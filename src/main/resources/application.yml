@@ -35,7 +35,7 @@ queueconfig:
 
 healthcheck:
   frequency: 1000 #milliseconds
-  filename: /tmp/case-service-healthy
+  filename: /tmp/case-processor-healthy
 
 exceptionmanager:
   connection:
