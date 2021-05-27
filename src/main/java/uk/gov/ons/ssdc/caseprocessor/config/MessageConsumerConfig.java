@@ -2,24 +2,51 @@ package uk.gov.ons.ssdc.caseprocessor.config;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.jms.ConnectionFactory;
-import javax.jms.Message;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.listener.AbstractMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.amqp.inbound.AmqpInboundChannelAdapter;
+import org.springframework.integration.amqp.support.DefaultAmqpHeaderMapper;
 import org.springframework.integration.channel.DirectChannel;
-import org.springframework.integration.jms.ChannelPublishingJmsMessageListener;
-import org.springframework.integration.jms.JmsHeaderMapper;
-import org.springframework.integration.jms.JmsMessageDrivenEndpoint;
-import org.springframework.jms.listener.AbstractMessageListenerContainer;
-import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHeaders;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.interceptor.RetryOperationsInterceptor;
+import uk.gov.ons.ssdc.caseprocessor.client.ExceptionManagerClient;
+import uk.gov.ons.ssdc.caseprocessor.messaging.ManagedMessageRecoverer;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
 
 @Configuration
 public class MessageConsumerConfig {
+  private final ExceptionManagerClient exceptionManagerClient;
+  private final ConnectionFactory connectionFactory;
+
   @Value("${queueconfig.sample-queue}")
   private String sampleQueue;
+
+  @Value("${queueconfig.consumers}")
+  private int consumers;
+
+  @Value("${queueconfig.retry-attempts}")
+  private int retryAttempts;
+
+  @Value("${queueconfig.retry-delay}")
+  private int retryDelay;
+
+  @Value("${messagelogging.logstacktraces}")
+  private boolean logStackTraces;
+
+  public MessageConsumerConfig(
+      ExceptionManagerClient exceptionManagerClient,
+      ConnectionFactory connectionFactory) {
+    this.exceptionManagerClient = exceptionManagerClient;
+    this.connectionFactory = connectionFactory;
+  }
 
   @Bean
   public MessageChannel sampleInputChannel() {
@@ -27,32 +54,53 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public JmsMessageDrivenEndpoint sampleInput(
-      AbstractMessageListenerContainer container, ChannelPublishingJmsMessageListener listener) {
-    JmsMessageDrivenEndpoint endpoint = new JmsMessageDrivenEndpoint(container, listener);
-    return endpoint;
+  public AmqpInboundChannelAdapter inboundSamples(
+      @Qualifier("sampleContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("sampleInputChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
   }
 
   @Bean
-  public AbstractMessageListenerContainer sampleContainer(ConnectionFactory connectionFactory) {
-    DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
-    container.setConnectionFactory(connectionFactory);
-    container.setDestinationName(sampleQueue);
+  public SimpleMessageListenerContainer sampleContainer() {
+    return setupListenerContainer(sampleQueue, Sample.class);
+  }
+
+  private SimpleMessageListenerContainer setupListenerContainer(
+      String queueName, Class expectedMessageType) {
+    FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
+    fixedBackOffPolicy.setBackOffPeriod(retryDelay);
+
+    ManagedMessageRecoverer managedMessageRecoverer =
+        new ManagedMessageRecoverer(
+            exceptionManagerClient,
+            expectedMessageType,
+            logStackTraces,
+            "Case Processor",
+            queueName);
+
+    RetryOperationsInterceptor retryOperationsInterceptor =
+        RetryInterceptorBuilder.stateless()
+            .maxAttempts(retryAttempts)
+            .backOffPolicy(fixedBackOffPolicy)
+            .recoverer(managedMessageRecoverer)
+            .build();
+
+    SimpleMessageListenerContainer container =
+        new SimpleMessageListenerContainer(connectionFactory);
+    container.setQueueNames(queueName);
+    container.setConcurrentConsumers(consumers);
+    container.setAdviceChain(retryOperationsInterceptor);
     return container;
   }
 
-  @Bean
-  public ChannelPublishingJmsMessageListener sampleListener(MessageChannel sampleInputChannel) {
-    ChannelPublishingJmsMessageListener listener = new ChannelPublishingJmsMessageListener();
-    listener.setRequestChannel(sampleInputChannel);
-    listener.setHeaderMapper(
-        new JmsHeaderMapper() {
-
+  private AmqpInboundChannelAdapter makeAdapter(
+      AbstractMessageListenerContainer listenerContainer, MessageChannel channel) {
+    AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
+    adapter.setOutputChannel(channel);
+    adapter.setHeaderMapper(
+        new DefaultAmqpHeaderMapper(null, null) {
           @Override
-          public void fromHeaders(MessageHeaders headers, Message target) {}
-
-          @Override
-          public Map<String, Object> toHeaders(Message source) {
+          public Map<String, Object> toHeadersFromRequest(MessageProperties source) {
             Map<String, Object> headers = new HashMap<>();
 
             /* We strip EVERYTHING out of the headers and put the content type back in because we
@@ -64,6 +112,6 @@ public class MessageConsumerConfig {
             return headers;
           }
         });
-    return listener;
+    return adapter;
   }
 }
