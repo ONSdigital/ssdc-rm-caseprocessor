@@ -42,8 +42,7 @@ public class MessageConsumerConfig {
   private boolean logStackTraces;
 
   public MessageConsumerConfig(
-      ExceptionManagerClient exceptionManagerClient,
-      ConnectionFactory connectionFactory) {
+      ExceptionManagerClient exceptionManagerClient, ConnectionFactory connectionFactory) {
     this.exceptionManagerClient = exceptionManagerClient;
     this.connectionFactory = connectionFactory;
   }

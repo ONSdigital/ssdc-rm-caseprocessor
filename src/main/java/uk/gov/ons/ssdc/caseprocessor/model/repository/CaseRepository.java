@@ -4,5 +4,4 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 
-public interface CaseRepository extends JpaRepository<Case, UUID> {
-}
+public interface CaseRepository extends JpaRepository<Case, UUID> {}

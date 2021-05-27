@@ -19,8 +19,8 @@ public class SampleReceiver {
   @Value("${caserefgeneratorkey}")
   private byte[] caserefgeneratorkey;
 
-  public SampleReceiver(CaseRepository caseRepository,
-      CollectionExerciseRepository collectionExerciseRepository) {
+  public SampleReceiver(
+      CaseRepository caseRepository, CollectionExerciseRepository collectionExerciseRepository) {
     this.caseRepository = caseRepository;
     this.collectionExerciseRepository = collectionExerciseRepository;
   }
@@ -32,11 +32,12 @@ public class SampleReceiver {
       return;
     }
 
-    Optional<CollectionExercise> collexOpt = collectionExerciseRepository
-        .findById(sample.getCollectionExerciseId());
+    Optional<CollectionExercise> collexOpt =
+        collectionExerciseRepository.findById(sample.getCollectionExerciseId());
 
     if (!collexOpt.isPresent()) {
-      throw new RuntimeException("Collection exercise '" + sample.getCollectionExerciseId() + "' not found");
+      throw new RuntimeException(
+          "Collection exercise '" + sample.getCollectionExerciseId() + "' not found");
     }
 
     CollectionExercise collex = collexOpt.get();
