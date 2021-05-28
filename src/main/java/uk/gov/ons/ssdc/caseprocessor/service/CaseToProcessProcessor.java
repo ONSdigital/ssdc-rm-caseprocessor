@@ -105,5 +105,6 @@ public class CaseToProcessProcessor {
     uacQidLink.setUac(uacQidDTO.getUac());
     uacQidLink.setCaze(caze);
     uacQidLinkRepository.saveAndFlush(uacQidLink);
+    return uacQidDTO;
   }
 }
