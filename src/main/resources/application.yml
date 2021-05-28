@@ -1,4 +1,9 @@
 spring:
+  task:
+    scheduling:
+      pool:
+        size: 10
+
   datasource:
     url: jdbc:postgresql://localhost:6432/postgres
     username: postgres
@@ -51,3 +56,7 @@ logging:
     org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler: ERROR
 
 caserefgeneratorkey: abc123
+
+scheduler:
+  frequency: 1000 #milliseconds
+  chunksize: 1000
