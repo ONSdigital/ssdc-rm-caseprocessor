@@ -30,11 +30,11 @@ public class WaveOfContactTriggerer {
 
     for (WaveOfContact triggeredWaveOfContact : triggeredWaveOfContacts) {
       try {
-        log.with("id", triggeredWaveOfContact.getId()).info("Action rule triggered");
+        log.with("id", triggeredWaveOfContact.getId()).info("Wave of contact triggered");
         waveOfContactProcessor.createScheduledWaveOfContact(triggeredWaveOfContact);
       } catch (Exception e) {
         log.with("id", triggeredWaveOfContact.getId())
-            .error("Unexpected error while executing action rule - is classifier valid SQL?", e);
+            .error("Unexpected error while executing wave of contact - is classifier valid SQL?", e);
       }
     }
   }

@@ -19,7 +19,7 @@ public class WaveOfContactScheduler {
     try {
       waveOfContactTriggerer.triggerActionRules();
     } catch (Exception e) {
-      log.error("Unexpected exception while processing Action Rules", e);
+      log.error("Unexpected exception while processing wave of contact", e);
       throw e;
     }
   }
