@@ -33,6 +33,7 @@ spring:
 
 queueconfig:
   sample-queue: case.sample.inbound
+  print-queue: Action.Printer
   case-event-exchange: events
   consumers: 50
   retry-attempts: 3

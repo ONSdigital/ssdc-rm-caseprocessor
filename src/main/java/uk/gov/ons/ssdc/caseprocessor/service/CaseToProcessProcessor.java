@@ -1,7 +1,10 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
+import com.opencsv.CSVWriter;
+import java.io.StringWriter;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
@@ -12,12 +15,25 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.WaveOfContactType;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 
 @Component
-public class CaseProcessor {
+public class CaseToProcessProcessor {
   private final RabbitTemplate rabbitTemplate;
   private final UacQidCache uacQidCache;
   private final UacQidLinkRepository uacQidLinkRepository;
 
-  public CaseProcessor(RabbitTemplate rabbitTemplate,
+  private final StringWriter stringWriter = new StringWriter();
+  private final CSVWriter csvWriter =
+      new CSVWriter(
+          stringWriter,
+          '|',
+          CSVWriter.DEFAULT_QUOTE_CHARACTER,
+          CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+          "");
+
+  @Value("${queueconfig.print-queue}")
+  private String printQueue;
+
+  public CaseToProcessProcessor(
+      RabbitTemplate rabbitTemplate,
       UacQidCache uacQidCache,
       UacQidLinkRepository uacQidLinkRepository) {
     this.rabbitTemplate = rabbitTemplate;
@@ -29,20 +45,15 @@ public class CaseProcessor {
     if (caseToProcess.getWaveOfContact().getType() == WaveOfContactType.PRINT) {
       processPrintCase(caseToProcess);
     }
-
-    System.out.println("Processed case: " + caseToProcess.getCaze().getId());
   }
 
   private void processPrintCase(CaseToProcess caseToProcess) {
-
-    String row = "";
-    for (String templateItem : caseToProcess.getWaveOfContact().getTemplate()) {
-      if (!row.isEmpty()) {
-        row += "|";
-      }
+    String[] rowStrings = new String[caseToProcess.getWaveOfContact().getTemplate().length];
+    for (int i = 0; i < caseToProcess.getWaveOfContact().getTemplate().length; i++) {
+      String templateItem = caseToProcess.getWaveOfContact().getTemplate()[i];
 
       if (templateItem.equals("__caseref__")) {
-        row += caseToProcess.getCaze().getCaseRef();
+        rowStrings[i] = Long.toString(caseToProcess.getCaze().getCaseRef());
       } else if (templateItem.equals("__uac__")) {
         UacQidDTO uacQidDTO = uacQidCache.getUacQidPair(1);
         UacQidLink uacQidLink = new UacQidLink();
@@ -52,19 +63,21 @@ public class CaseProcessor {
         uacQidLink.setCaze(caseToProcess.getCaze());
         uacQidLinkRepository.saveAndFlush(uacQidLink);
 
-        row += uacQidDTO.getUac();
+        rowStrings[i] = uacQidDTO.getUac();
       } else {
-        row += caseToProcess.getCaze().getSample().get(templateItem);
+        rowStrings[i] = caseToProcess.getCaze().getSample().get(templateItem);
       }
     }
 
+    csvWriter.writeNext(rowStrings);
+
     PrintRow printRow = new PrintRow();
-    printRow.setRow(row);
+    printRow.setRow(stringWriter.toString());
     printRow.setBatchId(caseToProcess.getBatchId());
     printRow.setBatchQuantity(caseToProcess.getBatchQuantity());
     printRow.setPackCode(caseToProcess.getWaveOfContact().getPackCode());
     printRow.setPrintSupplier(caseToProcess.getWaveOfContact().getPrintSupplier());
 
-    rabbitTemplate.convertAndSend("", "Action.Printer", printRow);
+    rabbitTemplate.convertAndSend("", printQueue, printRow);
   }
 }

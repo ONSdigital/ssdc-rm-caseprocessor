@@ -48,8 +48,6 @@ public class SampleReceiver {
     newCase.setSample(sample.getSample());
 
     newCase = saveNewCaseAndStampCaseRef(newCase);
-
-    System.out.println("Added new case to DB with case ref: " + newCase.getCaseRef());
   }
 
   private Case saveNewCaseAndStampCaseRef(Case caze) {

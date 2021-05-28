@@ -34,7 +34,8 @@ public class WaveOfContactTriggerer {
         waveOfContactProcessor.createScheduledWaveOfContact(triggeredWaveOfContact);
       } catch (Exception e) {
         log.with("id", triggeredWaveOfContact.getId())
-            .error("Unexpected error while executing wave of contact - is classifier valid SQL?", e);
+            .error(
+                "Unexpected error while executing wave of contact - is classifier valid SQL?", e);
       }
     }
   }

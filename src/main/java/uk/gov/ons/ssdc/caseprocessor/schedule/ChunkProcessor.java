@@ -7,20 +7,21 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CaseToProcess;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseToProcessRepository;
-import uk.gov.ons.ssdc.caseprocessor.service.CaseProcessor;
+import uk.gov.ons.ssdc.caseprocessor.service.CaseToProcessProcessor;
 
 @Component
 public class ChunkProcessor {
   private final CaseToProcessRepository caseToProcessRepository;
-  private final CaseProcessor caseProcessor;
+  private final CaseToProcessProcessor caseToProcessProcessor;
 
   @Value("${scheduler.chunksize}")
   private int chunkSize;
 
   public ChunkProcessor(
-      CaseToProcessRepository caseToProcessRepository, CaseProcessor caseProcessor) {
+      CaseToProcessRepository caseToProcessRepository,
+      CaseToProcessProcessor caseToProcessProcessor) {
     this.caseToProcessRepository = caseToProcessRepository;
-    this.caseProcessor = caseProcessor;
+    this.caseToProcessProcessor = caseToProcessProcessor;
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW) // Start a new transaction for every chunk
@@ -28,7 +29,7 @@ public class ChunkProcessor {
     try (Stream<CaseToProcess> cases = caseToProcessRepository.findChunkToProcess(chunkSize)) {
       cases.forEach(
           caseToProcess -> {
-            caseProcessor.process(caseToProcess);
+            caseToProcessProcessor.process(caseToProcess);
             caseToProcessRepository.delete(caseToProcess); // Delete the case from the 'queue'
           });
     }
