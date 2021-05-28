@@ -60,3 +60,13 @@ caserefgeneratorkey: abc123
 scheduler:
   frequency: 1000 #milliseconds
   chunksize: 1000
+
+uacservice:
+  connection:
+    scheme: http
+    host: localhost
+    port: 8164
+
+  uacqid-cache-min: 500
+  uacqid-fetch-count: 1000
+  uacqid-get-timeout: 60   #seconds

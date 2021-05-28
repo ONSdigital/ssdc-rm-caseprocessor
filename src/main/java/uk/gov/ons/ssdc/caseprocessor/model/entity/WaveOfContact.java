@@ -48,7 +48,7 @@ public class WaveOfContact {
 
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
-  private Map<String, String> template;
+  private String[] template;
 
   @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
   private boolean requiresUac;
