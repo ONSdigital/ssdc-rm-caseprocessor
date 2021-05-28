@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CaseToProcess;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.WaveOfContactType;
@@ -48,36 +49,61 @@ public class CaseToProcessProcessor {
   }
 
   private void processPrintCase(CaseToProcess caseToProcess) {
+
+    UacQidDTO uacQidDTO = null;
     String[] rowStrings = new String[caseToProcess.getWaveOfContact().getTemplate().length];
+
     for (int i = 0; i < caseToProcess.getWaveOfContact().getTemplate().length; i++) {
       String templateItem = caseToProcess.getWaveOfContact().getTemplate()[i];
 
-      if (templateItem.equals("__caseref__")) {
-        rowStrings[i] = Long.toString(caseToProcess.getCaze().getCaseRef());
-      } else if (templateItem.equals("__uac__")) {
-        UacQidDTO uacQidDTO = uacQidCache.getUacQidPair(1);
-        UacQidLink uacQidLink = new UacQidLink();
-        uacQidLink.setId(UUID.randomUUID());
-        uacQidLink.setQid(uacQidDTO.getQid());
-        uacQidLink.setUac(uacQidDTO.getUac());
-        uacQidLink.setCaze(caseToProcess.getCaze());
-        uacQidLinkRepository.saveAndFlush(uacQidLink);
+      switch (templateItem) {
+        case "__caseref__":
+          rowStrings[i] = Long.toString(caseToProcess.getCaze().getCaseRef());
+          break;
+        case "__uac__":
+          if (uacQidDTO == null) {
+            uacQidDTO = getUacQidForCase(caseToProcess.getCaze());
+          }
 
-        rowStrings[i] = uacQidDTO.getUac();
-      } else {
-        rowStrings[i] = caseToProcess.getCaze().getSample().get(templateItem);
+          rowStrings[i] = uacQidDTO.getUac();
+          break;
+        case "__qid__":
+          if (uacQidDTO == null) {
+            uacQidDTO = getUacQidForCase(caseToProcess.getCaze());
+          }
+
+          rowStrings[i] = uacQidDTO.getQid();
+          break;
+        default:
+          rowStrings[i] = caseToProcess.getCaze().getSample().get(templateItem);
       }
     }
 
-    csvWriter.writeNext(rowStrings);
-
     PrintRow printRow = new PrintRow();
-    printRow.setRow(stringWriter.toString());
+    printRow.setRow(getCsvRow(rowStrings));
     printRow.setBatchId(caseToProcess.getBatchId());
     printRow.setBatchQuantity(caseToProcess.getBatchQuantity());
     printRow.setPackCode(caseToProcess.getWaveOfContact().getPackCode());
     printRow.setPrintSupplier(caseToProcess.getWaveOfContact().getPrintSupplier());
 
     rabbitTemplate.convertAndSend("", printQueue, printRow);
+  }
+
+  // Has to be synchronised to stop different threads from mangling writer buffer contents
+  private synchronized String getCsvRow(String[] rowStrings) {
+    csvWriter.writeNext(rowStrings);
+    String csvRow = stringWriter.toString();
+    stringWriter.getBuffer().delete(0, stringWriter.getBuffer().length()); // Reset the writer
+    return csvRow;
+  }
+
+  private UacQidDTO getUacQidForCase(Case caze) {
+    UacQidDTO uacQidDTO = uacQidCache.getUacQidPair(1);
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setId(UUID.randomUUID());
+    uacQidLink.setQid(uacQidDTO.getQid());
+    uacQidLink.setUac(uacQidDTO.getUac());
+    uacQidLink.setCaze(caze);
+    uacQidLinkRepository.saveAndFlush(uacQidLink);
   }
 }
