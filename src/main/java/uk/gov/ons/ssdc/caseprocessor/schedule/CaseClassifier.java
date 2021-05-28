@@ -22,9 +22,9 @@ public class CaseClassifier {
             + "caze_id) SELECT ?, COUNT(*) OVER (), ?, id FROM "
             + "casev3.cases "
             + buildWhereClause(
-            waveOfContact.getCollectionExercise().getId(),
-            waveOfContact.getClassifiers(),
-            waveOfContact.getType()),
+                waveOfContact.getCollectionExercise().getId(),
+                waveOfContact.getClassifiers(),
+                waveOfContact.getType()),
         batchId,
         waveOfContact.getId());
   }
@@ -32,7 +32,8 @@ public class CaseClassifier {
   private String buildWhereClause(
       UUID collectionExerciseId, String classifiersClause, WaveOfContactType type) {
     StringBuilder whereClause = new StringBuilder();
-    whereClause.append(String.format("WHERE collection_exercise_id='%s'", collectionExerciseId.toString()));
+    whereClause.append(
+        String.format("WHERE collection_exercise_id='%s'", collectionExerciseId.toString()));
     whereClause.append(" AND receipt_received='f'");
     whereClause.append(" AND address_invalid='f'");
     whereClause.append(" AND refusal_received IS NULL");

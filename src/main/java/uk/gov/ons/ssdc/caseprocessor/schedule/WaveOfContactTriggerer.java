@@ -16,7 +16,8 @@ public class WaveOfContactTriggerer {
   private final WaveOfContactProcessor waveOfContactProcessor;
 
   public WaveOfContactTriggerer(
-      WaveOfContactRepository waveOfContactRepository, WaveOfContactProcessor waveOfContactProcessor) {
+      WaveOfContactRepository waveOfContactRepository,
+      WaveOfContactProcessor waveOfContactProcessor) {
     this.waveOfContactRepository = waveOfContactRepository;
     this.waveOfContactProcessor = waveOfContactProcessor;
   }
@@ -24,7 +25,8 @@ public class WaveOfContactTriggerer {
   @Transactional
   public void triggerActionRules() {
     List<WaveOfContact> triggeredWaveOfContacts =
-        waveOfContactRepository.findByTriggerDateTimeBeforeAndHasTriggeredIsFalse(OffsetDateTime.now());
+        waveOfContactRepository.findByTriggerDateTimeBeforeAndHasTriggeredIsFalse(
+            OffsetDateTime.now());
 
     for (WaveOfContact triggeredWaveOfContact : triggeredWaveOfContacts) {
       try {

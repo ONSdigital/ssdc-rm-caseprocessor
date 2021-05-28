@@ -18,8 +18,7 @@ public class ChunkProcessor {
   private int chunkSize;
 
   public ChunkProcessor(
-      CaseToProcessRepository caseToProcessRepository,
-      CaseProcessor caseProcessor) {
+      CaseToProcessRepository caseToProcessRepository, CaseProcessor caseProcessor) {
     this.caseToProcessRepository = caseToProcessRepository;
     this.caseProcessor = caseProcessor;
   }

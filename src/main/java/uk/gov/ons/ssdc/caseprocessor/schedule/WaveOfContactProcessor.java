@@ -11,7 +11,8 @@ public class WaveOfContactProcessor {
   private final CaseClassifier caseClassifier;
   private final WaveOfContactRepository waveOfContactRepository;
 
-  public WaveOfContactProcessor(CaseClassifier caseClassifier, WaveOfContactRepository waveOfContactRepository) {
+  public WaveOfContactProcessor(
+      CaseClassifier caseClassifier, WaveOfContactRepository waveOfContactRepository) {
     this.caseClassifier = caseClassifier;
     this.waveOfContactRepository = waveOfContactRepository;
   }
