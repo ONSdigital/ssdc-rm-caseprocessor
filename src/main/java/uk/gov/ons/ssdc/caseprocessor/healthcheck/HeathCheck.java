@@ -9,14 +9,23 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import uk.gov.ons.ssdc.caseprocessor.schedule.ClusterLeaderManager;
 
 @Component
 public class HeathCheck {
+  private final ClusterLeaderManager clusterLeaderManager;
+
   @Value("${healthcheck.filename}")
   private String fileName;
 
+  public HeathCheck(ClusterLeaderManager clusterLeaderManager) {
+    this.clusterLeaderManager = clusterLeaderManager;
+  }
+
   @Scheduled(fixedDelayString = "${healthcheck.frequency}")
   public void updateFileWithCurrentTimestamp() {
+    clusterLeaderManager.leaderKeepAlive();
+
     Path path = Paths.get(fileName);
     LocalDateTime now = LocalDateTime.now();
 

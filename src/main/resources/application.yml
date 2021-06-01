@@ -40,7 +40,7 @@ queueconfig:
   retry-delay: 1000 #milliseconds
 
 healthcheck:
-  frequency: 1000 #milliseconds
+  frequency: 15000 #milliseconds
   filename: /tmp/case-processor-healthy
 
 exceptionmanager:
@@ -61,6 +61,7 @@ caserefgeneratorkey: abc123
 scheduler:
   frequency: 1000 #milliseconds
   chunksize: 1000
+  leaderDeathTimeout: 120 #seconds
 
 uacservice:
   connection:

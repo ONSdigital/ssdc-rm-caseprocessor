@@ -23,7 +23,7 @@ public class WaveOfContactTriggerer {
   }
 
   @Transactional
-  public void triggerActionRules() {
+  public void triggerWaveOfContact() {
     List<WaveOfContact> triggeredWaveOfContacts =
         waveOfContactRepository.findByTriggerDateTimeBeforeAndHasTriggeredIsFalse(
             OffsetDateTime.now());
