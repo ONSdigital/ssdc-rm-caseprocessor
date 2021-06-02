@@ -1,0 +1,66 @@
+package uk.gov.ons.ssdc.caseprocessor.service;
+
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseDto;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
+
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+public class CaseService {
+  public static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
+  private final CaseRepository caseRepository;
+  private final RabbitTemplate rabbitTemplate;
+
+  @Value("${queueconfig.case-event-exchange}")
+  private String outboundExchange;
+
+  public CaseService(
+      CaseRepository caseRepository, RabbitTemplate rabbitTemplate) {
+    this.caseRepository = caseRepository;
+    this.rabbitTemplate = rabbitTemplate;
+  }
+
+  public void saveCaseAndEmitCaseUpdatedEvent(Case caze) {
+    caseRepository.saveAndFlush(caze);
+
+    EventDTO eventDTO = new EventDTO();
+    eventDTO.setType(EventTypeDTO.CASE_UPDATED);
+    ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
+    rabbitTemplate.convertAndSend(
+        outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
+  }
+
+  private ResponseManagementEvent prepareCaseEvent(
+      Case caze, EventDTO eventDTO) {
+    PayloadDTO payloadDTO = new PayloadDTO();
+    CaseDto caseDto = new CaseDto();
+    caseDto.setCaseId(caze.getId());
+    caseDto.setCaze(caze.getSample());
+    payloadDTO.setCaseDto(caseDto);
+    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
+    responseManagementEvent.setEvent(eventDTO);
+    responseManagementEvent.setPayload(payloadDTO);
+    return responseManagementEvent;
+  }
+
+
+  public Case getCaseByCaseId(UUID caseId) {
+    Optional<Case> cazeResult = caseRepository.findById(caseId);
+
+    if (cazeResult.isEmpty()) {
+      throw new RuntimeException(String.format("Case ID '%s' not present", caseId));
+    }
+    return cazeResult.get();
+  }
+
+}
