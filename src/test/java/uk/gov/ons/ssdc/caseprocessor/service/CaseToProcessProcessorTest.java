@@ -27,8 +27,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseToProcessProcessorTest {
-  @Mock
-  private RabbitTemplate rabbitTemplate;
+  @Mock private RabbitTemplate rabbitTemplate;
   @Mock private UacQidCache uacQidCache;
   @Mock private UacQidLinkRepository uacQidLinkRepository;
 
@@ -46,7 +45,7 @@ public class CaseToProcessProcessorTest {
 
     WaveOfContact waveOfContact = new WaveOfContact();
     waveOfContact.setType(WaveOfContactType.PRINT);
-    waveOfContact.setTemplate(new String[]{"__caseref__", "__uac__", "foo"});
+    waveOfContact.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
     waveOfContact.setPackCode("test pack code");
     waveOfContact.setPrintSupplier("test print supplier");
 
@@ -78,5 +77,4 @@ public class CaseToProcessProcessorTest {
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
   }
-
 }
