@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.jeasy.random.EasyRandom;
@@ -26,6 +27,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.WaveOfContactType;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.WaveOfContactRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 
@@ -42,6 +44,7 @@ public class WaveOfContactIT {
   @Autowired private WaveOfContactRepository waveOfContactRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
   @Autowired private CaseToProcessRepository caseToProcessRepository;
+  @Autowired private UacQidLinkRepository uacQidLinkRepository;
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
 
   private static final EasyRandom easyRandom = new EasyRandom();
@@ -51,11 +54,10 @@ public class WaveOfContactIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(OUTBOUND_PRINTER_QUEUE);
+    uacQidLinkRepository.deleteAllInBatch();
     caseToProcessRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
     waveOfContactRepository.deleteAllInBatch();
-    collectionExerciseRepository.deleteAll();
-    waveOfContactRepository.deleteAll();
     collectionExerciseRepository.deleteAllInBatch();
   }
 
@@ -64,11 +66,10 @@ public class WaveOfContactIT {
     try (QueueSpy printerQueue = rabbitQueueHelper.listen(OUTBOUND_PRINTER_QUEUE)) {
       // Given
       CollectionExercise collectionExercise = setUpCollectionExercise();
-      Case randomCase = setUpCase(collectionExercise);
+      setUpCase(collectionExercise);
 
       // When
       setUpWaveOfContact(WaveOfContactType.PRINT, collectionExercise);
-      Thread.sleep(2000);
       String printRowMessage = printerQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
@@ -78,6 +79,7 @@ public class WaveOfContactIT {
       assertThat(printRow.getBatchQuantity()).isEqualTo(1);
       assertThat(printRow.getPackCode()).isEqualTo(PACK_CODE);
       assertThat(printRow.getPrintSupplier()).isEqualTo(PRINT_SUPPLIER);
+      assertThat(printRow.getRow()).startsWith("\"123\"|\"bar\"|\"");
     }
   }
 
@@ -96,7 +98,7 @@ public class WaveOfContactIT {
     waveOfContact.setType(type);
     waveOfContact.setCollectionExercise(collectionExercise);
     waveOfContact.setClassifiers("1=1"); // Dummy classifier which is always true
-    waveOfContact.setTemplate(new String[] {"__caseref___"});
+    waveOfContact.setTemplate(new String[] {"__caseref__", "foo", "__uac__"});
     waveOfContact.setPackCode(PACK_CODE);
     waveOfContact.setPrintSupplier(PRINT_SUPPLIER);
 
@@ -105,6 +107,7 @@ public class WaveOfContactIT {
 
   private Case setUpCase(CollectionExercise collectionExercise) {
     Case randomCase = easyRandom.nextObject(Case.class);
+    randomCase.setCaseRef(123L);
     randomCase.setCollectionExercise(collectionExercise);
     randomCase.setUacQidLinks(null);
     randomCase.setReceiptReceived(false);
@@ -112,6 +115,7 @@ public class WaveOfContactIT {
     randomCase.setAddressInvalid(false);
     randomCase.setCreatedAt(null);
     randomCase.setLastUpdatedAt(null);
+    randomCase.setSample(Map.of("foo", "bar"));
     return caseRepository.saveAndFlush(randomCase);
   }
 }
