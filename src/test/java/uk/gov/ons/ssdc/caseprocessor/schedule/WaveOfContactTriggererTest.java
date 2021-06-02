@@ -21,7 +21,7 @@ public class WaveOfContactTriggererTest {
   private final WaveOfContactProcessor waveOfContactProcessor = mock(WaveOfContactProcessor.class);
 
   @Test
-  public void testTriggerActionRules() {
+  public void testTriggerWaveOfContact() {
     // Given
     WaveOfContact waveOfContact = new WaveOfContact();
     when(waveOfContactRepository.findByTriggerDateTimeBeforeAndHasTriggeredIsFalse(
@@ -38,16 +38,16 @@ public class WaveOfContactTriggererTest {
   }
 
   @Test
-  public void testTriggerMultipleActionRules() {
+  public void testTriggerMultipleWaveOfContact() {
     // Given
-    List<WaveOfContact> actionRules = new ArrayList<>(50);
+    List<WaveOfContact> waveOfContacts = new ArrayList<>(50);
     for (int i = 0; i < 50; i++) {
-      actionRules.add(new WaveOfContact());
+      waveOfContacts.add(new WaveOfContact());
     }
 
     when(waveOfContactRepository.findByTriggerDateTimeBeforeAndHasTriggeredIsFalse(
             any(OffsetDateTime.class)))
-        .thenReturn(actionRules);
+        .thenReturn(waveOfContacts);
 
     // When
     WaveOfContactTriggerer underTest =
@@ -55,6 +55,7 @@ public class WaveOfContactTriggererTest {
     underTest.triggerWaveOfContact();
 
     // Then
-    verify(waveOfContactProcessor, times(50)).createScheduledWaveOfContact(any(WaveOfContact.class));
+    verify(waveOfContactProcessor, times(50))
+        .createScheduledWaveOfContact(any(WaveOfContact.class));
   }
 }

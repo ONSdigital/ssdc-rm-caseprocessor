@@ -15,7 +15,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.WaveOfContactType;
 public class CaseClassifierTest {
 
   @Test
-  public void testEnqueueCasesForActionRulePrinter() {
+  public void testEnqueueCasesForWaveOfContactPrinter() {
     // Given
     JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
 
