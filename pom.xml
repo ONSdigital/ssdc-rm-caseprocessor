@@ -80,6 +80,11 @@
       <artifactId>logging</artifactId>
       <version>1.2.5</version>
     </dependency>
+    <dependency>
+      <groupId>com.opencsv</groupId>
+      <artifactId>opencsv</artifactId>
+      <version>4.1</version>
+    </dependency>
 
     <!--    Test Dependencies below this point -->
     <dependency>
@@ -90,6 +95,12 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jeasy</groupId>
+      <artifactId>easy-random-core</artifactId>
+      <version>4.0.0.RC1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

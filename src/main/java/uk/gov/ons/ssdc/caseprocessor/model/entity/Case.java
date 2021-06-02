@@ -2,6 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.model.entity;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.persistence.Column;
@@ -11,6 +12,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
 import lombok.ToString;
@@ -67,4 +69,7 @@ public class Case {
   private Map<String, String> sample;
 
   @ManyToOne private CollectionExercise collectionExercise;
+
+  @OneToMany(mappedBy = "caze")
+  List<UacQidLink> uacQidLinks;
 }
