@@ -18,7 +18,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.WaveOfContactRepository;
 public class WaveOfContactTriggererTest {
   private final WaveOfContactRepository waveOfContactRepository =
       mock(WaveOfContactRepository.class);
-  private final WaveOfContactProcessor actionRuleProcessor = mock(WaveOfContactProcessor.class);
+  private final WaveOfContactProcessor waveOfContactProcessor = mock(WaveOfContactProcessor.class);
 
   @Test
   public void testTriggerActionRules() {
@@ -30,11 +30,11 @@ public class WaveOfContactTriggererTest {
 
     // When
     WaveOfContactTriggerer underTest =
-        new WaveOfContactTriggerer(waveOfContactRepository, actionRuleProcessor);
+        new WaveOfContactTriggerer(waveOfContactRepository, waveOfContactProcessor);
     underTest.triggerWaveOfContact();
 
     // Then
-    verify(actionRuleProcessor).createScheduledWaveOfContact(eq(waveOfContact));
+    verify(waveOfContactProcessor).createScheduledWaveOfContact(eq(waveOfContact));
   }
 
   @Test
@@ -51,10 +51,10 @@ public class WaveOfContactTriggererTest {
 
     // When
     WaveOfContactTriggerer underTest =
-        new WaveOfContactTriggerer(waveOfContactRepository, actionRuleProcessor);
+        new WaveOfContactTriggerer(waveOfContactRepository, waveOfContactProcessor);
     underTest.triggerWaveOfContact();
 
     // Then
-    verify(actionRuleProcessor, times(50)).createScheduledWaveOfContact(any(WaveOfContact.class));
+    verify(waveOfContactProcessor, times(50)).createScheduledWaveOfContact(any(WaveOfContact.class));
   }
 }
