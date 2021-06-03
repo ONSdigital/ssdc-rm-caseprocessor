@@ -1,5 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.logging;
 
+import java.time.OffsetDateTime;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
@@ -8,9 +10,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper;
-
-import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Component
 public class EventLogger {

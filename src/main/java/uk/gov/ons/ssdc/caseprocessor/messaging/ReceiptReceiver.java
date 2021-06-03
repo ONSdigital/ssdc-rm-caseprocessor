@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 
@@ -32,11 +31,11 @@ public class ReceiptReceiver {
 
     // if uacQidLink is null it'll blow up, do we code defensively instead?
 
-    if(uacQidLink.isActive()) {
+    if (uacQidLink.isActive()) {
       uacQidLink.setActive(false);
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
-      if( uacQidLink.getCaze() != null) {
+      if (uacQidLink.getCaze() != null) {
         Case caze = uacQidLink.getCaze();
         caze.setReceiptReceived(true);
         caseService.saveCaseAndEmitCaseUpdatedEvent(caze);

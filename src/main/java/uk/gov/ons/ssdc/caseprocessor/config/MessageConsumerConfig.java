@@ -19,6 +19,7 @@ import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 import uk.gov.ons.ssdc.caseprocessor.client.ExceptionManagerClient;
 import uk.gov.ons.ssdc.caseprocessor.messaging.ManagedMessageRecoverer;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
 
 @Configuration
@@ -41,6 +42,12 @@ public class MessageConsumerConfig {
   @Value("${messagelogging.logstacktraces}")
   private boolean logStackTraces;
 
+  @Value("${queueconfig.receipt-response-inbound-queue}")
+  private String receiptInboundQueue;
+
+  @Value("${queueconfig.refusal-response-inbound-queue}")
+  private String refusalInboundQueue;
+
   public MessageConsumerConfig(
       ExceptionManagerClient exceptionManagerClient, ConnectionFactory connectionFactory) {
     this.exceptionManagerClient = exceptionManagerClient;
@@ -53,6 +60,16 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  public MessageChannel receiptInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel refusalInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
   public AmqpInboundChannelAdapter inboundSamples(
       @Qualifier("sampleContainer") SimpleMessageListenerContainer listenerContainer,
       @Qualifier("sampleInputChannel") MessageChannel channel) {
@@ -60,8 +77,32 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  public AmqpInboundChannelAdapter receiptInbound(
+      @Qualifier("receiptContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("receiptInputChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
+  }
+
+  @Bean
+  public AmqpInboundChannelAdapter refusalInbound(
+      @Qualifier("refusalContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("refusalInputChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
+  }
+
+  @Bean
   public SimpleMessageListenerContainer sampleContainer() {
     return setupListenerContainer(sampleQueue, Sample.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer receiptContainer() {
+    return setupListenerContainer(receiptInboundQueue, ResponseManagementEvent.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer refusalContainer() {
+    return setupListenerContainer(refusalInboundQueue, ResponseManagementEvent.class);
   }
 
   private SimpleMessageListenerContainer setupListenerContainer(

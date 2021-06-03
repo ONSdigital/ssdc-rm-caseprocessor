@@ -1,22 +1,19 @@
 package uk.gov.ons.ssdc.caseprocessor.model.entity;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.Data;
-import lombok.ToString;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
-
+import java.time.OffsetDateTime;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import lombok.Data;
+import lombok.ToString;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 // The bidirectional relationships with other entities can cause stack overflows with the default
 // toString
@@ -24,13 +21,6 @@ import java.util.UUID;
 @Data
 @TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
 @Entity
-@Table(
-    indexes = {
-      @Index(name = "event_type_idx", columnList = "event_type"),
-      @Index(name = "rm_event_processed_idx", columnList = "rm_event_processed"),
-      @Index(name = "event_uac_qid_link_id", columnList = "uac_qid_link_id"),
-      @Index(name = "event_caze_case_id", columnList = "caze_case_id")
-    })
 public class Event {
   @Id private UUID id;
 

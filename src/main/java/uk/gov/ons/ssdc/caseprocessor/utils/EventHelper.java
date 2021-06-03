@@ -1,12 +1,10 @@
 package uk.gov.ons.ssdc.caseprocessor.utils;
 
-
+import java.time.OffsetDateTime;
+import java.util.UUID;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
-
-import java.time.OffsetDateTime;
-import java.util.UUID;
 
 public class EventHelper {
 
@@ -15,7 +13,7 @@ public class EventHelper {
   private static final String FIELD_CHANNEL = "FIELD";
 
   public static EventDTO createEventDTO(
-          EventTypeDTO eventType, String event_channel, String event_source) {
+      EventTypeDTO eventType, String event_channel, String event_source) {
     EventDTO eventDTO = new EventDTO();
 
     eventDTO.setChannel(event_channel);

@@ -33,7 +33,11 @@ spring:
 
 queueconfig:
   sample-queue: case.sample.inbound
+  receipt-response-inbound-queue: Case.Responses
+  refusal-response-inbound-queue: case.refusals
   print-queue: Action.Printer
+  rh-case-queue: case.rh.case
+  rh-uac-queue: case.rh.uac
   case-event-exchange: events
   consumers: 50
   retry-attempts: 3
