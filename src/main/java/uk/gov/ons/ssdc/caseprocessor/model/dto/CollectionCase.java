@@ -10,5 +10,6 @@ public class CollectionCase {
   private Boolean receiptReceived;
   private Boolean invalidAddrress;
   private Boolean surveyLaunched;
+  private RefusalTypeDTO refusalReceived;
   private Map<String, String> sample;
 }

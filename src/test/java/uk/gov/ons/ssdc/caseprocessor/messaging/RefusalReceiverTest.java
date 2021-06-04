@@ -3,6 +3,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
 
 import java.util.UUID;
 import org.junit.Test;
@@ -11,6 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
@@ -39,6 +41,8 @@ public class RefusalReceiverTest {
 
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     responseManagementEvent.setPayload(payloadDTO);
+    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(responseManagementEvent);
+
 
     Case caze = new Case();
     caze.setId(CASE_ID);
@@ -47,7 +51,7 @@ public class RefusalReceiverTest {
     when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(caze);
 
     // When
-    underTest.receiveMessage(responseManagementEvent);
+    underTest.receiveMessage(message);
 
     // Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);

@@ -9,6 +9,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
@@ -46,6 +47,11 @@ public class CaseService {
     collectionCase.setReceiptReceived(caze.isReceiptReceived());
     collectionCase.setInvalidAddrress(caze.isAddressInvalid());
     collectionCase.setSurveyLaunched(caze.isSurveyLaunched());
+    if (caze.getRefusalReceived() != null) {
+      collectionCase.setRefusalReceived(RefusalTypeDTO.valueOf(caze.getRefusalReceived().name()));
+    } else {
+      collectionCase.setRefusalReceived(null);
+    }
     payloadDTO.setCollectionCase(collectionCase);
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     responseManagementEvent.setEvent(eventDTO);
