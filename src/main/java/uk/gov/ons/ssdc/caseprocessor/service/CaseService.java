@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseDto;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
@@ -40,11 +40,13 @@ public class CaseService {
 
   private ResponseManagementEvent prepareCaseEvent(Case caze, EventDTO eventDTO) {
     PayloadDTO payloadDTO = new PayloadDTO();
-    CaseDto caseDto = new CaseDto();
-    caseDto.setCaseId(caze.getId());
-    caseDto.setCaze(caze.getSample());
-    caseDto.setReceiptReceived(caze.isReceiptReceived());
-    payloadDTO.setCaseDto(caseDto);
+    CollectionCase collectionCase = new CollectionCase();
+    collectionCase.setCaseId(caze.getId());
+    collectionCase.setSample(caze.getSample());
+    collectionCase.setReceiptReceived(caze.isReceiptReceived());
+    collectionCase.setInvalidAddrress(caze.isAddressInvalid());
+    collectionCase.setSurveyLaunched(caze.isSurveyLaunched());
+    payloadDTO.setCollectionCase(collectionCase);
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     responseManagementEvent.setEvent(eventDTO);
     responseManagementEvent.setPayload(payloadDTO);

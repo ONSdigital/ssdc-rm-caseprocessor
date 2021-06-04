@@ -48,6 +48,12 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.refusal-response-inbound-queue}")
   private String refusalInboundQueue;
 
+  @Value("${queueconfig.invalid-address-inbound-queue}")
+  private String invalidAddressInboundQueue;
+
+  @Value("${queueconfig.survey-launched-queue}")
+  private String surveyLaunchedQueue;
+
   public MessageConsumerConfig(
       ExceptionManagerClient exceptionManagerClient, ConnectionFactory connectionFactory) {
     this.exceptionManagerClient = exceptionManagerClient;
@@ -66,6 +72,16 @@ public class MessageConsumerConfig {
 
   @Bean
   public MessageChannel refusalInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel invalidAddressInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel surveyLaunchedInputChannel() {
     return new DirectChannel();
   }
 
@@ -91,6 +107,25 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  AmqpInboundChannelAdapter invalidAddressInbound(
+      @Qualifier("invalidAddressContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("invalidAddressInputChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
+  }
+
+  @Bean
+  AmqpInboundChannelAdapter surveyLaunchedInbound(
+      @Qualifier("surveyLaunchedContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("surveyLaunchedInputChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer surveyLaunchedContainer() {
+    return setupListenerContainer(surveyLaunchedQueue, ResponseManagementEvent.class);
+  }
+
+  @Bean
   public SimpleMessageListenerContainer sampleContainer() {
     return setupListenerContainer(sampleQueue, Sample.class);
   }
@@ -103,6 +138,11 @@ public class MessageConsumerConfig {
   @Bean
   public SimpleMessageListenerContainer refusalContainer() {
     return setupListenerContainer(refusalInboundQueue, ResponseManagementEvent.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer invalidAddressContainer() {
+    return setupListenerContainer(invalidAddressInboundQueue, ResponseManagementEvent.class);
   }
 
   private SimpleMessageListenerContainer setupListenerContainer(

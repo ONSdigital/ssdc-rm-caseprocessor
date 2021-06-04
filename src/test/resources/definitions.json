@@ -28,13 +28,13 @@
       }
     },
     {
-      "name": "case.addressQueue",
+      "name": "case.invalidaddress",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {
         "x-dead-letter-exchange": "delayedRedeliveryExchange",
-        "x-dead-letter-routing-key": "case.addressQueue"
+        "x-dead-letter-routing-key": "case.invalidaddress"
       }
     },
     {
@@ -297,9 +297,9 @@
     {
       "source": "events",
       "vhost": "/",
-      "destination": "case.addressQueue",
+      "destination": "case.invalidaddress",
       "destination_type": "queue",
-      "routing_key": "event.case.address.update",
+      "routing_key": "case.invalidaddress",
       "arguments": {}
     },
     {

@@ -5,8 +5,10 @@ import java.util.UUID;
 import lombok.Data;
 
 @Data
-public class CaseDto {
+public class CollectionCase {
   private UUID caseId;
   private Boolean receiptReceived;
-  private Map<String, String> caze;
+  private Boolean invalidAddrress;
+  private Boolean surveyLaunched;
+  private Map<String, String> sample;
 }

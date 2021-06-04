@@ -38,6 +38,8 @@ queueconfig:
   print-queue: Action.Printer
   rh-case-queue: case.rh.case
   rh-uac-queue: case.rh.uac
+  invalid-address-inbound-queue: case.invalidaddress
+  survey-launched-queue: survey.launched
   case-event-exchange: events
   consumers: 50
   retry-attempts: 3

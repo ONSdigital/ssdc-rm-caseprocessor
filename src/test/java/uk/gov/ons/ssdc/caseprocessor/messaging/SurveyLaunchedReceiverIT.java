@@ -2,8 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,17 +14,15 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.QueueSpy;
@@ -35,87 +32,87 @@ import uk.gov.ons.ssdc.caseprocessor.utils.RabbitQueueHelper;
 @ActiveProfiles("test")
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
-public class ReceiptReceiverIT {
+public class SurveyLaunchedReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  private static final String TEST_QID = "123456";
-  private static final UUID TEST_UACLINK_ID = UUID.randomUUID();
+  private static final String TEST_QID = "1234334";
+  private static final String TEST_UAC = "9434343";
 
-  @Value("${queueconfig.receipt-response-inbound-queue}")
-  private String inboundReceiptQueue;
+  @Value("${queueconfig.survey-launched-queue}")
+  private String inboundQueue;
 
   @Value("${queueconfig.rh-case-queue}")
   private String rhCaseQueue;
-
-  @Value("${queueconfig.rh-uac-queue}")
-  private String rhUacQueue;
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
   @Autowired private EventRepository eventRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
-  @Autowired private CollectionExerciseRepository collectionExerciseRepository;
 
   @Before
   @Transactional
   public void setUp() {
-    rabbitQueueHelper.purgeQueue(inboundReceiptQueue);
+    rabbitQueueHelper.purgeQueue(inboundQueue);
     rabbitQueueHelper.purgeQueue(rhCaseQueue);
-    rabbitQueueHelper.purgeQueue(rhUacQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
-    collectionExerciseRepository.deleteAllInBatch();
   }
 
   @Test
-  public void testReceipt() throws Exception {
-    try (QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(rhUacQueue);
-        QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
-      // GIVEN
+  public void testSurveyLaunchLogsEventSetsFlagAndEmitsCorrectCaseUpdatedEvent() throws Exception {
+    // GIVEN
 
-      CollectionExercise collectionExercise = new CollectionExercise();
-      collectionExercise.setId(UUID.randomUUID());
-      collectionExerciseRepository.saveAndFlush(collectionExercise);
-
+    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
       Case caze = new Case();
       caze.setId(TEST_CASE_ID);
-      caze.setCollectionExercise(collectionExercise);
-
-      Map<String, String> sample = new HashMap<>();
-      sample.put("Address", "Tenby");
-      sample.put("Org", "Brewery");
+      caze.setUacQidLinks(null);
+      caze.setAddressInvalid(false);
+      caze.setRefusalReceived(null);
       caze.setReceiptReceived(false);
-      caze.setSample(sample);
-
-      caseRepository.saveAndFlush(caze);
+      caze.setSurveyLaunched(false);
+      caze = caseRepository.saveAndFlush(caze);
 
       UacQidLink uacQidLink = new UacQidLink();
-      uacQidLink.setId(TEST_UACLINK_ID);
-      uacQidLink.setQid(TEST_QID);
+      uacQidLink.setId(UUID.randomUUID());
       uacQidLink.setCaze(caze);
-      uacQidLink.setActive(true);
+      uacQidLink.setQid(TEST_QID);
+      uacQidLink.setUac(TEST_UAC);
       uacQidLinkRepository.saveAndFlush(uacQidLink);
 
+      ResponseManagementEvent surveyLaunchedEvent = new ResponseManagementEvent();
+      EventDTO eventDTO = new EventDTO();
+      eventDTO.setType(EventTypeDTO.SURVEY_LAUNCHED);
+      eventDTO.setSource("Respondent Home");
+      eventDTO.setChannel("RH");
+      surveyLaunchedEvent.setEvent(eventDTO);
+
       ResponseDTO responseDTO = new ResponseDTO();
-      responseDTO.setQuestionnaireId(TEST_QID);
+      responseDTO.setQuestionnaireId(uacQidLink.getQid());
       PayloadDTO payloadDTO = new PayloadDTO();
       payloadDTO.setResponse(responseDTO);
-      ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-      responseManagementEvent.setPayload(payloadDTO);
+      surveyLaunchedEvent.setPayload(payloadDTO);
 
-      EventDTO eventDTO = new EventDTO();
-      eventDTO.setType(EventTypeDTO.RESPONSE_RECEIVED);
+      surveyLaunchedEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
 
-      rabbitQueueHelper.sendMessage(inboundReceiptQueue, responseManagementEvent);
+      // WHEN
+      rabbitQueueHelper.sendMessage(inboundQueue, surveyLaunchedEvent);
 
-      //  THEN
-      ResponseManagementEvent actualResponseManagementEvent =
-          rhCaseQueueSpy.checkExpectedMessageReceived();
+      // THEN
+      ResponseManagementEvent caseUpdatedEvent = rhCaseQueueSpy.checkExpectedMessageReceived();
 
-      CollectionCase emittedCase = actualResponseManagementEvent.getPayload().getCollectionCase();
-      assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
-      assertThat(emittedCase.getSample()).isEqualTo(sample);
-      assertThat(emittedCase.getReceiptReceived()).isTrue();
+      assertThat(caseUpdatedEvent.getPayload().getCollectionCase().getCaseId())
+          .isEqualTo(TEST_CASE_ID);
+      assertThat(caseUpdatedEvent.getPayload().getCollectionCase().getSurveyLaunched()).isTrue();
+
+      List<Event> events = eventRepository.findAll();
+      assertThat(events.size()).isEqualTo(1);
+      Event event = events.get(0);
+      assertThat(event.getEventDescription()).isEqualTo("Survey launched");
+      UacQidLink actualUacQidLink = event.getUacQidLink();
+      assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
+      assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
+      assertThat(actualUacQidLink.getCaze().getId()).isEqualTo(TEST_CASE_ID);
+      assertThat(actualUacQidLink.isActive()).isFalse();
     }
   }
 }

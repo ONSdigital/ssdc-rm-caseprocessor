@@ -9,6 +9,7 @@ import lombok.Data;
 public class PayloadDTO {
   private ResponseDTO response;
   private RefusalDTO refusal;
-  private CaseDto caseDto;
+  private CollectionCase collectionCase;
   private UacDTO uac;
+  private InvalidAddress invalidAddress;
 }
