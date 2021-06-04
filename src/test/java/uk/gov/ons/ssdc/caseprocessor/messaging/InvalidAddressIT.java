@@ -26,6 +26,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.utils.RabbitQueueHelper;
 
@@ -46,6 +47,7 @@ public class InvalidAddressIT {
   @Autowired private CaseRepository caseRepository;
   @Autowired private EventRepository eventRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
+  @Autowired private UacQidLinkRepository uacQidLinkRepository;
 
   @Before
   @Transactional
@@ -53,8 +55,9 @@ public class InvalidAddressIT {
     rabbitQueueHelper.purgeQueue(inboundInvalidAddressQueue);
     rabbitQueueHelper.purgeQueue(rhCaseQueue);
     eventRepository.deleteAllInBatch();
-    caseRepository.deleteAllInBatch();
     collectionExerciseRepository.deleteAllInBatch();
+    uacQidLinkRepository.deleteAllInBatch();
+    caseRepository.deleteAllInBatch();
   }
 
   @Test
