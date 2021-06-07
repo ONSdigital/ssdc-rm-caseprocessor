@@ -2,8 +2,6 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +14,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
@@ -29,13 +29,11 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.utils.RabbitQueueHelper;
 
-
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
 public class RefusalReceiverIT {
-
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
   @Value("${queueconfig.refusal-response-inbound-queue}")
@@ -44,22 +42,17 @@ public class RefusalReceiverIT {
   @Value("${queueconfig.rh-case-queue}")
   private String rhCaseQueue;
 
-  @Value("${queueconfig.rh-uac-queue}")
-  private String rhUacQueue;
-
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
   @Autowired private EventRepository eventRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
 
-
   @Before
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundRefusalQueue);
     rabbitQueueHelper.purgeQueue(rhCaseQueue);
-    rabbitQueueHelper.purgeQueue(rhUacQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -68,8 +61,7 @@ public class RefusalReceiverIT {
 
   @Test
   public void testRefusal() throws Exception {
-    try (QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(rhUacQueue);
-        QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
+    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -79,22 +71,21 @@ public class RefusalReceiverIT {
       Case caze = new Case();
       caze.setId(TEST_CASE_ID);
       caze.setCollectionExercise(collectionExercise);
-
-      Map<String, String> sample = new HashMap<>();
-      sample.put("Address", "Westonzoyland");
-      sample.put("Org", "Brewery");
-      caze.setReceiptReceived(false);
-      caze.setSample(sample);
+      caze.setRefusalReceived(null);
 
       caseRepository.saveAndFlush(caze);
 
       RefusalDTO refusalDTO = new RefusalDTO();
       refusalDTO.setCaseId(TEST_CASE_ID);
-      refusalDTO.setType(RefusalTypeDTO.HARD_REFUSAL);
+      refusalDTO.setType(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
       PayloadDTO payloadDTO = new PayloadDTO();
       payloadDTO.setRefusal(refusalDTO);
       ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
       responseManagementEvent.setPayload(payloadDTO);
+
+      EventDTO eventDTO = new EventDTO();
+      eventDTO.setType(EventTypeDTO.RESPONSE_RECEIVED);
+      responseManagementEvent.setEvent(eventDTO);
 
       rabbitQueueHelper.sendMessage(inboundRefusalQueue, responseManagementEvent);
 
@@ -104,8 +95,7 @@ public class RefusalReceiverIT {
 
       CollectionCase emittedCase = actualResponseManagementEvent.getPayload().getCollectionCase();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
-      assertThat(emittedCase.getRefusalReceived()).isEqualTo(RefusalTypeDTO.HARD_REFUSAL);
+      assertThat(emittedCase.getRefusalReceived()).isEqualTo(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
     }
   }
-
 }
