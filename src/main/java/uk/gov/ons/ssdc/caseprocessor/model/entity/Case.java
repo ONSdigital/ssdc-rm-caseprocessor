@@ -10,7 +10,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -28,9 +27,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Data
 @Entity
 @TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
-@Table(
-    name = "cases",
-    indexes = {@Index(name = "cases_case_ref_idx", columnList = "case_ref")})
+@Table(name = "cases")
 public class Case {
 
   @Id private UUID id;
