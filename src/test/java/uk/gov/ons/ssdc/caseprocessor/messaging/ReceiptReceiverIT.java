@@ -1,121 +1,134 @@
-// package uk.gov.ons.ssdc.caseprocessor.messaging;
-//
-// import static org.assertj.core.api.Assertions.assertThat;
-//
-// import java.util.HashMap;
-// import java.util.Map;
-// import java.util.UUID;
-// import org.junit.Before;
-// import org.junit.Test;
-// import org.junit.runner.RunWith;
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.beans.factory.annotation.Value;
-// import org.springframework.boot.test.context.SpringBootTest;
-// import org.springframework.test.context.ActiveProfiles;
-// import org.springframework.test.context.ContextConfiguration;
-// import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-// import org.springframework.transaction.annotation.Transactional;
-// import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
-// import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-// import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
-// import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-// import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseDTO;
-// import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
-// import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-// import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
-// import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
-// import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
-// import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
-// import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
-// import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
-// import uk.gov.ons.ssdc.caseprocessor.utils.QueueSpy;
-// import uk.gov.ons.ssdc.caseprocessor.utils.RabbitQueueHelper;
-//
-// @ContextConfiguration
-// @ActiveProfiles("test")
-// @SpringBootTest
-// @RunWith(SpringJUnit4ClassRunner.class)
-// public class ReceiptReceiverIT {
-//  private static final UUID TEST_CASE_ID = UUID.randomUUID();
-//  private static final String TEST_QID = "123456";
-//  private static final UUID TEST_UACLINK_ID = UUID.randomUUID();
-//
-//  @Value("${queueconfig.receipt-response-inbound-queue}")
-//  private String inboundReceiptQueue;
-//
-//  @Value("${queueconfig.rh-case-queue}")
-//  private String rhCaseQueue;
-//
-//  @Value("${queueconfig.rh-uac-queue}")
-//  private String rhUacQueue;
-//
-//  @Autowired private RabbitQueueHelper rabbitQueueHelper;
-//  @Autowired private CaseRepository caseRepository;
-//  @Autowired private EventRepository eventRepository;
-//  @Autowired private UacQidLinkRepository uacQidLinkRepository;
-//  @Autowired private CollectionExerciseRepository collectionExerciseRepository;
-//
-//  @Before
-//  @Transactional
-//  public void setUp() {
-//    rabbitQueueHelper.purgeQueue(inboundReceiptQueue);
-//    rabbitQueueHelper.purgeQueue(rhCaseQueue);
-//    rabbitQueueHelper.purgeQueue(rhUacQueue);
-//    eventRepository.deleteAllInBatch();
-//    uacQidLinkRepository.deleteAllInBatch();
-//    caseRepository.deleteAllInBatch();
-//    collectionExerciseRepository.deleteAllInBatch();
-//  }
-//
-//  @Test
-//  public void testReceipt() throws Exception {
-//    try (QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(rhUacQueue);
-//        QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
-//      // GIVEN
-//
-//      CollectionExercise collectionExercise = new CollectionExercise();
-//      collectionExercise.setId(UUID.randomUUID());
-//      collectionExerciseRepository.saveAndFlush(collectionExercise);
-//
-//      Case caze = new Case();
-//      caze.setId(TEST_CASE_ID);
-//      caze.setCollectionExercise(collectionExercise);
-//
-//      Map<String, String> sample = new HashMap<>();
-//      sample.put("Address", "Tenby");
-//      sample.put("Org", "Brewery");
-//      caze.setReceiptReceived(false);
-//      caze.setSample(sample);
-//
-//      caseRepository.saveAndFlush(caze);
-//
-//      UacQidLink uacQidLink = new UacQidLink();
-//      uacQidLink.setId(TEST_UACLINK_ID);
-//      uacQidLink.setQid(TEST_QID);
-//      uacQidLink.setCaze(caze);
-//      uacQidLink.setActive(true);
-//      uacQidLinkRepository.saveAndFlush(uacQidLink);
-//
-//      ResponseDTO responseDTO = new ResponseDTO();
-//      responseDTO.setQuestionnaireId(TEST_QID);
-//      PayloadDTO payloadDTO = new PayloadDTO();
-//      payloadDTO.setResponse(responseDTO);
-//      ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-//      responseManagementEvent.setPayload(payloadDTO);
-//
-//      EventDTO eventDTO = new EventDTO();
-//      eventDTO.setType(EventTypeDTO.RESPONSE_RECEIVED);
-//
-//      rabbitQueueHelper.sendMessage(inboundReceiptQueue, responseManagementEvent);
-//
-//      //  THEN
-//      ResponseManagementEvent actualResponseManagementEvent =
-//          rhCaseQueueSpy.checkExpectedMessageReceived();
-//
-//      CollectionCase emittedCase = actualResponseManagementEvent.getPayload().getCollectionCase();
-//      assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
-//      assertThat(emittedCase.getSample()).isEqualTo(sample);
-//      assertThat(emittedCase.getReceiptReceived()).isTrue();
-//    }
-//  }
-// }
+package uk.gov.ons.ssdc.caseprocessor.messaging;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UacDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
+import uk.gov.ons.ssdc.caseprocessor.utils.QueueSpy;
+import uk.gov.ons.ssdc.caseprocessor.utils.RabbitQueueHelper;
+
+@ContextConfiguration
+@ActiveProfiles("test")
+@SpringBootTest
+@RunWith(SpringJUnit4ClassRunner.class)
+public class ReceiptReceiverIT {
+  private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final String TEST_QID = "123456";
+  private static final UUID TEST_UACLINK_ID = UUID.randomUUID();
+
+  @Value("${queueconfig.receipt-response-inbound-queue}")
+  private String inboundReceiptQueue;
+
+  @Value("${queueconfig.rh-case-queue}")
+  private String rhCaseQueue;
+
+  @Value("${queueconfig.rh-uac-queue}")
+  private String rhUacQueue;
+
+  @Autowired private RabbitQueueHelper rabbitQueueHelper;
+  @Autowired private CaseRepository caseRepository;
+  @Autowired private EventRepository eventRepository;
+  @Autowired private UacQidLinkRepository uacQidLinkRepository;
+  @Autowired private CollectionExerciseRepository collectionExerciseRepository;
+
+  @Before
+  @Transactional
+  public void setUp() {
+    rabbitQueueHelper.purgeQueue(inboundReceiptQueue);
+    rabbitQueueHelper.purgeQueue(rhCaseQueue);
+    rabbitQueueHelper.purgeQueue(rhUacQueue);
+    eventRepository.deleteAllInBatch();
+    uacQidLinkRepository.deleteAllInBatch();
+    caseRepository.deleteAllInBatch();
+    collectionExerciseRepository.deleteAllInBatch();
+  }
+
+  @Test
+  public void testReceipt() throws Exception {
+    try (QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(rhUacQueue);
+        QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
+      // GIVEN
+
+      CollectionExercise collectionExercise = new CollectionExercise();
+      collectionExercise.setId(UUID.randomUUID());
+      collectionExerciseRepository.saveAndFlush(collectionExercise);
+
+      Case caze = new Case();
+      caze.setId(TEST_CASE_ID);
+      caze.setCollectionExercise(collectionExercise);
+
+      Map<String, String> sample = new HashMap<>();
+      sample.put("Address", "Tenby");
+      sample.put("Org", "Brewery");
+      caze.setReceiptReceived(false);
+      caze.setSample(sample);
+
+      caseRepository.saveAndFlush(caze);
+
+      UacQidLink uacQidLink = new UacQidLink();
+      uacQidLink.setId(TEST_UACLINK_ID);
+      uacQidLink.setQid(TEST_QID);
+      uacQidLink.setCaze(caze);
+      uacQidLink.setActive(true);
+      uacQidLinkRepository.saveAndFlush(uacQidLink);
+
+      ResponseDTO responseDTO = new ResponseDTO();
+      responseDTO.setQuestionnaireId(TEST_QID);
+      PayloadDTO payloadDTO = new PayloadDTO();
+      payloadDTO.setResponse(responseDTO);
+      ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
+      responseManagementEvent.setPayload(payloadDTO);
+
+      EventDTO eventDTO = new EventDTO();
+      eventDTO.setType(EventTypeDTO.RESPONSE_RECEIVED);
+      responseManagementEvent.setEvent(eventDTO);
+
+      rabbitQueueHelper.sendMessage(inboundReceiptQueue, responseManagementEvent);
+
+      //  THEN
+      ResponseManagementEvent caseEmittedEvent = rhCaseQueueSpy.checkExpectedMessageReceived();
+
+      CollectionCase emittedCase = caseEmittedEvent.getPayload().getCollectionCase();
+      assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
+      assertThat(emittedCase.getSample()).isEqualTo(sample);
+      assertThat(emittedCase.getReceiptReceived()).isTrue();
+
+      ResponseManagementEvent uacUpdatedEvent = rhUacQueueSpy.checkExpectedMessageReceived();
+      UacDTO emittedUac = uacUpdatedEvent.getPayload().getUac();
+      assertThat(emittedUac.getActive()).isFalse();
+
+      List<Event> storedEvents = eventRepository.findAll();
+      assertThat(storedEvents.size()).isEqualTo(1);
+      assertThat(storedEvents.get(0).getUacQidLink().getId()).isEqualTo(TEST_UACLINK_ID);
+      assertThat(storedEvents.get(0).getEventType()).isEqualTo(EventType.RESPONSE_RECEIVED);
+    }
+  }
+}
