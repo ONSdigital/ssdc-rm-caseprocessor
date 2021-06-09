@@ -37,6 +37,7 @@ public class RefusalReceiver {
     refusedCase.setRefusalReceived(RefusalType.valueOf(refusal.getType().name()));
 
     caseService.saveCaseAndEmitCaseUpdatedEvent(refusedCase);
+
     eventLogger.logCaseEvent(
         refusedCase,
         responseManagementEvent.getEvent().getDateTime(),

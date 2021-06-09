@@ -22,6 +22,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
@@ -96,6 +98,11 @@ public class RefusalReceiverIT {
       CollectionCase emittedCase = actualResponseManagementEvent.getPayload().getCollectionCase();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(emittedCase.getRefusalReceived()).isEqualTo(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
+
+      assertThat(eventRepository.findAll().size()).isEqualTo(1);
+      Event event = eventRepository.findAll().get(0);
+      assertThat(event.getCaze().getId()).isEqualTo(TEST_CASE_ID);
+      assertThat(event.getEventType()).isEqualTo(EventType.REFUSAL_RECEIVED);
     }
   }
 }

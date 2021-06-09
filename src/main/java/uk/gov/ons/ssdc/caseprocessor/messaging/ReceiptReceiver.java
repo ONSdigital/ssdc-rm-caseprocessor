@@ -23,8 +23,7 @@ public class ReceiptReceiver {
   private final CaseService caseService;
   private final EventLogger eventLogger;
 
-  public ReceiptReceiver(UacService uacService, CaseService caseService,
-      EventLogger eventLogger) {
+  public ReceiptReceiver(UacService uacService, CaseService caseService, EventLogger eventLogger) {
     this.uacService = uacService;
     this.caseService = caseService;
     this.eventLogger = eventLogger;

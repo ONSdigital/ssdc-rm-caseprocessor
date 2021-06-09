@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO.ADDRESS_NOT_VALID;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -15,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.InvalidAddress;
@@ -42,6 +44,7 @@ public class InvalidAddressReceiverTest {
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setInvalidAddress(new InvalidAddress());
     managementEvent.getPayload().getInvalidAddress().setCaseId(UUID.randomUUID());
+    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(managementEvent);
 
     // Given
     Case expectedCase = new Case();
@@ -49,7 +52,7 @@ public class InvalidAddressReceiverTest {
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // when
-    underTest.receiveMessage(managementEvent);
+    underTest.receiveMessage(message);
 
     // then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
