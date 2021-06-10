@@ -39,8 +39,6 @@ public class ReceiptReceiver {
         uacService.findByQid(
             responseManagementEvent.getPayload().getResponse().getQuestionnaireId());
 
-    // if uacQidLink is null it'll blow up, do we code defensively instead?
-
     if (uacQidLink.isActive()) {
       uacQidLink.setActive(false);
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
