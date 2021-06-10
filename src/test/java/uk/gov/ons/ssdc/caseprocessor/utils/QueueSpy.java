@@ -19,7 +19,7 @@ public class QueueSpy implements AutoCloseable {
   private SimpleMessageListenerContainer container;
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     container.stop();
   }
 

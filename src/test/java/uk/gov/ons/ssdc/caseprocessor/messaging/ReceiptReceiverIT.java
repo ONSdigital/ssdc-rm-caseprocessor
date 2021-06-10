@@ -2,6 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +103,7 @@ public class ReceiptReceiverIT {
 
       ResponseDTO responseDTO = new ResponseDTO();
       responseDTO.setQuestionnaireId(TEST_QID);
+      responseDTO.setResponseDateTime(OffsetDateTime.now());
       PayloadDTO payloadDTO = new PayloadDTO();
       payloadDTO.setResponse(responseDTO);
       ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
@@ -109,6 +111,10 @@ public class ReceiptReceiverIT {
 
       EventDTO eventDTO = new EventDTO();
       eventDTO.setType(EventTypeDTO.RESPONSE_RECEIVED);
+      eventDTO.setSource("RH");
+      eventDTO.setDateTime(OffsetDateTime.now());
+      eventDTO.setChannel("RH");
+      eventDTO.setTransactionId(UUID.randomUUID());
       responseManagementEvent.setEvent(eventDTO);
 
       rabbitQueueHelper.sendMessage(inboundReceiptQueue, responseManagementEvent);

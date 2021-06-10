@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO.ADDRESS_NOT_VALID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -38,7 +39,7 @@ public class InvalidAddressReceiverTest {
   public void testInvalidAddress() {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now());
+    managementEvent.getEvent().setDateTime(OffsetDateTime.now().minusHours(1));
     managementEvent.getEvent().setType(ADDRESS_NOT_VALID);
     managementEvent.getEvent().setChannel("CC");
     managementEvent.setPayload(new PayloadDTO());
@@ -61,14 +62,16 @@ public class InvalidAddressReceiverTest {
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.isAddressInvalid()).isTrue();
 
+    OffsetDateTime messageDateTime = getMsgTimeStamp(message);
+
     verify(eventLogger)
         .logCaseEvent(
             eq(expectedCase),
-            any(OffsetDateTime.class),
+            eq(managementEvent.getEvent().getDateTime()),
             eq("Invalid address"),
             eq(EventType.ADDRESS_NOT_VALID),
             eq(managementEvent.getEvent()),
-            any(),
-            any());
+            eq(managementEvent.getPayload()),
+            eq(messageDateTime));
   }
 }

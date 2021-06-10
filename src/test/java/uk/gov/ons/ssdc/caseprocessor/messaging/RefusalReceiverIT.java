@@ -78,7 +78,9 @@ public class RefusalReceiverIT {
       caseRepository.saveAndFlush(caze);
 
       RefusalDTO refusalDTO = new RefusalDTO();
-      refusalDTO.setCaseId(TEST_CASE_ID);
+      CollectionCase collectionCase = new CollectionCase();
+      collectionCase.setCaseId(TEST_CASE_ID);
+      refusalDTO.setCollectionCase(collectionCase);
       refusalDTO.setType(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
       PayloadDTO payloadDTO = new PayloadDTO();
       payloadDTO.setRefusal(refusalDTO);

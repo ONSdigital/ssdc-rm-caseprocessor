@@ -2,6 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,9 +56,9 @@ public class InvalidAddressIT {
     rabbitQueueHelper.purgeQueue(inboundInvalidAddressQueue);
     rabbitQueueHelper.purgeQueue(rhCaseQueue);
     eventRepository.deleteAllInBatch();
-    collectionExerciseRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
+    collectionExerciseRepository.deleteAllInBatch();
   }
 
   @Test
@@ -78,6 +79,8 @@ public class InvalidAddressIT {
 
       InvalidAddress invalidAddress = new InvalidAddress();
       invalidAddress.setCaseId(TEST_CASE_ID);
+      invalidAddress.setReason("Not found");
+      invalidAddress.setNotes("Looked hard");
       PayloadDTO payloadDTO = new PayloadDTO();
       payloadDTO.setInvalidAddress(invalidAddress);
       ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
@@ -85,6 +88,10 @@ public class InvalidAddressIT {
 
       EventDTO eventDTO = new EventDTO();
       eventDTO.setType(EventTypeDTO.ADDRESS_NOT_VALID);
+      eventDTO.setSource("RH");
+      eventDTO.setDateTime(OffsetDateTime.now());
+      eventDTO.setChannel("RH");
+      eventDTO.setTransactionId(UUID.randomUUID());
       responseManagementEvent.setEvent(eventDTO);
 
       //  When

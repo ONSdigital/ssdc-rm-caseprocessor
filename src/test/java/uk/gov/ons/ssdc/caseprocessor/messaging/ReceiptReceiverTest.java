@@ -166,7 +166,7 @@ public class ReceiptReceiverTest {
     verify(eventLogger)
         .logUacQidEvent(
             eq(actualUacQidLink),
-            any(),
+            eq(responseManagementEvent.getEvent().getDateTime()),
             eq("QID Receipted"),
             eq(EventType.RESPONSE_RECEIVED),
             eq(responseManagementEvent.getEvent()),

@@ -32,7 +32,7 @@ public class RefusalReceiver {
     ResponseManagementEvent responseManagementEvent = message.getPayload();
 
     RefusalDTO refusal = message.getPayload().getPayload().getRefusal();
-    Case refusedCase = caseService.getCaseByCaseId(refusal.getCaseId());
+    Case refusedCase = caseService.getCaseByCaseId(refusal.getCollectionCase().getCaseId());
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     refusedCase.setRefusalReceived(RefusalType.valueOf(refusal.getType().name()));
 

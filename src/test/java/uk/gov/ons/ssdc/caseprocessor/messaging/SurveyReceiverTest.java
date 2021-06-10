@@ -7,7 +7,6 @@ import static org.mockito.Mockito.*;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import org.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -140,7 +139,7 @@ public class SurveyReceiverTest {
   }
 
   @Test
-  public void testRespondentAuthenticatedEventTypeLoggedAndRejected() throws JSONException {
+  public void testRespondentAuthenticatedEventTypeLoggedAndRejected() {
     // Given
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());

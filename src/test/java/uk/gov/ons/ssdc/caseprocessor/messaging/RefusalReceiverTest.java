@@ -1,7 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
@@ -43,7 +43,9 @@ public class RefusalReceiverTest {
   public void testRefusal() {
     // Given
     RefusalDTO refusalDTO = new RefusalDTO();
-    refusalDTO.setCaseId(CASE_ID);
+    CollectionCase collectionCase = new CollectionCase();
+    collectionCase.setCaseId(CASE_ID);
+    refusalDTO.setCollectionCase(collectionCase);
     refusalDTO.setType(RefusalTypeDTO.HARD_REFUSAL);
 
     PayloadDTO payloadDTO = new PayloadDTO();
@@ -80,7 +82,7 @@ public class RefusalReceiverTest {
     verify(eventLogger)
         .logCaseEvent(
             eq(caze),
-            any(),
+            eq(responseManagementEvent.getEvent().getDateTime()),
             eq("Refusal Received"),
             eq(EventType.REFUSAL_RECEIVED),
             eq(responseManagementEvent.getEvent()),
