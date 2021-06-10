@@ -18,6 +18,9 @@ The case processor schedules waves of contact to be triggered at a specific date
 
 The case processor is responsible for creating the content of the CSV print file which will be used to print letters, according to a flexible template. The print files can contain case refs, UACs, QIDs and any attribute of the sample.
 
+
+## Events
+
 ## Sample Load
 The case processor listens to a Rabbit queue called `case.sample.inbound`. The messages are JSON format and are of the following format:
 
@@ -30,6 +33,98 @@ The case processor listens to a Rabbit queue called `case.sample.inbound`. The m
   }
 }
 ```
+
+#Invalid Address
+Queue Name: case.invalidaddress
+Example Msg: 
+```json
+{
+  "event": {
+    "type": "ADDRESS_NOT_VALID",
+    "source": "RH",
+    "channel": "RH",
+    "dateTime": "2021-06-09T13:49:19.716761Z",
+    "transactionId": "92df974c-f03e-4519-8d55-05e9c0ecea43"
+  },
+  "payload": {
+    "invalidAddress": {
+      "reason": "Not found",
+      "notes": "Looked hard",
+      "caseId": "3b768940-6ef2-460e-bb75-e51d3a65ada4"
+    }
+  }
+}
+```
+
+#Receipts/Responses
+Queue Name: Case.Responses
+Example Msg:
+```json
+{
+  "event": {
+    "type": "RESPONSE_RECEIVED",
+    "source": "RH",
+    "channel": "RH",
+    "dateTime": "2021-06-09T14:10:11.910719Z",
+    "transactionId": "730af73e-398d-41d2-893a-cd0722151f9c"
+  },
+  "payload": {
+    "response": {
+      "questionnaireId": "123456",
+      "dateTime": "2021-06-09T14:10:11.909472Z"
+    }
+  }
+}
+```
+
+#Refusals
+Queue: case.refusals
+Example Msg:
+```json
+{
+  "event": {
+    "type": "REFUSAL_RECEIVED",
+    "source": null,
+    "channel": null,
+    "dateTime": null,
+    "transactionId": null
+  },
+  "payload": {
+    "refusal": {
+      "type": "EXTRAORDINARY_REFUSAL",
+      "collectionCase": {
+        "caseId": "2a792cbe-c125-4a3b-973a-34c0bccc7656",
+        "receiptReceived": null,
+        "invalidAddrress": null,
+        "surveyLaunched": null,
+        "refusalReceived": null,
+        "sample": null
+      }
+    }
+  }
+}
+```
+
+#Survey Launched
+queue: survey.launched
+Example Msg:
+```json
+{
+  "event": {
+    "type": "SURVEY_LAUNCHED",
+    "source": "Respondent Home",
+    "channel": "RH",
+    "dateTime": null,
+    "transactionId": null
+  },
+  "payload": {
+    "response": {
+      "questionnaireId": "1234334"
+    }
+  }
+}
+```
+
 
 Each sample message will create a case, linked to the specified collection exercise. The ID must be unique.
 

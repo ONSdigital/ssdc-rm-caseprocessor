@@ -17,8 +17,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.ssdc.caseprocessor.messaging.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.messaging.RabbitQueueHelper;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
@@ -27,9 +25,12 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.WaveOfContactType;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.WaveOfContactRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
+import uk.gov.ons.ssdc.caseprocessor.utils.QueueSpy;
+import uk.gov.ons.ssdc.caseprocessor.utils.RabbitQueueHelper;
 
 @ContextConfiguration
 @SpringBootTest
@@ -45,6 +46,7 @@ public class WaveOfContactIT {
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
   @Autowired private CaseToProcessRepository caseToProcessRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
+  @Autowired private EventRepository eventRepository;
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
 
   private static final EasyRandom easyRandom = new EasyRandom();
@@ -54,6 +56,7 @@ public class WaveOfContactIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(OUTBOUND_PRINTER_QUEUE);
+    eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseToProcessRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();

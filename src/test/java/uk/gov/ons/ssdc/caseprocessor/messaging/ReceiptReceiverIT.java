@@ -33,6 +33,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.WaveOfContactRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.utils.RabbitQueueHelper;
 
@@ -58,6 +59,7 @@ public class ReceiptReceiverIT {
   @Autowired private CaseRepository caseRepository;
   @Autowired private EventRepository eventRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
+  @Autowired private WaveOfContactRepository waveOfContactRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
 
   @Before
@@ -69,6 +71,7 @@ public class ReceiptReceiverIT {
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
+    waveOfContactRepository.deleteAllInBatch();
     collectionExerciseRepository.deleteAllInBatch();
   }
 

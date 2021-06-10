@@ -26,6 +26,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.WaveOfContactRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.RabbitQueueHelper;
 import uk.gov.ons.ssdc.caseprocessor.utils.TestHelper;
 
@@ -45,6 +46,7 @@ public class SampleLoadedIT {
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
   @Autowired private EventRepository eventRepository;
+  @Autowired private WaveOfContactRepository waveOfContactRepository;
 
   @Before
   @Transactional
@@ -53,6 +55,8 @@ public class SampleLoadedIT {
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
+    waveOfContactRepository.deleteAllInBatch();
+    collectionExerciseRepository.deleteAllInBatch();
   }
 
   @Test
