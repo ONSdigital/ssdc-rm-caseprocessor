@@ -88,7 +88,7 @@ public class RefusalReceiverIT {
       responseManagementEvent.setPayload(payloadDTO);
 
       EventDTO eventDTO = new EventDTO();
-      eventDTO.setType(EventTypeDTO.RESPONSE_RECEIVED);
+      eventDTO.setType(EventTypeDTO.REFUSAL_RECEIVED);
       responseManagementEvent.setEvent(eventDTO);
 
       rabbitQueueHelper.sendMessage(inboundRefusalQueue, responseManagementEvent);

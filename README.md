@@ -52,7 +52,7 @@ Queue: case.refusals
 Example Msg:
 {
   "event": {
-    "type": "RESPONSE_RECEIVED",
+    "type": "REFUSAL_RECEIVED",
     "source": null,
     "channel": null,
     "dateTime": null,
