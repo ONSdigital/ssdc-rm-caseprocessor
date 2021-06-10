@@ -21,7 +21,7 @@ The case processor is responsible for creating the content of the CSV print file
 
 ## Events
 
-## Sample Load
+### Sample Load
 The case processor listens to a Rabbit queue called `case.sample.inbound`. The messages are JSON format and are of the following format:
 
 ```json
@@ -34,7 +34,7 @@ The case processor listens to a Rabbit queue called `case.sample.inbound`. The m
 }
 ```
 
-#Invalid Address
+### Invalid Address
 Queue Name: case.invalidaddress
 Example Msg: 
 ```json
@@ -56,7 +56,7 @@ Example Msg:
 }
 ```
 
-#Receipts/Responses
+###Receipts/Responses
 Queue Name: Case.Responses
 Example Msg:
 ```json
@@ -77,7 +77,7 @@ Example Msg:
 }
 ```
 
-#Refusals
+###Refusals
 Queue: case.refusals
 Example Msg:
 ```json
@@ -105,7 +105,7 @@ Example Msg:
 }
 ```
 
-#Survey Launched
+###Survey Launched
 queue: survey.launched
 Example Msg:
 ```json
