@@ -56,7 +56,7 @@ public class ClusterLeaderManager {
     ClusterLeader clusterLeader = lockedClusterLeaderOpt.get();
 
     if (clusterLeader.getHostName().equals(hostName)) {
-      //      log.with("hostName", hostName).info("This host is leader");
+      log.with("hostName", hostName).info("This host is leader");
       return true;
     } else if (clusterLeader
         .getHostLastSeenAliveAt()
@@ -72,7 +72,7 @@ public class ClusterLeaderManager {
       return true;
     }
 
-    //    log.with("hostName", hostName).info("This host is not the leader");
+    log.with("hostName", hostName).info("This host is not the leader");
     return false;
   }
 
@@ -91,7 +91,7 @@ public class ClusterLeaderManager {
       clusterLeader.setHostLastSeenAliveAt(OffsetDateTime.now());
       clusterLeaderRepository.saveAndFlush(clusterLeader);
 
-      //      log.with("hostName", hostName).info("Leader keepalive updated. This host is leader");
+      log.with("hostName", hostName).info("Leader keepalive updated. This host is leader");
     }
   }
 }
