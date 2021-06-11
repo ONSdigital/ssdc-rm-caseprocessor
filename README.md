@@ -56,7 +56,7 @@ Example Msg:
 }
 ```
 
-###Receipts/Responses
+### Receipts/Responses
 Queue Name: Case.Responses
 Example Msg:
 ```json
@@ -77,7 +77,7 @@ Example Msg:
 }
 ```
 
-###Refusals
+### Refusals
 Queue: case.refusals
 Example Msg:
 ```json
@@ -105,7 +105,7 @@ Example Msg:
 }
 ```
 
-###Survey Launched
+### Survey Launched
 queue: survey.launched
 Example Msg:
 ```json
