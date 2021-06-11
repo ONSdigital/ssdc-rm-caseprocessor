@@ -18,6 +18,16 @@ The case processor schedules waves of contact to be triggered at a specific date
 
 The case processor is responsible for creating the content of the CSV print file which will be used to print letters, according to a flexible template. The print files can contain case refs, UACs, QIDs and any attribute of the sample.
 
+## Building
+To run all the tests and build the image
+```  
+   mvn clean install
+```
+
+Just build the image
+```
+    mvn -DskipTests -DskipITs -DdockerCompose.skip
+```
 
 ## Events
 
