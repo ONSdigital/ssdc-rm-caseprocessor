@@ -17,15 +17,14 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class UacQidLink {
   @Id private UUID id;
 
-  @Column(name = "qid")
-  private String qid;
+  @Column private String qid;
 
   @Column private String uac;
 
   @ManyToOne private Case caze;
 
   @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT true")
-  private boolean active;
+  private boolean active = true;
 
   @Column(columnDefinition = "timestamp with time zone")
   @CreationTimestamp
