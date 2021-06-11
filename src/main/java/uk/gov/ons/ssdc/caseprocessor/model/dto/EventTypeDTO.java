@@ -1,0 +1,13 @@
+package uk.gov.ons.ssdc.caseprocessor.model.dto;
+
+public enum EventTypeDTO {
+  CASE_CREATED,
+  CASE_UPDATED,
+  UAC_UPDATED,
+  RESPONSE_RECEIVED,
+  REFUSAL_RECEIVED,
+  SAMPLE_LOADED,
+  ADDRESS_NOT_VALID,
+  SURVEY_LAUNCHED,
+  RESPONDENT_AUTHENTICATED
+}
