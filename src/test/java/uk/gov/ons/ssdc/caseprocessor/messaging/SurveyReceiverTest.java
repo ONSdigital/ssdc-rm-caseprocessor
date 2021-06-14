@@ -92,53 +92,6 @@ public class SurveyReceiverTest {
   }
 
   @Test
-  public void testSurveryLaunchedEventNotFromRH() {
-    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
-    managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now());
-    managementEvent.getEvent().setType(EventTypeDTO.SURVEY_LAUNCHED);
-    managementEvent.getEvent().setChannel("CC");
-    managementEvent.setPayload(new PayloadDTO());
-
-    ResponseDTO response = new ResponseDTO();
-    response.setCaseId(TEST_CASE_ID);
-    response.setQuestionnaireId(TEST_QID_ID);
-    response.setAgentId(TEST_AGENT_ID);
-    managementEvent.getPayload().setResponse(response);
-
-    UacQidLink expectedUacQidLink = new UacQidLink();
-    expectedUacQidLink.setUac(TEST_QID_ID);
-    Case caze = new Case();
-    caze.setId(TEST_CASE_ID);
-    expectedUacQidLink.setCaze(caze);
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    // Given
-    when(uacService.findByQid(TEST_QID_ID)).thenReturn(expectedUacQidLink);
-
-    // when
-    underTest.receiveMessage(managementEvent);
-
-    // then
-
-    verify(uacService).findByQid(TEST_QID_ID);
-
-    verify(eventLogger)
-        .logUacQidEvent(
-            eq(expectedUacQidLink),
-            any(OffsetDateTime.class),
-            eq("Survey launched"),
-            eq(EventType.SURVEY_LAUNCHED),
-            eq(managementEvent.getEvent()),
-            any(),
-            any());
-
-    verifyNoMoreInteractions(uacService);
-    verifyNoInteractions(caseService);
-    verifyNoMoreInteractions(eventLogger);
-  }
-
-  @Test
   public void testRespondentAuthenticatedEventTypeLoggedAndRejected() {
     // Given
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();

@@ -128,11 +128,11 @@ public class ReceiptReceiverIT {
       CollectionCase emittedCase = caseEmittedEvent.getPayload().getCollectionCase();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(emittedCase.getSample()).isEqualTo(sample);
-      assertThat(emittedCase.getReceiptReceived()).isTrue();
+      assertThat(emittedCase.isReceiptReceived()).isTrue();
 
       ResponseManagementEvent uacUpdatedEvent = rhUacQueueSpy.checkExpectedMessageReceived();
       UacDTO emittedUac = uacUpdatedEvent.getPayload().getUac();
-      assertThat(emittedUac.getActive()).isFalse();
+      assertThat(emittedUac.isActive()).isFalse();
 
       List<Event> storedEvents = eventRepository.findAll();
       assertThat(storedEvents.size()).isEqualTo(1);

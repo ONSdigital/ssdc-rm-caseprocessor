@@ -106,7 +106,7 @@ public class InvalidAddressIT {
 
       CollectionCase emittedCase = actualResponseManagementEvent.getPayload().getCollectionCase();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
-      assertThat(emittedCase.getInvalidAddrress()).isTrue();
+      assertThat(emittedCase.isInvalidAddress()).isTrue();
 
       assertThat(eventRepository.findAll().size()).isEqualTo(1);
       Event event = eventRepository.findAll().get(0);

@@ -17,7 +17,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.WaveOfContact;
@@ -38,6 +40,7 @@ import uk.gov.ons.ssdc.caseprocessor.utils.RabbitQueueHelper;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class WaveOfContactIT {
   private static final String OUTBOUND_PRINTER_QUEUE = "Action.Printer";
+  private static final String UAC_QUEUE = "case.rh.uac";
   private static final String PACK_CODE = "test-pack-code";
   private static final String PRINT_SUPPLIER = "test-print-supplier";
 
@@ -56,6 +59,7 @@ public class WaveOfContactIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(OUTBOUND_PRINTER_QUEUE);
+    rabbitQueueHelper.purgeQueue(UAC_QUEUE);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseToProcessRepository.deleteAllInBatch();
@@ -66,14 +70,16 @@ public class WaveOfContactIT {
 
   @Test
   public void testPrinterRule() throws Exception {
-    try (QueueSpy printerQueue = rabbitQueueHelper.listen(OUTBOUND_PRINTER_QUEUE)) {
+    try (QueueSpy printerQueue = rabbitQueueHelper.listen(OUTBOUND_PRINTER_QUEUE);
+        QueueSpy uacQueue = rabbitQueueHelper.listen(UAC_QUEUE)) {
       // Given
       CollectionExercise collectionExercise = setUpCollectionExercise();
-      setUpCase(collectionExercise);
+      Case caze = setUpCase(collectionExercise);
 
       // When
       setUpWaveOfContact(WaveOfContactType.PRINT, collectionExercise);
       String printRowMessage = printerQueue.getQueue().poll(20, TimeUnit.SECONDS);
+      String uacMessage = uacQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
       assertThat(printRowMessage).isNotNull();
@@ -83,6 +89,12 @@ public class WaveOfContactIT {
       assertThat(printRow.getPackCode()).isEqualTo(PACK_CODE);
       assertThat(printRow.getPrintSupplier()).isEqualTo(PRINT_SUPPLIER);
       assertThat(printRow.getRow()).startsWith("\"123\"|\"bar\"|\"");
+
+      assertThat(uacMessage).isNotNull();
+      ResponseManagementEvent rme =
+          objectMapper.readValue(uacMessage, ResponseManagementEvent.class);
+      assertThat(rme.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
+      assertThat(rme.getPayload().getUac().getCaseId()).isEqualTo(caze.getId());
     }
   }
 

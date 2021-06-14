@@ -45,7 +45,7 @@ public class CaseService {
     collectionCase.setCaseId(caze.getId());
     collectionCase.setSample(caze.getSample());
     collectionCase.setReceiptReceived(caze.isReceiptReceived());
-    collectionCase.setInvalidAddrress(caze.isAddressInvalid());
+    collectionCase.setInvalidAddress(caze.isAddressInvalid());
     collectionCase.setSurveyLaunched(caze.isSurveyLaunched());
     if (caze.getRefusalReceived() != null) {
       collectionCase.setRefusalReceived(RefusalTypeDTO.valueOf(caze.getRefusalReceived().name()));

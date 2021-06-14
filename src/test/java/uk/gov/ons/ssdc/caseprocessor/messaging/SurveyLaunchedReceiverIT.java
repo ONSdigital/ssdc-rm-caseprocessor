@@ -102,7 +102,7 @@ public class SurveyLaunchedReceiverIT {
 
       assertThat(caseUpdatedEvent.getPayload().getCollectionCase().getCaseId())
           .isEqualTo(TEST_CASE_ID);
-      assertThat(caseUpdatedEvent.getPayload().getCollectionCase().getSurveyLaunched()).isTrue();
+      assertThat(caseUpdatedEvent.getPayload().getCollectionCase().isSurveyLaunched()).isTrue();
 
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);

@@ -30,6 +30,7 @@ public class CaseToProcessProcessorTest {
   @Mock private RabbitTemplate rabbitTemplate;
   @Mock private UacQidCache uacQidCache;
   @Mock private UacQidLinkRepository uacQidLinkRepository;
+  @Mock private UacService uacService;
 
   @InjectMocks CaseToProcessProcessor underTest;
 
@@ -76,5 +77,7 @@ public class CaseToProcessProcessorTest {
     assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
+
+    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.getValue());
   }
 }
