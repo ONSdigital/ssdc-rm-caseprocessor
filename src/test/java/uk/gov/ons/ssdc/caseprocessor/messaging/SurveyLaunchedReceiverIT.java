@@ -36,12 +36,10 @@ public class SurveyLaunchedReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String TEST_QID = "1234334";
   private static final String TEST_UAC = "9434343";
+  private static final String RH_CASE_QUEUE = "case.rh.case";
 
   @Value("${queueconfig.survey-launched-queue}")
   private String inboundQueue;
-
-  @Value("${queueconfig.rh-case-queue}")
-  private String rhCaseQueue;
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
@@ -52,7 +50,7 @@ public class SurveyLaunchedReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundQueue);
-    rabbitQueueHelper.purgeQueue(rhCaseQueue);
+    rabbitQueueHelper.purgeQueue(RH_CASE_QUEUE);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -62,7 +60,7 @@ public class SurveyLaunchedReceiverIT {
   public void testSurveyLaunchLogsEventSetsFlagAndEmitsCorrectCaseUpdatedEvent() throws Exception {
     // GIVEN
 
-    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
+    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(RH_CASE_QUEUE)) {
       Case caze = new Case();
       caze.setId(TEST_CASE_ID);
       caze.setUacQidLinks(null);
@@ -112,7 +110,6 @@ public class SurveyLaunchedReceiverIT {
       assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
       assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
       assertThat(actualUacQidLink.getCaze().getId()).isEqualTo(TEST_CASE_ID);
-      assertThat(actualUacQidLink.isActive()).isFalse();
     }
   }
 }

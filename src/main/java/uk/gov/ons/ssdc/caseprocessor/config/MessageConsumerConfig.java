@@ -42,14 +42,14 @@ public class MessageConsumerConfig {
   @Value("${messagelogging.logstacktraces}")
   private boolean logStackTraces;
 
-  @Value("${queueconfig.receipt-response-inbound-queue}")
-  private String receiptInboundQueue;
+  @Value("${queueconfig.receipt-response-queue}")
+  private String receiptQueue;
 
-  @Value("${queueconfig.refusal-response-inbound-queue}")
-  private String refusalInboundQueue;
+  @Value("${queueconfig.refusal-response-queue}")
+  private String refusalQueue;
 
-  @Value("${queueconfig.invalid-address-inbound-queue}")
-  private String invalidAddressInboundQueue;
+  @Value("${queueconfig.invalid-address-queue}")
+  private String invalidAddressQueue;
 
   @Value("${queueconfig.survey-launched-queue}")
   private String surveyLaunchedQueue;
@@ -132,17 +132,17 @@ public class MessageConsumerConfig {
 
   @Bean
   public SimpleMessageListenerContainer receiptContainer() {
-    return setupListenerContainer(receiptInboundQueue, ResponseManagementEvent.class);
+    return setupListenerContainer(receiptQueue, ResponseManagementEvent.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer refusalContainer() {
-    return setupListenerContainer(refusalInboundQueue, ResponseManagementEvent.class);
+    return setupListenerContainer(refusalQueue, ResponseManagementEvent.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer invalidAddressContainer() {
-    return setupListenerContainer(invalidAddressInboundQueue, ResponseManagementEvent.class);
+    return setupListenerContainer(invalidAddressQueue, ResponseManagementEvent.class);
   }
 
   private SimpleMessageListenerContainer setupListenerContainer(
