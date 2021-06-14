@@ -76,5 +76,6 @@ public class CaseToProcessProcessorTest {
     assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
+    assertThat(actualUacQidLink.isActive()).isTrue();
   }
 }
