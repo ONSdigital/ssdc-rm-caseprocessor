@@ -25,4 +25,4 @@ cache:
 
 branches:
   only:
-  - master
+  - main
