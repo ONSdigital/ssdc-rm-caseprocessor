@@ -24,8 +24,7 @@ public class Job {
   @Column
   private BulkProcess bulkProcess;
 
-  @ManyToOne
-  private CollectionExercise collectionExercise;
+  @ManyToOne private CollectionExercise collectionExercise;
 
   @Column(columnDefinition = "timestamp with time zone")
   @CreationTimestamp
