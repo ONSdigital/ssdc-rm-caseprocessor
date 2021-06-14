@@ -25,4 +25,7 @@ public class CollectionExercise {
 
   @OneToMany(mappedBy = "collectionExercise")
   private List<WaveOfContact> waveOfContacts;
+
+  @OneToMany(mappedBy = "collectionExercise")
+  private List<Job> jobs;
 }
