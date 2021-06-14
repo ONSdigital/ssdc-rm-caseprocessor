@@ -12,12 +12,8 @@ env:
 
 before_install:
   - mvn fmt:check
-  - docker login -u "${DOCKER_GCP_USERNAME}" -p "${DOCKER_GCP_PASSWORD}" "${DOCKER_GCP_REGISTRY}";
 
-script: travis_wait mvn verify jacoco:report
-
-after_success:
-- bash <(curl -s https://codecov.io/bash)
+script: mvn -DskipITs -DdockerCompose.skip verify jacoco:report
 
 cache:
   directories:
