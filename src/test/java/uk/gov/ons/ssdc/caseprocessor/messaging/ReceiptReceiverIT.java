@@ -45,15 +45,11 @@ public class ReceiptReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String TEST_QID = "123456";
   private static final UUID TEST_UACLINK_ID = UUID.randomUUID();
+  private static final String RH_CASE_QUEUE = "case.rh.case";
+  private static final String RH_UAC_QUEUE = "case.rh.uac";
 
-  @Value("${queueconfig.receipt-response-inbound-queue}")
+  @Value("${queueconfig.receipt-response-queue}")
   private String inboundReceiptQueue;
-
-  @Value("${queueconfig.rh-case-queue}")
-  private String rhCaseQueue;
-
-  @Value("${queueconfig.rh-uac-queue}")
-  private String rhUacQueue;
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
@@ -66,8 +62,8 @@ public class ReceiptReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundReceiptQueue);
-    rabbitQueueHelper.purgeQueue(rhCaseQueue);
-    rabbitQueueHelper.purgeQueue(rhUacQueue);
+    rabbitQueueHelper.purgeQueue(RH_CASE_QUEUE);
+    rabbitQueueHelper.purgeQueue(RH_UAC_QUEUE);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -77,8 +73,8 @@ public class ReceiptReceiverIT {
 
   @Test
   public void testReceipt() throws Exception {
-    try (QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(rhUacQueue);
-        QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
+    try (QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(RH_UAC_QUEUE);
+        QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(RH_CASE_QUEUE)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -128,11 +124,11 @@ public class ReceiptReceiverIT {
       CollectionCase emittedCase = caseEmittedEvent.getPayload().getCollectionCase();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(emittedCase.getSample()).isEqualTo(sample);
-      assertThat(emittedCase.getReceiptReceived()).isTrue();
+      assertThat(emittedCase.isReceiptReceived()).isTrue();
 
       ResponseManagementEvent uacUpdatedEvent = rhUacQueueSpy.checkExpectedMessageReceived();
       UacDTO emittedUac = uacUpdatedEvent.getPayload().getUac();
-      assertThat(emittedUac.getActive()).isFalse();
+      assertThat(emittedUac.isActive()).isFalse();
 
       List<Event> storedEvents = eventRepository.findAll();
       assertThat(storedEvents.size()).isEqualTo(1);

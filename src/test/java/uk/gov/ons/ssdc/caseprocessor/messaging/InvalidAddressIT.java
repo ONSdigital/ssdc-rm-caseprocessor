@@ -38,12 +38,10 @@ import uk.gov.ons.ssdc.caseprocessor.utils.RabbitQueueHelper;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class InvalidAddressIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final String RH_CASE_QUEUE = "case.rh.case";
 
-  @Value("${queueconfig.invalid-address-inbound-queue}")
+  @Value("${queueconfig.invalid-address-queue}")
   private String inboundInvalidAddressQueue;
-
-  @Value("${queueconfig.rh-case-queue}")
-  private String rhCaseQueue;
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
@@ -56,7 +54,7 @@ public class InvalidAddressIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundInvalidAddressQueue);
-    rabbitQueueHelper.purgeQueue(rhCaseQueue);
+    rabbitQueueHelper.purgeQueue(RH_CASE_QUEUE);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -66,7 +64,7 @@ public class InvalidAddressIT {
 
   @Test
   public void testInvalidAddress() throws Exception {
-    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
+    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(RH_CASE_QUEUE)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -106,7 +104,7 @@ public class InvalidAddressIT {
 
       CollectionCase emittedCase = actualResponseManagementEvent.getPayload().getCollectionCase();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
-      assertThat(emittedCase.getInvalidAddrress()).isTrue();
+      assertThat(emittedCase.isInvalidAddress()).isTrue();
 
       assertThat(eventRepository.findAll().size()).isEqualTo(1);
       Event event = eventRepository.findAll().get(0);

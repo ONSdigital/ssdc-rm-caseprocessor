@@ -9,7 +9,7 @@ import lombok.Data;
 @JsonInclude(Include.NON_NULL)
 public class UacDTO {
   private String uac;
-  private Boolean active;
+  private boolean active;
   private String questionnaireId;
   private UUID caseId;
   private UUID collectionExerciseId;

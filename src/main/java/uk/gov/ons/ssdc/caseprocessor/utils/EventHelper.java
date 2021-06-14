@@ -4,13 +4,11 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 
 public class EventHelper {
 
   private static final String EVENT_SOURCE = "CASE_SERVICE";
   private static final String EVENT_CHANNEL = "RM";
-  private static final String FIELD_CHANNEL = "FIELD";
 
   public static EventDTO createEventDTO(
       EventTypeDTO eventType, String event_channel, String event_source) {
@@ -27,9 +25,5 @@ public class EventHelper {
 
   public static EventDTO createEventDTO(EventTypeDTO eventType) {
     return createEventDTO(eventType, EVENT_CHANNEL, EVENT_SOURCE);
-  }
-
-  public static boolean isEventChannelField(ResponseManagementEvent event) {
-    return event.getEvent().getChannel().equalsIgnoreCase(FIELD_CHANNEL);
   }
 }

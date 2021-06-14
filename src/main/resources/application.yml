@@ -33,12 +33,10 @@ spring:
 
 queueconfig:
   sample-queue: case.sample.inbound
-  receipt-response-inbound-queue: Case.Responses
-  refusal-response-inbound-queue: case.refusals
+  receipt-response-queue: Case.Responses
+  refusal-response-queue: case.refusals
   print-queue: Action.Printer
-  rh-case-queue: case.rh.case
-  rh-uac-queue: case.rh.uac
-  invalid-address-inbound-queue: case.invalidaddress
+  invalid-address-queue: case.invalidaddress
   survey-launched-queue: survey.launched
   case-event-exchange: events
   consumers: 50

@@ -20,6 +20,7 @@ public class CaseToProcessProcessor {
   private final RabbitTemplate rabbitTemplate;
   private final UacQidCache uacQidCache;
   private final UacQidLinkRepository uacQidLinkRepository;
+  private final UacService uacService;
 
   private final StringWriter stringWriter = new StringWriter();
   private final CSVWriter csvWriter =
@@ -36,10 +37,12 @@ public class CaseToProcessProcessor {
   public CaseToProcessProcessor(
       RabbitTemplate rabbitTemplate,
       UacQidCache uacQidCache,
-      UacQidLinkRepository uacQidLinkRepository) {
+      UacQidLinkRepository uacQidLinkRepository,
+      UacService uacService) {
     this.rabbitTemplate = rabbitTemplate;
     this.uacQidCache = uacQidCache;
     this.uacQidLinkRepository = uacQidLinkRepository;
+    this.uacService = uacService;
   }
 
   public void process(CaseToProcess caseToProcess) {
@@ -105,6 +108,9 @@ public class CaseToProcessProcessor {
     uacQidLink.setUac(uacQidDTO.getUac());
     uacQidLink.setCaze(caze);
     uacQidLinkRepository.saveAndFlush(uacQidLink);
+
+    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+
     return uacQidDTO;
   }
 }

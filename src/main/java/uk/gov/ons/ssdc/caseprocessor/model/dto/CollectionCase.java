@@ -7,9 +7,9 @@ import lombok.Data;
 @Data
 public class CollectionCase {
   private UUID caseId;
-  private Boolean receiptReceived;
-  private Boolean invalidAddrress;
-  private Boolean surveyLaunched;
+  private boolean receiptReceived;
+  private boolean invalidAddress;
+  private boolean surveyLaunched;
   private RefusalTypeDTO refusalReceived;
   private Map<String, String> sample;
 }
