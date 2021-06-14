@@ -13,6 +13,8 @@ env:
 before_install:
   - mvn fmt:check
 
+install: echo "SKIPPING DEFAULT INSTALL" # Travis has a default maven install that will surely fail
+
 script: mvn -DskipITs -DdockerCompose.skip jacoco:report
 
 cache:
