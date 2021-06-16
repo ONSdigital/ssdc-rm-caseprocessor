@@ -1,5 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,5 +66,21 @@ public class UacService {
     }
 
     return uacQidLinkOpt.get();
+  }
+
+  public UacQidLink createNewUacQidLink(Case caze, String uac, String qid) {
+    OffsetDateTime now = OffsetDateTime.now();
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setCaze(caze);
+    uacQidLink.setUac(uac);
+    uacQidLink.setQid(qid);
+    uacQidLink.setCreatedAt(now);
+    uacQidLink.setLastUpdatedAt(now);
+    saveAndEmitUacUpdatedEvent(uacQidLink);
+    return uacQidLink;
+  }
+
+  public boolean existsByQid(String qid) {
+    return uacQidLinkRepository.existsByQid(qid);
   }
 }

@@ -238,6 +238,16 @@
       }
     },
     {
+      "name": "caseApi.case.telephoneCapture",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "caseApi.case.telephoneCapture"
+      }
+    },
+    {
       "name": "delayedRedeliveryQueue",
       "vhost": "/",
       "durable": true,
