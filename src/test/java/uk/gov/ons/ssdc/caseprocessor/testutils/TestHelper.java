@@ -1,4 +1,4 @@
-package uk.gov.ons.ssdc.caseprocessor.utils;
+package uk.gov.ons.ssdc.caseprocessor.testutils;
 
 import java.io.IOException;
 import java.util.Optional;

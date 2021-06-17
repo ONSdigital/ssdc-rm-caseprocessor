@@ -48,10 +48,12 @@ public class TelephoneCaptureReceiver {
       // If it does exist, check if it is linked to the given case
       UacQidLink existingUacQidLink = uacService.findByQid(telephoneCapturePayload.getQid());
       if (existingUacQidLink.getCaze().getId() == telephoneCapturePayload.getCaseId()) {
-        // If the QID is already linked to a given case this must be duplicate event, ignore
+
+        // If the QID is already linked to the given case this must be duplicate event, ignore
         return;
       }
-      // If not then something has gone terribly unexpectedly wrong, error out
+
+      // If not then something has gone wrong, error out
       throw new RuntimeException(
           "Telephone capture QID "
               + telephoneCapturePayload.getQid()

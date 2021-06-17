@@ -34,8 +34,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseReposito
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.WaveOfContactRepository;
-import uk.gov.ons.ssdc.caseprocessor.utils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.utils.RabbitQueueHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
+import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
