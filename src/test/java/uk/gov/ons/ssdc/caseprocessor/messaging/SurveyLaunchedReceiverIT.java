@@ -36,7 +36,9 @@ public class SurveyLaunchedReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String TEST_QID = "1234334";
   private static final String TEST_UAC = "9434343";
-  private static final String RH_CASE_QUEUE = "case.rh.case";
+
+  @Value("${queueconfig.outbound-case-queue}")
+  private String RH_CASE_QUEUE;
 
   @Value("${queueconfig.survey-launched-queue}")
   private String inboundQueue;

@@ -38,7 +38,9 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class RefusalReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  private static final String RH_CASE_QUEUE = "case.rh.case";
+
+  @Value("${queueconfig.outbound-case-queue}")
+  private String RH_CASE_QUEUE;
 
   @Value("${queueconfig.refusal-response-queue}")
   private String inboundRefusalQueue;

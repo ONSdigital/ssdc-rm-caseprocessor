@@ -45,8 +45,12 @@ public class ReceiptReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String TEST_QID = "123456";
   private static final UUID TEST_UACLINK_ID = UUID.randomUUID();
-  private static final String RH_CASE_QUEUE = "case.rh.case";
-  private static final String RH_UAC_QUEUE = "case.rh.uac";
+
+  @Value("${queueconfig.outbound-case-queue}")
+  private String outboundCaseQueue;
+
+  @Value("${queueconfig.outbound-uac-queue}")
+  private String outboundUacQueue;
 
   @Value("${queueconfig.receipt-response-queue}")
   private String inboundReceiptQueue;
@@ -62,8 +66,8 @@ public class ReceiptReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundReceiptQueue);
-    rabbitQueueHelper.purgeQueue(RH_CASE_QUEUE);
-    rabbitQueueHelper.purgeQueue(RH_UAC_QUEUE);
+    rabbitQueueHelper.purgeQueue(outboundCaseQueue);
+    rabbitQueueHelper.purgeQueue(outboundUacQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -73,8 +77,8 @@ public class ReceiptReceiverIT {
 
   @Test
   public void testReceipt() throws Exception {
-    try (QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(RH_UAC_QUEUE);
-        QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(RH_CASE_QUEUE)) {
+    try (QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(outboundUacQueue);
+         QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(outboundCaseQueue)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();

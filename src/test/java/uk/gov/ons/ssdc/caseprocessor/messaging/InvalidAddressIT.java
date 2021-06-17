@@ -38,7 +38,9 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class InvalidAddressIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  private static final String RH_CASE_QUEUE = "case.rh.case";
+
+  @Value("${queueconfig.outbound-case-queue}")
+  private String rhCaseQueue;
 
   @Value("${queueconfig.invalid-address-queue}")
   private String inboundInvalidAddressQueue;
@@ -54,7 +56,7 @@ public class InvalidAddressIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundInvalidAddressQueue);
-    rabbitQueueHelper.purgeQueue(RH_CASE_QUEUE);
+    rabbitQueueHelper.purgeQueue(rhCaseQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -64,7 +66,7 @@ public class InvalidAddressIT {
 
   @Test
   public void testInvalidAddress() throws Exception {
-    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(RH_CASE_QUEUE)) {
+    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
