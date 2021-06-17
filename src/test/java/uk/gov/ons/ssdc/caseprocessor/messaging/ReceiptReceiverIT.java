@@ -77,8 +77,8 @@ public class ReceiptReceiverIT {
 
   @Test
   public void testReceipt() throws Exception {
-    try (QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(outboundUacQueue);
-         QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(outboundCaseQueue)) {
+    try (QueueSpy outboundUacQueueSpy = rabbitQueueHelper.listen(outboundUacQueue);
+        QueueSpy outCaseQueueSpy = rabbitQueueHelper.listen(outboundCaseQueue)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -123,14 +123,14 @@ public class ReceiptReceiverIT {
       rabbitQueueHelper.sendMessage(inboundReceiptQueue, responseManagementEvent);
 
       //  THEN
-      ResponseManagementEvent caseEmittedEvent = rhCaseQueueSpy.checkExpectedMessageReceived();
+      ResponseManagementEvent caseEmittedEvent = outCaseQueueSpy.checkExpectedMessageReceived();
 
       CollectionCase emittedCase = caseEmittedEvent.getPayload().getCollectionCase();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(emittedCase.getSample()).isEqualTo(sample);
       assertThat(emittedCase.isReceiptReceived()).isTrue();
 
-      ResponseManagementEvent uacUpdatedEvent = rhUacQueueSpy.checkExpectedMessageReceived();
+      ResponseManagementEvent uacUpdatedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
       UacDTO emittedUac = uacUpdatedEvent.getPayload().getUac();
       assertThat(emittedUac.isActive()).isFalse();
 

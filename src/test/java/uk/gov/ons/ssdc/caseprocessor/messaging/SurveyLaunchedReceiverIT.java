@@ -62,7 +62,7 @@ public class SurveyLaunchedReceiverIT {
   public void testSurveyLaunchLogsEventSetsFlagAndEmitsCorrectCaseUpdatedEvent() throws Exception {
     // GIVEN
 
-    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(RH_CASE_QUEUE)) {
+    try (QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(RH_CASE_QUEUE)) {
       Case caze = new Case();
       caze.setId(TEST_CASE_ID);
       caze.setUacQidLinks(null);
@@ -98,7 +98,8 @@ public class SurveyLaunchedReceiverIT {
       rabbitQueueHelper.sendMessage(inboundQueue, surveyLaunchedEvent);
 
       // THEN
-      ResponseManagementEvent caseUpdatedEvent = rhCaseQueueSpy.checkExpectedMessageReceived();
+      ResponseManagementEvent caseUpdatedEvent =
+          outboundCaseQueueSpy.checkExpectedMessageReceived();
 
       assertThat(caseUpdatedEvent.getPayload().getCollectionCase().getCaseId())
           .isEqualTo(TEST_CASE_ID);

@@ -42,10 +42,10 @@ import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 public class WaveOfContactIT {
   @Value("${queueconfig.outbound-printer-queue}")
   private String outboundPrinterQueue;
-  
+
   @Value("${queueconfig.outbound-uac-queue}")
   private String outboundUacQueue;
-  
+
   private static final String PACK_CODE = "test-pack-code";
   private static final String PRINT_SUPPLIER = "test-print-supplier";
 
@@ -76,7 +76,7 @@ public class WaveOfContactIT {
   @Test
   public void testPrinterRule() throws Exception {
     try (QueueSpy printerQueue = rabbitQueueHelper.listen(outboundPrinterQueue);
-         QueueSpy uacQueue = rabbitQueueHelper.listen(this.outboundUacQueue)) {
+        QueueSpy outboundUacQueue = rabbitQueueHelper.listen(this.outboundUacQueue)) {
       // Given
       CollectionExercise collectionExercise = setUpCollectionExercise();
       Case caze = setUpCase(collectionExercise);
@@ -84,7 +84,7 @@ public class WaveOfContactIT {
       // When
       setUpWaveOfContact(WaveOfContactType.PRINT, collectionExercise);
       String printRowMessage = printerQueue.getQueue().poll(20, TimeUnit.SECONDS);
-      String uacMessage = uacQueue.getQueue().poll(20, TimeUnit.SECONDS);
+      String uacMessage = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
       assertThat(printRowMessage).isNotNull();

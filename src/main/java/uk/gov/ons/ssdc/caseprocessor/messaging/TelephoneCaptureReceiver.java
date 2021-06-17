@@ -3,6 +3,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -60,8 +61,7 @@ public class TelephoneCaptureReceiver {
               + " is already linked to a different case");
     }
 
-    uacService.createNewUacQidLink(
-        caze, telephoneCapturePayload.getUac(), telephoneCapturePayload.getQid());
+    createNewUacQidLink(caze, telephoneCapturePayload.getUac(), telephoneCapturePayload.getQid());
 
     eventLogger.logCaseEvent(
         caze,
@@ -71,5 +71,17 @@ public class TelephoneCaptureReceiver {
         telephoneCaptureEvent.getEvent(),
         telephoneCapturePayload,
         messageTimestamp);
+  }
+
+  private void createNewUacQidLink(Case caze, String uac, String qid) {
+    OffsetDateTime now = OffsetDateTime.now();
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setId(UUID.randomUUID());
+    uacQidLink.setUac(uac);
+    uacQidLink.setQid(qid);
+    uacQidLink.setCaze(caze);
+    uacQidLink.setCreatedAt(now);
+    uacQidLink.setLastUpdatedAt(now);
+    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
   }
 }

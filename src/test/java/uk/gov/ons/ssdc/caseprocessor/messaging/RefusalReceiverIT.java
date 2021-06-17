@@ -66,7 +66,7 @@ public class RefusalReceiverIT {
 
   @Test
   public void testRefusal() throws Exception {
-    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(RH_CASE_QUEUE)) {
+    try (QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(RH_CASE_QUEUE)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -98,7 +98,7 @@ public class RefusalReceiverIT {
 
       //  THEN
       ResponseManagementEvent actualResponseManagementEvent =
-          rhCaseQueueSpy.checkExpectedMessageReceived();
+          outboundCaseQueueSpy.checkExpectedMessageReceived();
 
       CollectionCase emittedCase = actualResponseManagementEvent.getPayload().getCollectionCase();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);

@@ -40,7 +40,7 @@ public class InvalidAddressIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
   @Value("${queueconfig.outbound-case-queue}")
-  private String rhCaseQueue;
+  private String outboundCaseQueue;
 
   @Value("${queueconfig.invalid-address-queue}")
   private String inboundInvalidAddressQueue;
@@ -56,7 +56,7 @@ public class InvalidAddressIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundInvalidAddressQueue);
-    rabbitQueueHelper.purgeQueue(rhCaseQueue);
+    rabbitQueueHelper.purgeQueue(outboundCaseQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -66,7 +66,7 @@ public class InvalidAddressIT {
 
   @Test
   public void testInvalidAddress() throws Exception {
-    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
+    try (QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(outboundCaseQueue)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -102,7 +102,7 @@ public class InvalidAddressIT {
 
       //  Then
       ResponseManagementEvent actualResponseManagementEvent =
-          rhCaseQueueSpy.checkExpectedMessageReceived();
+          outboundCaseQueueSpy.checkExpectedMessageReceived();
 
       CollectionCase emittedCase = actualResponseManagementEvent.getPayload().getCollectionCase();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);

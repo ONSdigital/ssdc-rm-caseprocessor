@@ -1,5 +1,8 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
@@ -8,6 +11,7 @@ import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -19,6 +23,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.TelephoneCaptureDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 
@@ -53,7 +58,14 @@ public class TelephoneCaptureReceiverTest {
     underTest.receiveMessage(eventMessage);
 
     // Then
-    verify(uacService).createNewUacQidLink(testCase, TEST_UAC, TEST_QID);
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.isActive()).isTrue();
+    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
+    assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
+    assertThat(actualUacQidLink.getCaze()).isEqualTo(testCase);
+
     verify(eventLogger)
         .logCaseEvent(
             testCase,
@@ -63,6 +75,58 @@ public class TelephoneCaptureReceiverTest {
             responseManagementEvent.getEvent(),
             responseManagementEvent.getPayload().getTelephoneCapture(),
             getMsgTimeStamp(eventMessage));
+  }
+
+  @Test
+  public void testReceiveMessageQidAlreadyLinkedToCorrectCase() {
+    // Given
+    Case testCase = new Case();
+    testCase.setId(CASE_ID);
+    ResponseManagementEvent responseManagementEvent = buildTelephoneCaptureEvent();
+    Message<ResponseManagementEvent> eventMessage =
+        constructMessageWithValidTimeStamp(responseManagementEvent);
+
+    UacQidLink existingUacQidLink = new UacQidLink();
+    existingUacQidLink.setQid(TEST_QID);
+    existingUacQidLink.setCaze(testCase);
+
+    when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(testCase);
+
+    when(uacService.existsByQid(TEST_QID)).thenReturn(true);
+    when(uacService.findByQid(TEST_QID)).thenReturn(existingUacQidLink);
+
+    // When
+    underTest.receiveMessage(eventMessage);
+
+    // Then
+    verify(uacService, never()).saveAndEmitUacUpdatedEvent(any());
+    verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(), any(), any());
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testReceiveMessageQidAlreadyLinkedToOtherCase() {
+    // Given
+    Case testCase = new Case();
+    testCase.setId(CASE_ID);
+
+    Case otherCase = new Case();
+    otherCase.setId(UUID.randomUUID());
+
+    ResponseManagementEvent responseManagementEvent = buildTelephoneCaptureEvent();
+    Message<ResponseManagementEvent> eventMessage =
+        constructMessageWithValidTimeStamp(responseManagementEvent);
+
+    UacQidLink existingUacQidLink = new UacQidLink();
+    existingUacQidLink.setQid(TEST_QID);
+    existingUacQidLink.setCaze(otherCase);
+
+    when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(testCase);
+
+    when(uacService.existsByQid(TEST_QID)).thenReturn(true);
+    when(uacService.findByQid(TEST_QID)).thenReturn(existingUacQidLink);
+
+    // When, then throws
+    underTest.receiveMessage(eventMessage);
   }
 
   private ResponseManagementEvent buildTelephoneCaptureEvent() {
