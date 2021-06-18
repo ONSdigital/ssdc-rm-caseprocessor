@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.net.UnknownHostException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +22,7 @@ public class WaveOfContactTriggererTest {
   private final WaveOfContactProcessor waveOfContactProcessor = mock(WaveOfContactProcessor.class);
 
   @Test
-  public void testTriggerWaveOfContact() {
+  public void testTriggerWaveOfContact() throws UnknownHostException {
     // Given
     WaveOfContact waveOfContact = new WaveOfContact();
     when(waveOfContactRepository.findByTriggerDateTimeBeforeAndHasTriggeredIsFalse(
@@ -38,7 +39,7 @@ public class WaveOfContactTriggererTest {
   }
 
   @Test
-  public void testTriggerMultipleWaveOfContact() {
+  public void testTriggerMultipleWaveOfContact() throws UnknownHostException {
     // Given
     List<WaveOfContact> waveOfContacts = new ArrayList<>(50);
     for (int i = 0; i < 50; i++) {

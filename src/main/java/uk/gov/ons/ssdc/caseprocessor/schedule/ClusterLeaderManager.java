@@ -41,7 +41,7 @@ public class ClusterLeaderManager {
       clusterLeaderRepository.saveAndFlush(clusterLeader);
 
       log.with("hostName", hostName)
-          .info("No leader existed in DB, so this host is attempting to become leader");
+          .debug("No leader existed in DB, so this host is attempting to become leader");
     }
 
     Optional<ClusterLeader> lockedClusterLeaderOpt =
@@ -49,14 +49,14 @@ public class ClusterLeaderManager {
 
     if (!lockedClusterLeaderOpt.isPresent()) {
       log.with("hostName", hostName)
-          .info("Could not get leader row, presumably because of lock contention");
+          .debug("Could not get leader row, presumably because of lock contention");
       return false;
     }
 
     ClusterLeader clusterLeader = lockedClusterLeaderOpt.get();
 
     if (clusterLeader.getHostName().equals(hostName)) {
-      log.with("hostName", hostName).info("This host is leader");
+      log.with("hostName", hostName).debug("This host is leader");
       return true;
     } else if (clusterLeader
         .getHostLastSeenAliveAt()
@@ -68,11 +68,11 @@ public class ClusterLeaderManager {
 
       log.with("oldHostName", oldHostName)
           .with("hostName", hostName)
-          .info("Leader has transferred from dead host to this host");
+          .debug("Leader has transferred from dead host to this host");
       return true;
     }
 
-    log.with("hostName", hostName).info("This host is not the leader");
+    log.with("hostName", hostName).debug("This host is not the leader");
     return false;
   }
 
@@ -91,7 +91,7 @@ public class ClusterLeaderManager {
       clusterLeader.setHostLastSeenAliveAt(OffsetDateTime.now());
       clusterLeaderRepository.saveAndFlush(clusterLeader);
 
-      log.with("hostName", hostName).info("Leader keepalive updated. This host is leader");
+      log.with("hostName", hostName).debug("Leader keepalive updated. This host is leader");
     }
   }
 }
