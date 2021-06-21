@@ -24,7 +24,7 @@ public class Survey {
 
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
-  private Object[] sampleValidationRules; // We don't need the rule POJO in the case processor
+  private String sampleValidationRules;
 
   @OneToMany(mappedBy = "survey")
   private List<CollectionExercise> collectionExercises;
