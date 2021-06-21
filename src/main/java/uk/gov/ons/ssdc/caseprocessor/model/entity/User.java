@@ -20,8 +20,8 @@ public class User {
 
   @Column private String email;
 
-  @ElementCollection(targetClass = BulkProcess.class)
+  @ElementCollection(targetClass = Survey.class)
   @CollectionTable
   @Enumerated(EnumType.STRING)
-  private Collection<BulkProcess> bulkProcesses;
+  private Collection<Survey> surveys;
 }
