@@ -1,6 +1,8 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_QUEUE;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_QUEUE;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -46,12 +48,6 @@ public class ReceiptReceiverIT {
   private static final String TEST_QID = "123456";
   private static final UUID TEST_UACLINK_ID = UUID.randomUUID();
 
-  @Value("${queueconfig.outbound-case-queue}")
-  private String outboundCaseQueue;
-
-  @Value("${queueconfig.outbound-uac-queue}")
-  private String outboundUacQueue;
-
   @Value("${queueconfig.receipt-response-queue}")
   private String inboundReceiptQueue;
 
@@ -66,8 +62,8 @@ public class ReceiptReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundReceiptQueue);
-    rabbitQueueHelper.purgeQueue(outboundCaseQueue);
-    rabbitQueueHelper.purgeQueue(outboundUacQueue);
+    rabbitQueueHelper.purgeQueue(OUTBOUND_CASE_QUEUE);
+    rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -77,8 +73,8 @@ public class ReceiptReceiverIT {
 
   @Test
   public void testReceipt() throws Exception {
-    try (QueueSpy outboundUacQueueSpy = rabbitQueueHelper.listen(outboundUacQueue);
-        QueueSpy outCaseQueueSpy = rabbitQueueHelper.listen(outboundCaseQueue)) {
+    try (QueueSpy outboundUacQueueSpy = rabbitQueueHelper.listen(OUTBOUND_UAC_QUEUE);
+        QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(OUTBOUND_CASE_QUEUE)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -123,7 +119,8 @@ public class ReceiptReceiverIT {
       rabbitQueueHelper.sendMessage(inboundReceiptQueue, responseManagementEvent);
 
       //  THEN
-      ResponseManagementEvent caseEmittedEvent = outCaseQueueSpy.checkExpectedMessageReceived();
+      ResponseManagementEvent caseEmittedEvent =
+          outboundCaseQueueSpy.checkExpectedMessageReceived();
 
       CollectionCase emittedCase = caseEmittedEvent.getPayload().getCollectionCase();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);

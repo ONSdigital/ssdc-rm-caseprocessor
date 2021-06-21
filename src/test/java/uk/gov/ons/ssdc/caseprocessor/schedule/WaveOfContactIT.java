@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_QUEUE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
@@ -40,11 +41,8 @@ import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 @ActiveProfiles("test")
 @RunWith(SpringJUnit4ClassRunner.class)
 public class WaveOfContactIT {
-  @Value("${queueconfig.outbound-printer-queue}")
+  @Value("${queueconfig.print-queue}")
   private String outboundPrinterQueue;
-
-  @Value("${queueconfig.outbound-uac-queue}")
-  private String outboundUacQueue;
 
   private static final String PACK_CODE = "test-pack-code";
   private static final String PRINT_SUPPLIER = "test-print-supplier";
@@ -64,7 +62,7 @@ public class WaveOfContactIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(outboundPrinterQueue);
-    rabbitQueueHelper.purgeQueue(outboundUacQueue);
+    rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseToProcessRepository.deleteAllInBatch();
@@ -76,7 +74,7 @@ public class WaveOfContactIT {
   @Test
   public void testPrinterRule() throws Exception {
     try (QueueSpy printerQueue = rabbitQueueHelper.listen(outboundPrinterQueue);
-        QueueSpy outboundUacQueue = rabbitQueueHelper.listen(this.outboundUacQueue)) {
+        QueueSpy outboundUacQueue = rabbitQueueHelper.listen(OUTBOUND_UAC_QUEUE)) {
       // Given
       CollectionExercise collectionExercise = setUpCollectionExercise();
       Case caze = setUpCase(collectionExercise);

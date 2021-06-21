@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_QUEUE;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,9 +38,6 @@ public class SurveyLaunchedReceiverIT {
   private static final String TEST_QID = "1234334";
   private static final String TEST_UAC = "9434343";
 
-  @Value("${queueconfig.outbound-case-queue}")
-  private String RH_CASE_QUEUE;
-
   @Value("${queueconfig.survey-launched-queue}")
   private String inboundQueue;
 
@@ -52,7 +50,7 @@ public class SurveyLaunchedReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundQueue);
-    rabbitQueueHelper.purgeQueue(RH_CASE_QUEUE);
+    rabbitQueueHelper.purgeQueue(OUTBOUND_CASE_QUEUE);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -62,7 +60,7 @@ public class SurveyLaunchedReceiverIT {
   public void testSurveyLaunchLogsEventSetsFlagAndEmitsCorrectCaseUpdatedEvent() throws Exception {
     // GIVEN
 
-    try (QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(RH_CASE_QUEUE)) {
+    try (QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(OUTBOUND_CASE_QUEUE)) {
       Case caze = new Case();
       caze.setId(TEST_CASE_ID);
       caze.setUacQidLinks(null);

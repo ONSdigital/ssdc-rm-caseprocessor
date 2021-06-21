@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_QUEUE;
 
 import java.util.UUID;
 import org.junit.Before;
@@ -39,9 +40,6 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 public class RefusalReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
-  @Value("${queueconfig.outbound-case-queue}")
-  private String RH_CASE_QUEUE;
-
   @Value("${queueconfig.refusal-response-queue}")
   private String inboundRefusalQueue;
 
@@ -56,7 +54,7 @@ public class RefusalReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundRefusalQueue);
-    rabbitQueueHelper.purgeQueue(RH_CASE_QUEUE);
+    rabbitQueueHelper.purgeQueue(OUTBOUND_CASE_QUEUE);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -66,7 +64,7 @@ public class RefusalReceiverIT {
 
   @Test
   public void testRefusal() throws Exception {
-    try (QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(RH_CASE_QUEUE)) {
+    try (QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(OUTBOUND_CASE_QUEUE)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();

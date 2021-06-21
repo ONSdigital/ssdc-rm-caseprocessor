@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_QUEUE;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -44,9 +45,6 @@ public class TelephoneCaptureReceiverIT {
   @Value("${queueconfig.telephone-capture-queue}")
   private String telephoneCaptureQueue;
 
-  @Value("${queueconfig.outbound-uac-queue}")
-  private String outboundUacQueue;
-
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
   @Autowired private EventRepository eventRepository;
@@ -61,7 +59,7 @@ public class TelephoneCaptureReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(telephoneCaptureQueue);
-    rabbitQueueHelper.purgeQueue(outboundUacQueue);
+    rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -100,7 +98,7 @@ public class TelephoneCaptureReceiverIT {
     responseManagementEvent.setEvent(eventDTO);
     responseManagementEvent.setPayload(payloadDTO);
 
-    try (QueueSpy outboundUacQueueSpy = rabbitQueueHelper.listen(outboundUacQueue)) {
+    try (QueueSpy outboundUacQueueSpy = rabbitQueueHelper.listen(OUTBOUND_UAC_QUEUE)) {
       rabbitQueueHelper.sendMessage(telephoneCaptureQueue, responseManagementEvent);
       ResponseManagementEvent emittedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
 

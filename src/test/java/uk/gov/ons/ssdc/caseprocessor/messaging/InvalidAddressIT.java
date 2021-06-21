@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_QUEUE;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -39,9 +40,6 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 public class InvalidAddressIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
-  @Value("${queueconfig.outbound-case-queue}")
-  private String outboundCaseQueue;
-
   @Value("${queueconfig.invalid-address-queue}")
   private String inboundInvalidAddressQueue;
 
@@ -56,7 +54,7 @@ public class InvalidAddressIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundInvalidAddressQueue);
-    rabbitQueueHelper.purgeQueue(outboundCaseQueue);
+    rabbitQueueHelper.purgeQueue(OUTBOUND_CASE_QUEUE);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -66,7 +64,7 @@ public class InvalidAddressIT {
 
   @Test
   public void testInvalidAddress() throws Exception {
-    try (QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(outboundCaseQueue)) {
+    try (QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(OUTBOUND_CASE_QUEUE)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();

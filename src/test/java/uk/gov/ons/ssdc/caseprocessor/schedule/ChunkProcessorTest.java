@@ -21,7 +21,6 @@ import uk.gov.ons.ssdc.caseprocessor.service.CaseToProcessProcessor;
 @RunWith(MockitoJUnitRunner.class)
 public class ChunkProcessorTest {
   @Mock private CaseToProcessRepository caseToProcessRepository;
-
   @Mock private CaseToProcessProcessor caseToProcessProcessor;
 
   @InjectMocks private ChunkProcessor underTest;
