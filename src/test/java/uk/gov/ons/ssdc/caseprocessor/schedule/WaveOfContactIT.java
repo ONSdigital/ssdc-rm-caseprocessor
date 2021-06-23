@@ -133,6 +133,7 @@ public class WaveOfContactIT {
     randomCase.setAddressInvalid(false);
     randomCase.setCreatedAt(null);
     randomCase.setLastUpdatedAt(null);
+    randomCase.setEvents(null);
     randomCase.setSample(Map.of("foo", "bar"));
     return caseRepository.saveAndFlush(randomCase);
   }

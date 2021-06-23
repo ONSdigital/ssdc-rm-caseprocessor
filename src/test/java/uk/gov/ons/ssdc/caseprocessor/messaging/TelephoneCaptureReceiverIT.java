@@ -118,6 +118,7 @@ public class TelephoneCaptureReceiverIT {
     randomCase.setCaseRef(123L);
     randomCase.setSample(Map.of("foo", "bar"));
     randomCase.setUacQidLinks(null);
+    randomCase.setEvents(null);
     return caseRepository.saveAndFlush(randomCase);
   }
 }
