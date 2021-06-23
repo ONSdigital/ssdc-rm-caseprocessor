@@ -34,9 +34,7 @@ public class SurveyReceiverTest {
   private final String TEST_AGENT_ID = "any agent";
 
   @Mock private UacService uacService;
-
   @Mock private EventLogger eventLogger;
-
   @Mock private CaseService caseService;
 
   @InjectMocks SurveyLaunchedReceiver underTest;

@@ -1,4 +1,4 @@
-package uk.gov.ons.ssdc.caseprocessor.utils;
+package uk.gov.ons.ssdc.caseprocessor.testutils;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;

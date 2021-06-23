@@ -33,9 +33,7 @@ public class ReceiptReceiverTest {
   private static final UUID CASE_ID = UUID.randomUUID();
 
   @Mock private UacService uacService;
-
   @Mock private CaseService caseService;
-
   @Mock private EventLogger eventLogger;
 
   @InjectMocks ReceiptReceiver underTest;

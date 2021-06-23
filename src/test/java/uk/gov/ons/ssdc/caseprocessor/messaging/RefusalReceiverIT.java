@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_QUEUE;
 
 import java.util.UUID;
 import org.junit.Before;
@@ -29,8 +30,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseReposito
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.WaveOfContactRepository;
-import uk.gov.ons.ssdc.caseprocessor.utils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.utils.RabbitQueueHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
+import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -38,7 +39,6 @@ import uk.gov.ons.ssdc.caseprocessor.utils.RabbitQueueHelper;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class RefusalReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  private static final String RH_CASE_QUEUE = "case.rh.case";
 
   @Value("${queueconfig.refusal-response-queue}")
   private String inboundRefusalQueue;
@@ -54,7 +54,7 @@ public class RefusalReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundRefusalQueue);
-    rabbitQueueHelper.purgeQueue(RH_CASE_QUEUE);
+    rabbitQueueHelper.purgeQueue(OUTBOUND_CASE_QUEUE);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -64,7 +64,7 @@ public class RefusalReceiverIT {
 
   @Test
   public void testRefusal() throws Exception {
-    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(RH_CASE_QUEUE)) {
+    try (QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(OUTBOUND_CASE_QUEUE)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -96,7 +96,7 @@ public class RefusalReceiverIT {
 
       //  THEN
       ResponseManagementEvent actualResponseManagementEvent =
-          rhCaseQueueSpy.checkExpectedMessageReceived();
+          outboundCaseQueueSpy.checkExpectedMessageReceived();
 
       CollectionCase emittedCase = actualResponseManagementEvent.getPayload().getCollectionCase();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);

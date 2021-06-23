@@ -12,4 +12,5 @@ public class PayloadDTO {
   private CollectionCase collectionCase;
   private UacDTO uac;
   private InvalidAddress invalidAddress;
+  private TelephoneCaptureDTO telephoneCapture;
 }

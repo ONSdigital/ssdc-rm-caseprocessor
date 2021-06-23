@@ -1,6 +1,8 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_QUEUE;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_QUEUE;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -34,8 +36,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseReposito
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.WaveOfContactRepository;
-import uk.gov.ons.ssdc.caseprocessor.utils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.utils.RabbitQueueHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
+import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -45,8 +47,6 @@ public class ReceiptReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String TEST_QID = "123456";
   private static final UUID TEST_UACLINK_ID = UUID.randomUUID();
-  private static final String RH_CASE_QUEUE = "case.rh.case";
-  private static final String RH_UAC_QUEUE = "case.rh.uac";
 
   @Value("${queueconfig.receipt-response-queue}")
   private String inboundReceiptQueue;
@@ -62,8 +62,8 @@ public class ReceiptReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundReceiptQueue);
-    rabbitQueueHelper.purgeQueue(RH_CASE_QUEUE);
-    rabbitQueueHelper.purgeQueue(RH_UAC_QUEUE);
+    rabbitQueueHelper.purgeQueue(OUTBOUND_CASE_QUEUE);
+    rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -73,8 +73,8 @@ public class ReceiptReceiverIT {
 
   @Test
   public void testReceipt() throws Exception {
-    try (QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(RH_UAC_QUEUE);
-        QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(RH_CASE_QUEUE)) {
+    try (QueueSpy outboundUacQueueSpy = rabbitQueueHelper.listen(OUTBOUND_UAC_QUEUE);
+        QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(OUTBOUND_CASE_QUEUE)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -119,14 +119,15 @@ public class ReceiptReceiverIT {
       rabbitQueueHelper.sendMessage(inboundReceiptQueue, responseManagementEvent);
 
       //  THEN
-      ResponseManagementEvent caseEmittedEvent = rhCaseQueueSpy.checkExpectedMessageReceived();
+      ResponseManagementEvent caseEmittedEvent =
+          outboundCaseQueueSpy.checkExpectedMessageReceived();
 
       CollectionCase emittedCase = caseEmittedEvent.getPayload().getCollectionCase();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(emittedCase.getSample()).isEqualTo(sample);
       assertThat(emittedCase.isReceiptReceived()).isTrue();
 
-      ResponseManagementEvent uacUpdatedEvent = rhUacQueueSpy.checkExpectedMessageReceived();
+      ResponseManagementEvent uacUpdatedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
       UacDTO emittedUac = uacUpdatedEvent.getPayload().getUac();
       assertThat(emittedUac.isActive()).isFalse();
 

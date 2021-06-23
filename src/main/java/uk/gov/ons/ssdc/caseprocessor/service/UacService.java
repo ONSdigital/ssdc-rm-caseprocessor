@@ -66,4 +66,8 @@ public class UacService {
 
     return uacQidLinkOpt.get();
   }
+
+  public boolean existsByQid(String qid) {
+    return uacQidLinkRepository.existsByQid(qid);
+  }
 }
