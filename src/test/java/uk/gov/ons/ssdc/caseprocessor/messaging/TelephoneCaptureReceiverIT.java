@@ -7,7 +7,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +41,8 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class TelephoneCaptureReceiverIT {
 
+  private static final UUID TEST_CASE_ID = UUID.randomUUID();
+
   @Value("${queueconfig.telephone-capture-queue}")
   private String telephoneCaptureQueue;
 
@@ -53,7 +54,7 @@ public class TelephoneCaptureReceiverIT {
   @Autowired private WaveOfContactRepository waveOfContactRepository;
   @Autowired private UacQidServiceClient uacQidServiceClient;
 
-  private static final EasyRandom easyRandom = new EasyRandom();
+  //  private static final EasyRandom easyRandom = new EasyRandom();
 
   @Before
   @Transactional
@@ -113,7 +114,8 @@ public class TelephoneCaptureReceiverIT {
   }
 
   private Case setUpCase(CollectionExercise collectionExercise) {
-    Case randomCase = easyRandom.nextObject(Case.class);
+    Case randomCase = new Case();
+    randomCase.setId(TEST_CASE_ID);
     randomCase.setCollectionExercise(collectionExercise);
     randomCase.setCaseRef(123L);
     randomCase.setSample(Map.of("foo", "bar"));
