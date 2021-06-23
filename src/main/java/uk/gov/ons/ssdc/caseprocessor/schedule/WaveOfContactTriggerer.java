@@ -2,6 +2,8 @@ package uk.gov.ons.ssdc.caseprocessor.schedule;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -15,9 +17,12 @@ public class WaveOfContactTriggerer {
   private final WaveOfContactRepository waveOfContactRepository;
   private final WaveOfContactProcessor waveOfContactProcessor;
 
+  private String hostName = InetAddress.getLocalHost().getHostName();
+
   public WaveOfContactTriggerer(
       WaveOfContactRepository waveOfContactRepository,
-      WaveOfContactProcessor waveOfContactProcessor) {
+      WaveOfContactProcessor waveOfContactProcessor)
+      throws UnknownHostException {
     this.waveOfContactRepository = waveOfContactRepository;
     this.waveOfContactProcessor = waveOfContactProcessor;
   }
@@ -30,7 +35,9 @@ public class WaveOfContactTriggerer {
 
     for (WaveOfContact triggeredWaveOfContact : triggeredWaveOfContacts) {
       try {
-        log.with("id", triggeredWaveOfContact.getId()).info("Wave of contact triggered");
+        log.with("hostName", hostName)
+            .with("id", triggeredWaveOfContact.getId())
+            .info("Wave of contact triggered");
         waveOfContactProcessor.createScheduledWaveOfContact(triggeredWaveOfContact);
       } catch (Exception e) {
         log.with("id", triggeredWaveOfContact.getId())
