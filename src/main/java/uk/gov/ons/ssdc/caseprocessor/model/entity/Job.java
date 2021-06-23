@@ -20,10 +20,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class Job {
   @Id private UUID id;
 
-  @Enumerated(EnumType.STRING)
-  @Column
-  private BulkProcess bulkProcess;
-
   @ManyToOne private CollectionExercise collectionExercise;
 
   @Column(columnDefinition = "timestamp with time zone")
