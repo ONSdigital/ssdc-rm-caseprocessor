@@ -27,9 +27,6 @@ public class MessageConsumerConfig {
   private final ExceptionManagerClient exceptionManagerClient;
   private final ConnectionFactory connectionFactory;
 
-  @Value("${queueconfig.sample-queue}")
-  private String sampleQueue;
-
   @Value("${queueconfig.consumers}")
   private int consumers;
 
@@ -41,6 +38,12 @@ public class MessageConsumerConfig {
 
   @Value("${messagelogging.logstacktraces}")
   private boolean logStackTraces;
+
+  @Value("${queueconfig.sample-queue}")
+  private String sampleQueue;
+
+  @Value("${queueconfig.fulfilment-queue}")
+  private String fulfilmentQueue;
 
   @Value("${queueconfig.receipt-response-queue}")
   private String receiptQueue;
@@ -86,6 +89,11 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  public MessageChannel fulfilmentInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
   public AmqpInboundChannelAdapter inboundSamples(
       @Qualifier("sampleContainer") SimpleMessageListenerContainer listenerContainer,
       @Qualifier("sampleInputChannel") MessageChannel channel) {
@@ -121,6 +129,13 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  AmqpInboundChannelAdapter fulfilmentInbound(
+          @Qualifier("fulfilmentContainer") SimpleMessageListenerContainer listenerContainer,
+          @Qualifier("fulfilmentInputChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
+  }
+
+  @Bean
   public SimpleMessageListenerContainer surveyLaunchedContainer() {
     return setupListenerContainer(surveyLaunchedQueue, ResponseManagementEvent.class);
   }
@@ -143,6 +158,11 @@ public class MessageConsumerConfig {
   @Bean
   public SimpleMessageListenerContainer invalidAddressContainer() {
     return setupListenerContainer(invalidAddressQueue, ResponseManagementEvent.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer fulfilmentContainer() {
+    return setupListenerContainer(fulfilmentQueue, ResponseManagementEvent.class);
   }
 
   private SimpleMessageListenerContainer setupListenerContainer(
