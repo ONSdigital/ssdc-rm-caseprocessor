@@ -37,7 +37,7 @@ queueconfig:
   telephone-capture-queue: caseApi.caseProcessor.telephoneCapture
   sample-queue: supportTool.caseProcessor.sample
   receipt-response-queue: events.caseProcessor.responses
-  refusal-response-queue: events.caseProcessor.refusals
+  refusal-response-queue: events.caseProcessor.refusal
   print-queue: caseProcessor.printFileSvc.printBatch
   invalid-address-queue: events.caseProcessor.invalidAddress
   survey-launched-queue: events.caseProceessor.surveyLaunched
