@@ -116,7 +116,7 @@ Example Msg:
 ```
 
 ### Survey Launched
-queue: events.caseProceessor.surveyLaunched
+queue: events.caseProcessor.surveyLaunched
 Example Msg:
 ```json
 {
