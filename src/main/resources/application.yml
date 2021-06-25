@@ -38,7 +38,7 @@ queueconfig:
   sample-queue: supportTool.caseProcessor.sample
   receipt-response-queue: events.caseProcessor.response
   refusal-response-queue: events.caseProcessor.refusal
-  print-queue: caseProcessor.printFileSvc.printBatch
+  print-queue: caseProcessor.printFileSvc.printBatchRow
   invalid-address-queue: events.caseProcessor.invalidAddress
   survey-launched-queue: events.caseProceessor.surveyLaunched
   case-event-exchange: events
