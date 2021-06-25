@@ -67,7 +67,7 @@ Example Msg:
 ```
 
 ### Receipts/Responses
-Queue Name: events.caseProcessor.responses
+Queue Name: events.caseProcessor.response
 Example Msg:
 ```json
 {
@@ -88,7 +88,7 @@ Example Msg:
 ```
 
 ### Refusals
-Queue: events.caseProcessor.refusals
+Queue: events.caseProcessor.refusal
 Example Msg:
 ```json
 {
