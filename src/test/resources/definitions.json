@@ -1,23 +1,23 @@
 {
   "queues": [
     {
-      "name": "events.caseProcessor.refusals",
+      "name": "events.caseProcessor.refusal",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {
         "x-dead-letter-exchange": "delayedRedeliveryExchange",
-        "x-dead-letter-routing-key": "events.caseProcessor.refusals"
+        "x-dead-letter-routing-key": "events.caseProcessor.refusal"
       }
     },
     {
-      "name": "events.caseProcessor.responses",
+      "name": "events.caseProcessor.response",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {
         "x-dead-letter-exchange": "delayedRedeliveryExchange",
-        "x-dead-letter-routing-key": "events.caseProcessor.responses"
+        "x-dead-letter-routing-key": "events.caseProcessor.response"
       }
     },
     {
@@ -31,34 +31,34 @@
       }
     },
     {
-      "name": "caseProcessor.rh.uac",
+      "name": "events.rh.uacUpdate",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {
         "x-dead-letter-exchange": "events.deadletter.exchange",
-        "x-dead-letter-routing-key": "events.uac.update"
+        "x-dead-letter-routing-key": "events.rh.uacUpdate"
       }
     },
     {
-      "name": "caseProcessor.rh.uac.dlq",
+      "name": "events.rh.uacUpdate.dlq",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {}
     },
     {
-      "name": "caseProcessor.rh.case",
+      "name": "events.rh.caseUpdate",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {
         "x-dead-letter-exchange": "events.deadletter.exchange",
-        "x-dead-letter-routing-key": "events.case.update"
+        "x-dead-letter-routing-key": "events.rh.caseUpdate"
       }
     },
     {
-      "name": "caseProcessor.rh.case.dlq",
+      "name": "events.rh.caseUpdate.dlq",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
@@ -75,13 +75,13 @@
       }
     },
     {
-      "name": "caseProcessor.printFileSvc.printBatch",
+      "name": "caseProcessor.printFileSvc.printBatchRow",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {
         "x-dead-letter-exchange": "delayedRedeliveryExchange",
-        "x-dead-letter-routing-key": "caseProcessor.printFileSvc.printBatch"
+        "x-dead-letter-routing-key": "caseProcessor.printFileSvc.printBatchRow"
       }
     },
     {
@@ -95,23 +95,13 @@
       }
     },
     {
-      "name": "events.caseProceessor.surveyLaunched",
+      "name": "events.caseProcessor.surveyLaunched",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {
         "x-dead-letter-exchange": "delayedRedeliveryExchange",
-        "x-dead-letter-routing-key": "events.caseProceessor.surveyLaunched"
-      }
-    },
-        {
-      "name": "events.caseProceessor.authentication",
-      "vhost": "/",
-      "durable": true,
-      "auto_delete": false,
-      "arguments": {
-        "x-dead-letter-exchange": "delayedRedeliveryExchange",
-        "x-dead-letter-routing-key": "events.caseProceessor.authentication"
+        "x-dead-letter-routing-key": "events.caseProcessor.surveyLaunched"
       }
     },
     {
@@ -161,54 +151,54 @@
     {
       "source": "events",
       "vhost": "/",
-      "destination": "events.caseProcessor.refusals",
+      "destination": "events.caseProcessor.refusal",
       "destination_type": "queue",
-      "routing_key": "events.caseProcessor.refusals",
+      "routing_key": "events.caseProcessor.refusal",
       "arguments": {
       }
     },
     {
       "source": "events",
       "vhost": "/",
-      "destination": "events.caseProcessor.responses",
+      "destination": "events.caseProcessor.response",
       "destination_type": "queue",
-      "routing_key": "events.caseProcessor.responses",
+      "routing_key": "events.caseProcessor.response",
       "arguments": {
       }
     },
     {
       "source": "events",
       "vhost": "/",
-      "destination": "caseProcessor.rh.uac",
+      "destination": "events.rh.uacUpdate",
       "destination_type": "queue",
-      "routing_key": "caseProcessor.rh.uac",
+      "routing_key": "events.rh.uacUpdate",
       "arguments": {
       }
     },
     {
       "source": "events.deadletter.exchange",
       "vhost": "/",
-      "destination": "caseProcessor.rh.uac.dlq",
+      "destination": "events.rh.uacUpdates.dlq",
       "destination_type": "queue",
-      "routing_key": "caseProcessor.rh.uac",
+      "routing_key": "events.rh.uacUpdate",
       "arguments": {
       }
     },
     {
       "source": "events",
       "vhost": "/",
-      "destination": "caseProcessor.rh.case",
+      "destination": "events.rh.caseUpdate",
       "destination_type": "queue",
-      "routing_key": "caseProcessor.rh.case",
+      "routing_key": "events.rh.caseUpdate",
       "arguments": {
       }
     },
     {
       "source": "events.deadletter.exchange",
       "vhost": "/",
-      "destination": "caseProcessor.rh.case.dlq",
+      "destination": "events.rh.caseUpdate.dlq",
       "destination_type": "queue",
-      "routing_key": "caseProcessor.rh.case",
+      "routing_key": "events.rh.caseUpdate",
       "arguments": {
       }
     },
@@ -223,18 +213,9 @@
     {
       "source": "events",
       "vhost": "/",
-      "destination": "events.caseProceessor.surveyLaunched",
+      "destination": "events.caseProcessor.surveyLaunched",
       "destination_type": "queue",
-      "routing_key": "events.caseProceessor.surveyLaunched",
-      "arguments": {
-      }
-    },
-    {
-      "source": "events",
-      "vhost": "/",
-      "destination": "events.caseProceessor.authentication",
-      "destination_type": "queue",
-      "routing_key": "events.caseProceessor.authentication",
+      "routing_key": "events.caseProcessor.surveyLaunched",
       "arguments": {
       }
     },

@@ -40,7 +40,7 @@ queueconfig:
   refusal-response-queue: events.caseProcessor.refusal
   print-queue: caseProcessor.printFileSvc.printBatchRow
   invalid-address-queue: events.caseProcessor.invalidAddress
-  survey-launched-queue: events.caseProceessor.surveyLaunched
+  survey-launched-queue: events.caseProcessor.surveyLaunched
   case-event-exchange: events
   consumers: 50
   retry-attempts: 3
