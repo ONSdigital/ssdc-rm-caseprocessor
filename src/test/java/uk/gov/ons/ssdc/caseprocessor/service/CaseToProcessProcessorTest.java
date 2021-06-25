@@ -31,6 +31,7 @@ public class CaseToProcessProcessorTest {
   @Mock private UacQidCache uacQidCache;
   @Mock private UacQidLinkRepository uacQidLinkRepository;
   @Mock private UacService uacService;
+  @Mock private PrintProcessor printProcessor;
 
   @InjectMocks CaseToProcessProcessor underTest;
 
