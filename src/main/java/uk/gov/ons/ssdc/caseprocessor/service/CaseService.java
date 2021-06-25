@@ -16,7 +16,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 
 @Service
 public class CaseService {
-  public static final String CASE_UPDATE_ROUTING_KEY = "caseProcessor.rh.case";
+  public static final String CASE_UPDATE_ROUTING_KEY = "caseProcessor.rh.caseUpdate";
   private final CaseRepository caseRepository;
   private final RabbitTemplate rabbitTemplate;
 
