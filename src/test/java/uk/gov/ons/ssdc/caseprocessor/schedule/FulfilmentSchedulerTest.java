@@ -19,15 +19,11 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentNextTriggerRepos
 
 @RunWith(MockitoJUnitRunner.class)
 public class FulfilmentSchedulerTest {
-  @Mock
-  private ClusterLeaderManager clusterLeaderManager;
-  @Mock
-  private FulfilmentNextTriggerRepository fulfilmentNextTriggerRepository;
-  @Mock
-  private FulfilmentProcessor fulfilmentProcessor;
+  @Mock private ClusterLeaderManager clusterLeaderManager;
+  @Mock private FulfilmentNextTriggerRepository fulfilmentNextTriggerRepository;
+  @Mock private FulfilmentProcessor fulfilmentProcessor;
 
-  @InjectMocks
-  private FulfilmentScheduler underTest;
+  @InjectMocks private FulfilmentScheduler underTest;
 
   @Test
   public void testScheduleFulfilments() {
@@ -37,8 +33,8 @@ public class FulfilmentSchedulerTest {
     fulfilmentNextTrigger.setTriggerDateTime(dateTimeNow);
 
     when(clusterLeaderManager.isThisHostClusterLeader()).thenReturn(true);
-    when(fulfilmentNextTriggerRepository.findByTriggerDateTimeBefore(any(OffsetDateTime.class))).thenReturn(
-        Optional.of(fulfilmentNextTrigger));
+    when(fulfilmentNextTriggerRepository.findByTriggerDateTimeBefore(any(OffsetDateTime.class)))
+        .thenReturn(Optional.of(fulfilmentNextTrigger));
 
     // When
     underTest.scheduleFulfilments();
@@ -58,8 +54,8 @@ public class FulfilmentSchedulerTest {
     fulfilmentNextTrigger.setTriggerDateTime(dateTimeNow);
 
     when(clusterLeaderManager.isThisHostClusterLeader()).thenReturn(true);
-    when(fulfilmentNextTriggerRepository.findByTriggerDateTimeBefore(any(OffsetDateTime.class))).thenReturn(
-        Optional.empty());
+    when(fulfilmentNextTriggerRepository.findByTriggerDateTimeBefore(any(OffsetDateTime.class)))
+        .thenReturn(Optional.empty());
 
     // When
     underTest.scheduleFulfilments();

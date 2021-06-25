@@ -23,9 +23,10 @@ public class ChunkProcessor {
   private int chunkSize;
 
   public ChunkProcessor(
-          CaseToProcessRepository caseToProcessRepository,
-          CaseToProcessProcessor caseToProcessProcessor,
-          FulfilmentToProcessRepository fulfilmentToProcessRepository, PrintProcessor printProcessor) {
+      CaseToProcessRepository caseToProcessRepository,
+      CaseToProcessProcessor caseToProcessProcessor,
+      FulfilmentToProcessRepository fulfilmentToProcessRepository,
+      PrintProcessor printProcessor) {
     this.caseToProcessRepository = caseToProcessRepository;
     this.caseToProcessProcessor = caseToProcessProcessor;
     this.fulfilmentToProcessRepository = fulfilmentToProcessRepository;
@@ -50,12 +51,14 @@ public class ChunkProcessor {
 
   @Transactional(propagation = Propagation.REQUIRES_NEW) // Start a new transaction for every chunk
   public void processFulfilmentChunk() {
-    try (Stream<FulfilmentToProcess> cases = fulfilmentToProcessRepository.findChunkToProcess(chunkSize)) {
+    try (Stream<FulfilmentToProcess> cases =
+        fulfilmentToProcessRepository.findChunkToProcess(chunkSize)) {
       cases.forEach(
-              fulfilmentToProcess -> {
-                printProcessor.process(fulfilmentToProcess);
-                fulfilmentToProcessRepository.delete(fulfilmentToProcess); // Delete the case from the 'queue'
-              });
+          fulfilmentToProcess -> {
+            printProcessor.process(fulfilmentToProcess);
+            fulfilmentToProcessRepository.delete(
+                fulfilmentToProcess); // Delete the case from the 'queue'
+          });
     }
   }
 

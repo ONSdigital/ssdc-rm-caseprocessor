@@ -15,12 +15,13 @@ public class CaseToProcessProcessor {
 
   public void process(CaseToProcess caseToProcess) {
     if (caseToProcess.getWaveOfContact().getType() == WaveOfContactType.PRINT) {
-      printProcessor.processPrintRow(caseToProcess.getWaveOfContact().getTemplate(),
-              caseToProcess.getCaze(),
-              caseToProcess.getBatchId(),
-              caseToProcess.getBatchQuantity(),
-              caseToProcess.getWaveOfContact().getPackCode(),
-              caseToProcess.getWaveOfContact().getPrintSupplier());
+      printProcessor.processPrintRow(
+          caseToProcess.getWaveOfContact().getTemplate(),
+          caseToProcess.getCaze(),
+          caseToProcess.getBatchId(),
+          caseToProcess.getBatchQuantity(),
+          caseToProcess.getWaveOfContact().getPackCode(),
+          caseToProcess.getWaveOfContact().getPrintSupplier());
     }
   }
 }

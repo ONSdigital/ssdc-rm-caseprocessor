@@ -1,5 +1,8 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
+import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
+
+import java.time.OffsetDateTime;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -11,10 +14,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentToProcess;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
-
-import java.time.OffsetDateTime;
-
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 @MessageEndpoint
 public class FulfilmentReceiver {

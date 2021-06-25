@@ -130,8 +130,8 @@ public class MessageConsumerConfig {
 
   @Bean
   AmqpInboundChannelAdapter fulfilmentInbound(
-          @Qualifier("fulfilmentContainer") SimpleMessageListenerContainer listenerContainer,
-          @Qualifier("fulfilmentInputChannel") MessageChannel channel) {
+      @Qualifier("fulfilmentContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("fulfilmentInputChannel") MessageChannel channel) {
     return makeAdapter(listenerContainer, channel);
   }
 

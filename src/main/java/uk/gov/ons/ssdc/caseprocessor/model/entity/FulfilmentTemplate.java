@@ -1,11 +1,10 @@
 package uk.gov.ons.ssdc.caseprocessor.model.entity;
 
-import lombok.Data;
-import org.hibernate.annotations.Type;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import lombok.Data;
+import org.hibernate.annotations.Type;
 
 @Data
 @Entity

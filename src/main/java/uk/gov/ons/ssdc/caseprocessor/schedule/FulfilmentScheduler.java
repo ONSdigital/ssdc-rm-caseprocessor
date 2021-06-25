@@ -2,16 +2,15 @@ package uk.gov.ons.ssdc.caseprocessor.schedule;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.time.OffsetDateTime;
+import java.util.Optional;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentNextTrigger;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentNextTriggerRepository;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.time.OffsetDateTime;
-import java.util.Optional;
 
 @Service
 public class FulfilmentScheduler {
@@ -22,7 +21,11 @@ public class FulfilmentScheduler {
 
   private String hostName = InetAddress.getLocalHost().getHostName();
 
-  public FulfilmentScheduler(ClusterLeaderManager clusterLeaderManager, FulfilmentNextTriggerRepository fulfilmentNextTriggerRepository, FulfilmentProcessor fulfilmentProcessor) throws UnknownHostException {
+  public FulfilmentScheduler(
+      ClusterLeaderManager clusterLeaderManager,
+      FulfilmentNextTriggerRepository fulfilmentNextTriggerRepository,
+      FulfilmentProcessor fulfilmentProcessor)
+      throws UnknownHostException {
     this.clusterLeaderManager = clusterLeaderManager;
     this.fulfilmentNextTriggerRepository = fulfilmentNextTriggerRepository;
     this.fulfilmentProcessor = fulfilmentProcessor;
@@ -36,7 +39,8 @@ public class FulfilmentScheduler {
     }
 
     // Check if it's time to process the fulfilments
-    Optional<FulfilmentNextTrigger> triggerOptional = fulfilmentNextTriggerRepository.findByTriggerDateTimeBefore(OffsetDateTime.now());
+    Optional<FulfilmentNextTrigger> triggerOptional =
+        fulfilmentNextTriggerRepository.findByTriggerDateTimeBefore(OffsetDateTime.now());
 
     if (triggerOptional.isPresent()) {
       log.with("hostName", hostName).info("Fulfilment processing triggered");

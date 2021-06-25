@@ -22,6 +22,7 @@ public class ChunkPoller {
   public void processQueuedFulfilments() {
     do {
       chunkProcessor.processFulfilmentChunk();
-    } while (chunkProcessor.isThereFulfilmentWorkToDo()); // Don't go to sleep while there's work to do!
+    } while (chunkProcessor
+        .isThereFulfilmentWorkToDo()); // Don't go to sleep while there's work to do!
   }
 }
