@@ -16,7 +16,7 @@ import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 
 @Service
 public class UacService {
-  private static final String UAC_UPDATE_ROUTING_KEY = "caseProcessor.rh.uac";
+  private static final String UAC_UPDATE_ROUTING_KEY = "caseProcessor.rh.uacUpdate";
 
   private final UacQidLinkRepository uacQidLinkRepository;
   private final RabbitTemplate rabbitTemplate;
