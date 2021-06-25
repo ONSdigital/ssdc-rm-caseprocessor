@@ -1,4 +1,4 @@
-package uk.gov.ons.ssdc.caseprocessor.utils;
+package uk.gov.ons.ssdc.caseprocessor.testutils;
 
 import static org.junit.Assert.*;
 
@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 
 @AllArgsConstructor
 public class QueueSpy implements AutoCloseable {

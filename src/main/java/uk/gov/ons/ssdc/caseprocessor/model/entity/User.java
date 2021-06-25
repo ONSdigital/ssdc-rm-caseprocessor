@@ -2,14 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.model.entity;
 
 import java.util.Collection;
 import java.util.UUID;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -21,7 +14,7 @@ public class User {
   @Column private String email;
 
   @ElementCollection(targetClass = Survey.class)
-  @CollectionTable
+  @CollectionTable(name = "users_survey")
   @Enumerated(EnumType.STRING)
   private Collection<Survey> surveys;
 }

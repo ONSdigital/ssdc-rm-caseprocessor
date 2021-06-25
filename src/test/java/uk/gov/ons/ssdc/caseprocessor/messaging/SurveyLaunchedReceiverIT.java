@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_QUEUE;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,8 +26,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
-import uk.gov.ons.ssdc.caseprocessor.utils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.utils.RabbitQueueHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
+import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -36,7 +37,6 @@ public class SurveyLaunchedReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String TEST_QID = "1234334";
   private static final String TEST_UAC = "9434343";
-  private static final String RH_CASE_QUEUE = "case.rh.case";
 
   @Value("${queueconfig.survey-launched-queue}")
   private String inboundQueue;
@@ -50,7 +50,7 @@ public class SurveyLaunchedReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundQueue);
-    rabbitQueueHelper.purgeQueue(RH_CASE_QUEUE);
+    rabbitQueueHelper.purgeQueue(OUTBOUND_CASE_QUEUE);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -60,7 +60,7 @@ public class SurveyLaunchedReceiverIT {
   public void testSurveyLaunchLogsEventSetsFlagAndEmitsCorrectCaseUpdatedEvent() throws Exception {
     // GIVEN
 
-    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(RH_CASE_QUEUE)) {
+    try (QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(OUTBOUND_CASE_QUEUE)) {
       Case caze = new Case();
       caze.setId(TEST_CASE_ID);
       caze.setUacQidLinks(null);
@@ -96,7 +96,8 @@ public class SurveyLaunchedReceiverIT {
       rabbitQueueHelper.sendMessage(inboundQueue, surveyLaunchedEvent);
 
       // THEN
-      ResponseManagementEvent caseUpdatedEvent = rhCaseQueueSpy.checkExpectedMessageReceived();
+      ResponseManagementEvent caseUpdatedEvent =
+          outboundCaseQueueSpy.checkExpectedMessageReceived();
 
       assertThat(caseUpdatedEvent.getPayload().getCollectionCase().getCaseId())
           .isEqualTo(TEST_CASE_ID);

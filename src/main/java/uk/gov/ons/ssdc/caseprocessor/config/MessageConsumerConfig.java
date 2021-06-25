@@ -57,6 +57,9 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.survey-launched-queue}")
   private String surveyLaunchedQueue;
 
+  @Value("${queueconfig.telephone-capture-queue}")
+  private String telephoneCaptureQueue;
+
   public MessageConsumerConfig(
       ExceptionManagerClient exceptionManagerClient, ConnectionFactory connectionFactory) {
     this.exceptionManagerClient = exceptionManagerClient;
@@ -90,6 +93,10 @@ public class MessageConsumerConfig {
 
   @Bean
   public MessageChannel fulfilmentInputChannel() {
+    return new DirectChannel();
+  }
+
+  public MessageChannel telephoneCaptureInputChannel() {
     return new DirectChannel();
   }
 
@@ -135,6 +142,12 @@ public class MessageConsumerConfig {
     return makeAdapter(listenerContainer, channel);
   }
 
+  AmqpInboundChannelAdapter telephoneCaptureInbound(
+      @Qualifier("telephoneCaptureContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("telephoneCaptureInputChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
+  }
+
   @Bean
   public SimpleMessageListenerContainer surveyLaunchedContainer() {
     return setupListenerContainer(surveyLaunchedQueue, ResponseManagementEvent.class);
@@ -163,6 +176,10 @@ public class MessageConsumerConfig {
   @Bean
   public SimpleMessageListenerContainer fulfilmentContainer() {
     return setupListenerContainer(fulfilmentQueue, ResponseManagementEvent.class);
+  }
+
+  public SimpleMessageListenerContainer telephoneCaptureContainer() {
+    return setupListenerContainer(telephoneCaptureQueue, ResponseManagementEvent.class);
   }
 
   private SimpleMessageListenerContainer setupListenerContainer(

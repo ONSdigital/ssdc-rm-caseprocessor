@@ -7,4 +7,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 
 public interface UacQidLinkRepository extends JpaRepository<UacQidLink, UUID> {
   Optional<UacQidLink> findByQid(String questionnaireId);
+
+  boolean existsByQid(String qid);
 }
