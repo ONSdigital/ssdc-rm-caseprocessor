@@ -103,7 +103,7 @@ public class PrintProcessorTest {
   }
 
   @Test
-  public void testProcess() {
+  public void testProcessFulfilment() {
     // Given
     FulfilmentTemplate fulfilmentTemplate = new FulfilmentTemplate();
     fulfilmentTemplate.setFulfilmentCode("TEST_FULFILMENT_CODE");

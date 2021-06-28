@@ -20,7 +20,7 @@ public class CaseToProcessProcessorTest {
   @InjectMocks CaseToProcessProcessor underTest;
 
   @Test
-  public void testHappyPath() {
+  public void testProccessPrintWaveOfContact() {
     // Given
     Case caze = new Case();
     caze.setSample(Map.of("foo", "bar"));
