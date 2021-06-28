@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
@@ -41,6 +42,7 @@ public class SampleReceiver {
     this.eventLogger = eventLogger;
   }
 
+  @Transactional
   @ServiceActivator(inputChannel = "sampleInputChannel")
   public void receiveSample(Message<Sample> message) {
     Sample sample = message.getPayload();
