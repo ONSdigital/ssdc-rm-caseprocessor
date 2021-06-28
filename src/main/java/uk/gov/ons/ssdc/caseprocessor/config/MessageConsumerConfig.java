@@ -96,6 +96,7 @@ public class MessageConsumerConfig {
     return new DirectChannel();
   }
 
+  @Bean
   public MessageChannel telephoneCaptureInputChannel() {
     return new DirectChannel();
   }
