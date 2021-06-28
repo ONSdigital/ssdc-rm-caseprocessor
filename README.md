@@ -32,7 +32,7 @@ Just build the image
 ## Events
 
 ### Sample Load
-The case processor listens to a Rabbit queue called `case.sample.inbound`. The messages are JSON format and are of the following format:
+The case processor listens to a Rabbit queue called `supportTool.caseProcessor.sample`. The messages are JSON format and are of the following format:
 
 ```json
 {
@@ -45,7 +45,7 @@ The case processor listens to a Rabbit queue called `case.sample.inbound`. The m
 ```
 
 ### Invalid Address
-Queue Name: case.invalidaddress
+Queue Name: events.caseProcessor.invalidAddress
 Example Msg: 
 ```json
 {
@@ -67,7 +67,7 @@ Example Msg:
 ```
 
 ### Receipts/Responses
-Queue Name: Case.Responses
+Queue Name: events.caseProcessor.response
 Example Msg:
 ```json
 {
@@ -88,7 +88,7 @@ Example Msg:
 ```
 
 ### Refusals
-Queue: case.refusals
+Queue: events.caseProcessor.refusal
 Example Msg:
 ```json
 {
@@ -116,7 +116,7 @@ Example Msg:
 ```
 
 ### Survey Launched
-queue: survey.launched
+queue: events.caseProcessor.surveyLaunched
 Example Msg:
 ```json
 {

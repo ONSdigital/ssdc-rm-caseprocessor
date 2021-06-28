@@ -31,14 +31,16 @@ spring:
     port: 6672
     virtualhost: /
 
+
+
 queueconfig:
   telephone-capture-queue: caseApi.caseProcessor.telephoneCapture
-  sample-queue: case.sample.inbound
-  receipt-response-queue: Case.Responses
-  refusal-response-queue: case.refusals
-  print-queue: Action.Printer
-  invalid-address-queue: case.invalidaddress
-  survey-launched-queue: survey.launched
+  sample-queue: supportTool.caseProcessor.sample
+  receipt-response-queue: events.caseProcessor.response
+  refusal-response-queue: events.caseProcessor.refusal
+  print-queue: caseProcessor.printFileSvc.printBatchRow
+  invalid-address-queue: events.caseProcessor.invalidAddress
+  survey-launched-queue: events.caseProcessor.surveyLaunched
   fulfilment-queue: events.caseProcessor.fulfilment
   case-event-exchange: events
   consumers: 50

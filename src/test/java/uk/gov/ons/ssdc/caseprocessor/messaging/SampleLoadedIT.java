@@ -31,9 +31,9 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseReposito
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.WaveOfContactRepository;
+import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
-import uk.gov.ons.ssdc.caseprocessor.testutils.TestHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -46,8 +46,8 @@ public class SampleLoadedIT {
   private String inboundQueue;
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
-  @Autowired private TestHelper testHelper;
   @Autowired private CaseRepository caseRepository;
+  @Autowired private CaseService caseService;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
   @Autowired private EventRepository eventRepository;
@@ -90,7 +90,7 @@ public class SampleLoadedIT {
       CollectionCase emittedCase = actualResponseManagementEvent.getPayload().getCollectionCase();
       Assertions.assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
 
-      Case actualCase = testHelper.pollUntilCaseExists(TEST_CASE_ID);
+      Case actualCase = caseService.getCaseByCaseId(TEST_CASE_ID);
 
       assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID);
       assertThat(actualCase.getCollectionExercise().getId()).isEqualTo(collectionExercise.getId());
