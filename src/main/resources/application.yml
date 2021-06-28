@@ -39,7 +39,7 @@ queueconfig:
   print-queue: Action.Printer
   invalid-address-queue: case.invalidaddress
   survey-launched-queue: survey.launched
-  fulfilment-queue: Events.CaseProcessor.Fulfilment
+  fulfilment-queue: events.caseProcessor.fulfilment
   case-event-exchange: events
   consumers: 50
   retry-attempts: 3
