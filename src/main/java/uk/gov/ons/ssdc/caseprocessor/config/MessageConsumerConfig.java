@@ -143,6 +143,7 @@ public class MessageConsumerConfig {
     return makeAdapter(listenerContainer, channel);
   }
 
+  @Bean
   AmqpInboundChannelAdapter telephoneCaptureInbound(
       @Qualifier("telephoneCaptureContainer") SimpleMessageListenerContainer listenerContainer,
       @Qualifier("telephoneCaptureInputChannel") MessageChannel channel) {
@@ -179,6 +180,7 @@ public class MessageConsumerConfig {
     return setupListenerContainer(fulfilmentQueue, ResponseManagementEvent.class);
   }
 
+  @Bean
   public SimpleMessageListenerContainer telephoneCaptureContainer() {
     return setupListenerContainer(telephoneCaptureQueue, ResponseManagementEvent.class);
   }
