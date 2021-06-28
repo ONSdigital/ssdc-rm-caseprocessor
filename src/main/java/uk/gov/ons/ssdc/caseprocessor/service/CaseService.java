@@ -39,6 +39,15 @@ public class CaseService {
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
   }
 
+  public void emitCaseCreatedEvent(Case caze) {
+    EventDTO eventDTO = new EventDTO();
+    eventDTO.setType(EventTypeDTO.CASE_CREATED);
+    eventDTO.setChannel("RM");
+    ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
+    rabbitTemplate.convertAndSend(
+        outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
+  }
+
   private ResponseManagementEvent prepareCaseEvent(Case caze, EventDTO eventDTO) {
     PayloadDTO payloadDTO = new PayloadDTO();
     CollectionCase collectionCase = new CollectionCase();

@@ -2,10 +2,12 @@ version: '2.1'
 services:
   postgres:
     container_name: postgres-case-it
-    image: sdcplatform/ras-rm-docker-postgres
-    command: ["-c", "shared_buffers=256MB", "-c", "max_connections=200"]
+    image: postgres:13
+    command: ["-c", "shared_buffers=256MB", "-c", "max_connections=500"]
     ports:
       - "15432:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
 
   rabbitmq:
     container_name: rabbitmq-case-it
@@ -25,7 +27,7 @@ services:
 
   uac-qid:
     container_name: uac-qid-case-it
-    image: eu.gcr.io/census-rm-ci/rm/census-rm-uac-qid-service:latest
+    image: eu.gcr.io/ssdc-rm-ci/rm/ssdc-rm-uac-qid-service:latest
     ports:
       - "18164:8164"
     external_links:

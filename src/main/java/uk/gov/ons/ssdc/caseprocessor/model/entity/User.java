@@ -14,7 +14,7 @@ public class User {
   @Column private String email;
 
   @ElementCollection(targetClass = Survey.class)
-  @CollectionTable
+  @CollectionTable(name = "users_survey")
   @Enumerated(EnumType.STRING)
   private Collection<Survey> surveys;
 }
