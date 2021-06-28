@@ -84,7 +84,6 @@ public class FulfilmentIT {
       Case caze = setUpCase(collectionExercise);
 
       // When
-
       FulfilmentDTO fulfilment = new FulfilmentDTO();
       fulfilment.setCaseId(caze.getId());
       fulfilment.setFulfilmentCode(PACK_CODE);
