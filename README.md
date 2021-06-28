@@ -157,3 +157,25 @@ values ('f2af7113-eb93-4946-930d-3775e81a2666',    -- wave of contact ID
 ```
 
 The wave of contact will only be triggered by the "leader" pod, in the event that multiple instances of the case processor are running. If the leader dies or is killed/terminated, then another leader will be elected after 2 minutes.
+
+## Fulfilment
+The case processor triggers fulfilmments at a specified date & time. Fulfilments trigger once every 24 hours. Fulfilments will be sent for all requests which have queued up.
+
+The SQL to create a fulfilment template is as follows:
+
+```sql
+insert into casev3.fulfilment_template
+values ('TEST_FULFILMENT_CODE',    -- fulfilment code
+        '"__caseref__","__uac__"', -- print template
+        'SUPPLIER_A');             -- print supplier
+```
+
+The SQL to create a fulfilment trigger is as follows:
+
+```sql
+insert into casev3.fulfilment_next_trigger
+values ('b1d826fa-6afc-4270-9f0c-302cb05d4d96', -- trigger ID
+        '2021-06-28T10:40:00.000Z');            -- next time to trigger
+```
+
+The fulfilments will only be triggered by the "leader" pod, in the event that multiple instances of the case processor are running. If the leader dies or is killed/terminated, then another leader will be elected after 2 minutes.
