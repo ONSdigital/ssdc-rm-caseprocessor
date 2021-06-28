@@ -96,7 +96,7 @@ public class SampleLoadedIT {
       assertThat(actualCase.getCollectionExercise().getId()).isEqualTo(collectionExercise.getId());
       assertThat(actualCase.getSample()).isEqualTo(sampleDto);
 
-      List<Event> events = eventRepository.findAll();
+      List<Event> events = testHelper.pollUntilEventsExist();
       assertThat(events.size()).isEqualTo(1);
       assertThat(events.get(0).getEventType()).isEqualTo(EventType.SAMPLE_LOADED);
     }
