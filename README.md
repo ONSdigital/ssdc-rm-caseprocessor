@@ -165,9 +165,9 @@ The SQL to create a fulfilment template is as follows:
 
 ```sql
 insert into casev3.fulfilment_template
-values ('TEST_FULFILMENT_CODE',    -- fulfilment code
-        '"__caseref__","__uac__"', -- print template
-        'SUPPLIER_A');             -- print supplier
+values ('TEST_FULFILMENT_CODE',      -- fulfilment code
+        '["__caseref__","__uac__"]', -- print template
+        'SUPPLIER_A');               -- print supplier
 ```
 
 The SQL to create a fulfilment trigger is as follows:
