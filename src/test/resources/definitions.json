@@ -1,6 +1,16 @@
 {
   "queues": [
     {
+      "name": "events.caseProcessor.fulfilment",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "events.caseProcessor.fulfilment"
+      }
+    },
+    {
       "name": "events.caseProcessor.refusal",
       "vhost": "/",
       "durable": true,

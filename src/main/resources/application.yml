@@ -41,6 +41,7 @@ queueconfig:
   print-queue: caseProcessor.printFileSvc.printBatchRow
   invalid-address-queue: events.caseProcessor.invalidAddress
   survey-launched-queue: events.caseProcessor.surveyLaunched
+  fulfilment-queue: events.caseProcessor.fulfilment
   case-event-exchange: events
   consumers: 50
   retry-attempts: 3

@@ -27,9 +27,6 @@ public class MessageConsumerConfig {
   private final ExceptionManagerClient exceptionManagerClient;
   private final ConnectionFactory connectionFactory;
 
-  @Value("${queueconfig.sample-queue}")
-  private String sampleQueue;
-
   @Value("${queueconfig.consumers}")
   private int consumers;
 
@@ -41,6 +38,12 @@ public class MessageConsumerConfig {
 
   @Value("${messagelogging.logstacktraces}")
   private boolean logStackTraces;
+
+  @Value("${queueconfig.sample-queue}")
+  private String sampleQueue;
+
+  @Value("${queueconfig.fulfilment-queue}")
+  private String fulfilmentQueue;
 
   @Value("${queueconfig.receipt-response-queue}")
   private String receiptQueue;
@@ -89,6 +92,11 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  public MessageChannel fulfilmentInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
   public MessageChannel telephoneCaptureInputChannel() {
     return new DirectChannel();
   }
@@ -129,6 +137,13 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  AmqpInboundChannelAdapter fulfilmentInbound(
+      @Qualifier("fulfilmentContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("fulfilmentInputChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
+  }
+
+  @Bean
   AmqpInboundChannelAdapter telephoneCaptureInbound(
       @Qualifier("telephoneCaptureContainer") SimpleMessageListenerContainer listenerContainer,
       @Qualifier("telephoneCaptureInputChannel") MessageChannel channel) {
@@ -158,6 +173,11 @@ public class MessageConsumerConfig {
   @Bean
   public SimpleMessageListenerContainer invalidAddressContainer() {
     return setupListenerContainer(invalidAddressQueue, ResponseManagementEvent.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer fulfilmentContainer() {
+    return setupListenerContainer(fulfilmentQueue, ResponseManagementEvent.class);
   }
 
   @Bean

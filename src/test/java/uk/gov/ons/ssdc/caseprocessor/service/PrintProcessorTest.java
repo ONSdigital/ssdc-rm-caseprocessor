@@ -1,0 +1,162 @@
+package uk.gov.ons.ssdc.caseprocessor.service;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.OffsetDateTime;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
+import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentTemplateRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
+
+@RunWith(MockitoJUnitRunner.class)
+public class PrintProcessorTest {
+  @Mock private RabbitTemplate rabbitTemplate;
+  @Mock private UacQidCache uacQidCache;
+  @Mock private UacQidLinkRepository uacQidLinkRepository;
+  @Mock private UacService uacService;
+  @Mock private FulfilmentTemplateRepository fulfilmentTemplateRepository;
+  @Mock private EventLogger eventLogger;
+
+  @InjectMocks PrintProcessor underTest;
+
+  @Value("${queueconfig.print-queue}")
+  private String printQueue;
+
+  @Test
+  public void testProcessPrintRow() {
+    // Given
+    Case caze = new Case();
+    caze.setSample(Map.of("foo", "bar"));
+    caze.setCaseRef(123L);
+
+    WaveOfContact waveOfContact = new WaveOfContact();
+    waveOfContact.setType(WaveOfContactType.PRINT);
+    waveOfContact.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
+    waveOfContact.setPackCode("test pack code");
+    waveOfContact.setPrintSupplier("test print supplier");
+
+    CaseToProcess caseToProcess = new CaseToProcess();
+    caseToProcess.setWaveOfContact(waveOfContact);
+    caseToProcess.setCaze(caze);
+    caseToProcess.setBatchId(UUID.fromString("6a127d58-c1cb-489c-a3f5-72014a0c32d6"));
+
+    UacQidDTO uacQidDTO = new UacQidDTO();
+    uacQidDTO.setUac("test uac");
+    uacQidDTO.setQid("test qid");
+
+    when(uacQidCache.getUacQidPair(anyInt())).thenReturn(uacQidDTO);
+
+    // When
+    underTest.processPrintRow(
+        waveOfContact.getTemplate(),
+        caze,
+        caseToProcess.getBatchId(),
+        caseToProcess.getBatchQuantity(),
+        caseToProcess.getWaveOfContact().getPackCode(),
+        caseToProcess.getWaveOfContact().getPrintSupplier());
+
+    // Then
+    ArgumentCaptor<PrintRow> printRowArgumentCaptor = ArgumentCaptor.forClass(PrintRow.class);
+    verify(rabbitTemplate).convertAndSend(eq(""), eq(printQueue), printRowArgumentCaptor.capture());
+    PrintRow actualPrintRow = printRowArgumentCaptor.getValue();
+    assertThat(actualPrintRow.getPackCode()).isEqualTo("test pack code");
+    assertThat(actualPrintRow.getPrintSupplier()).isEqualTo("test print supplier");
+    assertThat(actualPrintRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
+
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacQidLinkRepository).saveAndFlush(uacQidLinkCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
+    assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
+    assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
+    assertThat(actualUacQidLink.isActive()).isTrue();
+
+    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.getValue());
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(caze),
+            any(OffsetDateTime.class),
+            eq(
+                "Printed pack code test pack code with batch id 6a127d58-c1cb-489c-a3f5-72014a0c32d6"),
+            eq(EventType.PRINTED_PACK_CODE),
+            any(EventDTO.class),
+            isNull(),
+            any(OffsetDateTime.class));
+  }
+
+  @Test
+  public void testProcessFulfilment() {
+    // Given
+    FulfilmentTemplate fulfilmentTemplate = new FulfilmentTemplate();
+    fulfilmentTemplate.setFulfilmentCode("TEST_FULFILMENT_CODE");
+    fulfilmentTemplate.setPrintSupplier("FOOBAR_PRINT_SUPPLIER");
+    fulfilmentTemplate.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
+    when(fulfilmentTemplateRepository.findById(anyString()))
+        .thenReturn(Optional.of(fulfilmentTemplate));
+
+    Case caze = new Case();
+    caze.setSample(Map.of("foo", "bar"));
+    caze.setCaseRef(123L);
+
+    FulfilmentToProcess fulfilmentToProcess = new FulfilmentToProcess();
+    fulfilmentToProcess.setFulfilmentCode("TEST_FULFILMENT_CODE");
+    fulfilmentToProcess.setCaze(caze);
+    fulfilmentToProcess.setBatchId(UUID.fromString("6a127d58-c1cb-489c-a3f5-72014a0c32d6"));
+    fulfilmentToProcess.setBatchQuantity(200);
+
+    UacQidDTO uacQidDTO = new UacQidDTO();
+    uacQidDTO.setUac("test uac");
+    uacQidDTO.setQid("test qid");
+
+    when(uacQidCache.getUacQidPair(anyInt())).thenReturn(uacQidDTO);
+
+    // When
+    underTest.process(fulfilmentToProcess);
+
+    // Then
+    ArgumentCaptor<PrintRow> printRowArgumentCaptor = ArgumentCaptor.forClass(PrintRow.class);
+    verify(rabbitTemplate).convertAndSend(eq(""), eq(printQueue), printRowArgumentCaptor.capture());
+    PrintRow actualPrintRow = printRowArgumentCaptor.getValue();
+    assertThat(actualPrintRow.getPackCode()).isEqualTo("TEST_FULFILMENT_CODE");
+    assertThat(actualPrintRow.getPrintSupplier()).isEqualTo("FOOBAR_PRINT_SUPPLIER");
+    assertThat(actualPrintRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
+
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacQidLinkRepository).saveAndFlush(uacQidLinkCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
+    assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
+    assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
+    assertThat(actualUacQidLink.isActive()).isTrue();
+
+    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.getValue());
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(caze),
+            any(OffsetDateTime.class),
+            eq(
+                "Printed pack code TEST_FULFILMENT_CODE with batch id 6a127d58-c1cb-489c-a3f5-72014a0c32d6"),
+            eq(EventType.PRINTED_PACK_CODE),
+            any(EventDTO.class),
+            isNull(),
+            any(OffsetDateTime.class));
+  }
+}
