@@ -3,8 +3,8 @@ package uk.gov.ons.ssdc.caseprocessor.schedule;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.WaveOfContact;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.WaveOfContactType;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRule;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRuleType;
 
 @Component
 public class CaseClassifier {
@@ -14,23 +14,23 @@ public class CaseClassifier {
     this.jdbcTemplate = jdbcTemplate;
   }
 
-  public void enqueueCasesForWaveOfContact(WaveOfContact waveOfContact) {
+  public void enqueueCasesForActionRule(ActionRule actionRule) {
     UUID batchId = UUID.randomUUID();
 
     jdbcTemplate.update(
-        "INSERT INTO casev3.case_to_process (batch_id, batch_quantity, wave_of_contact_id, "
+        "INSERT INTO casev3.case_to_process (batch_id, batch_quantity, action_rule_id, "
             + "caze_id) SELECT ?, COUNT(*) OVER (), ?, id FROM "
             + "casev3.cases "
             + buildWhereClause(
-                waveOfContact.getCollectionExercise().getId(),
-                waveOfContact.getClassifiers(),
-                waveOfContact.getType()),
+                actionRule.getCollectionExercise().getId(),
+                actionRule.getClassifiers(),
+                actionRule.getType()),
         batchId,
-        waveOfContact.getId());
+        actionRule.getId());
   }
 
   private String buildWhereClause(
-      UUID collectionExerciseId, String classifiersClause, WaveOfContactType type) {
+      UUID collectionExerciseId, String classifiersClause, ActionRuleType type) {
     StringBuilder whereClause = new StringBuilder();
     whereClause.append(
         String.format("WHERE collection_exercise_id='%s'", collectionExerciseId.toString()));

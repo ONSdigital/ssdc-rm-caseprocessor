@@ -22,16 +22,16 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRule;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.WaveOfContact;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.WaveOfContactType;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.WaveOfContactRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
@@ -40,7 +40,7 @@ import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 @SpringBootTest
 @ActiveProfiles("test")
 @RunWith(SpringJUnit4ClassRunner.class)
-public class WaveOfContactIT {
+public class ActionRuleIT {
   @Value("${queueconfig.print-queue}")
   private String outboundPrinterQueue;
 
@@ -48,7 +48,7 @@ public class WaveOfContactIT {
   private static final String PRINT_SUPPLIER = "test-print-supplier";
 
   @Autowired private CaseRepository caseRepository;
-  @Autowired private WaveOfContactRepository waveOfContactRepository;
+  @Autowired private ActionRuleRepository actionRuleRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
   @Autowired private CaseToProcessRepository caseToProcessRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
@@ -67,7 +67,7 @@ public class WaveOfContactIT {
     uacQidLinkRepository.deleteAllInBatch();
     caseToProcessRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
-    waveOfContactRepository.deleteAllInBatch();
+    actionRuleRepository.deleteAllInBatch();
     collectionExerciseRepository.deleteAllInBatch();
   }
 
@@ -80,7 +80,7 @@ public class WaveOfContactIT {
       Case caze = setUpCase(collectionExercise);
 
       // When
-      setUpWaveOfContact(WaveOfContactType.PRINT, collectionExercise);
+      setUpActionRule(ActionRuleType.PRINT, collectionExercise);
       String printRowMessage = printerQueue.getQueue().poll(20, TimeUnit.SECONDS);
       String uacMessage = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
@@ -107,20 +107,19 @@ public class WaveOfContactIT {
     return collectionExerciseRepository.saveAndFlush(collectionExercise);
   }
 
-  private WaveOfContact setUpWaveOfContact(
-      WaveOfContactType type, CollectionExercise collectionExercise) {
-    WaveOfContact waveOfContact = new WaveOfContact();
-    waveOfContact.setId(UUID.randomUUID());
-    waveOfContact.setTriggerDateTime(OffsetDateTime.now());
-    waveOfContact.setHasTriggered(false);
-    waveOfContact.setType(type);
-    waveOfContact.setCollectionExercise(collectionExercise);
-    waveOfContact.setClassifiers("1=1"); // Dummy classifier which is always true
-    waveOfContact.setTemplate(new String[] {"__caseref__", "foo", "__uac__"});
-    waveOfContact.setPackCode(PACK_CODE);
-    waveOfContact.setPrintSupplier(PRINT_SUPPLIER);
+  private ActionRule setUpActionRule(ActionRuleType type, CollectionExercise collectionExercise) {
+    ActionRule actionRule = new ActionRule();
+    actionRule.setId(UUID.randomUUID());
+    actionRule.setTriggerDateTime(OffsetDateTime.now());
+    actionRule.setHasTriggered(false);
+    actionRule.setType(type);
+    actionRule.setCollectionExercise(collectionExercise);
+    actionRule.setClassifiers("1=1"); // Dummy classifier which is always true
+    actionRule.setTemplate(new String[] {"__caseref__", "foo", "__uac__"});
+    actionRule.setPackCode(PACK_CODE);
+    actionRule.setPrintSupplier(PRINT_SUPPLIER);
 
-    return waveOfContactRepository.saveAndFlush(waveOfContact);
+    return actionRuleRepository.saveAndFlush(actionRule);
   }
 
   private Case setUpCase(CollectionExercise collectionExercise) {

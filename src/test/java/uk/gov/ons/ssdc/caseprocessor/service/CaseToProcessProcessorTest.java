@@ -8,10 +8,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRule;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CaseToProcess;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.WaveOfContact;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.WaveOfContactType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseToProcessProcessorTest {
@@ -20,20 +20,20 @@ public class CaseToProcessProcessorTest {
   @InjectMocks CaseToProcessProcessor underTest;
 
   @Test
-  public void testProccessPrintWaveOfContact() {
+  public void testProccessPrintActionRule() {
     // Given
     Case caze = new Case();
     caze.setSample(Map.of("foo", "bar"));
     caze.setCaseRef(123L);
 
-    WaveOfContact waveOfContact = new WaveOfContact();
-    waveOfContact.setType(WaveOfContactType.PRINT);
-    waveOfContact.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
-    waveOfContact.setPackCode("test pack code");
-    waveOfContact.setPrintSupplier("test print supplier");
+    ActionRule actionRule = new ActionRule();
+    actionRule.setType(ActionRuleType.PRINT);
+    actionRule.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
+    actionRule.setPackCode("test pack code");
+    actionRule.setPrintSupplier("test print supplier");
 
     CaseToProcess caseToProcess = new CaseToProcess();
-    caseToProcess.setWaveOfContact(waveOfContact);
+    caseToProcess.setActionRule(actionRule);
     caseToProcess.setCaze(caze);
 
     // When
@@ -42,11 +42,11 @@ public class CaseToProcessProcessorTest {
     // Then
     verify(printProcessor)
         .processPrintRow(
-            waveOfContact.getTemplate(),
+            actionRule.getTemplate(),
             caze,
             caseToProcess.getBatchId(),
             caseToProcess.getBatchQuantity(),
-            caseToProcess.getWaveOfContact().getPackCode(),
-            caseToProcess.getWaveOfContact().getPrintSupplier());
+            caseToProcess.getActionRule().getPackCode(),
+            caseToProcess.getActionRule().getPrintSupplier());
   }
 }
