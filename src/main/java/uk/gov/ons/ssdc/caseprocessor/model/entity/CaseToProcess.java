@@ -20,7 +20,7 @@ public class CaseToProcess {
 
   @ManyToOne private Case caze;
 
-  @ManyToOne private WaveOfContact waveOfContact;
+  @ManyToOne private ActionRule actionRule;
 
   @Column private UUID batchId;
 

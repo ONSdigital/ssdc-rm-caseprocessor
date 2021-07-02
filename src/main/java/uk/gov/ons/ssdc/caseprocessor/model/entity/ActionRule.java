@@ -20,13 +20,13 @@ import org.hibernate.annotations.TypeDefs;
 @Data
 @Entity
 @TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
-public class WaveOfContact {
+public class ActionRule {
 
   @Id private UUID id;
 
   @Enumerated(EnumType.STRING)
   @Column
-  private WaveOfContactType type;
+  private ActionRuleType type;
 
   @Column(columnDefinition = "timestamp with time zone")
   private OffsetDateTime triggerDateTime;

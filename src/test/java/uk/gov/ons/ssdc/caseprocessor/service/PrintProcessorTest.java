@@ -44,14 +44,14 @@ public class PrintProcessorTest {
     caze.setSample(Map.of("foo", "bar"));
     caze.setCaseRef(123L);
 
-    WaveOfContact waveOfContact = new WaveOfContact();
-    waveOfContact.setType(WaveOfContactType.PRINT);
-    waveOfContact.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
-    waveOfContact.setPackCode("test pack code");
-    waveOfContact.setPrintSupplier("test print supplier");
+    ActionRule actionRule = new ActionRule();
+    actionRule.setType(ActionRuleType.PRINT);
+    actionRule.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
+    actionRule.setPackCode("test pack code");
+    actionRule.setPrintSupplier("test print supplier");
 
     CaseToProcess caseToProcess = new CaseToProcess();
-    caseToProcess.setWaveOfContact(waveOfContact);
+    caseToProcess.setActionRule(actionRule);
     caseToProcess.setCaze(caze);
     caseToProcess.setBatchId(UUID.fromString("6a127d58-c1cb-489c-a3f5-72014a0c32d6"));
 
@@ -63,12 +63,12 @@ public class PrintProcessorTest {
 
     // When
     underTest.processPrintRow(
-        waveOfContact.getTemplate(),
+        actionRule.getTemplate(),
         caze,
         caseToProcess.getBatchId(),
         caseToProcess.getBatchQuantity(),
-        caseToProcess.getWaveOfContact().getPackCode(),
-        caseToProcess.getWaveOfContact().getPrintSupplier());
+        caseToProcess.getActionRule().getPackCode(),
+        caseToProcess.getActionRule().getPrintSupplier());
 
     // Then
     ArgumentCaptor<PrintRow> printRowArgumentCaptor = ArgumentCaptor.forClass(PrintRow.class);

@@ -115,6 +115,16 @@
       }
     },
     {
+      "name": "events.caseProcessor.deactivateUac",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "events.caseProcessor.deactivateUac"
+      }
+    },
+    {
       "name": "DelayedRedeliveryQueue",
       "vhost": "/",
       "durable": true,
@@ -226,6 +236,15 @@
       "destination": "events.caseProcessor.surveyLaunched",
       "destination_type": "queue",
       "routing_key": "events.caseProcessor.surveyLaunched",
+      "arguments": {
+      }
+    },
+    {
+      "source": "events",
+      "vhost": "/",
+      "destination": "events.caseProcessor.deactivateUac",
+      "destination_type": "queue",
+      "routing_key": "events.caseProcessor.deactivateUac",
       "arguments": {
       }
     },
