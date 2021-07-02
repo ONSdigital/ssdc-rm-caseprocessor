@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class SurveyPrintTemplate {
+public class FulfilmentSurveyPrintTemplate {
   @Id private UUID id;
 
   @ManyToOne private Survey survey;

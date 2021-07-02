@@ -87,11 +87,12 @@ public class FulfilmentIT {
 
       Survey survey = setUpSurvey();
 
-      SurveyPrintTemplate surveyPrintTemplate = new SurveyPrintTemplate();
-      surveyPrintTemplate.setId(UUID.randomUUID());
-      surveyPrintTemplate.setSurvey(survey);
-      surveyPrintTemplate.setPrintTemplate(printTemplate);
-      surveyPrintTemplateRepository.saveAndFlush(surveyPrintTemplate);
+      FulfilmentSurveyPrintTemplate fulfilmentSurveyPrintTemplate =
+          new FulfilmentSurveyPrintTemplate();
+      fulfilmentSurveyPrintTemplate.setId(UUID.randomUUID());
+      fulfilmentSurveyPrintTemplate.setSurvey(survey);
+      fulfilmentSurveyPrintTemplate.setPrintTemplate(printTemplate);
+      surveyPrintTemplateRepository.saveAndFlush(fulfilmentSurveyPrintTemplate);
 
       CollectionExercise collectionExercise = setUpCollectionExercise(survey);
       Case caze = setUpCase(collectionExercise);

@@ -27,10 +27,10 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentSurveyPrintTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentToProcess;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.PrintTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Survey;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.SurveyPrintTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 
@@ -61,8 +61,9 @@ public class FulfilmentReceiverTest {
     PrintTemplate printTemplate = new PrintTemplate();
     printTemplate.setPackCode("TEST_FULFILMENT_CODE");
 
-    SurveyPrintTemplate surveyPrintTemplate = new SurveyPrintTemplate();
-    surveyPrintTemplate.setPrintTemplate(printTemplate);
+    FulfilmentSurveyPrintTemplate fulfilmentSurveyPrintTemplate =
+        new FulfilmentSurveyPrintTemplate();
+    fulfilmentSurveyPrintTemplate.setPrintTemplate(printTemplate);
 
     Case expectedCase = new Case();
     expectedCase.setCollectionExercise(new CollectionExercise());
@@ -70,7 +71,7 @@ public class FulfilmentReceiverTest {
     expectedCase
         .getCollectionExercise()
         .getSurvey()
-        .setFulfilmentPrintTemplates(List.of(surveyPrintTemplate));
+        .setFulfilmentPrintTemplates(List.of(fulfilmentSurveyPrintTemplate));
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // When

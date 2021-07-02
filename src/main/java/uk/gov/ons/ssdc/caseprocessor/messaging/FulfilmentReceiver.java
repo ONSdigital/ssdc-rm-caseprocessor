@@ -11,10 +11,10 @@ import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentSurveyPrintTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentToProcess;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.PrintTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Survey;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.SurveyPrintTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 
@@ -68,9 +68,10 @@ public class FulfilmentReceiver {
   private PrintTemplate getAllowedPrintTemplate(String packCode, Case caze) {
     Survey survey = caze.getCollectionExercise().getSurvey();
 
-    for (SurveyPrintTemplate surveyPrintTemplate : survey.getFulfilmentPrintTemplates()) {
-      if (surveyPrintTemplate.getPrintTemplate().getPackCode().equals(packCode)) {
-        return surveyPrintTemplate.getPrintTemplate();
+    for (FulfilmentSurveyPrintTemplate fulfilmentSurveyPrintTemplate :
+        survey.getFulfilmentPrintTemplates()) {
+      if (fulfilmentSurveyPrintTemplate.getPrintTemplate().getPackCode().equals(packCode)) {
+        return fulfilmentSurveyPrintTemplate.getPrintTemplate();
       }
     }
 
