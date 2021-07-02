@@ -36,16 +36,10 @@ public class ActionRule {
 
   @Lob
   @Type(type = "org.hibernate.type.BinaryType")
-  @Column(nullable = false)
+  @Column
   private byte[] classifiers;
 
-  @Type(type = "jsonb")
-  @Column(columnDefinition = "jsonb")
-  private String[] template;
-
-  @Column private String printSupplier;
-
-  @Column private String packCode;
+  @ManyToOne private PrintTemplate printTemplate;
 
   @ManyToOne private CollectionExercise collectionExercise;
 
@@ -54,6 +48,10 @@ public class ActionRule {
   }
 
   public String getClassifiers() {
+    if (classifiers == null) {
+      return null;
+    }
+
     return new String(classifiers);
   }
 }

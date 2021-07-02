@@ -12,6 +12,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRule;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CaseToProcess;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.PrintTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseToProcessProcessorTest {
@@ -27,11 +28,14 @@ public class CaseToProcessProcessorTest {
     caze.setSample(Map.of("foo", "bar"));
     caze.setCaseRef(123L);
 
+    PrintTemplate printTemplate = new PrintTemplate();
+    printTemplate.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
+    printTemplate.setPackCode("test pack code");
+    printTemplate.setPrintSupplier("test print supplier");
+
     ActionRule actionRule = new ActionRule();
     actionRule.setType(ActionRuleType.PRINT);
-    actionRule.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
-    actionRule.setPackCode("test pack code");
-    actionRule.setPrintSupplier("test print supplier");
+    actionRule.setPrintTemplate(printTemplate);
 
     CaseToProcess caseToProcess = new CaseToProcess();
     caseToProcess.setActionRule(actionRule);
@@ -43,12 +47,12 @@ public class CaseToProcessProcessorTest {
     // Then
     verify(printProcessor)
         .processPrintRow(
-            actionRule.getTemplate(),
+            printTemplate.getTemplate(),
             caze,
             caseToProcess.getBatchId(),
             caseToProcess.getBatchQuantity(),
-            caseToProcess.getActionRule().getPackCode(),
-            caseToProcess.getActionRule().getPrintSupplier());
+            printTemplate.getPackCode(),
+            printTemplate.getPrintSupplier());
   }
 
   @Test

@@ -44,11 +44,14 @@ public class PrintProcessorTest {
     caze.setSample(Map.of("foo", "bar"));
     caze.setCaseRef(123L);
 
+    PrintTemplate printTemplate = new PrintTemplate();
+    printTemplate.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
+    printTemplate.setPackCode("test pack code");
+    printTemplate.setPrintSupplier("test print supplier");
+
     ActionRule actionRule = new ActionRule();
     actionRule.setType(ActionRuleType.PRINT);
-    actionRule.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
-    actionRule.setPackCode("test pack code");
-    actionRule.setPrintSupplier("test print supplier");
+    actionRule.setPrintTemplate(printTemplate);
 
     CaseToProcess caseToProcess = new CaseToProcess();
     caseToProcess.setActionRule(actionRule);
@@ -63,12 +66,12 @@ public class PrintProcessorTest {
 
     // When
     underTest.processPrintRow(
-        actionRule.getTemplate(),
+        printTemplate.getTemplate(),
         caze,
         caseToProcess.getBatchId(),
         caseToProcess.getBatchQuantity(),
-        caseToProcess.getActionRule().getPackCode(),
-        caseToProcess.getActionRule().getPrintSupplier());
+        printTemplate.getPackCode(),
+        printTemplate.getPrintSupplier());
 
     // Then
     ArgumentCaptor<PrintRow> printRowArgumentCaptor = ArgumentCaptor.forClass(PrintRow.class);
