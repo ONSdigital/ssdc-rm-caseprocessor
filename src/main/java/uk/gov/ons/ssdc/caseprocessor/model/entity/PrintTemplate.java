@@ -8,8 +8,8 @@ import org.hibernate.annotations.Type;
 
 @Data
 @Entity
-public class FulfilmentTemplate {
-  @Id private String fulfilmentCode;
+public class PrintTemplate {
+  @Id private String packCode;
 
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")

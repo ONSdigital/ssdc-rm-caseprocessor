@@ -23,22 +23,22 @@ public class FulfilmentProcessor {
 
   @Transactional
   public void addFulfilmentBatchIdAndQuantity() {
-    List<String> fulfilmentCodes = fulfilmentToProcessRepository.findDistinctFulfilmentCode();
+    List<String> packCodes = fulfilmentToProcessRepository.findDistinctPackCode();
 
-    fulfilmentCodes.forEach(
-        fulfilmentCode -> {
+    packCodes.forEach(
+        packCode -> {
           UUID batchId = UUID.randomUUID();
           log.with("batch_id", batchId)
-              .with("fulfilment_code", fulfilmentCode)
+              .with("fulfilment_code", packCode)
               .info("Fulfilments triggered");
 
           jdbcTemplate.update(
               "UPDATE casev3.fulfilment_to_process "
                   + "SET batch_quantity = (SELECT COUNT(*) FROM casev3.fulfilment_to_process "
-                  + "WHERE fulfilment_code = ?), batch_id = ? WHERE fulfilment_code = ?",
-              fulfilmentCode,
+                  + "WHERE print_template_pack_code = ?), batch_id = ? WHERE print_template_pack_code = ?",
+              packCode,
               batchId,
-              fulfilmentCode);
+              packCode);
         });
   }
 }

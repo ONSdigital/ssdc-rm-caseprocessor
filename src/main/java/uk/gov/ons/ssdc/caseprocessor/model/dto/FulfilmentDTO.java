@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 public class FulfilmentDTO {
   private UUID caseId;
-  private String fulfilmentCode;
+  private String packCode;
 }
