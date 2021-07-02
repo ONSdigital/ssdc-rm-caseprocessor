@@ -11,8 +11,8 @@ public class CaseToProcessProcessor {
   private final PrintProcessor printProcessor;
   private final DeactivateUacProcessor deactivateUacProcessor;
 
-  public CaseToProcessProcessor(PrintProcessor printProcessor,
-      DeactivateUacProcessor deactivateUacProcessor) {
+  public CaseToProcessProcessor(
+      PrintProcessor printProcessor, DeactivateUacProcessor deactivateUacProcessor) {
     this.printProcessor = printProcessor;
     this.deactivateUacProcessor = deactivateUacProcessor;
   }
@@ -29,8 +29,7 @@ public class CaseToProcessProcessor {
           caseToProcess.getActionRule().getPrintSupplier());
     } else if (actionRuleType == ActionRuleType.DEACTIVATE_UAC) {
       deactivateUacProcessor.process(caseToProcess.getCaze());
-    }
-    else {
+    } else {
       throw new NotImplementedException("No implementation for other types of action rule yet");
     }
   }

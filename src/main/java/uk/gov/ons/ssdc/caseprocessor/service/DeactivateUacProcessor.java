@@ -1,5 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.DEACTIVATE_UAC_ROUTING_KEY;
+
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -18,13 +20,10 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 public class DeactivateUacProcessor {
   private final RabbitTemplate rabbitTemplate;
 
-  public static final String DEACTIVATE_UAC_ROUTING_KEY = "events.caseProcessor.deactivateUac";
-
   @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
 
-  public DeactivateUacProcessor(
-      RabbitTemplate rabbitTemplate) {
+  public DeactivateUacProcessor(RabbitTemplate rabbitTemplate) {
     this.rabbitTemplate = rabbitTemplate;
   }
 
@@ -32,10 +31,11 @@ public class DeactivateUacProcessor {
     List<UacQidLink> uacQidLinks = caze.getUacQidLinks();
 
     for (UacQidLink uacQidLink : uacQidLinks) {
-      ResponseManagementEvent responseManagementEvent = prepareDeactivateUacEvent(
-          uacQidLink);
-      rabbitTemplate.convertAndSend(
-          outboundExchange, DEACTIVATE_UAC_ROUTING_KEY, responseManagementEvent);
+      if (uacQidLink.isActive()) {
+        ResponseManagementEvent responseManagementEvent = prepareDeactivateUacEvent(uacQidLink);
+        rabbitTemplate.convertAndSend(
+            outboundExchange, DEACTIVATE_UAC_ROUTING_KEY, responseManagementEvent);
+      }
     }
   }
 

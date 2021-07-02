@@ -26,6 +26,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRule;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseToProcessRepository;
@@ -101,6 +102,31 @@ public class ActionRuleIT {
     }
   }
 
+  @Test
+  public void testDeactivateUacRule() throws Exception {
+    try (QueueSpy outboundUacQueue = rabbitQueueHelper.listen(OUTBOUND_UAC_QUEUE)) {
+      // Given
+      CollectionExercise collectionExercise = setUpCollectionExercise();
+      Case caze = setUpCase(collectionExercise);
+      UacQidLink uacQidLink = setupUacQidLink(caze);
+
+      // When
+      setUpActionRule(ActionRuleType.DEACTIVATE_UAC, collectionExercise);
+      String uacMessage = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
+
+      // Then
+      assertThat(uacMessage).isNotNull();
+      ResponseManagementEvent rme =
+          objectMapper.readValue(uacMessage, ResponseManagementEvent.class);
+      assertThat(rme.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
+      assertThat(rme.getPayload().getUac().getCaseId()).isEqualTo(caze.getId());
+      assertThat(rme.getPayload().getUac().isActive()).isFalse();
+      assertThat(rme.getPayload().getUac().getQuestionnaireId()).isEqualTo(uacQidLink.getQid());
+
+      assertThat(uacQidLinkRepository.findByQid(uacQidLink.getQid()).get().isActive()).isFalse();
+    }
+  }
+
   private CollectionExercise setUpCollectionExercise() {
     CollectionExercise collectionExercise = new CollectionExercise();
     collectionExercise.setId(UUID.randomUUID());
@@ -135,5 +161,14 @@ public class ActionRuleIT {
     randomCase.setEvents(null);
     randomCase.setSample(Map.of("foo", "bar"));
     return caseRepository.saveAndFlush(randomCase);
+  }
+
+  private UacQidLink setupUacQidLink(Case caze) {
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setId(UUID.randomUUID());
+    uacQidLink.setQid("123456789");
+    uacQidLink.setActive(true);
+    uacQidLink.setCaze(caze);
+    return uacQidLinkRepository.saveAndFlush(uacQidLink);
   }
 }

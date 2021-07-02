@@ -16,6 +16,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.CaseToProcess;
 @RunWith(MockitoJUnitRunner.class)
 public class CaseToProcessProcessorTest {
   @Mock private PrintProcessor printProcessor;
+  @Mock private DeactivateUacProcessor deactivateUacProcessor;
 
   @InjectMocks CaseToProcessProcessor underTest;
 
@@ -48,5 +49,24 @@ public class CaseToProcessProcessorTest {
             caseToProcess.getBatchQuantity(),
             caseToProcess.getActionRule().getPackCode(),
             caseToProcess.getActionRule().getPrintSupplier());
+  }
+
+  @Test
+  public void testProcessDeactivateUacActionRule() {
+    // Given
+    Case caze = new Case();
+
+    ActionRule actionRule = new ActionRule();
+    actionRule.setType(ActionRuleType.DEACTIVATE_UAC);
+
+    CaseToProcess caseToProcess = new CaseToProcess();
+    caseToProcess.setActionRule(actionRule);
+    caseToProcess.setCaze(caze);
+
+    // When
+    underTest.process(caseToProcess);
+
+    // Then
+    verify(deactivateUacProcessor).process(caze);
   }
 }

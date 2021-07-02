@@ -39,9 +39,6 @@ public class CaseClassifierTest {
     expectedSql.append(" SELECT ?, COUNT(*) OVER (), ?, id");
     expectedSql.append(" FROM casev3.cases WHERE collection_exercise_id=");
     expectedSql.append("'" + collectionExercise.getId().toString() + "'");
-    expectedSql.append(" AND receipt_received='f'");
-    expectedSql.append(" AND address_invalid='f'");
-    expectedSql.append(" AND refusal_received IS NULL");
     expectedSql.append(" AND foo IN ('bar')");
     verify(jdbcTemplate)
         .update(eq(expectedSql.toString()), any(UUID.class), eq(actionRule.getId()));
