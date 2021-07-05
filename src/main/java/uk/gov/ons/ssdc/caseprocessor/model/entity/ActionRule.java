@@ -44,7 +44,11 @@ public class ActionRule {
   @ManyToOne private CollectionExercise collectionExercise;
 
   public void setClassifiers(String classifierClauseStr) {
-    classifiers = classifierClauseStr.getBytes();
+    if (classifierClauseStr == null) {
+      classifiers = null;
+    } else {
+      classifiers = classifierClauseStr.getBytes();
+    }
   }
 
   public String getClassifiers() {
