@@ -34,8 +34,7 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 public class DeactivateUacReceiverIT {
   private static final String TEST_QID = "0123456789";
 
-  @Value("${queueconfig.rh-uac-queue}")
-  private String caseRhUacQueue;
+  private static final String caseRhUacQueue = "events.rh.uacUpdate";
 
   @Value("${queueconfig.deactivate-uac-queue}")
   private String deactivateUacQueue;
