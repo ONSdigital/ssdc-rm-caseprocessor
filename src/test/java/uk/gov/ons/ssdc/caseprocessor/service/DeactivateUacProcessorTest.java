@@ -6,7 +6,6 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.DEACTIVATE_UAC_ROUTING_KEY;
 
 import java.util.List;
-import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -33,8 +32,6 @@ public class DeactivateUacProcessorTest {
     ReflectionTestUtils.setField(underTest, "outboundExchange", "testExchange");
 
     Case caze = new Case();
-    caze.setSample(Map.of("foo", "bar"));
-    caze.setCaseRef(123L);
 
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setQid("0123456789");
