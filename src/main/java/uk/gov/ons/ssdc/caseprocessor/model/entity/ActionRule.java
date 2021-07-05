@@ -36,7 +36,7 @@ public class ActionRule {
 
   @Lob
   @Type(type = "org.hibernate.type.BinaryType")
-  @Column(nullable = false)
+  @Column
   private byte[] classifiers;
 
   @Type(type = "jsonb")
@@ -50,10 +50,18 @@ public class ActionRule {
   @ManyToOne private CollectionExercise collectionExercise;
 
   public void setClassifiers(String classifierClauseStr) {
+    if (classifierClauseStr == null) {
+      classifiers = null;
+    }
+
     classifiers = classifierClauseStr.getBytes();
   }
 
   public String getClassifiers() {
+    if (classifiers == null) {
+      return null;
+    }
+
     return new String(classifiers);
   }
 }
