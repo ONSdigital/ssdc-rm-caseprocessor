@@ -17,8 +17,9 @@ public class ActionRuleProcessor {
     this.actionRuleRepository = actionRuleRepository;
   }
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW) // Start a new transaction for every WoC
-  public void createScheduledActionRule(ActionRule triggeredActionRule) {
+  @Transactional(
+      propagation = Propagation.REQUIRES_NEW) // Start a new transaction for every action rule
+  public void processTriggeredActionRule(ActionRule triggeredActionRule) {
     caseClassifier.enqueueCasesForActionRule(triggeredActionRule);
     triggeredActionRule.setHasTriggered(true);
     actionRuleRepository.save(triggeredActionRule);

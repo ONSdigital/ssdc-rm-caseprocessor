@@ -34,7 +34,7 @@ public class ActionRuleTriggererTest {
     underTest.triggerActionRule();
 
     // Then
-    verify(actionRuleProcessor).createScheduledActionRule(eq(actionRule));
+    verify(actionRuleProcessor).processTriggeredActionRule(eq(actionRule));
   }
 
   @Test
@@ -55,6 +55,6 @@ public class ActionRuleTriggererTest {
     underTest.triggerActionRule();
 
     // Then
-    verify(actionRuleProcessor, times(50)).createScheduledActionRule(any(ActionRule.class));
+    verify(actionRuleProcessor, times(50)).processTriggeredActionRule(any(ActionRule.class));
   }
 }
