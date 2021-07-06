@@ -37,7 +37,7 @@ public class ActionRuleTriggerer {
         log.with("hostName", hostName)
             .with("id", triggeredActionRule.getId())
             .info("Action rule triggered");
-        actionRuleProcessor.createScheduledActionRule(triggeredActionRule);
+        actionRuleProcessor.triggerActionRule(triggeredActionRule);
       } catch (Exception e) {
         log.with("id", triggeredActionRule.getId())
             .error("Unexpected error while executing action rule - is classifier valid SQL?", e);
