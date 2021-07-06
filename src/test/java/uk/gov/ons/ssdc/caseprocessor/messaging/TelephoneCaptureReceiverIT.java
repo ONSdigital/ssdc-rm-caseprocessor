@@ -27,11 +27,11 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.UacDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.WaveOfContactRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 
@@ -51,7 +51,7 @@ public class TelephoneCaptureReceiverIT {
   @Autowired private EventRepository eventRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
-  @Autowired private WaveOfContactRepository waveOfContactRepository;
+  @Autowired private ActionRuleRepository actionRuleRepository;
   @Autowired private UacQidServiceClient uacQidServiceClient;
 
   //  private static final EasyRandom easyRandom = new EasyRandom();
@@ -64,7 +64,7 @@ public class TelephoneCaptureReceiverIT {
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
-    waveOfContactRepository.deleteAllInBatch();
+    actionRuleRepository.deleteAllInBatch();
     collectionExerciseRepository.deleteAllInBatch();
   }
 

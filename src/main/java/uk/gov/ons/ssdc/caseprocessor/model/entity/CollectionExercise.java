@@ -24,7 +24,7 @@ public class CollectionExercise {
   private List<Case> cases;
 
   @OneToMany(mappedBy = "collectionExercise")
-  private List<WaveOfContact> waveOfContacts;
+  private List<ActionRule> actionRules;
 
   @OneToMany(mappedBy = "collectionExercise")
   private List<Job> jobs;

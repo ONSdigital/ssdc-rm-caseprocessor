@@ -26,11 +26,11 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.WaveOfContactRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
@@ -51,7 +51,7 @@ public class SampleLoadedIT {
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
   @Autowired private EventRepository eventRepository;
-  @Autowired private WaveOfContactRepository waveOfContactRepository;
+  @Autowired private ActionRuleRepository actionRuleRepository;
 
   @Before
   @Transactional
@@ -61,7 +61,7 @@ public class SampleLoadedIT {
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
-    waveOfContactRepository.deleteAllInBatch();
+    actionRuleRepository.deleteAllInBatch();
     collectionExerciseRepository.deleteAllInBatch();
   }
 

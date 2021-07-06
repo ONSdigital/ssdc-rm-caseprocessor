@@ -42,6 +42,7 @@ queueconfig:
   invalid-address-queue: events.caseProcessor.invalidAddress
   survey-launched-queue: events.caseProcessor.surveyLaunched
   fulfilment-queue: events.caseProcessor.fulfilment
+  deactivate-uac-queue: events.caseProcessor.deactivateUac
   case-event-exchange: events
   consumers: 50
   retry-attempts: 3

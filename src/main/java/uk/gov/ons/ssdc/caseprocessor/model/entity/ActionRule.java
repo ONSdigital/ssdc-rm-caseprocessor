@@ -20,13 +20,13 @@ import org.hibernate.annotations.TypeDefs;
 @Data
 @Entity
 @TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
-public class WaveOfContact {
+public class ActionRule {
 
   @Id private UUID id;
 
   @Enumerated(EnumType.STRING)
   @Column
-  private WaveOfContactType type;
+  private ActionRuleType type;
 
   @Column(columnDefinition = "timestamp with time zone")
   private OffsetDateTime triggerDateTime;
@@ -36,7 +36,7 @@ public class WaveOfContact {
 
   @Lob
   @Type(type = "org.hibernate.type.BinaryType")
-  @Column(nullable = false)
+  @Column
   private byte[] classifiers;
 
   @Type(type = "jsonb")
@@ -50,10 +50,18 @@ public class WaveOfContact {
   @ManyToOne private CollectionExercise collectionExercise;
 
   public void setClassifiers(String classifierClauseStr) {
-    classifiers = classifierClauseStr.getBytes();
+    if (classifierClauseStr == null) {
+      classifiers = null;
+    } else {
+      classifiers = classifierClauseStr.getBytes();
+    }
   }
 
   public String getClassifiers() {
+    if (classifiers == null) {
+      return null;
+    }
+
     return new String(classifiers);
   }
 }

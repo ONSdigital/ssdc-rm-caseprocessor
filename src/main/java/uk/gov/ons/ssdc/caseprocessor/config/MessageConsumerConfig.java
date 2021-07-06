@@ -60,6 +60,9 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.telephone-capture-queue}")
   private String telephoneCaptureQueue;
 
+  @Value("${queueconfig.deactivate-uac-queue}")
+  private String deactivateUacQueue;
+
   public MessageConsumerConfig(
       ExceptionManagerClient exceptionManagerClient, ConnectionFactory connectionFactory) {
     this.exceptionManagerClient = exceptionManagerClient;
@@ -98,6 +101,11 @@ public class MessageConsumerConfig {
 
   @Bean
   public MessageChannel telephoneCaptureInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel deactivateUacInputChannel() {
     return new DirectChannel();
   }
 
@@ -151,6 +159,13 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  AmqpInboundChannelAdapter deactivateUacInbound(
+      @Qualifier("deactivateUacContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("deactivateUacInputChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
+  }
+
+  @Bean
   public SimpleMessageListenerContainer surveyLaunchedContainer() {
     return setupListenerContainer(surveyLaunchedQueue, ResponseManagementEvent.class);
   }
@@ -183,6 +198,11 @@ public class MessageConsumerConfig {
   @Bean
   public SimpleMessageListenerContainer telephoneCaptureContainer() {
     return setupListenerContainer(telephoneCaptureQueue, ResponseManagementEvent.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer deactivateUacContainer() {
+    return setupListenerContainer(deactivateUacQueue, ResponseManagementEvent.class);
   }
 
   private SimpleMessageListenerContainer setupListenerContainer(

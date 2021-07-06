@@ -48,7 +48,7 @@ public class FulfilmentIT {
   @Autowired private FulfilmentNextTriggerRepository fulfilmentNextTriggerRepository;
   @Autowired private FulfilmentToProcessRepository fulfilmentToProcessRepository;
   @Autowired private FulfilmentTemplateRepository fulfilmentTemplateRepository;
-  @Autowired private WaveOfContactRepository waveOfContactRepository;
+  @Autowired private ActionRuleRepository actionRuleRepository;
   @Autowired private CaseToProcessRepository caseToProcessRepository;
 
   private static final EasyRandom easyRandom = new EasyRandom();
@@ -59,7 +59,7 @@ public class FulfilmentIT {
   public void setUp() {
     rabbitQueueHelper.purgeQueue(outboundPrinterQueue);
     rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);
-    waveOfContactRepository.deleteAllInBatch();
+    actionRuleRepository.deleteAllInBatch();
     caseToProcessRepository.deleteAllInBatch();
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
