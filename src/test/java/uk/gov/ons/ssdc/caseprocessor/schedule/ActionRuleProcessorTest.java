@@ -26,7 +26,7 @@ public class ActionRuleProcessorTest {
 
     // when
     ActionRuleProcessor underTest = new ActionRuleProcessor(caseClassifier, actionRuleRepository);
-    underTest.triggerActionRule(actionRule);
+    underTest.processTriggeredActionRule(actionRule);
 
     // then
     ArgumentCaptor<ActionRule> actionRuleCaptor = ArgumentCaptor.forClass(ActionRule.class);

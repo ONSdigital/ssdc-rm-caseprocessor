@@ -19,7 +19,7 @@ public class ActionRuleProcessor {
 
   @Transactional(
       propagation = Propagation.REQUIRES_NEW) // Start a new transaction for every action rule
-  public void triggerActionRule(ActionRule triggeredActionRule) {
+  public void processTriggeredActionRule(ActionRule triggeredActionRule) {
     caseClassifier.enqueueCasesForActionRule(triggeredActionRule);
     triggeredActionRule.setHasTriggered(true);
     actionRuleRepository.save(triggeredActionRule);

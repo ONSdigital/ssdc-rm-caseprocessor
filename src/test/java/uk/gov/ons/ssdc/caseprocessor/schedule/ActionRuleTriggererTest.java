@@ -33,7 +33,7 @@ public class ActionRuleTriggererTest {
     underTest.triggerActionRule();
 
     // Then
-    verify(actionRuleProcessor).triggerActionRule(actionRule);
+    verify(actionRuleProcessor).processTriggeredActionRule(actionRule);
   }
 
   @Test
@@ -54,6 +54,6 @@ public class ActionRuleTriggererTest {
     underTest.triggerActionRule();
 
     // Then
-    verify(actionRuleProcessor, times(50)).triggerActionRule(any(ActionRule.class));
+    verify(actionRuleProcessor, times(50)).processTriggeredActionRule(any(ActionRule.class));
   }
 }
