@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.model.entity;
 
 public enum UserGroupAuthorisedActivityType {
+  SUPER_USER,
   LIST_SURVEYS,
   CREATE_SURVEY,
   CREATE_PRINT_TEMPLATE,
