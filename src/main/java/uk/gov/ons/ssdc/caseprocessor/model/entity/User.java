@@ -9,7 +9,8 @@ import lombok.ToString;
 @ToString(onlyExplicitlyIncluded = true) // Bidirectional relationship causes IDE stackoverflow
 @Entity
 @Data
-@Table(name = "users")
+@Table(name = "users",
+    indexes = {@Index(name = "users_email_idx", columnList = "email", unique = true)})
 public class User {
   @Id private UUID id;
 
