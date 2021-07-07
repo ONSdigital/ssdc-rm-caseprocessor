@@ -42,12 +42,14 @@ public class FulfilmentIT {
 
   @Autowired private CaseRepository caseRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
+  @Autowired private SurveyRepository surveyRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
   @Autowired private EventRepository eventRepository;
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private FulfilmentNextTriggerRepository fulfilmentNextTriggerRepository;
   @Autowired private FulfilmentToProcessRepository fulfilmentToProcessRepository;
-  @Autowired private FulfilmentTemplateRepository fulfilmentTemplateRepository;
+  @Autowired private PrintTemplateRepository printTemplateRepository;
+  @Autowired private SurveyPrintTemplateRepository surveyPrintTemplateRepository;
   @Autowired private ActionRuleRepository actionRuleRepository;
   @Autowired private CaseToProcessRepository caseToProcessRepository;
 
@@ -65,8 +67,11 @@ public class FulfilmentIT {
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
     collectionExerciseRepository.deleteAllInBatch();
+    surveyPrintTemplateRepository.deleteAllInBatch();
+    surveyRepository.deleteAllInBatch();
     fulfilmentNextTriggerRepository.deleteAllInBatch();
     fulfilmentToProcessRepository.deleteAllInBatch();
+    printTemplateRepository.deleteAllInBatch();
   }
 
   @Test
@@ -74,19 +79,28 @@ public class FulfilmentIT {
     try (QueueSpy printerQueue = rabbitQueueHelper.listen(outboundPrinterQueue);
         QueueSpy outboundUacQueue = rabbitQueueHelper.listen(OUTBOUND_UAC_QUEUE)) {
       // Given
-      FulfilmentTemplate fulfilmentTemplate = new FulfilmentTemplate();
-      fulfilmentTemplate.setFulfilmentCode(PACK_CODE);
-      fulfilmentTemplate.setPrintSupplier(PRINT_SUPPLIER);
-      fulfilmentTemplate.setTemplate(new String[] {"__caseref__", "foo", "__uac__"});
-      fulfilmentTemplateRepository.saveAndFlush(fulfilmentTemplate);
+      PrintTemplate printTemplate = new PrintTemplate();
+      printTemplate.setPackCode(PACK_CODE);
+      printTemplate.setPrintSupplier(PRINT_SUPPLIER);
+      printTemplate.setTemplate(new String[] {"__caseref__", "foo", "__uac__"});
+      printTemplateRepository.saveAndFlush(printTemplate);
 
-      CollectionExercise collectionExercise = setUpCollectionExercise();
+      Survey survey = setUpSurvey();
+
+      FulfilmentSurveyPrintTemplate fulfilmentSurveyPrintTemplate =
+          new FulfilmentSurveyPrintTemplate();
+      fulfilmentSurveyPrintTemplate.setId(UUID.randomUUID());
+      fulfilmentSurveyPrintTemplate.setSurvey(survey);
+      fulfilmentSurveyPrintTemplate.setPrintTemplate(printTemplate);
+      surveyPrintTemplateRepository.saveAndFlush(fulfilmentSurveyPrintTemplate);
+
+      CollectionExercise collectionExercise = setUpCollectionExercise(survey);
       Case caze = setUpCase(collectionExercise);
 
       // When
       FulfilmentDTO fulfilment = new FulfilmentDTO();
       fulfilment.setCaseId(caze.getId());
-      fulfilment.setFulfilmentCode(PACK_CODE);
+      fulfilment.setPackCode(PACK_CODE);
 
       PayloadDTO payload = new PayloadDTO();
       payload.setFulfilment(fulfilment);
@@ -131,9 +145,16 @@ public class FulfilmentIT {
     }
   }
 
-  private CollectionExercise setUpCollectionExercise() {
+  private Survey setUpSurvey() {
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+    return surveyRepository.saveAndFlush(survey);
+  }
+
+  private CollectionExercise setUpCollectionExercise(Survey survey) {
     CollectionExercise collectionExercise = new CollectionExercise();
     collectionExercise.setId(UUID.randomUUID());
+    collectionExercise.setSurvey(survey);
     return collectionExerciseRepository.saveAndFlush(collectionExercise);
   }
 

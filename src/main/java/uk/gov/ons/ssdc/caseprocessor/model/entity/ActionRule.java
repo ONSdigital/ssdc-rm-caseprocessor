@@ -39,13 +39,7 @@ public class ActionRule {
   @Column
   private byte[] classifiers;
 
-  @Type(type = "jsonb")
-  @Column(columnDefinition = "jsonb")
-  private String[] template;
-
-  @Column private String printSupplier;
-
-  @Column private String packCode;
+  @ManyToOne private PrintTemplate printTemplate;
 
   @ManyToOne private CollectionExercise collectionExercise;
 

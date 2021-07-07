@@ -28,4 +28,10 @@ public class Survey {
 
   @OneToMany(mappedBy = "survey")
   private List<CollectionExercise> collectionExercises;
+
+  @OneToMany(mappedBy = "survey")
+  private List<ActionRuleSurveyPrintTemplate> actionRulePrintTemplates;
+
+  @OneToMany(mappedBy = "survey")
+  private List<FulfilmentSurveyPrintTemplate> fulfilmentPrintTemplates;
 }

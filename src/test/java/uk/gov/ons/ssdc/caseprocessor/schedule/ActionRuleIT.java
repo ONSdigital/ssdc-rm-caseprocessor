@@ -26,12 +26,18 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRule;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.PrintTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentNextTriggerRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintTemplateRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyPrintTemplateRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
@@ -49,12 +55,17 @@ public class ActionRuleIT {
   private static final String PRINT_SUPPLIER = "test-print-supplier";
 
   @Autowired private CaseRepository caseRepository;
-  @Autowired private ActionRuleRepository actionRuleRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
-  @Autowired private CaseToProcessRepository caseToProcessRepository;
+  @Autowired private SurveyRepository surveyRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
   @Autowired private EventRepository eventRepository;
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
+  @Autowired private FulfilmentNextTriggerRepository fulfilmentNextTriggerRepository;
+  @Autowired private FulfilmentToProcessRepository fulfilmentToProcessRepository;
+  @Autowired private PrintTemplateRepository printTemplateRepository;
+  @Autowired private SurveyPrintTemplateRepository surveyPrintTemplateRepository;
+  @Autowired private ActionRuleRepository actionRuleRepository;
+  @Autowired private CaseToProcessRepository caseToProcessRepository;
 
   private static final EasyRandom easyRandom = new EasyRandom();
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
@@ -64,12 +75,17 @@ public class ActionRuleIT {
   public void setUp() {
     rabbitQueueHelper.purgeQueue(outboundPrinterQueue);
     rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);
+    actionRuleRepository.deleteAllInBatch();
+    caseToProcessRepository.deleteAllInBatch();
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
-    caseToProcessRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
-    actionRuleRepository.deleteAllInBatch();
     collectionExerciseRepository.deleteAllInBatch();
+    surveyPrintTemplateRepository.deleteAllInBatch();
+    surveyRepository.deleteAllInBatch();
+    fulfilmentNextTriggerRepository.deleteAllInBatch();
+    fulfilmentToProcessRepository.deleteAllInBatch();
+    printTemplateRepository.deleteAllInBatch();
   }
 
   @Test
@@ -79,9 +95,10 @@ public class ActionRuleIT {
       // Given
       CollectionExercise collectionExercise = setUpCollectionExercise();
       Case caze = setUpCase(collectionExercise);
+      PrintTemplate printTemplate = setUpPrintTemplate();
 
       // When
-      setUpActionRule(ActionRuleType.PRINT, collectionExercise);
+      setUpActionRule(ActionRuleType.PRINT, collectionExercise, printTemplate);
       String printRowMessage = printerQueue.getQueue().poll(20, TimeUnit.SECONDS);
       String uacMessage = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
@@ -111,7 +128,7 @@ public class ActionRuleIT {
       UacQidLink uacQidLink = setupUacQidLink(caze);
 
       // When
-      setUpActionRule(ActionRuleType.DEACTIVATE_UAC, collectionExercise);
+      setUpActionRule(ActionRuleType.DEACTIVATE_UAC, collectionExercise, null);
       String uacMessage = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
@@ -133,17 +150,23 @@ public class ActionRuleIT {
     return collectionExerciseRepository.saveAndFlush(collectionExercise);
   }
 
-  private ActionRule setUpActionRule(ActionRuleType type, CollectionExercise collectionExercise) {
+  private PrintTemplate setUpPrintTemplate() {
+    PrintTemplate printTemplate = new PrintTemplate();
+    printTemplate.setTemplate(new String[] {"__caseref__", "foo", "__uac__"});
+    printTemplate.setPackCode(PACK_CODE);
+    printTemplate.setPrintSupplier(PRINT_SUPPLIER);
+    return printTemplateRepository.saveAndFlush(printTemplate);
+  }
+
+  private ActionRule setUpActionRule(
+      ActionRuleType type, CollectionExercise collectionExercise, PrintTemplate printTemplate) {
     ActionRule actionRule = new ActionRule();
     actionRule.setId(UUID.randomUUID());
     actionRule.setTriggerDateTime(OffsetDateTime.now());
     actionRule.setHasTriggered(false);
     actionRule.setType(type);
     actionRule.setCollectionExercise(collectionExercise);
-    actionRule.setClassifiers("1=1"); // Dummy classifier which is always true
-    actionRule.setTemplate(new String[] {"__caseref__", "foo", "__uac__"});
-    actionRule.setPackCode(PACK_CODE);
-    actionRule.setPrintSupplier(PRINT_SUPPLIER);
+    actionRule.setPrintTemplate(printTemplate);
 
     return actionRuleRepository.saveAndFlush(actionRule);
   }

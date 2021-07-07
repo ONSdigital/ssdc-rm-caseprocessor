@@ -4,6 +4,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CaseToProcess;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.PrintTemplate;
 
 @Component
 public class CaseToProcessProcessor {
@@ -20,13 +21,14 @@ public class CaseToProcessProcessor {
   public void process(CaseToProcess caseToProcess) {
     ActionRuleType actionRuleType = caseToProcess.getActionRule().getType();
     if (actionRuleType == ActionRuleType.PRINT) {
+      PrintTemplate printTemplate = caseToProcess.getActionRule().getPrintTemplate();
       printProcessor.processPrintRow(
-          caseToProcess.getActionRule().getTemplate(),
+          printTemplate.getTemplate(),
           caseToProcess.getCaze(),
           caseToProcess.getBatchId(),
           caseToProcess.getBatchQuantity(),
-          caseToProcess.getActionRule().getPackCode(),
-          caseToProcess.getActionRule().getPrintSupplier());
+          printTemplate.getPackCode(),
+          printTemplate.getPrintSupplier());
     } else if (actionRuleType == ActionRuleType.DEACTIVATE_UAC) {
       deactivateUacProcessor.process(caseToProcess.getCaze());
     } else {

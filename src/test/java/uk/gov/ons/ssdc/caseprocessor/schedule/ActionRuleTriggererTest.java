@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,7 +34,7 @@ public class ActionRuleTriggererTest {
     underTest.triggerActionRule();
 
     // Then
-    verify(actionRuleProcessor).processTriggeredActionRule(actionRule);
+    verify(actionRuleProcessor).processTriggeredActionRule(eq(actionRule));
   }
 
   @Test

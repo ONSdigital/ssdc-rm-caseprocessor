@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.OffsetDateTime;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +22,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,7 +30,6 @@ public class PrintProcessorTest {
   @Mock private UacQidCache uacQidCache;
   @Mock private UacQidLinkRepository uacQidLinkRepository;
   @Mock private UacService uacService;
-  @Mock private FulfilmentTemplateRepository fulfilmentTemplateRepository;
   @Mock private EventLogger eventLogger;
 
   @InjectMocks PrintProcessor underTest;
@@ -47,11 +44,14 @@ public class PrintProcessorTest {
     caze.setSample(Map.of("foo", "bar"));
     caze.setCaseRef(123L);
 
+    PrintTemplate printTemplate = new PrintTemplate();
+    printTemplate.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
+    printTemplate.setPackCode("test pack code");
+    printTemplate.setPrintSupplier("test print supplier");
+
     ActionRule actionRule = new ActionRule();
     actionRule.setType(ActionRuleType.PRINT);
-    actionRule.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
-    actionRule.setPackCode("test pack code");
-    actionRule.setPrintSupplier("test print supplier");
+    actionRule.setPrintTemplate(printTemplate);
 
     CaseToProcess caseToProcess = new CaseToProcess();
     caseToProcess.setActionRule(actionRule);
@@ -66,12 +66,12 @@ public class PrintProcessorTest {
 
     // When
     underTest.processPrintRow(
-        actionRule.getTemplate(),
+        printTemplate.getTemplate(),
         caze,
         caseToProcess.getBatchId(),
         caseToProcess.getBatchQuantity(),
-        caseToProcess.getActionRule().getPackCode(),
-        caseToProcess.getActionRule().getPrintSupplier());
+        printTemplate.getPackCode(),
+        printTemplate.getPrintSupplier());
 
     // Then
     ArgumentCaptor<PrintRow> printRowArgumentCaptor = ArgumentCaptor.forClass(PrintRow.class);
@@ -105,19 +105,17 @@ public class PrintProcessorTest {
   @Test
   public void testProcessFulfilment() {
     // Given
-    FulfilmentTemplate fulfilmentTemplate = new FulfilmentTemplate();
-    fulfilmentTemplate.setFulfilmentCode("TEST_FULFILMENT_CODE");
-    fulfilmentTemplate.setPrintSupplier("FOOBAR_PRINT_SUPPLIER");
-    fulfilmentTemplate.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
-    when(fulfilmentTemplateRepository.findById(anyString()))
-        .thenReturn(Optional.of(fulfilmentTemplate));
+    PrintTemplate printTemplate = new PrintTemplate();
+    printTemplate.setPackCode("TEST_FULFILMENT_CODE");
+    printTemplate.setPrintSupplier("FOOBAR_PRINT_SUPPLIER");
+    printTemplate.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
 
     Case caze = new Case();
     caze.setSample(Map.of("foo", "bar"));
     caze.setCaseRef(123L);
 
     FulfilmentToProcess fulfilmentToProcess = new FulfilmentToProcess();
-    fulfilmentToProcess.setFulfilmentCode("TEST_FULFILMENT_CODE");
+    fulfilmentToProcess.setPrintTemplate(printTemplate);
     fulfilmentToProcess.setCaze(caze);
     fulfilmentToProcess.setBatchId(UUID.fromString("6a127d58-c1cb-489c-a3f5-72014a0c32d6"));
     fulfilmentToProcess.setBatchQuantity(200);

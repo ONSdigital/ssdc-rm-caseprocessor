@@ -10,6 +10,7 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constru
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,8 +25,12 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.FulfilmentDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentSurveyPrintTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentToProcess;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.PrintTemplate;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.Survey;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 
@@ -50,9 +55,23 @@ public class FulfilmentReceiverTest {
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setFulfilment(new FulfilmentDTO());
     managementEvent.getPayload().getFulfilment().setCaseId(UUID.randomUUID());
-    managementEvent.getPayload().getFulfilment().setFulfilmentCode("TEST_FULFILMENT_CODE");
+    managementEvent.getPayload().getFulfilment().setPackCode("TEST_FULFILMENT_CODE");
     Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(managementEvent);
+
+    PrintTemplate printTemplate = new PrintTemplate();
+    printTemplate.setPackCode("TEST_FULFILMENT_CODE");
+
+    FulfilmentSurveyPrintTemplate fulfilmentSurveyPrintTemplate =
+        new FulfilmentSurveyPrintTemplate();
+    fulfilmentSurveyPrintTemplate.setPrintTemplate(printTemplate);
+
     Case expectedCase = new Case();
+    expectedCase.setCollectionExercise(new CollectionExercise());
+    expectedCase.getCollectionExercise().setSurvey(new Survey());
+    expectedCase
+        .getCollectionExercise()
+        .getSurvey()
+        .setFulfilmentPrintTemplates(List.of(fulfilmentSurveyPrintTemplate));
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // When
@@ -63,7 +82,7 @@ public class FulfilmentReceiverTest {
         ArgumentCaptor.forClass(FulfilmentToProcess.class);
     verify(fulfilmentToProcessRepository).saveAndFlush(fulfilmentToProcessArgCapt.capture());
     FulfilmentToProcess fulfilmentToProcess = fulfilmentToProcessArgCapt.getValue();
-    assertThat(fulfilmentToProcess.getFulfilmentCode()).isEqualTo("TEST_FULFILMENT_CODE");
+    assertThat(fulfilmentToProcess.getPrintTemplate()).isEqualTo(printTemplate);
     assertThat(fulfilmentToProcess.getCaze()).isEqualTo(expectedCase);
 
     OffsetDateTime messageDateTime = getMsgTimeStamp(message);

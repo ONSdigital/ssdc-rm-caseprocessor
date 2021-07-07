@@ -13,7 +13,7 @@ public class FulfilmentToProcess {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id;
 
-  @Column private String fulfilmentCode;
+  @ManyToOne private PrintTemplate printTemplate;
 
   @ManyToOne private Case caze;
 

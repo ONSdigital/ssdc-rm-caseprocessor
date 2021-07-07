@@ -3,7 +3,6 @@ package uk.gov.ons.ssdc.caseprocessor.service;
 import com.opencsv.CSVWriter;
 import java.io.StringWriter;
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +13,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 
 @Component
@@ -23,7 +21,6 @@ public class PrintProcessor {
   private final UacQidCache uacQidCache;
   private final UacQidLinkRepository uacQidLinkRepository;
   private final UacService uacService;
-  private final FulfilmentTemplateRepository fulfilmentTemplateRepository;
   private final EventLogger eventLogger;
 
   private final StringWriter stringWriter = new StringWriter();
@@ -43,34 +40,24 @@ public class PrintProcessor {
       UacQidCache uacQidCache,
       UacQidLinkRepository uacQidLinkRepository,
       UacService uacService,
-      FulfilmentTemplateRepository fulfilmentTemplateRepository,
       EventLogger eventLogger) {
     this.rabbitTemplate = rabbitTemplate;
     this.uacQidCache = uacQidCache;
     this.uacQidLinkRepository = uacQidLinkRepository;
     this.uacService = uacService;
-    this.fulfilmentTemplateRepository = fulfilmentTemplateRepository;
     this.eventLogger = eventLogger;
   }
 
   public void process(FulfilmentToProcess fulfilmentToProcess) {
-    Optional<FulfilmentTemplate> fulfilmentTemplateOpt =
-        fulfilmentTemplateRepository.findById(fulfilmentToProcess.getFulfilmentCode());
-    if (!fulfilmentTemplateOpt.isPresent()) {
-      throw new RuntimeException(
-          String.format(
-              "No template for fulfilment code %s", fulfilmentToProcess.getFulfilmentCode()));
-    }
-
-    FulfilmentTemplate fulfilmentTemplate = fulfilmentTemplateOpt.get();
+    PrintTemplate printTemplate = fulfilmentToProcess.getPrintTemplate();
 
     processPrintRow(
-        fulfilmentTemplate.getTemplate(),
+        printTemplate.getTemplate(),
         fulfilmentToProcess.getCaze(),
         fulfilmentToProcess.getBatchId(),
         fulfilmentToProcess.getBatchQuantity(),
-        fulfilmentToProcess.getFulfilmentCode(),
-        fulfilmentTemplate.getPrintSupplier());
+        printTemplate.getPackCode(),
+        printTemplate.getPrintSupplier());
   }
 
   public void processPrintRow(

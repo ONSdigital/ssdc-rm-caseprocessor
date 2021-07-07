@@ -161,10 +161,10 @@ The action rule will only be triggered by the "leader" pod, in the event that mu
 ## Fulfilment
 The case processor triggers fulfilmments at a specified date & time. Fulfilments trigger once every 24 hours. Fulfilments will be sent for all requests which have queued up.
 
-The SQL to create a fulfilment template is as follows:
+The SQL to create a print template is as follows:
 
 ```sql
-insert into casev3.fulfilment_template
+insert into casev3.print_template
 values ('TEST_FULFILMENT_CODE',      -- fulfilment code
         '["__caseref__","__uac__"]', -- print template
         'SUPPLIER_A');               -- print supplier
@@ -179,3 +179,23 @@ values ('b1d826fa-6afc-4270-9f0c-302cb05d4d96', -- trigger ID
 ```
 
 The fulfilments will only be triggered by the "leader" pod, in the event that multiple instances of the case processor are running. If the leader dies or is killed/terminated, then another leader will be elected after 2 minutes.
+
+Example message:
+```json
+{
+  "event": {
+    "type": "FULFILMENT",
+    "source": "Respondent Home",
+    "channel": "RH",
+    "dateTime": null,
+    "transactionId": null
+  },
+  "payload": {
+    "fulfilment": {
+      "caseId": "2a792cbe-c125-4a3b-973a-34c0bccc7656",
+      "packCode": "TEST_FULFILMENT_CODE"
+    }
+  }
+}
+```
+
