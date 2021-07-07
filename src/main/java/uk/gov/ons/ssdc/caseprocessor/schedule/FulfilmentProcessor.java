@@ -29,7 +29,7 @@ public class FulfilmentProcessor {
         packCode -> {
           UUID batchId = UUID.randomUUID();
           log.with("batch_id", batchId)
-              .with("fulfilment_code", packCode)
+              .with("pack_code", packCode)
               .info("Fulfilments triggered");
 
           jdbcTemplate.update(
