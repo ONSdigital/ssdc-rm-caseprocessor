@@ -28,9 +28,7 @@ public class FulfilmentProcessor {
     packCodes.forEach(
         packCode -> {
           UUID batchId = UUID.randomUUID();
-          log.with("batch_id", batchId)
-              .with("pack_code", packCode)
-              .info("Fulfilments triggered");
+          log.with("batch_id", batchId).with("pack_code", packCode).info("Fulfilments triggered");
 
           jdbcTemplate.update(
               "UPDATE casev3.fulfilment_to_process "
