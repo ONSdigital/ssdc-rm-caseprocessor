@@ -29,18 +29,18 @@ public class UacService {
     this.uacQidLinkRepository = uacQidLinkRepository;
   }
 
-  public void saveAndEmitUacUpdatedEvent(UacQidLink uacQidLink) {
-    uacQidLinkRepository.save(uacQidLink);
+  public UacQidLink saveAndEmitUacUpdatedEvent(UacQidLink uacQidLink) {
+    UacQidLink savedUacQidLink = uacQidLinkRepository.saveAndFlush(uacQidLink);
 
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.UAC_UPDATED);
     eventDTO.setChannel("RM");
 
     UacDTO uac = new UacDTO();
-    uac.setQuestionnaireId(uacQidLink.getQid());
-    uac.setUac(uacQidLink.getUac());
-    uac.setActive(uacQidLink.isActive());
+    uac.setQuestionnaireId(savedUacQidLink.getQid());
+    uac.setUac(savedUacQidLink.getUac());
+    uac.setActive(savedUacQidLink.isActive());
 
-    Case caze = uacQidLink.getCaze();
+    Case caze = savedUacQidLink.getCaze();
     if (caze != null) {
       uac.setCaseId(caze.getId());
       uac.setCollectionExerciseId(caze.getCollectionExercise().getId());
@@ -54,6 +54,8 @@ public class UacService {
 
     rabbitTemplate.convertAndSend(
         outboundExchange, UAC_UPDATE_ROUTING_KEY, responseManagementEvent);
+
+    return savedUacQidLink;
   }
 
   public UacQidLink findByQid(String questionnaireId) {

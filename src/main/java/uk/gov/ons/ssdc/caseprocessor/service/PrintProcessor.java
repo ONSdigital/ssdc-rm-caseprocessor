@@ -131,8 +131,6 @@ public class PrintProcessor {
     uacQidLink.setQid(uacQidDTO.getQid());
     uacQidLink.setUac(uacQidDTO.getUac());
     uacQidLink.setCaze(caze);
-    uacQidLinkRepository.saveAndFlush(uacQidLink);
-
     uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
     return uacQidDTO;

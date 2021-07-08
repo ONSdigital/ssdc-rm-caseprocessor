@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,6 +51,7 @@ public class DeactivateUacReceiverTest {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setActive(true);
     when(uacService.findByQid("0123456789")).thenReturn(uacQidLink);
+    when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
 
     // When
     underTest.receiveMessage(message);
