@@ -22,13 +22,11 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PrintProcessorTest {
   @Mock private RabbitTemplate rabbitTemplate;
   @Mock private UacQidCache uacQidCache;
-  @Mock private UacQidLinkRepository uacQidLinkRepository;
   @Mock private UacService uacService;
   @Mock private EventLogger eventLogger;
 
@@ -82,14 +80,13 @@ public class PrintProcessorTest {
     assertThat(actualPrintRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacQidLinkRepository).saveAndFlush(uacQidLinkCaptor.capture());
+    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
     assertThat(actualUacQidLink.isActive()).isTrue();
 
-    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.getValue());
     verify(eventLogger)
         .logCaseEvent(
             eq(caze),
@@ -138,14 +135,13 @@ public class PrintProcessorTest {
     assertThat(actualPrintRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacQidLinkRepository).saveAndFlush(uacQidLinkCaptor.capture());
+    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
     assertThat(actualUacQidLink.isActive()).isTrue();
 
-    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.getValue());
     verify(eventLogger)
         .logCaseEvent(
             eq(caze),

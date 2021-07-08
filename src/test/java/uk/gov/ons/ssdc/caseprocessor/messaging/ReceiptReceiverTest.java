@@ -60,6 +60,7 @@ public class ReceiptReceiverTest {
     uacQidLink.setActive(true);
 
     when(uacService.findByQid(any())).thenReturn(uacQidLink);
+    when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
 
     underTest.receiveMessage(message);
 
@@ -147,6 +148,7 @@ public class ReceiptReceiverTest {
     uacQidLink.setCaze(caze);
 
     when(uacService.findByQid(any())).thenReturn(uacQidLink);
+    when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
 
     underTest.receiveMessage(message);
 

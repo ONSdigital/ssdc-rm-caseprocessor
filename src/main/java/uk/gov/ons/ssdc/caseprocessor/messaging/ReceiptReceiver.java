@@ -41,7 +41,7 @@ public class ReceiptReceiver {
 
     if (uacQidLink.isActive()) {
       uacQidLink.setActive(false);
-      uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+      uacQidLink = uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
       if (uacQidLink.getCaze() != null) {
         Case caze = uacQidLink.getCaze();
