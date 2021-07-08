@@ -11,4 +11,6 @@ public class Sample {
   private UUID collectionExerciseId;
 
   private Map<String, String> sample;
+
+  private Map<String, String> sampleSensitive;
 }
