@@ -1,6 +1,16 @@
 {
   "queues": [
     {
+      "name": "events.caseProcessor.updateSampleSensitive",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "events.caseProcessor.updateSampleSensitive"
+      }
+    },
+    {
       "name": "events.caseProcessor.fulfilment",
       "vhost": "/",
       "durable": true,

@@ -15,4 +15,5 @@ public class PayloadDTO {
   private FulfilmentDTO fulfilment;
   private TelephoneCaptureDTO telephoneCapture;
   private DeactivateUacDTO deactivateUac;
+  private UpdateSampleSensitive updateSampleSensitive;
 }
