@@ -46,7 +46,7 @@ public class Job {
   @Column
   private JobStatus jobStatus;
 
-  @OneToMany(mappedBy = "job", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "job")
   private List<JobRow> jobRows;
 
   @Column private String fatalErrorDescription;
