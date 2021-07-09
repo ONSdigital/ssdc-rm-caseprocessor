@@ -181,6 +181,15 @@
     {
       "source": "events",
       "vhost": "/",
+      "destination": "events.caseProcessor.updateSampleSensitive",
+      "destination_type": "queue",
+      "routing_key": "events.caseProcessor.updateSampleSensitive",
+      "arguments": {
+      }
+    },
+    {
+      "source": "events",
+      "vhost": "/",
       "destination": "events.caseProcessor.refusal",
       "destination_type": "queue",
       "routing_key": "events.caseProcessor.refusal",
