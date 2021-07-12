@@ -83,4 +83,31 @@ public class UpdateSampleSensitiveReceiverTest {
             eq(RedactHelper.redact(managementEvent.getPayload())),
             eq(messageDateTime));
   }
+
+  @Test(expected = RuntimeException.class)
+  public void testMessageKeyDoesNotMatchExistingEntry() {
+    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
+    managementEvent.setEvent(new EventDTO());
+    managementEvent.getEvent().setDateTime(OffsetDateTime.now().minusHours(1));
+    managementEvent.getEvent().setType(UPDATE_SAMPLE_SENSITIVE);
+    managementEvent.getEvent().setChannel("CC");
+    managementEvent.setPayload(new PayloadDTO());
+    managementEvent.getPayload().setUpdateSampleSensitive(new UpdateSampleSensitive());
+    managementEvent.getPayload().getUpdateSampleSensitive().setCaseId(UUID.randomUUID());
+    managementEvent
+        .getPayload()
+        .getUpdateSampleSensitive()
+        .setSampleSensitive(Map.of("UPRN", "9999999"));
+    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(managementEvent);
+
+    // Given
+    Case expectedCase = new Case();
+    Map<String, String> sensitiveData = new HashMap<>();
+    sensitiveData.put("PHONE_NUMBER", "1111111");
+    expectedCase.setSampleSensitive(sensitiveData);
+    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+
+    // When, then throws
+    underTest.receiveMessage(message);
+  }
 }

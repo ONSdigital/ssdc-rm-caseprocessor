@@ -39,6 +39,9 @@ public class UpdateSampleSensitiveReceiver {
     for (Map.Entry<String, String> entry : updateSampleSensitive.getSampleSensitive().entrySet()) {
       if (caze.getSampleSensitive().containsKey(entry.getKey())) {
         caze.getSampleSensitive().put(entry.getKey(), entry.getValue());
+      } else {
+        throw new RuntimeException(
+            "Key (" + entry.getKey() + ") does not match an existing entry!");
       }
     }
 

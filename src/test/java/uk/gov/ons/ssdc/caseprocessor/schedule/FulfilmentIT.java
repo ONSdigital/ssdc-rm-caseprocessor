@@ -5,6 +5,7 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -119,6 +120,9 @@ public class FulfilmentIT {
       rabbitQueueHelper.sendMessage(outboundFulfilmentQueue, responseManagementEvent);
 
       Thread.sleep(3000);
+
+      List<Event> events = eventPoller.getEvents(1);
+
 
       FulfilmentNextTrigger fulfilmentNextTrigger = new FulfilmentNextTrigger();
       fulfilmentNextTrigger.setId(UUID.randomUUID());
