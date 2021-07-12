@@ -71,8 +71,7 @@ public class UpdateSampleSensitiveReceiverIT {
   }
 
   @Test
-  public void testUpdateSampleSensitive()
-      throws JsonProcessingException, EventsNotFoundException {
+  public void testUpdateSampleSensitive() throws JsonProcessingException, EventsNotFoundException {
     // GIVEN
 
     Case caze = new Case();
