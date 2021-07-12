@@ -1,6 +1,5 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
-import static java.lang.Thread.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_QUEUE;
 
@@ -72,7 +71,8 @@ public class UpdateSampleSensitiveReceiverIT {
   }
 
   @Test
-  public void testUpdateSampleSensitive() throws JsonProcessingException, InterruptedException, EventsNotFoundException {
+  public void testUpdateSampleSensitive()
+      throws JsonProcessingException, EventsNotFoundException {
     // GIVEN
 
     Case caze = new Case();
