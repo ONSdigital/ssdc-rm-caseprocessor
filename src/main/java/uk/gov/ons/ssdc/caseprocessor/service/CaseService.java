@@ -39,6 +39,10 @@ public class CaseService {
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
   }
 
+  public void saveCase(Case caze) {
+    caseRepository.saveAndFlush(caze);
+  }
+
   public void emitCaseCreatedEvent(Case caze) {
     EventDTO eventDTO = new EventDTO();
     eventDTO.setType(EventTypeDTO.CASE_CREATED);

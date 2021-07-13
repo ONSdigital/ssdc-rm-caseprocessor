@@ -63,6 +63,9 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.deactivate-uac-queue}")
   private String deactivateUacQueue;
 
+  @Value("${queueconfig.update-sample-sensitive-queue}")
+  private String updateSampleSensitiveQueue;
+
   public MessageConsumerConfig(
       ExceptionManagerClient exceptionManagerClient, ConnectionFactory connectionFactory) {
     this.exceptionManagerClient = exceptionManagerClient;
@@ -106,6 +109,11 @@ public class MessageConsumerConfig {
 
   @Bean
   public MessageChannel deactivateUacInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel updateSampleSensitiveInputChannel() {
     return new DirectChannel();
   }
 
@@ -166,6 +174,13 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  AmqpInboundChannelAdapter updateSampleSensitiveInbound(
+      @Qualifier("updateSampleSensitiveContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("updateSampleSensitiveInputChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
+  }
+
+  @Bean
   public SimpleMessageListenerContainer surveyLaunchedContainer() {
     return setupListenerContainer(surveyLaunchedQueue, ResponseManagementEvent.class);
   }
@@ -203,6 +218,11 @@ public class MessageConsumerConfig {
   @Bean
   public SimpleMessageListenerContainer deactivateUacContainer() {
     return setupListenerContainer(deactivateUacQueue, ResponseManagementEvent.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer updateSampleSensitiveContainer() {
+    return setupListenerContainer(updateSampleSensitiveQueue, ResponseManagementEvent.class);
   }
 
   private SimpleMessageListenerContainer setupListenerContainer(

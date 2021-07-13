@@ -72,16 +72,20 @@ public class SampleLoadedIT {
       collectionExercise.setId(UUID.randomUUID());
       collectionExerciseRepository.saveAndFlush(collectionExercise);
 
-      Map<String, String> sampleDto = new HashMap<>();
-      sampleDto.put("Address", "Tenby");
-      sampleDto.put("Org", "Brewery");
+      Map<String, String> sample = new HashMap<>();
+      sample.put("Address", "Tenby");
+      sample.put("Org", "Brewery");
 
-      Sample sample = new Sample();
-      sample.setCaseId(TEST_CASE_ID);
-      sample.setCollectionExerciseId(collectionExercise.getId());
-      sample.setSample(sampleDto);
+      Map<String, String> sampleSensitive = new HashMap<>();
+      sample.put("The Queen's Private Telephone Number", "02071234567");
 
-      rabbitQueueHelper.sendMessage(inboundQueue, sample);
+      Sample sampleDto = new Sample();
+      sampleDto.setCaseId(TEST_CASE_ID);
+      sampleDto.setCollectionExerciseId(collectionExercise.getId());
+      sampleDto.setSample(sample);
+      sampleDto.setSampleSensitive(sampleSensitive);
+
+      rabbitQueueHelper.sendMessage(inboundQueue, sampleDto);
 
       //  THEN
       ResponseManagementEvent actualResponseManagementEvent =
@@ -94,7 +98,8 @@ public class SampleLoadedIT {
 
       assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID);
       assertThat(actualCase.getCollectionExercise().getId()).isEqualTo(collectionExercise.getId());
-      assertThat(actualCase.getSample()).isEqualTo(sampleDto);
+      assertThat(actualCase.getSample()).isEqualTo(sample);
+      assertThat(actualCase.getSampleSensitive()).isEqualTo(sampleSensitive);
 
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);

@@ -199,3 +199,24 @@ Example message:
 }
 ```
 
+## Update Sensitive Data
+If we want to change or blank out (i.e. 'delete') sensitive data, such as phone numbers, email addresses, or respondent names, to comply with GDPR right to rectification laws, then we can handle messages to fix that data as required.
+
+Example message:
+```json
+{
+  "event": {
+    "type": "UPDATE_SAMPLE_SENSITIVE",
+    "source": "RH",
+    "channel": "RH",
+    "dateTime": "2021-06-09T13:49:19.716761Z",
+    "transactionId": "92df974c-f03e-4519-8d55-05e9c0ecea43"
+  },
+  "payload": {
+    "updateSampleSensitive": {
+      "caseId": "3b768940-6ef2-460e-bb75-e51d3a65ada4",
+      "sampleSensitive": {"PHONE_NUMBER":"this is not a real phone number innit"}
+    }
+  }
+}
+```

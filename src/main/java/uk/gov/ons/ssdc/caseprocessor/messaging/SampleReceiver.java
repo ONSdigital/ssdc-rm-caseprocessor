@@ -20,6 +20,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.utils.CaseRefGenerator;
+import uk.gov.ons.ssdc.caseprocessor.utils.RedactHelper;
 
 @MessageEndpoint
 public class SampleReceiver {
@@ -67,6 +68,7 @@ public class SampleReceiver {
     newCase.setId(sample.getCaseId());
     newCase.setCollectionExercise(collex);
     newCase.setSample(sample.getSample());
+    newCase.setSampleSensitive(sample.getSampleSensitive());
 
     newCase = saveNewCaseAndStampCaseRef(newCase);
     caseService.emitCaseCreatedEvent(newCase);
@@ -77,7 +79,7 @@ public class SampleReceiver {
         "Create case sample received",
         EventType.SAMPLE_LOADED,
         createEventDTO(EventTypeDTO.SAMPLE_LOADED),
-        message.getPayload(),
+        RedactHelper.redact(message.getPayload()),
         messageTimestamp);
   }
 

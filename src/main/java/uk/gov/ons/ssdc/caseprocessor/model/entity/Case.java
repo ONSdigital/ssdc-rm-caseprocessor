@@ -68,6 +68,10 @@ public class Case {
   @Column(columnDefinition = "jsonb")
   private Map<String, String> sample;
 
+  @Type(type = "jsonb")
+  @Column(columnDefinition = "jsonb")
+  private Map<String, String> sampleSensitive;
+
   @ManyToOne private CollectionExercise collectionExercise;
 
   @OneToMany(mappedBy = "caze")
