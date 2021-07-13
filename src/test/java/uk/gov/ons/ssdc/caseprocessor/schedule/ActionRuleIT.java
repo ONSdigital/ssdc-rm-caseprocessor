@@ -18,7 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
@@ -30,15 +29,10 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.PrintTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentNextTriggerRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintTemplateRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyPrintTemplateRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
+import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
@@ -54,38 +48,23 @@ public class ActionRuleIT {
   private static final String PACK_CODE = "test-pack-code";
   private static final String PRINT_SUPPLIER = "test-print-supplier";
 
+  @Autowired private DeleteDataHelper deleteDataHelper;
+
   @Autowired private CaseRepository caseRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
-  @Autowired private SurveyRepository surveyRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
-  @Autowired private EventRepository eventRepository;
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
-  @Autowired private FulfilmentNextTriggerRepository fulfilmentNextTriggerRepository;
-  @Autowired private FulfilmentToProcessRepository fulfilmentToProcessRepository;
   @Autowired private PrintTemplateRepository printTemplateRepository;
-  @Autowired private SurveyPrintTemplateRepository surveyPrintTemplateRepository;
   @Autowired private ActionRuleRepository actionRuleRepository;
-  @Autowired private CaseToProcessRepository caseToProcessRepository;
 
   private static final EasyRandom easyRandom = new EasyRandom();
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
 
   @Before
-  @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(outboundPrinterQueue);
     rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);
-    actionRuleRepository.deleteAllInBatch();
-    caseToProcessRepository.deleteAllInBatch();
-    eventRepository.deleteAllInBatch();
-    uacQidLinkRepository.deleteAllInBatch();
-    caseRepository.deleteAllInBatch();
-    collectionExerciseRepository.deleteAllInBatch();
-    surveyPrintTemplateRepository.deleteAllInBatch();
-    surveyRepository.deleteAllInBatch();
-    fulfilmentNextTriggerRepository.deleteAllInBatch();
-    fulfilmentToProcessRepository.deleteAllInBatch();
-    printTemplateRepository.deleteAllInBatch();
+    deleteDataHelper.deleteAllData();
   }
 
   @Test

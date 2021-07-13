@@ -3,8 +3,6 @@ package uk.gov.ons.ssdc.caseprocessor.model.entity;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import lombok.Data;
@@ -14,8 +12,7 @@ import lombok.Data;
 public class CaseToProcess {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(columnDefinition = "serial")
+  @Column(columnDefinition = "bigserial")
   private long id;
 
   @ManyToOne private Case caze;

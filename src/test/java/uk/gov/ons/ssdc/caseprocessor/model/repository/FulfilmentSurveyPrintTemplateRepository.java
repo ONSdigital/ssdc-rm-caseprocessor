@@ -8,5 +8,5 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentSurveyPrintTemplate;
 
 @Component
 @ActiveProfiles("test")
-public interface SurveyPrintTemplateRepository
+public interface FulfilmentSurveyPrintTemplateRepository
     extends JpaRepository<FulfilmentSurveyPrintTemplate, UUID> {}
