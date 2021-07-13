@@ -4,10 +4,12 @@ import java.util.List;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.test.context.ActiveProfiles;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 
 @Component
+@ActiveProfiles("test")
 public class EventPoller {
   private final EventRepository eventRepository;
 
@@ -24,7 +26,8 @@ public class EventPoller {
 
     if (events.size() < minExpectedEventCount) {
       throw new EventsNotFoundException(
-          "Found: " + events.size() + " events, require at least: " + minExpectedEventCount);
+          String.format(
+              "Found: %d events, require at least: %d", events.size(), minExpectedEventCount));
     }
 
     return events;
