@@ -9,7 +9,7 @@ import lombok.Data;
 public class FulfilmentToProcess {
 
   @Id
-  @Column(columnDefinition = "serial")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id;
 
   @ManyToOne private PrintTemplate printTemplate;
