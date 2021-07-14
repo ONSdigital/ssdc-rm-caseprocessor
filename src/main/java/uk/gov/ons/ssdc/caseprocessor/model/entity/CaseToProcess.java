@@ -12,7 +12,7 @@ import lombok.Data;
 public class CaseToProcess {
 
   @Id
-  @Column(columnDefinition = "bigserial")
+  @Column(columnDefinition = "serial")
   private long id;
 
   @ManyToOne private Case caze;
