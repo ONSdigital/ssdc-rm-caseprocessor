@@ -15,7 +15,6 @@ public class CaseToProcess {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(columnDefinition = "serial")
   private long id;
 
   @ManyToOne private Case caze;
