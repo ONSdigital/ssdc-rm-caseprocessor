@@ -16,12 +16,14 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 
 @Service
 public class CaseService {
-  public static final String CASE_UPDATE_ROUTING_KEY = "events.rh.caseUpdate";
   private final CaseRepository caseRepository;
   private final RabbitTemplate rabbitTemplate;
 
   @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
+
+  @Value("${queueconfig.case-update-routing-key}")
+  private String caseUpdateRoutingKey;
 
   public CaseService(CaseRepository caseRepository, RabbitTemplate rabbitTemplate) {
     this.caseRepository = caseRepository;
@@ -35,8 +37,7 @@ public class CaseService {
     eventDTO.setType(EventTypeDTO.CASE_UPDATED);
     eventDTO.setChannel("RM");
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
-    rabbitTemplate.convertAndSend(
-        outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
+    rabbitTemplate.convertAndSend(outboundExchange, caseUpdateRoutingKey, responseManagementEvent);
   }
 
   public void saveCase(Case caze) {
@@ -48,8 +49,7 @@ public class CaseService {
     eventDTO.setType(EventTypeDTO.CASE_CREATED);
     eventDTO.setChannel("RM");
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
-    rabbitTemplate.convertAndSend(
-        outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
+    rabbitTemplate.convertAndSend(outboundExchange, caseUpdateRoutingKey, responseManagementEvent);
   }
 
   private ResponseManagementEvent prepareCaseEvent(Case caze, EventDTO eventDTO) {

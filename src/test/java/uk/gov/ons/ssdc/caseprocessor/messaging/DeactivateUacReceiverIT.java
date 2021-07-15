@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_QUEUE;
 
 import java.util.UUID;
 import org.junit.Before;
@@ -34,8 +35,6 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 public class DeactivateUacReceiverIT {
   private static final String TEST_QID = "0123456789";
 
-  private static final String caseRhUacQueue = "events.rh.uacUpdate";
-
   @Value("${queueconfig.deactivate-uac-queue}")
   private String deactivateUacQueue;
 
@@ -47,14 +46,14 @@ public class DeactivateUacReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(deactivateUacQueue);
-    rabbitQueueHelper.purgeQueue(caseRhUacQueue);
+    rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
   }
 
   @Test
   public void testDeactivateUacReceiver() throws Exception {
-    try (QueueSpy uacRhQueue = rabbitQueueHelper.listen(caseRhUacQueue)) {
+    try (QueueSpy uacRhQueue = rabbitQueueHelper.listen(OUTBOUND_UAC_QUEUE)) {
       // GIVEN
       ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
       EventDTO eventDTO = new EventDTO();

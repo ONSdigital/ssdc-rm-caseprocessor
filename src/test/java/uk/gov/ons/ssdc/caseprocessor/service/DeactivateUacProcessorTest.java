@@ -3,7 +3,6 @@ package uk.gov.ons.ssdc.caseprocessor.service;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.DEACTIVATE_UAC_ROUTING_KEY;
 
 import java.util.List;
 import org.junit.Test;
@@ -30,6 +29,7 @@ public class DeactivateUacProcessorTest {
   public void testProcessDeactivateUacRow() {
     // Given
     ReflectionTestUtils.setField(underTest, "outboundExchange", "testExchange");
+    ReflectionTestUtils.setField(underTest, "deactivateUacRoutingKey", "testRoutingKey");
 
     Case caze = new Case();
 
@@ -46,7 +46,7 @@ public class DeactivateUacProcessorTest {
     verify(rabbitTemplate)
         .convertAndSend(
             eq("testExchange"),
-            eq(DEACTIVATE_UAC_ROUTING_KEY),
+            eq("testRoutingKey"),
             responseManagementEventArgumentCaptor.capture());
     DeactivateUacDTO actualDeactivateUac =
         responseManagementEventArgumentCaptor.getValue().getPayload().getDeactivateUac();

@@ -183,7 +183,16 @@
       "vhost": "/",
       "destination": "events.caseProcessor.updateSampleSensitive",
       "destination_type": "queue",
-      "routing_key": "events.caseProcessor.updateSampleSensitive",
+      "routing_key": "events.updateSampleSensitive",
+      "arguments": {
+      }
+    },
+    {
+      "source": "events",
+      "vhost": "/",
+      "destination": "events.caseProcessor.fulfilment",
+      "destination_type": "queue",
+      "routing_key": "events.fulfilment",
       "arguments": {
       }
     },
@@ -192,7 +201,7 @@
       "vhost": "/",
       "destination": "events.caseProcessor.refusal",
       "destination_type": "queue",
-      "routing_key": "events.caseProcessor.refusal",
+      "routing_key": "events.refusal",
       "arguments": {
       }
     },
@@ -201,7 +210,7 @@
       "vhost": "/",
       "destination": "events.caseProcessor.response",
       "destination_type": "queue",
-      "routing_key": "events.caseProcessor.response",
+      "routing_key": "events.response",
       "arguments": {
       }
     },
@@ -210,7 +219,7 @@
       "vhost": "/",
       "destination": "events.rh.uacUpdate",
       "destination_type": "queue",
-      "routing_key": "events.rh.uacUpdate",
+      "routing_key": "events.uacUpdate",
       "arguments": {
       }
     },
@@ -228,7 +237,7 @@
       "vhost": "/",
       "destination": "events.rh.caseUpdate",
       "destination_type": "queue",
-      "routing_key": "events.rh.caseUpdate",
+      "routing_key": "events.caseUpdate",
       "arguments": {
       }
     },
@@ -246,7 +255,7 @@
       "vhost": "/",
       "destination": "events.caseProcessor.invalidAddress",
       "destination_type": "queue",
-      "routing_key": "events.caseProcessor.invalidAddress",
+      "routing_key": "events.invalidAddress",
       "arguments": {}
     },
     {
@@ -254,7 +263,7 @@
       "vhost": "/",
       "destination": "events.caseProcessor.surveyLaunched",
       "destination_type": "queue",
-      "routing_key": "events.caseProcessor.surveyLaunched",
+      "routing_key": "events.surveyLaunched",
       "arguments": {
       }
     },
@@ -263,7 +272,7 @@
       "vhost": "/",
       "destination": "events.caseProcessor.deactivateUac",
       "destination_type": "queue",
-      "routing_key": "events.caseProcessor.deactivateUac",
+      "routing_key": "events.deactivateUac",
       "arguments": {
       }
     },
