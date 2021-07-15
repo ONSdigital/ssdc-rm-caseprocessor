@@ -13,6 +13,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
+import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 
 @Service
 public class CaseService {
@@ -31,9 +32,8 @@ public class CaseService {
   public void saveCaseAndEmitCaseUpdatedEvent(Case caze) {
     caseRepository.saveAndFlush(caze);
 
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.CASE_UPDATED);
-    eventDTO.setChannel("RM");
+    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATED);
+
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     rabbitTemplate.convertAndSend(
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
@@ -44,9 +44,8 @@ public class CaseService {
   }
 
   public void emitCaseCreatedEvent(Case caze) {
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.CASE_CREATED);
-    eventDTO.setChannel("RM");
+    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
+
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     rabbitTemplate.convertAndSend(
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);

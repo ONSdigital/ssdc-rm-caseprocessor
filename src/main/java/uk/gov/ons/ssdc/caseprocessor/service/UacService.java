@@ -33,7 +33,6 @@ public class UacService {
     UacQidLink savedUacQidLink = uacQidLinkRepository.saveAndFlush(uacQidLink);
 
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.UAC_UPDATED);
-    eventDTO.setChannel("RM");
 
     UacDTO uac = new UacDTO();
     uac.setQuestionnaireId(savedUacQidLink.getQid());
