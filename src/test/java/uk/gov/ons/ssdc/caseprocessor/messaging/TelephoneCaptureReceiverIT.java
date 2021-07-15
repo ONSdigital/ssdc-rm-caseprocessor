@@ -16,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.client.UacQidServiceClient;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
@@ -27,11 +26,9 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.UacDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
+import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 
@@ -47,25 +44,19 @@ public class TelephoneCaptureReceiverIT {
   private String telephoneCaptureQueue;
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
+  @Autowired private DeleteDataHelper deleteDataHelper;
+
   @Autowired private CaseRepository caseRepository;
-  @Autowired private EventRepository eventRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
-  @Autowired private UacQidLinkRepository uacQidLinkRepository;
-  @Autowired private ActionRuleRepository actionRuleRepository;
   @Autowired private UacQidServiceClient uacQidServiceClient;
 
   //  private static final EasyRandom easyRandom = new EasyRandom();
 
   @Before
-  @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(telephoneCaptureQueue);
     rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);
-    eventRepository.deleteAllInBatch();
-    uacQidLinkRepository.deleteAllInBatch();
-    caseRepository.deleteAllInBatch();
-    actionRuleRepository.deleteAllInBatch();
-    collectionExerciseRepository.deleteAllInBatch();
+    deleteDataHelper.deleteAllData();
   }
 
   @Test
