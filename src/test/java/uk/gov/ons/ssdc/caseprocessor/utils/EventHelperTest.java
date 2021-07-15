@@ -23,8 +23,7 @@ public class EventHelperTest {
 
   @Test
   public void testCreateEventDTOWithEventTypeChannelAndSource() {
-    EventDTO eventDTO = EventHelper
-        .createEventDTO(EventTypeDTO.CASE_CREATED, "CHANNEL", "SOURCE");
+    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED, "CHANNEL", "SOURCE");
 
     assertThat(eventDTO.getChannel()).isEqualTo("CHANNEL");
     assertThat(eventDTO.getSource()).isEqualTo("SOURCE");
