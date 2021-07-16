@@ -1,10 +1,8 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.DEACTIVATE_UAC_ROUTING_KEY;
+import static uk.gov.ons.ssdc.caseprocessor.utils.EventHelper.createEventDTO;
 
-import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,6 +21,9 @@ public class DeactivateUacProcessor {
   @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
 
+  @Value("${queueconfig.deactivate-uac-routing-key}")
+  private String deactivateUacRoutingKey;
+
   public DeactivateUacProcessor(RabbitTemplate rabbitTemplate) {
     this.rabbitTemplate = rabbitTemplate;
   }
@@ -34,18 +35,13 @@ public class DeactivateUacProcessor {
       if (uacQidLink.isActive()) {
         ResponseManagementEvent responseManagementEvent = prepareDeactivateUacEvent(uacQidLink);
         rabbitTemplate.convertAndSend(
-            outboundExchange, DEACTIVATE_UAC_ROUTING_KEY, responseManagementEvent);
+            outboundExchange, deactivateUacRoutingKey, responseManagementEvent);
       }
     }
   }
 
   private ResponseManagementEvent prepareDeactivateUacEvent(UacQidLink uacQidLink) {
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setTransactionId(UUID.randomUUID());
-    eventDTO.setType(EventTypeDTO.DEACTIVATE_UAC);
-    eventDTO.setChannel("RM");
-    eventDTO.setSource("CASE_PROCESSOR");
-    eventDTO.setDateTime(OffsetDateTime.now());
+    EventDTO eventDTO = createEventDTO(EventTypeDTO.DEACTIVATE_UAC);
 
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     responseManagementEvent.setEvent(eventDTO);

@@ -13,15 +13,18 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
+import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 
 @Service
 public class CaseService {
-  public static final String CASE_UPDATE_ROUTING_KEY = "events.rh.caseUpdate";
   private final CaseRepository caseRepository;
   private final RabbitTemplate rabbitTemplate;
 
   @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
+
+  @Value("${queueconfig.case-update-routing-key}")
+  private String caseUpdateRoutingKey;
 
   public CaseService(CaseRepository caseRepository, RabbitTemplate rabbitTemplate) {
     this.caseRepository = caseRepository;
@@ -31,12 +34,10 @@ public class CaseService {
   public void saveCaseAndEmitCaseUpdatedEvent(Case caze) {
     caseRepository.saveAndFlush(caze);
 
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.CASE_UPDATED);
-    eventDTO.setChannel("RM");
+    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATED);
+
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
-    rabbitTemplate.convertAndSend(
-        outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
+    rabbitTemplate.convertAndSend(outboundExchange, caseUpdateRoutingKey, responseManagementEvent);
   }
 
   public void saveCase(Case caze) {
@@ -44,12 +45,10 @@ public class CaseService {
   }
 
   public void emitCaseCreatedEvent(Case caze) {
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.CASE_CREATED);
-    eventDTO.setChannel("RM");
+    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
+
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
-    rabbitTemplate.convertAndSend(
-        outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
+    rabbitTemplate.convertAndSend(outboundExchange, caseUpdateRoutingKey, responseManagementEvent);
   }
 
   private ResponseManagementEvent prepareCaseEvent(Case caze, EventDTO eventDTO) {

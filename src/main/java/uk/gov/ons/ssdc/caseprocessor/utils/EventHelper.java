@@ -7,15 +7,19 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 
 public class EventHelper {
 
-  private static final String EVENT_SOURCE = "CASE_SERVICE";
+  private static final String EVENT_SOURCE = "CASE_PROCESSOR";
   private static final String EVENT_CHANNEL = "RM";
 
+  private EventHelper() {
+    throw new IllegalStateException("Utility class EventHelper should not be instantiated");
+  }
+
   public static EventDTO createEventDTO(
-      EventTypeDTO eventType, String event_channel, String event_source) {
+      EventTypeDTO eventType, String eventChannel, String eventSource) {
     EventDTO eventDTO = new EventDTO();
 
-    eventDTO.setChannel(event_channel);
-    eventDTO.setSource(event_source);
+    eventDTO.setChannel(eventChannel);
+    eventDTO.setSource(eventSource);
     eventDTO.setDateTime(OffsetDateTime.now());
     eventDTO.setTransactionId(UUID.randomUUID());
     eventDTO.setType(eventType);
@@ -25,5 +29,15 @@ public class EventHelper {
 
   public static EventDTO createEventDTO(EventTypeDTO eventType) {
     return createEventDTO(eventType, EVENT_CHANNEL, EVENT_SOURCE);
+  }
+
+  public static EventDTO getDummyEvent() {
+    EventDTO event = new EventDTO();
+
+    event.setChannel(EVENT_CHANNEL);
+    event.setSource(EVENT_SOURCE);
+    event.setTransactionId(UUID.randomUUID());
+
+    return event;
   }
 }
