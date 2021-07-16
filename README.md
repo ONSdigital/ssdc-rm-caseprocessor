@@ -32,7 +32,11 @@ Just build the image
 ## Events
 
 ### Sample Load
-The case processor listens to a Rabbit queue called `supportTool.caseProcessor.sample`. The messages are JSON format and are of the following format:
+Queue name: `supportTool.caseProcessor.sample`
+Exchange: N/A
+Routing key: N/A
+
+Example message:
 
 ```json
 {
@@ -45,8 +49,11 @@ The case processor listens to a Rabbit queue called `supportTool.caseProcessor.s
 ```
 
 ### Invalid Address
-Queue Name: events.caseProcessor.invalidAddress
-Example Msg: 
+Queue name: `events.caseProcessor.invalidAddress`
+Exchange: `events`
+Routing key: `events.invalidAddress`
+
+Example message: 
 ```json
 {
   "event": {
@@ -67,8 +74,11 @@ Example Msg:
 ```
 
 ### Receipts/Responses
-Queue Name: events.caseProcessor.response
-Example Msg:
+Queue name: `events.caseProcessor.response`
+Exchange: `events`
+Routing key: `events.response`
+
+Example message:
 ```json
 {
   "event": {
@@ -88,8 +98,11 @@ Example Msg:
 ```
 
 ### Refusals
-Queue: events.caseProcessor.refusal
-Example Msg:
+Queue name: `events.caseProcessor.refusal`
+Exchange: `events`
+Routing key: `events.refusal`
+
+Example message:
 ```json
 {
   "event": {
@@ -116,8 +129,11 @@ Example Msg:
 ```
 
 ### Survey Launched
-queue: events.caseProcessor.surveyLaunched
-Example Msg:
+Queue name: `events.caseProcessor.surveyLaunched`
+Exchange: `events`
+Routing key: `events.surveyLaunched`
+
+Example message:
 ```json
 {
   "event": {
@@ -180,6 +196,10 @@ values ('b1d826fa-6afc-4270-9f0c-302cb05d4d96', -- trigger ID
 
 The fulfilments will only be triggered by the "leader" pod, in the event that multiple instances of the case processor are running. If the leader dies or is killed/terminated, then another leader will be elected after 2 minutes.
 
+Queue name: `events.caseProcessor.fulfilment`
+Exchange: `events`
+Routing key: `events.fulfilment`
+
 Example message:
 ```json
 {
@@ -202,6 +222,10 @@ Example message:
 ## Update Sensitive Data
 If we want to change or blank out (i.e. 'delete') sensitive data, such as phone numbers, email addresses, or respondent names, to comply with GDPR right to rectification laws, then we can handle messages to fix that data as required.
 
+Queue name: `events.caseProcessor.updateSampleSensitive`
+Exchange: `events`
+Routing key: `events.updateSampleSensitive`
+
 Example message:
 ```json
 {
@@ -216,6 +240,29 @@ Example message:
     "updateSampleSensitive": {
       "caseId": "3b768940-6ef2-460e-bb75-e51d3a65ada4",
       "sampleSensitive": {"PHONE_NUMBER":"this is not a real phone number innit"}
+    }
+  }
+}
+```
+
+## Deactivate UAC
+Queue name: `events.caseProcessor.deactivateUac`
+Exchange: `events`
+Routing key: `events.deactivateUac`
+
+Example message:
+```json
+{
+  "event": {
+    "type": "DEACTIVATE_UAC",
+    "source": "RH",
+    "channel": "RH",
+    "dateTime": "2021-06-09T13:49:19.716761Z",
+    "transactionId": "92df974c-f03e-4519-8d55-05e9c0ecea43"
+  },
+  "payload": {
+    "deactivateUac": {
+      "qid": "0123456789"
     }
   }
 }

@@ -16,13 +16,14 @@ import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 
 @Service
 public class UacService {
-  private static final String UAC_UPDATE_ROUTING_KEY = "events.rh.uacUpdate";
-
   private final UacQidLinkRepository uacQidLinkRepository;
   private final RabbitTemplate rabbitTemplate;
 
   @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
+
+  @Value("${queueconfig.uac-update-routing-key}")
+  private String uacUpdateRoutingKey;
 
   public UacService(UacQidLinkRepository uacQidLinkRepository, RabbitTemplate rabbitTemplate) {
     this.rabbitTemplate = rabbitTemplate;
@@ -52,8 +53,7 @@ public class UacService {
     responseManagementEvent.setEvent(eventDTO);
     responseManagementEvent.setPayload(payloadDTO);
 
-    rabbitTemplate.convertAndSend(
-        outboundExchange, UAC_UPDATE_ROUTING_KEY, responseManagementEvent);
+    rabbitTemplate.convertAndSend(outboundExchange, uacUpdateRoutingKey, responseManagementEvent);
 
     return savedUacQidLink;
   }
