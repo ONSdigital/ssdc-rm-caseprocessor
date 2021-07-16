@@ -26,6 +26,10 @@ public class Survey {
   @Column(columnDefinition = "jsonb")
   private String sampleValidationRules;
 
+  @Column private boolean sampleWithHeaderRow;
+
+  @Column private char sampleSeparator;
+
   @OneToMany(mappedBy = "survey")
   private List<CollectionExercise> collectionExercises;
 

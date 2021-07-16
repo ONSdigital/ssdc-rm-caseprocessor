@@ -136,6 +136,7 @@ public class FulfilmentIT {
   private Survey setUpSurvey() {
     Survey survey = new Survey();
     survey.setId(UUID.randomUUID());
+    survey.setSampleSeparator(',');
     return surveyRepository.saveAndFlush(survey);
   }
 
