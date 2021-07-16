@@ -14,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
@@ -26,6 +25,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
+import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 
@@ -42,18 +42,17 @@ public class SurveyLaunchedReceiverIT {
   private String inboundQueue;
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
+  @Autowired private DeleteDataHelper deleteDataHelper;
+
   @Autowired private CaseRepository caseRepository;
   @Autowired private EventRepository eventRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
 
   @Before
-  @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundQueue);
     rabbitQueueHelper.purgeQueue(OUTBOUND_CASE_QUEUE);
-    eventRepository.deleteAllInBatch();
-    uacQidLinkRepository.deleteAllInBatch();
-    caseRepository.deleteAllInBatch();
+    deleteDataHelper.deleteAllData();
   }
 
   @Test

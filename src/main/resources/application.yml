@@ -9,12 +9,15 @@ spring:
     username: postgres
     password: postgres
     driverClassName: org.postgresql.Driver
-    initialization-mode: always
     hikari:
       maximumPoolSize: 50
 
+  sql:
+    init:
+      mode: always
+
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQL94Dialect
+    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
     hibernate:
       ddl-auto: update
     properties:
@@ -44,6 +47,9 @@ queueconfig:
   fulfilment-queue: events.caseProcessor.fulfilment
   deactivate-uac-queue: events.caseProcessor.deactivateUac
   update-sample-sensitive-queue: events.caseProcessor.updateSampleSensitive
+  case-update-routing-key: events.caseUpdate
+  uac-update-routing-key: events.uacUpdate
+  deactivate-uac-routing-key: events.deactivateUac
   case-event-exchange: events
   consumers: 50
   retry-attempts: 3
