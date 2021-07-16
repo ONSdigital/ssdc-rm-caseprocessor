@@ -9,11 +9,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
+import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 
 @Component
 public class PrintProcessor {
@@ -111,7 +111,7 @@ public class PrintProcessor {
         OffsetDateTime.now(),
         String.format("Printed pack code %s with batch id %s", packCode, batchId.toString()),
         EventType.PRINTED_PACK_CODE,
-        getDummyEvent(),
+        EventHelper.getDummyEvent(),
         null,
         OffsetDateTime.now());
   }
@@ -134,15 +134,5 @@ public class PrintProcessor {
     uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
     return uacQidDTO;
-  }
-
-  private EventDTO getDummyEvent() {
-    EventDTO event = new EventDTO();
-
-    event.setChannel("RM");
-    event.setSource("CASE_PROCESSOR");
-    event.setTransactionId(UUID.randomUUID());
-
-    return event;
   }
 }
