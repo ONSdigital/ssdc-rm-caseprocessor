@@ -2,10 +2,8 @@ package uk.gov.ons.ssdc.caseprocessor.model.entity;
 
 public enum EventType {
   CASE_CREATED,
-  UAC_UPDATED,
   RESPONSE_RECEIVED,
   REFUSAL_RECEIVED,
-  SAMPLE_LOADED,
   SURVEY_LAUNCHED,
   ADDRESS_NOT_VALID,
   RESPONDENT_AUTHENTICATED,

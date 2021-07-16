@@ -77,7 +77,7 @@ public class SampleReceiver {
         newCase,
         OffsetDateTime.now(),
         "Create case sample received",
-        EventType.SAMPLE_LOADED,
+        EventType.CASE_CREATED,
         createEventDTO(EventTypeDTO.SAMPLE_LOADED),
         RedactHelper.redact(message.getPayload()),
         messageTimestamp);

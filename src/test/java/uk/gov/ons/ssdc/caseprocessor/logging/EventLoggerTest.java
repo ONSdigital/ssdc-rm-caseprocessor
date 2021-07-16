@@ -43,7 +43,7 @@ public class EventLoggerTest {
         caze,
         eventTime,
         "Test description",
-        EventType.UAC_UPDATED,
+        EventType.CASE_CREATED,
         eventDTO,
         redactMe,
         messageTime);
@@ -56,7 +56,7 @@ public class EventLoggerTest {
     assertThat(eventTime).isEqualTo(actualEvent.getEventDate());
     assertThat("Test source").isEqualTo(actualEvent.getEventSource());
     assertThat("Test channel").isEqualTo(actualEvent.getEventChannel());
-    assertThat(EventType.UAC_UPDATED).isEqualTo(actualEvent.getEventType());
+    assertThat(EventType.CASE_CREATED).isEqualTo(actualEvent.getEventType());
     assertThat("Test description").isEqualTo(actualEvent.getEventDescription());
     assertThat("{\"uac\":\"SECRET UAC\",\"qid\":\"TEST QID\"}")
         .isEqualTo(actualEvent.getEventPayload());
@@ -81,7 +81,7 @@ public class EventLoggerTest {
         uacQidLink,
         eventTime,
         "Test description",
-        EventType.UAC_UPDATED,
+        EventType.CASE_CREATED,
         eventDTO,
         redactMe,
         messageTime);
@@ -94,7 +94,7 @@ public class EventLoggerTest {
     assertThat(eventTime).isEqualTo(actualEvent.getEventDate());
     assertThat("Test source").isEqualTo(actualEvent.getEventSource());
     assertThat("Test channel").isEqualTo(actualEvent.getEventChannel());
-    assertThat(EventType.UAC_UPDATED).isEqualTo(actualEvent.getEventType());
+    assertThat(EventType.CASE_CREATED).isEqualTo(actualEvent.getEventType());
     assertThat("Test description").isEqualTo(actualEvent.getEventDescription());
     assertThat("{\"uac\":\"SECRET UAC\",\"qid\":\"TEST QID\"}")
         .isEqualTo(actualEvent.getEventPayload());
