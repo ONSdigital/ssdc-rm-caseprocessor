@@ -109,7 +109,7 @@ public class PrintProcessor {
     eventLogger.logCaseEvent(
         caze,
         OffsetDateTime.now(),
-        String.format("Printed pack code %s with batch id %s", packCode, batchId.toString()),
+        String.format("Print file generated with pack code %s", packCode),
         EventType.PRINTED_PACK_CODE,
         getDummyEvent(),
         null,
