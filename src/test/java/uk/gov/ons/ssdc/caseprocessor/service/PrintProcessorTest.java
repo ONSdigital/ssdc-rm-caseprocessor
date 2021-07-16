@@ -91,8 +91,7 @@ public class PrintProcessorTest {
         .logCaseEvent(
             eq(caze),
             any(OffsetDateTime.class),
-            eq(
-                "Printed pack code test pack code with batch id 6a127d58-c1cb-489c-a3f5-72014a0c32d6"),
+            eq("Print file generated with pack code test pack code"),
             eq(EventType.PRINTED_PACK_CODE),
             any(EventDTO.class),
             isNull(),
@@ -146,8 +145,7 @@ public class PrintProcessorTest {
         .logCaseEvent(
             eq(caze),
             any(OffsetDateTime.class),
-            eq(
-                "Printed pack code TEST_FULFILMENT_CODE with batch id 6a127d58-c1cb-489c-a3f5-72014a0c32d6"),
+            eq("Print file generated with pack code TEST_FULFILMENT_CODE"),
             eq(EventType.PRINTED_PACK_CODE),
             any(EventDTO.class),
             isNull(),
