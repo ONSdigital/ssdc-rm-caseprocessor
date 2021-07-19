@@ -94,7 +94,7 @@ public class SampleLoadedIT {
 
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);
-      assertThat(events.get(0).getEventType()).isEqualTo(EventType.SAMPLE_LOADED);
+      assertThat(events.get(0).getEventType()).isEqualTo(EventType.CASE_CREATED);
     }
   }
 }
