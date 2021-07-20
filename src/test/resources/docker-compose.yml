@@ -36,7 +36,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-case-it:5432/postgres?sslmode=disable
       - SPRING_PROFILES_ACTIVE=dev
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8164/actuator/info"]
+      test: ["CMD", "curl", "-f", "http://localhost:8164/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 10
