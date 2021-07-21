@@ -27,7 +27,7 @@ import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 import uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ReceiptReceiverTest {
   private static final String QUESTIONNAIRE_ID = "12345";
   private static final UUID CASE_ID = UUID.randomUUID();

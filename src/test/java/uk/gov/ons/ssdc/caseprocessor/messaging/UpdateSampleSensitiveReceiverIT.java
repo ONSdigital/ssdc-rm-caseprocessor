@@ -37,7 +37,7 @@ import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 public class UpdateSampleSensitiveReceiverIT {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();

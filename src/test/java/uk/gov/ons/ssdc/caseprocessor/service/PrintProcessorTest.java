@@ -23,7 +23,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PrintProcessorTest {
   @Mock private RabbitTemplate rabbitTemplate;
   @Mock private UacQidCache uacQidCache;
