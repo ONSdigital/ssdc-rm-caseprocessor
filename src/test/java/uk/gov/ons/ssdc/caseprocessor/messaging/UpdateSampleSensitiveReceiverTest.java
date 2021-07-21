@@ -13,12 +13,13 @@ import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
@@ -84,7 +85,7 @@ public class UpdateSampleSensitiveReceiverTest {
             eq(messageDateTime));
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testMessageKeyDoesNotMatchExistingEntry() {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
@@ -108,6 +109,10 @@ public class UpdateSampleSensitiveReceiverTest {
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
-    underTest.receiveMessage(message);
+    Assertions.assertThrows(
+        RuntimeException.class,
+        () -> {
+          underTest.receiveMessage(message);
+        });
   }
 }

@@ -3,7 +3,7 @@ package uk.gov.ons.ssdc.caseprocessor.utils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.commons.validator.routines.checkdigit.LuhnCheckDigit;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class LuhnHelperTest {
   LuhnCheckDigit lcd = new LuhnCheckDigit();

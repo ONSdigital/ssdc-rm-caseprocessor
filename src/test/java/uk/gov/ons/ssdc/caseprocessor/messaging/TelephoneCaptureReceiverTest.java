@@ -1,5 +1,13 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
+
+import java.util.UUID;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -17,14 +25,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
-
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 @ExtendWith(MockitoExtension.class)
 public class TelephoneCaptureReceiverTest {
@@ -102,7 +102,7 @@ public class TelephoneCaptureReceiverTest {
     verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(), any(), any());
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testReceiveMessageQidAlreadyLinkedToOtherCase() {
     // Given
     Case testCase = new Case();
@@ -125,7 +125,11 @@ public class TelephoneCaptureReceiverTest {
     when(uacService.findByQid(TEST_QID)).thenReturn(existingUacQidLink);
 
     // When, then throws
-    underTest.receiveMessage(eventMessage);
+    Assertions.assertThrows(
+        RuntimeException.class,
+        () -> {
+          underTest.receiveMessage(eventMessage);
+        });
   }
 
   private ResponseManagementEvent buildTelephoneCaptureEvent() {

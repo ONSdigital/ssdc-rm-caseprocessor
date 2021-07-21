@@ -6,14 +6,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class CaseRefGeneratorTest {
 
   // Marked ignored as it takes a couple of minutes to run
   @Test
-  @Ignore
+  @Disabled
   public void testGetCaseRef() {
     // Be careful - on a fast multi-core CPU this test takes minutes, but could be very slow
     int max_num_of_caserefs_to_check = 89999998;
