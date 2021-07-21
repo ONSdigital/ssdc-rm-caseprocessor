@@ -12,14 +12,12 @@ import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 
 @Component
 public class PrintProcessor {
   private final RabbitTemplate rabbitTemplate;
   private final UacQidCache uacQidCache;
-  private final UacQidLinkRepository uacQidLinkRepository;
   private final UacService uacService;
   private final EventLogger eventLogger;
 
@@ -38,12 +36,10 @@ public class PrintProcessor {
   public PrintProcessor(
       RabbitTemplate rabbitTemplate,
       UacQidCache uacQidCache,
-      UacQidLinkRepository uacQidLinkRepository,
       UacService uacService,
       EventLogger eventLogger) {
     this.rabbitTemplate = rabbitTemplate;
     this.uacQidCache = uacQidCache;
-    this.uacQidLinkRepository = uacQidLinkRepository;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
   }
