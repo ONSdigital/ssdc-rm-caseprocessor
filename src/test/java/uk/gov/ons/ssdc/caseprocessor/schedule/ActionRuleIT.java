@@ -8,7 +8,6 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,7 +56,6 @@ public class ActionRuleIT {
   @Autowired private PrintTemplateRepository printTemplateRepository;
   @Autowired private ActionRuleRepository actionRuleRepository;
 
-  private static final EasyRandom easyRandom = new EasyRandom();
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
 
   @BeforeEach
@@ -151,16 +149,10 @@ public class ActionRuleIT {
   }
 
   private Case setUpCase(CollectionExercise collectionExercise) {
-    Case randomCase = easyRandom.nextObject(Case.class);
+    Case randomCase = new Case();
+    randomCase.setId(UUID.randomUUID());
     randomCase.setCaseRef(123L);
     randomCase.setCollectionExercise(collectionExercise);
-    randomCase.setUacQidLinks(null);
-    randomCase.setReceiptReceived(false);
-    randomCase.setRefusalReceived(null);
-    randomCase.setAddressInvalid(false);
-    randomCase.setCreatedAt(null);
-    randomCase.setLastUpdatedAt(null);
-    randomCase.setEvents(null);
     randomCase.setSample(Map.of("foo", "bar"));
     return caseRepository.saveAndFlush(randomCase);
   }
