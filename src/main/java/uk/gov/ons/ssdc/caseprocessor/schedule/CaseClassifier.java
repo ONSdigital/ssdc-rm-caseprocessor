@@ -33,7 +33,7 @@ public class CaseClassifier {
     whereClause.append(
         String.format("WHERE collection_exercise_id='%s'", collectionExerciseId.toString()));
 
-    if (!StringUtils.isEmpty(classifiersClause)) {
+    if (StringUtils.hasText(classifiersClause)) {
       whereClause.append(" AND ").append(classifiersClause);
     }
 
