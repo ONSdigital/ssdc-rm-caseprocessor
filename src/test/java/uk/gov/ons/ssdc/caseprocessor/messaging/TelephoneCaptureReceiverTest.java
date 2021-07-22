@@ -1,13 +1,13 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.util.UUID;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -125,11 +125,7 @@ public class TelephoneCaptureReceiverTest {
     when(uacService.findByQid(TEST_QID)).thenReturn(existingUacQidLink);
 
     // When, then throws
-    Assertions.assertThrows(
-        RuntimeException.class,
-        () -> {
-          underTest.receiveMessage(eventMessage);
-        });
+    assertThrows(RuntimeException.class, () -> underTest.receiveMessage(eventMessage));
   }
 
   private ResponseManagementEvent buildTelephoneCaptureEvent() {

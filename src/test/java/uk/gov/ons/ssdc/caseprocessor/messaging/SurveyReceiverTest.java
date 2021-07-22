@@ -1,13 +1,13 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -147,17 +147,9 @@ public class SurveyReceiverTest {
     String expectedErrorMessage =
         String.format("Event Type '%s' is invalid on this topic", EventTypeDTO.CASE_CREATED);
 
-    Assertions.assertThrows(
-        RuntimeException.class,
-        () -> {
-          try {
-            // WHEN
-            underTest.receiveMessage(managementEvent);
-          } catch (RuntimeException re) {
-            // THEN
-            assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
-            throw re;
-          }
-        });
+    RuntimeException thrown =
+        assertThrows(RuntimeException.class, () -> underTest.receiveMessage(managementEvent));
+
+    assertThat(thrown.getMessage()).isEqualTo(expectedErrorMessage);
   }
 }
