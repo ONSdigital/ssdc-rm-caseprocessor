@@ -67,8 +67,8 @@
     </dependency>
     <dependency>
       <groupId>com.vladmihalcea</groupId>
-      <artifactId>hibernate-types-5</artifactId>
-      <version>2.4.4</version>
+      <artifactId>hibernate-types-55</artifactId>
+      <version>2.12.1</version>
     </dependency>
     <dependency>
       <groupId>commons-validator</groupId>
