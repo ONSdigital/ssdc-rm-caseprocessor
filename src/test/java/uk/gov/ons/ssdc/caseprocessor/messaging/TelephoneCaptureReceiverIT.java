@@ -50,8 +50,6 @@ public class TelephoneCaptureReceiverIT {
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
   @Autowired private UacQidServiceClient uacQidServiceClient;
 
-  //  private static final EasyRandom easyRandom = new EasyRandom();
-
   @BeforeEach
   public void setUp() {
     rabbitQueueHelper.purgeQueue(telephoneCaptureQueue);
