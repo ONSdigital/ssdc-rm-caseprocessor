@@ -1,6 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.testutils;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;

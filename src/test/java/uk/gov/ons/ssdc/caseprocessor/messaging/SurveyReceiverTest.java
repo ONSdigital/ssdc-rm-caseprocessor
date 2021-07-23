@@ -1,19 +1,20 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
@@ -26,7 +27,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SurveyReceiverTest {
 
   private final UUID TEST_CASE_ID = UUID.randomUUID();
@@ -137,23 +138,18 @@ public class SurveyReceiverTest {
     verifyNoInteractions(caseService);
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testInvalidSurveyEventTypeException() {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
     managementEvent.getEvent().setType(EventTypeDTO.CASE_CREATED);
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     String expectedErrorMessage =
         String.format("Event Type '%s' is invalid on this topic", EventTypeDTO.CASE_CREATED);
 
-    try {
-      // WHEN
-      underTest.receiveMessage(managementEvent);
-    } catch (RuntimeException re) {
-      // THEN
-      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
-      throw re;
-    }
+    RuntimeException thrown =
+        assertThrows(RuntimeException.class, () -> underTest.receiveMessage(managementEvent));
+
+    assertThat(thrown.getMessage()).isEqualTo(expectedErrorMessage);
   }
 }

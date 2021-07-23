@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.UUID;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRule;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRuleType;

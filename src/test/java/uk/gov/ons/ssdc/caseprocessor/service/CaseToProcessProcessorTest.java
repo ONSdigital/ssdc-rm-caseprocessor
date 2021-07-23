@@ -3,18 +3,18 @@ package uk.gov.ons.ssdc.caseprocessor.service;
 import static org.mockito.Mockito.verify;
 
 import java.util.Map;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRule;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CaseToProcess;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.PrintTemplate;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CaseToProcessProcessorTest {
   @Mock private PrintProcessor printProcessor;
   @Mock private DeactivateUacProcessor deactivateUacProcessor;

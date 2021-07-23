@@ -3,7 +3,7 @@ package uk.gov.ons.ssdc.caseprocessor.utils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
 
 public class RedactHelperTest {

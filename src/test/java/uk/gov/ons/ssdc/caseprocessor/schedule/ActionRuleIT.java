@@ -9,15 +9,15 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
@@ -40,7 +40,7 @@ import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 @ContextConfiguration
 @SpringBootTest
 @ActiveProfiles("test")
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 public class ActionRuleIT {
   @Value("${queueconfig.print-queue}")
   private String outboundPrinterQueue;
@@ -60,7 +60,7 @@ public class ActionRuleIT {
   private static final EasyRandom easyRandom = new EasyRandom();
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
 
-  @Before
+  @BeforeEach
   public void setUp() {
     rabbitQueueHelper.purgeQueue(outboundPrinterQueue);
     rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);

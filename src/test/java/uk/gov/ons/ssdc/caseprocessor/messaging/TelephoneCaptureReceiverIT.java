@@ -7,15 +7,15 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.client.UacQidServiceClient;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
@@ -35,7 +35,7 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 public class TelephoneCaptureReceiverIT {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
@@ -52,7 +52,7 @@ public class TelephoneCaptureReceiverIT {
 
   //  private static final EasyRandom easyRandom = new EasyRandom();
 
-  @Before
+  @BeforeEach
   public void setUp() {
     rabbitQueueHelper.purgeQueue(telephoneCaptureQueue);
     rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);

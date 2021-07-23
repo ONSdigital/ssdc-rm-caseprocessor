@@ -9,15 +9,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
@@ -35,7 +35,7 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 public class SampleLoadedIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
@@ -49,7 +49,7 @@ public class SampleLoadedIT {
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
   @Autowired private EventRepository eventRepository;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundQueue);
     rabbitQueueHelper.purgeQueue(OUTBOUND_CASE_QUEUE);

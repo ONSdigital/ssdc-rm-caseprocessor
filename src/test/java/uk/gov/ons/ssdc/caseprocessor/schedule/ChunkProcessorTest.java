@@ -8,17 +8,17 @@ import static org.mockito.Mockito.when;
 
 import java.util.LinkedList;
 import java.util.List;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CaseToProcess;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseToProcessProcessor;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ChunkProcessorTest {
   @Mock private CaseToProcessRepository caseToProcessRepository;
   @Mock private CaseToProcessProcessor caseToProcessProcessor;

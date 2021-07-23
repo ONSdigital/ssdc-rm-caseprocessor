@@ -8,12 +8,12 @@ import static org.mockito.Mockito.when;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
@@ -23,7 +23,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PrintProcessorTest {
   @Mock private RabbitTemplate rabbitTemplate;
   @Mock private UacQidCache uacQidCache;

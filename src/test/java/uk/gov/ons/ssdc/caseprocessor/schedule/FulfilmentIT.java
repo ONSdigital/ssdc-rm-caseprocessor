@@ -9,18 +9,33 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.*;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.*;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.FulfilmentDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentNextTrigger;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentSurveyPrintTemplate;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.PrintTemplate;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.Survey;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentNextTriggerRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentSurveyPrintTemplateRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintTemplateRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
@@ -29,7 +44,7 @@ import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 @ContextConfiguration
 @SpringBootTest
 @ActiveProfiles("test")
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 public class FulfilmentIT {
   @Value("${queueconfig.print-queue}")
   private String outboundPrinterQueue;
@@ -55,7 +70,7 @@ public class FulfilmentIT {
   private static final EasyRandom easyRandom = new EasyRandom();
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
 
-  @Before
+  @BeforeEach
   public void setUp() {
     rabbitQueueHelper.purgeQueue(outboundPrinterQueue);
     rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);
