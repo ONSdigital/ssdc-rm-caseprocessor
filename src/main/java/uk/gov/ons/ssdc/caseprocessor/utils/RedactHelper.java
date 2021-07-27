@@ -6,10 +6,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Map;
+import org.springframework.util.StringUtils;
 
 public class RedactHelper {
   private static final String REDACTION_FAILURE = "Failed to redact sensitive data";
-  private static final String REDACTION_TARGET = "setSampleSensitive";
+  private static final String REDACTION_TARGET = "getSampleSensitive";
+  private static final String REDACTION_TEXT = "REDACTED";
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
 
   public static Object redact(Object rootObjectToRedact) {
@@ -44,9 +46,15 @@ public class RedactHelper {
                 }
               }
 
-              if (method.getName().equals(methodToFind)) {
+              if (method.getName().equals(methodToFind)
+                  && method.getReturnType().equals(Map.class)) {
                 try {
-                  method.invoke(object, Map.of("REDACTED", "REDACTED"));
+                  Map<String, String> sensitiveData = (Map<String, String>) method.invoke(object);
+                  for (String key : sensitiveData.keySet()) {
+                    if (StringUtils.hasText((sensitiveData.get(key)))) {
+                      sensitiveData.put(key, REDACTION_TEXT);
+                    }
+                  }
                 } catch (IllegalAccessException | InvocationTargetException e) {
                   throw new RuntimeException(REDACTION_FAILURE, e);
                 }

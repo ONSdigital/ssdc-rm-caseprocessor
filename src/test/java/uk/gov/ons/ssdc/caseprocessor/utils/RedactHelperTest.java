@@ -19,7 +19,7 @@ public class RedactHelperTest {
     Sample sampleDeepCopy = (Sample) RedactHelper.redact(sample);
 
     // THEN
-    assertThat(sampleDeepCopy.getSampleSensitive()).isEqualTo(Map.of("REDACTED", "REDACTED"));
+    assertThat(sampleDeepCopy.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "REDACTED"));
 
     // Extra check to make sure the original object wasn't accidentally mutated
     assertThat(sample.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "999999"));
