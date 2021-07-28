@@ -103,6 +103,6 @@ public class UpdateSampleSensitiveReceiverIT {
 
     PayloadDTO actualPayload = objectMapper.readValue(event.getEventPayload(), PayloadDTO.class);
     assertThat(actualPayload.getUpdateSampleSensitive().getSampleSensitive())
-        .isEqualTo(Map.of("REDACTED", "REDACTED"));
+        .isEqualTo(Map.of("PHONE_NUMBER", "REDACTED"));
   }
 }
