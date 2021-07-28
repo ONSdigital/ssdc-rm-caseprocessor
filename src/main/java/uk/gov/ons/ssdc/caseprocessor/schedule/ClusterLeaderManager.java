@@ -18,7 +18,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.ClusterLeaderRepository;
 @Component
 public class ClusterLeaderManager {
   private static final Logger log = LoggerFactory.getLogger(ClusterLeaderManager.class);
-  protected static final UUID LEADER_ID = UUID.fromString("e469807b-f2e2-47bd-acf6-74f8943ff3db");
+  private static final UUID LEADER_ID = UUID.fromString("e469807b-f2e2-47bd-acf6-74f8943ff3db");
 
   private final ClusterLeaderRepository clusterLeaderRepository;
   private final ClusterLeaderStartupManager clusterLeaderStartupManager;
