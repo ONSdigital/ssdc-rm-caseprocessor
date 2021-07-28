@@ -1,6 +1,5 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
-
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.net.InetAddress;
