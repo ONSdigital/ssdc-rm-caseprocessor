@@ -21,7 +21,7 @@ public class ClusterLeaderManager {
   protected static final UUID LEADER_ID = UUID.fromString("e469807b-f2e2-47bd-acf6-74f8943ff3db");
 
   private final ClusterLeaderRepository clusterLeaderRepository;
-  private final ClusterLeaderManagerStartup clusterLeaderManagerStartup;
+  private final ClusterLeaderStartupManager clusterLeaderStartupManager;
 
   @Value("${scheduler.leaderDeathTimeout}")
   private int leaderDeathTimeout;
@@ -30,17 +30,17 @@ public class ClusterLeaderManager {
 
   public ClusterLeaderManager(
       ClusterLeaderRepository clusterLeaderRepository,
-      ClusterLeaderManagerStartup clusterLeaderManagerStartup)
+      ClusterLeaderStartupManager clusterLeaderStartupManager)
       throws UnknownHostException {
     this.clusterLeaderRepository = clusterLeaderRepository;
-    this.clusterLeaderManagerStartup = clusterLeaderManagerStartup;
+    this.clusterLeaderStartupManager = clusterLeaderStartupManager;
   }
 
   @Transactional(isolation = Isolation.REPEATABLE_READ)
   public boolean isThisHostClusterLeader() {
     synchronized (LEADER_ID) {
       try {
-        clusterLeaderManagerStartup.doStartupChecksAndAttemptToElectLeaderIfRequired(LEADER_ID);
+        clusterLeaderStartupManager.doStartupChecksAndAttemptToElectLeaderIfRequired(LEADER_ID);
       } catch (DataIntegrityViolationException dataIntegrityViolationException) {
         // Multiple processes had a dead-heat when trying to become leader, so let the losers fail
         return false;

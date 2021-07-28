@@ -14,13 +14,13 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.ClusterLeader;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ClusterLeaderRepository;
 
 @Component
-public class ClusterLeaderManagerStartup {
-  private static final Logger log = LoggerFactory.getLogger(ClusterLeaderManagerStartup.class);
+public class ClusterLeaderStartupManager {
+  private static final Logger log = LoggerFactory.getLogger(ClusterLeaderStartupManager.class);
   private final ClusterLeaderRepository clusterLeaderRepository;
 
   private String hostName = InetAddress.getLocalHost().getHostName();
 
-  public ClusterLeaderManagerStartup(ClusterLeaderRepository clusterLeaderRepository)
+  public ClusterLeaderStartupManager(ClusterLeaderRepository clusterLeaderRepository)
       throws UnknownHostException {
     this.clusterLeaderRepository = clusterLeaderRepository;
   }
