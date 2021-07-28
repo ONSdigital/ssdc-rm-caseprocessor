@@ -27,17 +27,19 @@ public class ClusterLeaderManagerStartup {
 
   @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
   public void doStartupChecksAndAttemptToElectLeaderIfRequired(UUID leaderId) {
-    if (!clusterLeaderRepository.existsById(leaderId)) {
-      // We are starting up for the first time!
-      // Record that this host is the cluster leader in the database
-      ClusterLeader clusterLeader = new ClusterLeader();
-      clusterLeader.setId(leaderId);
-      clusterLeader.setHostName(hostName);
-      clusterLeader.setHostLastSeenAliveAt(OffsetDateTime.now());
-      clusterLeaderRepository.saveAndFlush(clusterLeader);
-
-      log.with("hostName", hostName)
-          .debug("No leader existed in DB, so this host is attempting to become leader");
+    if (clusterLeaderRepository.existsById(leaderId)) {
+      return; // We are not staring up for the first time... nothing to do here
     }
+
+    // We ARE starting up for the first time!
+    // Record that this host is the cluster leader in the database
+    ClusterLeader clusterLeader = new ClusterLeader();
+    clusterLeader.setId(leaderId);
+    clusterLeader.setHostName(hostName);
+    clusterLeader.setHostLastSeenAliveAt(OffsetDateTime.now());
+    clusterLeaderRepository.saveAndFlush(clusterLeader);
+
+    log.with("hostName", hostName)
+        .debug("No leader existed in DB, so this host is attempting to become leader");
   }
 }
