@@ -28,7 +28,7 @@ public class ClusterLeaderManagerStartup {
   @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
   public void doStartupChecksAndAttemptToElectLeaderIfRequired(UUID leaderId) {
     if (clusterLeaderRepository.existsById(leaderId)) {
-      return; // We are not staring up for the first time... nothing to do here
+      return; // We are not starting up for the first time... nothing to do here
     }
 
     // We ARE starting up for the first time!
