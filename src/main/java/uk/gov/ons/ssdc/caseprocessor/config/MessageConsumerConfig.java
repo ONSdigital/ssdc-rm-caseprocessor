@@ -88,8 +88,7 @@ public class MessageConsumerConfig {
 
   @Bean
   public PubSubInboundChannelAdapter inboundSamples(
-      @Qualifier("sampleInputChannel") MessageChannel channel,
-      PubSubTemplate pubSubTemplate) {
+      @Qualifier("sampleInputChannel") MessageChannel channel, PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, sampleSubscription, Sample.class);
   }
 
@@ -101,8 +100,7 @@ public class MessageConsumerConfig {
 
   @Bean
   public PubSubInboundChannelAdapter refusalInbound(
-      @Qualifier("refusalInputChannel") MessageChannel channel,
-      PubSubTemplate pubSubTemplate) {
+      @Qualifier("refusalInputChannel") MessageChannel channel, PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, refusalSubscription, ResponseManagementEvent.class);
   }
 
@@ -110,46 +108,54 @@ public class MessageConsumerConfig {
   PubSubInboundChannelAdapter invalidAddressInbound(
       @Qualifier("invalidAddressInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, invalidAddressSubscription, ResponseManagementEvent.class);
+    return makeAdapter(
+        channel, pubSubTemplate, invalidAddressSubscription, ResponseManagementEvent.class);
   }
 
   @Bean
   PubSubInboundChannelAdapter surveyLaunchedInbound(
       @Qualifier("surveyLaunchedInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, surveyLaunchedSubscription, ResponseManagementEvent.class);
+    return makeAdapter(
+        channel, pubSubTemplate, surveyLaunchedSubscription, ResponseManagementEvent.class);
   }
 
   @Bean
   PubSubInboundChannelAdapter fulfilmentInbound(
-      @Qualifier("fulfilmentInputChannel") MessageChannel channel,
-      PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, fulfilmentSubscription, ResponseManagementEvent.class);
+      @Qualifier("fulfilmentInputChannel") MessageChannel channel, PubSubTemplate pubSubTemplate) {
+    return makeAdapter(
+        channel, pubSubTemplate, fulfilmentSubscription, ResponseManagementEvent.class);
   }
 
   @Bean
   PubSubInboundChannelAdapter telephoneCaptureInbound(
       @Qualifier("telephoneCaptureInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, telephoneCaptureSubscription, ResponseManagementEvent.class);
+    return makeAdapter(
+        channel, pubSubTemplate, telephoneCaptureSubscription, ResponseManagementEvent.class);
   }
 
   @Bean
   PubSubInboundChannelAdapter deactivateUacInbound(
       @Qualifier("deactivateUacInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, deactivateUacSubscription, ResponseManagementEvent.class);
+    return makeAdapter(
+        channel, pubSubTemplate, deactivateUacSubscription, ResponseManagementEvent.class);
   }
 
   @Bean
   PubSubInboundChannelAdapter updateSampleSensitiveInbound(
       @Qualifier("updateSampleSensitiveInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, updateSampleSensitiveSubscription, ResponseManagementEvent.class);
+    return makeAdapter(
+        channel, pubSubTemplate, updateSampleSensitiveSubscription, ResponseManagementEvent.class);
   }
 
-  private PubSubInboundChannelAdapter makeAdapter(MessageChannel channel,
-      PubSubTemplate pubSubTemplate, String subscriptionName, Class<?> payloadType) {
+  private PubSubInboundChannelAdapter makeAdapter(
+      MessageChannel channel,
+      PubSubTemplate pubSubTemplate,
+      String subscriptionName,
+      Class<?> payloadType) {
     PubSubInboundChannelAdapter adapter =
         new PubSubInboundChannelAdapter(pubSubTemplate, subscriptionName);
     adapter.setOutputChannel(channel);

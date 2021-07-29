@@ -11,11 +11,9 @@ import org.hibernate.annotations.Type;
 @Data
 @Entity
 public class MessageToSend {
-  @Id
-  private UUID id;
+  @Id private UUID id;
 
-  @Column
-  private String destinationTopic;
+  @Column private String destinationTopic;
 
   @Lob
   @Type(type = "org.hibernate.type.BinaryType")

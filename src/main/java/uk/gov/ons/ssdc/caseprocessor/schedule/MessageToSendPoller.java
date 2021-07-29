@@ -1,6 +1,5 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -8,8 +7,7 @@ import org.springframework.stereotype.Component;
 public class MessageToSendPoller {
   private final MessageToSendProcessor messageToSendProcessor;
 
-  public MessageToSendPoller(
-      MessageToSendProcessor messageToSendProcessor) {
+  public MessageToSendPoller(MessageToSendProcessor messageToSendProcessor) {
     this.messageToSendProcessor = messageToSendProcessor;
   }
 

@@ -1,5 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -10,6 +12,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.MessageToSendRepository;
 
 @Component
 public class MessageToSendProcessor {
+  private static final Logger log = LoggerFactory.getLogger(MessageToSendProcessor.class);
   private final MessageToSendRepository messageToSendRepository;
   private final MessageToSendSender messageToSendSender;
 
@@ -17,8 +20,7 @@ public class MessageToSendProcessor {
   private int chunkSize;
 
   public MessageToSendProcessor(
-      MessageToSendRepository messageToSendRepository,
-      MessageToSendSender messageToSendSender) {
+      MessageToSendRepository messageToSendRepository, MessageToSendSender messageToSendSender) {
     this.messageToSendRepository = messageToSendRepository;
     this.messageToSendSender = messageToSendSender;
   }
@@ -29,8 +31,13 @@ public class MessageToSendProcessor {
         messageToSendRepository.findMessagesToSend(chunkSize)) {
       messagesToSend.forEach(
           messageToSend -> {
-            messageToSendSender.sendMessage(messageToSend);
-            messageToSendRepository.delete(messageToSend);
+            try {
+              messageToSendSender.sendMessage(messageToSend);
+              messageToSendRepository.delete(messageToSend);
+            } catch (Exception exception) {
+              log.with(messageToSend)
+                  .error("Could not send message. Will retry indefinitely", exception);
+            }
           });
     }
   }

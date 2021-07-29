@@ -10,8 +10,7 @@ import uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper;
 public class MessageSender {
   private final MessageToSendRepository messageToSendRepository;
 
-  public MessageSender(
-      MessageToSendRepository messageToSendRepository) {
+  public MessageSender(MessageToSendRepository messageToSendRepository) {
     this.messageToSendRepository = messageToSendRepository;
   }
 
