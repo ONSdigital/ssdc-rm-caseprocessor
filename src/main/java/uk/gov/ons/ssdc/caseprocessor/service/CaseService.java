@@ -2,9 +2,9 @@ package uk.gov.ons.ssdc.caseprocessor.service;
 
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
@@ -18,17 +18,14 @@ import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 @Service
 public class CaseService {
   private final CaseRepository caseRepository;
-  private final RabbitTemplate rabbitTemplate;
+  private final MessageSender messageSender;
 
-  @Value("${queueconfig.case-event-exchange}")
-  private String outboundExchange;
+  @Value("${queueconfig.case-update-topic}")
+  private String caseUpdateTopic;
 
-  @Value("${queueconfig.case-update-routing-key}")
-  private String caseUpdateRoutingKey;
-
-  public CaseService(CaseRepository caseRepository, RabbitTemplate rabbitTemplate) {
+  public CaseService(CaseRepository caseRepository, MessageSender messageSender) {
     this.caseRepository = caseRepository;
-    this.rabbitTemplate = rabbitTemplate;
+    this.messageSender = messageSender;
   }
 
   public void saveCaseAndEmitCaseUpdatedEvent(Case caze) {
@@ -37,7 +34,7 @@ public class CaseService {
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATED);
 
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
-    rabbitTemplate.convertAndSend(outboundExchange, caseUpdateRoutingKey, responseManagementEvent);
+    messageSender.sendMessage(caseUpdateTopic, responseManagementEvent);
   }
 
   public void saveCase(Case caze) {
@@ -48,7 +45,7 @@ public class CaseService {
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
 
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
-    rabbitTemplate.convertAndSend(outboundExchange, caseUpdateRoutingKey, responseManagementEvent);
+    messageSender.sendMessage(caseUpdateTopic, responseManagementEvent);
   }
 
   private ResponseManagementEvent prepareCaseEvent(Case caze, EventDTO eventDTO) {

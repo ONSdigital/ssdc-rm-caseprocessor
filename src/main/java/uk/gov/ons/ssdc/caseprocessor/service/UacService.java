@@ -1,9 +1,9 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
 import java.util.Optional;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
@@ -17,16 +17,13 @@ import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 @Service
 public class UacService {
   private final UacQidLinkRepository uacQidLinkRepository;
-  private final RabbitTemplate rabbitTemplate;
+  private final MessageSender messageSender;
 
-  @Value("${queueconfig.case-event-exchange}")
-  private String outboundExchange;
+  @Value("${queueconfig.uac-update-topic}")
+  private String uacUpdateTopic;
 
-  @Value("${queueconfig.uac-update-routing-key}")
-  private String uacUpdateRoutingKey;
-
-  public UacService(UacQidLinkRepository uacQidLinkRepository, RabbitTemplate rabbitTemplate) {
-    this.rabbitTemplate = rabbitTemplate;
+  public UacService(UacQidLinkRepository uacQidLinkRepository, MessageSender messageSender) {
+    this.messageSender = messageSender;
     this.uacQidLinkRepository = uacQidLinkRepository;
   }
 
@@ -52,7 +49,7 @@ public class UacService {
     responseManagementEvent.setEvent(eventDTO);
     responseManagementEvent.setPayload(payloadDTO);
 
-    rabbitTemplate.convertAndSend(outboundExchange, uacUpdateRoutingKey, responseManagementEvent);
+    messageSender.sendMessage(uacUpdateTopic, responseManagementEvent);
 
     return savedUacQidLink;
   }

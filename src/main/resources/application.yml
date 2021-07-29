@@ -27,33 +27,27 @@ spring:
           lob:
             non_contextual_creation: true
 
-  rabbitmq:
-    username: guest
-    password: guest
-    host: localhost
-    port: 6672
-    virtualhost: /
-
+  cloud:
+    gcp:
+      pubsub:
+        emulator-host: localhost:8538
+        project-id: project
 
 
 queueconfig:
-  telephone-capture-queue: caseApi.caseProcessor.telephoneCapture
-  sample-queue: supportTool.caseProcessor.sample
-  receipt-response-queue: events.caseProcessor.response
-  refusal-response-queue: events.caseProcessor.refusal
-  print-queue: caseProcessor.printFileSvc.printBatchRow
-  invalid-address-queue: events.caseProcessor.invalidAddress
-  survey-launched-queue: events.caseProcessor.surveyLaunched
-  fulfilment-queue: events.caseProcessor.fulfilment
-  deactivate-uac-queue: events.caseProcessor.deactivateUac
-  update-sample-sensitive-queue: events.caseProcessor.updateSampleSensitive
-  case-update-routing-key: events.caseUpdate
-  uac-update-routing-key: events.uacUpdate
-  deactivate-uac-routing-key: events.deactivateUac
-  case-event-exchange: events
-  consumers: 50
-  retry-attempts: 3
-  retry-delay: 1000 #milliseconds
+  telephone-capture-subscription: caseApi.caseProcessor.telephoneCapture.subscription
+  sample-subscription: supportTool.caseProcessor.sample.subscription
+  receipt-response-subscription: events.caseProcessor.response.subscription
+  refusal-response-subscription: events.caseProcessor.refusal.subscription
+  print-topic: caseProcessor.printFileSvc.printBatchRow.topic
+  invalid-address-subscription: events.caseProcessor.invalidAddress.subscription
+  survey-launched-subscription: events.caseProcessor.surveyLaunched.subscription
+  fulfilment-subscription: events.caseProcessor.fulfilment.subscription
+  deactivate-uac-subscription: events.caseProcessor.deactivateUac.subscription
+  update-sample-sensitive-subscription: events.caseProcessor.updateSampleSensitive.subscription
+  case-update-topic: events.caseUpdate.topic
+  uac-update-topic: events.uacUpdate.topic
+  deactivate-uac-topic: events.deactivateUac.topic
 
 healthcheck:
   frequency: 15000 #milliseconds
