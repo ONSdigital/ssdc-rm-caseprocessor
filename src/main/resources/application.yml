@@ -48,6 +48,7 @@ queueconfig:
   case-update-topic: events.caseUpdate.topic
   uac-update-topic: events.uacUpdate.topic
   deactivate-uac-topic: events.deactivateUac.topic
+  publishtimeout: 30  # In seconds
 
 healthcheck:
   frequency: 15000 #milliseconds

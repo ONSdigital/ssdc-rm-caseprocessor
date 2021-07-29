@@ -153,7 +153,7 @@ public class MessageConsumerConfig {
     PubSubInboundChannelAdapter adapter =
         new PubSubInboundChannelAdapter(pubSubTemplate, subscriptionName);
     adapter.setOutputChannel(channel);
-    adapter.setAckMode(AckMode.MANUAL);
+    adapter.setAckMode(AckMode.AUTO);
     adapter.setPayloadType(payloadType);
     return adapter;
   }
