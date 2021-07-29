@@ -9,22 +9,6 @@ services:
     environment:
       - POSTGRES_PASSWORD=postgres
 
-  rabbitmq:
-    container_name: rabbitmq-case-it
-    image: rabbitmq:3.8-management
-    ports:
-      - "34369:4369"
-      - "55672:25672"
-      - "35671:5671"
-      - "35672:5672"
-      - "46671:15671"
-      - "46672:15672"
-    environment:
-      - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
-    volumes:
-      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-      - ./definitions.json:/opt/definitions.json
-
   uac-qid:
     container_name: uac-qid-case-it
     image: eu.gcr.io/ssdc-rm-ci/rm/ssdc-rm-uac-qid-service:latest

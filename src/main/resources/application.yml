@@ -47,7 +47,7 @@ queueconfig:
   update-sample-sensitive-subscription: events.caseProcessor.updateSampleSensitive.subscription
   case-update-topic: events.caseUpdate.topic
   uac-update-topic: events.uacUpdate.topic
-  deactivate-uac-topic: events.deactivateUac.topic
+  deactivate-uac-topic: events.caseProcessor.deactivateUac.topic
   publishtimeout: 30  # In seconds
 
 healthcheck:

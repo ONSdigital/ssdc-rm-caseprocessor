@@ -1,5 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
+import com.google.protobuf.ByteString;
+import com.google.pubsub.v1.PubsubMessage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -21,8 +23,13 @@ public class MessageToSendSender {
   }
 
   public void sendMessage(MessageToSend messageToSend) {
+    PubsubMessage pubsubMessage =
+        PubsubMessage.newBuilder()
+            .setData(ByteString.copyFromUtf8(messageToSend.getMessageBody()))
+            .build();
+
     ListenableFuture<String> future =
-        pubSubTemplate.publish(messageToSend.getDestinationTopic(), messageToSend.getMessageBody());
+        pubSubTemplate.publish(messageToSend.getDestinationTopic(), pubsubMessage);
 
     try {
       future.get(publishTimeout, TimeUnit.SECONDS);
