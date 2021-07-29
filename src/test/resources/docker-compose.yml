@@ -25,6 +25,20 @@ services:
       timeout: 10s
       retries: 10
 
+  pubsub-emulator:
+    container_name: pubsub-emulator-case-it
+    image: eu.gcr.io/ssdc-rm-ci/rm/gcloud-pubsub-emulator:latest
+    ports:
+      - "18538:8538"
+
+  setup-pubsub-emulator:
+    image: eu.gcr.io/ssdc-rm-ci/rm/gcloud-pubsub-emulator:latest
+    volumes:
+      - ./setup_pubsub.sh:/setup_pubsub.sh
+    depends_on:
+      - pubsub-emulator
+    entrypoint: sh -c "/setup_pubsub.sh"
+
   start_dependencies:
     image: dadarek/wait-for-dependencies
     depends_on:

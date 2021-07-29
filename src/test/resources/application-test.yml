@@ -1,6 +1,10 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:15432/postgres
+  cloud:
+    gcp:
+      pubsub:
+        emulator-host: localhost:18538
 
 uacservice:
   connection:
