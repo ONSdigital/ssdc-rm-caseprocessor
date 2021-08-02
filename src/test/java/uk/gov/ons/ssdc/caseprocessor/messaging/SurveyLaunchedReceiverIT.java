@@ -37,7 +37,7 @@ public class SurveyLaunchedReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String TEST_QID = "1234334";
   private static final String TEST_UAC = "9434343";
-  private static final String INBOUND_TOPIC = "event.survey-launched";
+  private static final String INBOUND_TOPIC = "event_survey-launched";
 
   @Value("${queueconfig.case-update-topic}")
   private String caseUpdateTopic;

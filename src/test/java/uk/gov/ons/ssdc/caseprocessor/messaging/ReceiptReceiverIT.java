@@ -46,7 +46,7 @@ public class ReceiptReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String TEST_QID = "123456";
   private static final UUID TEST_UACLINK_ID = UUID.randomUUID();
-  private static final String INBOUND_RECEIPT_TOPIC = "event.receipt";
+  private static final String INBOUND_RECEIPT_TOPIC = "event_receipt";
 
   @Value("${queueconfig.case-update-topic}")
   private String caseUpdateTopic;

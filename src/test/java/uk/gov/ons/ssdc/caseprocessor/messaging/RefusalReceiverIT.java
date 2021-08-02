@@ -37,7 +37,7 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 @ExtendWith(SpringExtension.class)
 public class RefusalReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  private static final String INBOUND_REFUSAL_TOPIC = "event.refusal";
+  private static final String INBOUND_REFUSAL_TOPIC = "event_refusal";
 
   @Value("${queueconfig.case-update-topic}")
   private String caseUpdateTopic;
