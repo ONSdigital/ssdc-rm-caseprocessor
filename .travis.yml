@@ -8,7 +8,7 @@ jdk: openjdk11
 
 env:
   global:
-  - IMAGE_NAME="$DOCKER_GCP_LOCATION/ssdc-rm-caseprocessor"
+  - IMAGE_NAME="${DOCKER_GCP_LOCATION}/ssdc-rm-caseprocessor"
 
 before_install:
   - mvn fmt:check
