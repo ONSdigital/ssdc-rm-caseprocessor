@@ -18,7 +18,7 @@ curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/topics/event.refusal
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/subscriptions/event.refusal.rm-case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/project/topics/event.refusal"}'
 
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/topics/rm-internal-print-row
-curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/subscriptions/rm-internal-print-row.print-file-service -H 'Content-Type: application/json' -d '{"topic": "projects/projecct/topics/rm-internal-print-row"}'
+curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/subscriptions/rm-internal-print-row.print-file-service -H 'Content-Type: application/json' -d '{"topic": "projects/project/topics/rm-internal-print-row"}'
 
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/topics/event.invalid
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/subscriptions/event.invalid.rm-case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/project/topics/event.invalid"}'
