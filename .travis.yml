@@ -6,13 +6,8 @@ services:
 language: java
 jdk: openjdk11
 
-env:
-  global:
-  - IMAGE_NAME="${DOCKER_GCP_LOCATION}/ssdc-rm-caseprocessor"
-
 before_install:
   - mvn fmt:check
-  - docker login -u "${DOCKER_GCP_USERNAME}" -p "${DOCKER_GCP_PASSWORD}" "${DOCKER_GCP_REGISTRY}";
 
 install: echo "SKIPPING DEFAULT INSTALL" # Travis has a default maven install. Don't build twice!
 
