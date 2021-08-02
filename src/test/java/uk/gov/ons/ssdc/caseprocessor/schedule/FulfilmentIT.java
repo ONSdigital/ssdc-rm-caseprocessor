@@ -46,8 +46,8 @@ import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 @ExtendWith(SpringExtension.class)
 public class FulfilmentIT {
   private static final String OUTBOUND_PRINTER_SUBSCRIPTION =
-      "caseProcessor.printFileSvc.printBatchRow.subscription";;
-  private static final String FULFILMENT_TOPIC = "events.caseProcessor.fulfilment.topic";
+      "rm-internal-print-row.print-file-service";
+  private static final String FULFILMENT_TOPIC = "event.paper-fulfilment";
 
   private static final String PACK_CODE = "test-pack-code";
   private static final String PRINT_SUPPLIER = "FOOBAR_PRINT_SUPPLIER";

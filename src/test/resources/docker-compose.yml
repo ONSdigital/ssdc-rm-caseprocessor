@@ -33,6 +33,8 @@ services:
 
   setup-pubsub-emulator:
     image: eu.gcr.io/ssdc-rm-ci/rm/gcloud-pubsub-emulator:latest
+    environment:
+      - PUBSUB_SETUP_HOST=pubsub-emulator:8538
     volumes:
       - ./setup_pubsub.sh:/setup_pubsub.sh
     depends_on:

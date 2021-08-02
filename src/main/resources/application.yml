@@ -35,19 +35,19 @@ spring:
 
 
 queueconfig:
-  telephone-capture-subscription: caseApi.caseProcessor.telephoneCapture.subscription
-  sample-subscription: supportTool.caseProcessor.sample.subscription
-  receipt-response-subscription: events.caseProcessor.response.subscription
-  refusal-response-subscription: events.caseProcessor.refusal.subscription
-  print-topic: caseProcessor.printFileSvc.printBatchRow.topic
-  invalid-address-subscription: events.caseProcessor.invalidAddress.subscription
-  survey-launched-subscription: events.caseProcessor.surveyLaunched.subscription
-  fulfilment-subscription: events.caseProcessor.fulfilment.subscription
-  deactivate-uac-subscription: events.caseProcessor.deactivateUac.subscription
-  update-sample-sensitive-subscription: events.caseProcessor.updateSampleSensitive.subscription
-  case-update-topic: events.caseUpdate.topic
-  uac-update-topic: events.uacUpdate.topic
-  deactivate-uac-topic: events.caseProcessor.deactivateUac.topic
+  telephone-capture-subscription: rm-internal-telephone-capture.case-processor
+  sample-subscription: rm-internal-sample.case-processor
+  receipt-response-subscription: event.receipt.rm-case-processor
+  refusal-response-subscription: event.refusal.rm-case-processor
+  print-topic: rm-internal-print-row
+  invalid-address-subscription: event.invalid.rm-case-processor
+  survey-launched-subscription: event.survey-launched.rm-case-processor
+  fulfilment-subscription: event.paper-fulfilment.rm-case-processor
+  deactivate-uac-subscription: event.deactivate-uac.rm-case-processor
+  update-sample-sensitive-subscription: event.update-sample-sensitive.rm-case-processor
+  case-update-topic: event.case-update
+  uac-update-topic: event.uac-update
+  deactivate-uac-topic: event.deactivate-uac
   publishtimeout: 30  # In seconds
 
 healthcheck:

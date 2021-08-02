@@ -42,8 +42,7 @@ public class UpdateSampleSensitiveReceiverIT {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
-  private static final String UPDATE_SAMPLE_SENSITIVE_TOPIC =
-      "events.caseProcessor.updateSampleSensitive.topic";
+  private static final String UPDATE_SAMPLE_SENSITIVE_TOPIC = "event.update-sample-sensitive";
 
   @Value("${queueconfig.case-update-topic}")
   private String caseUpdateTopic;

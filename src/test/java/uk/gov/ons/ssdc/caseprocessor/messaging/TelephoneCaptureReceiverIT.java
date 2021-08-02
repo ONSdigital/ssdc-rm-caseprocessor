@@ -39,8 +39,7 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 public class TelephoneCaptureReceiverIT {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  private static final String TELEPHONE_CAPTURE_TOPIC =
-      "caseApi.caseProcessor.telephoneCapture.topic";
+  private static final String TELEPHONE_CAPTURE_TOPIC = "rm-internal-telephone-capture";
 
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;

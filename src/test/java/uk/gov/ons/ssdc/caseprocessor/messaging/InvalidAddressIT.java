@@ -37,8 +37,7 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 @ExtendWith(SpringExtension.class)
 public class InvalidAddressIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  private static final String INBOUND_INVALID_ADDRESS_TOPIC =
-      "events.caseProcessor.invalidAddress.topic";
+  private static final String INBOUND_INVALID_ADDRESS_TOPIC = "event.invalid";
 
   @Value("${queueconfig.case-update-topic}")
   private String caseUpdateTopic;
