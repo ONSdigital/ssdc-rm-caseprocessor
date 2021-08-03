@@ -1,13 +1,13 @@
 package uk.gov.ons.ssdc.caseprocessor.healthcheck;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,9 +28,10 @@ public class HeathCheckIT {
 
     try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
       String fileLine = bufferedReader.readLine();
-      String now = LocalDateTime.now().toString();
+      OffsetDateTime healthCheckTimeStamp = OffsetDateTime.parse(fileLine);
 
-      assertEquals(now.substring(0, 15), fileLine.substring(0, 15));
+      assertThat(OffsetDateTime.now().toEpochSecond() - healthCheckTimeStamp.toEpochSecond())
+          .isLessThan(30);
     }
   }
 }
