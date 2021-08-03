@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.FileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 
 @Component
@@ -20,6 +20,7 @@ public class PrintProcessor {
   private final UacQidCache uacQidCache;
   private final UacService uacService;
   private final EventLogger eventLogger;
+  private final FileRowRepository fileRowRepository;
 
   private final StringWriter stringWriter = new StringWriter();
   private final CSVWriter csvWriter =
@@ -37,11 +38,13 @@ public class PrintProcessor {
       MessageSender messageSender,
       UacQidCache uacQidCache,
       UacService uacService,
-      EventLogger eventLogger) {
+      EventLogger eventLogger,
+      FileRowRepository fileRowRepository) {
     this.messageSender = messageSender;
     this.uacQidCache = uacQidCache;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
+    this.fileRowRepository = fileRowRepository;
   }
 
   public void process(FulfilmentToProcess fulfilmentToProcess) {
@@ -93,14 +96,14 @@ public class PrintProcessor {
       }
     }
 
-    PrintRow printRow = new PrintRow();
-    printRow.setRow(getCsvRow(rowStrings));
-    printRow.setBatchId(batchId);
-    printRow.setBatchQuantity(batchQuantity);
-    printRow.setPackCode(packCode);
-    printRow.setPrintSupplier(printSupplier);
+    FileRow fileRow = new FileRow();
+    fileRow.setRow(getCsvRow(rowStrings));
+    fileRow.setBatchId(batchId);
+    fileRow.setBatchQuantity(batchQuantity);
+    fileRow.setPackCode(packCode);
+    fileRow.setPrintSupplier(printSupplier);
 
-    messageSender.sendMessage(printTopic, printRow);
+    fileRowRepository.saveAndFlush(fileRow);
 
     eventLogger.logCaseEvent(
         caze,
