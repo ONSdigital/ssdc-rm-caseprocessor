@@ -101,21 +101,16 @@ Example message:
 {
   "event": {
     "type": "REFUSAL_RECEIVED",
-    "source": null,
-    "channel": null,
-    "dateTime": null,
-    "transactionId": null
+    "source": "RH",
+    "channel": "RH",
+    "dateTime": "2021-06-09T13:49:19.716761Z",
+    "transactionId": "92df974c-f03e-4519-8d55-05e9c0ecea43"
   },
   "payload": {
     "refusal": {
       "type": "EXTRAORDINARY_REFUSAL",
       "collectionCase": {
-        "caseId": "2a792cbe-c125-4a3b-973a-34c0bccc7656",
-        "receiptReceived": null,
-        "invalidAddrress": null,
-        "surveyLaunched": null,
-        "refusalReceived": null,
-        "sample": null
+        "caseId": "2a792cbe-c125-4a3b-973a-34c0bccc7656"
       }
     }
   }
@@ -130,10 +125,10 @@ Example message:
 {
   "event": {
     "type": "SURVEY_LAUNCHED",
-    "source": "Respondent Home",
+    "source": "RH",
     "channel": "RH",
-    "dateTime": null,
-    "transactionId": null
+    "dateTime": "2021-06-09T13:49:19.716761Z",
+    "transactionId": "92df974c-f03e-4519-8d55-05e9c0ecea43"
   },
   "payload": {
     "response": {
@@ -195,10 +190,10 @@ Example message:
 {
   "event": {
     "type": "FULFILMENT",
-    "source": "Respondent Home",
+    "source": "RH",
     "channel": "RH",
-    "dateTime": null,
-    "transactionId": null
+    "dateTime": "2021-06-09T13:49:19.716761Z",
+    "transactionId": "92df974c-f03e-4519-8d55-05e9c0ecea43"
   },
   "payload": {
     "fulfilment": {
@@ -258,6 +253,7 @@ Example message:
 ## Case Created
 Topic: `event.case-update`
 
+Example message:
 ```json
 {
   "event": {
@@ -276,9 +272,9 @@ Topic: `event.case-update`
         "refusalReceived": "HARD_REFUSAL",
         "sample" : {
           "ADDRESS_LINE1": "123 Fake Street",
-          "ADDRESS_LINE2": "JoVDP Village",
-          "ADDRESS_LINE3": "Whilesville",
-          "TOWN_NAME": "Mort City",
+          "ADDRESS_LINE2": "Fake Part of Suburb",
+          "ADDRESS_LINE3": "Fake Suburb",
+          "TOWN_NAME": "Kaboom City",
           "POSTCODE": "PO99 3XY"
         }
       }
@@ -289,6 +285,7 @@ Topic: `event.case-update`
 ## Case Updated
 Topic: `event.case-update`
 
+Example message:
 ```json
 {
   "event": {
@@ -307,9 +304,9 @@ Topic: `event.case-update`
         "refusalReceived": "HARD_REFUSAL",
         "sample" : {
           "ADDRESS_LINE1": "123 Fake Street",
-          "ADDRESS_LINE2": "JoVDP Village",
-          "ADDRESS_LINE3": "Whilesville",
-          "TOWN_NAME": "Mort City",
+          "ADDRESS_LINE2": "Fake Part of Suburb",
+          "ADDRESS_LINE3": "Fake Suburb",
+          "TOWN_NAME": "Kaboom City",
           "POSTCODE": "PO99 3XY"
         }
       }
@@ -320,6 +317,7 @@ Topic: `event.case-update`
 ## UAC Updated
 Topic: `event.uac-update`
 
+Example message:
 ```json
 {
   "event": {
