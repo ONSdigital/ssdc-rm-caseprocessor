@@ -49,9 +49,7 @@ Example message:
 ```
 
 ### Invalid Address
-Queue name: `events.caseProcessor.invalidAddress`
-Exchange: `events`
-Routing key: `events.invalidAddress`
+Topic: `event_survey-launched`
 
 Example message: 
 ```json
@@ -74,9 +72,7 @@ Example message:
 ```
 
 ### Receipts/Responses
-Queue name: `events.caseProcessor.response`
-Exchange: `events`
-Routing key: `events.response`
+Topic name: `event_receipt`
 
 Example message:
 ```json
@@ -98,9 +94,7 @@ Example message:
 ```
 
 ### Refusals
-Queue name: `events.caseProcessor.refusal`
-Exchange: `events`
-Routing key: `events.refusal`
+Topic: `event_refusal`
 
 Example message:
 ```json
@@ -129,9 +123,7 @@ Example message:
 ```
 
 ### Survey Launched
-Queue name: `events.caseProcessor.surveyLaunched`
-Exchange: `events`
-Routing key: `events.surveyLaunched`
+Topic: `event_survey-launched`
 
 Example message:
 ```json
@@ -196,9 +188,7 @@ values ('b1d826fa-6afc-4270-9f0c-302cb05d4d96', -- trigger ID
 
 The fulfilments will only be triggered by the "leader" pod, in the event that multiple instances of the case processor are running. If the leader dies or is killed/terminated, then another leader will be elected after 2 minutes.
 
-Queue name: `events.caseProcessor.fulfilment`
-Exchange: `events`
-Routing key: `events.fulfilment`
+Topic: `event.paper-fulfilment`
 
 Example message:
 ```json
@@ -222,9 +212,7 @@ Example message:
 ## Update Sensitive Data
 If we want to change or blank out (i.e. 'delete') sensitive data, such as phone numbers, email addresses, or respondent names, to comply with GDPR right to rectification laws, then we can handle messages to fix that data as required.
 
-Queue name: `events.caseProcessor.updateSampleSensitive`
-Exchange: `events`
-Routing key: `events.updateSampleSensitive`
+Topic: `event.update-sample-sensitive`
 
 Example message:
 ```json
@@ -246,9 +234,7 @@ Example message:
 ```
 
 ## Deactivate UAC
-Queue name: `events.caseProcessor.deactivateUac`
-Exchange: `events`
-Routing key: `events.deactivateUac`
+Topic: `event_deactivate-uac`
 
 Example message:
 ```json
@@ -263,6 +249,93 @@ Example message:
   "payload": {
     "deactivateUac": {
       "qid": "0123456789"
+    }
+  }
+}
+```
+
+
+## Case Created
+Topic: `event.case-update`
+
+```json
+{
+  "event": {
+    "type": "CASE_CREATED",
+    "source": "CASE_PROCESSOR",
+    "channel": "RM",
+    "dateTime": "2021-08-04T11:51:00.000Z",
+    "transactionId": "67c27976-dea9-438d-9785-0b58986dff4a"
+  },
+  "payload": {
+      "collectionCase": {
+        "caseId": "68f7b09b-3ca6-4c28-a5f3-08410f9ee579", 
+        "receiptReceived": true,
+        "invalidAddress": false,
+        "surveyLaunched": true,
+        "refusalReceived": "HARD_REFUSAL",
+        "sample" : {
+          "ADDRESS_LINE1": "123 Fake Street",
+          "ADDRESS_LINE2": "JoVDP Village",
+          "ADDRESS_LINE3": "Whilesville",
+          "TOWN_NAME": "Mort City",
+          "POSTCODE": "PO99 3XY"
+        }
+      }
+  }
+}
+```
+
+## Case Updated
+Topic: `event.case-update`
+
+```json
+{
+  "event": {
+    "type": "CASE_UPDATED",
+    "source": "CASE_PROCESSOR",
+    "channel": "RM",
+    "dateTime": "2021-08-04T11:51:00.000Z",
+    "transactionId": "67c27976-dea9-438d-9785-0b58986dff4a"
+  },
+  "payload": {
+      "collectionCase": {
+        "caseId": "68f7b09b-3ca6-4c28-a5f3-08410f9ee579", 
+        "receiptReceived": true,
+        "invalidAddress": false,
+        "surveyLaunched": true,
+        "refusalReceived": "HARD_REFUSAL",
+        "sample" : {
+          "ADDRESS_LINE1": "123 Fake Street",
+          "ADDRESS_LINE2": "JoVDP Village",
+          "ADDRESS_LINE3": "Whilesville",
+          "TOWN_NAME": "Mort City",
+          "POSTCODE": "PO99 3XY"
+        }
+      }
+  }
+}
+```
+
+## UAC Updated
+Topic: `event.uac-update`
+
+```json
+{
+  "event": {
+    "type": "UAC_UPDATED",
+    "source": "CASE_PROCESSOR",
+    "channel": "RM",
+    "dateTime": "2021-08-04T11:51:00.000Z",
+    "transactionId": "67c27976-dea9-438d-9785-0b58986dff4a"
+  },
+  "payload": {
+    "uac": {
+      "uac": "ABCD1234XYZA8765POYT",
+      "active": true,
+      "questionnaireId": "013000000000000164",
+      "caseId": "68f7b09b-3ca6-4c28-a5f3-08410f9ee579",
+      "collectionExerciseId": "58c12f89-ade1-412d-bbce-3d05916e4e64"
     }
   }
 }
