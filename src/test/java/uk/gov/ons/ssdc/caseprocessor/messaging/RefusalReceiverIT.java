@@ -1,7 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_QUEUE;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
 
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,8 +28,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -37,11 +37,12 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 @ExtendWith(SpringExtension.class)
 public class RefusalReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final String INBOUND_REFUSAL_TOPIC = "event_refusal";
 
-  @Value("${queueconfig.refusal-response-queue}")
-  private String inboundRefusalQueue;
+  @Value("${queueconfig.case-update-topic}")
+  private String caseUpdateTopic;
 
-  @Autowired private RabbitQueueHelper rabbitQueueHelper;
+  @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
 
   @Autowired private CaseRepository caseRepository;
@@ -50,14 +51,14 @@ public class RefusalReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    rabbitQueueHelper.purgeQueue(inboundRefusalQueue);
-    rabbitQueueHelper.purgeQueue(OUTBOUND_CASE_QUEUE);
+    pubsubHelper.purgeMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testRefusal() throws Exception {
-    try (QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(OUTBOUND_CASE_QUEUE)) {
+    try (QueueSpy<ResponseManagementEvent> outboundCaseQueueSpy =
+        pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, ResponseManagementEvent.class)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -85,7 +86,7 @@ public class RefusalReceiverIT {
       eventDTO.setType(EventTypeDTO.REFUSAL_RECEIVED);
       responseManagementEvent.setEvent(eventDTO);
 
-      rabbitQueueHelper.sendMessage(inboundRefusalQueue, responseManagementEvent);
+      pubsubHelper.sendMessage(INBOUND_REFUSAL_TOPIC, responseManagementEvent);
 
       //  THEN
       ResponseManagementEvent actualResponseManagementEvent =

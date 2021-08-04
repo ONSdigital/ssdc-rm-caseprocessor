@@ -14,10 +14,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
+import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
@@ -25,15 +25,15 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
 
 @ExtendWith(MockitoExtension.class)
 public class PrintProcessorTest {
-  @Mock private RabbitTemplate rabbitTemplate;
+  @Mock private MessageSender messageSender;
   @Mock private UacQidCache uacQidCache;
   @Mock private UacService uacService;
   @Mock private EventLogger eventLogger;
 
   @InjectMocks PrintProcessor underTest;
 
-  @Value("${queueconfig.print-queue}")
-  private String printQueue;
+  @Value("${queueconfig.print-topic}")
+  private String printTopic;
 
   @Test
   public void testProcessPrintRow() {
@@ -73,7 +73,7 @@ public class PrintProcessorTest {
 
     // Then
     ArgumentCaptor<PrintRow> printRowArgumentCaptor = ArgumentCaptor.forClass(PrintRow.class);
-    verify(rabbitTemplate).convertAndSend(eq(""), eq(printQueue), printRowArgumentCaptor.capture());
+    verify(messageSender).sendMessage(eq(printTopic), printRowArgumentCaptor.capture());
     PrintRow actualPrintRow = printRowArgumentCaptor.getValue();
     assertThat(actualPrintRow.getPackCode()).isEqualTo("test pack code");
     assertThat(actualPrintRow.getPrintSupplier()).isEqualTo("test print supplier");
@@ -127,7 +127,7 @@ public class PrintProcessorTest {
 
     // Then
     ArgumentCaptor<PrintRow> printRowArgumentCaptor = ArgumentCaptor.forClass(PrintRow.class);
-    verify(rabbitTemplate).convertAndSend(eq(""), eq(printQueue), printRowArgumentCaptor.capture());
+    verify(messageSender).sendMessage(eq(printTopic), printRowArgumentCaptor.capture());
     PrintRow actualPrintRow = printRowArgumentCaptor.getValue();
     assertThat(actualPrintRow.getPackCode()).isEqualTo("TEST_FULFILMENT_CODE");
     assertThat(actualPrintRow.getPrintSupplier()).isEqualTo("FOOBAR_PRINT_SUPPLIER");

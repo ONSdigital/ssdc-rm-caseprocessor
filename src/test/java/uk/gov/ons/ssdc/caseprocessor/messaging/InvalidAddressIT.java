@@ -1,7 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_QUEUE;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -28,8 +28,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -37,11 +37,12 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 @ExtendWith(SpringExtension.class)
 public class InvalidAddressIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final String INBOUND_INVALID_ADDRESS_TOPIC = "event_invalid";
 
-  @Value("${queueconfig.invalid-address-queue}")
-  private String inboundInvalidAddressQueue;
+  @Value("${queueconfig.case-update-topic}")
+  private String caseUpdateTopic;
 
-  @Autowired private RabbitQueueHelper rabbitQueueHelper;
+  @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
 
   @Autowired private CaseRepository caseRepository;
@@ -50,14 +51,14 @@ public class InvalidAddressIT {
 
   @BeforeEach
   public void setUp() {
-    rabbitQueueHelper.purgeQueue(inboundInvalidAddressQueue);
-    rabbitQueueHelper.purgeQueue(OUTBOUND_CASE_QUEUE);
+    pubsubHelper.purgeMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testInvalidAddress() throws Exception {
-    try (QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(OUTBOUND_CASE_QUEUE)) {
+    try (QueueSpy<ResponseManagementEvent> outboundCaseQueueSpy =
+        pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, ResponseManagementEvent.class)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -89,7 +90,7 @@ public class InvalidAddressIT {
       responseManagementEvent.setEvent(eventDTO);
 
       //  When
-      rabbitQueueHelper.sendMessage(inboundInvalidAddressQueue, responseManagementEvent);
+      pubsubHelper.sendMessage(INBOUND_INVALID_ADDRESS_TOPIC, responseManagementEvent);
 
       //  Then
       ResponseManagementEvent actualResponseManagementEvent =

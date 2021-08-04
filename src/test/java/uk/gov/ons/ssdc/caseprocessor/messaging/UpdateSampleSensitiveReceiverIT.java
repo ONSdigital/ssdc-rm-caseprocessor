@@ -1,7 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_QUEUE;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,7 +31,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.EventPoller;
 import uk.gov.ons.ssdc.caseprocessor.testutils.EventsNotFoundException;
-import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 
 @ContextConfiguration
@@ -42,11 +42,12 @@ public class UpdateSampleSensitiveReceiverIT {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
+  private static final String UPDATE_SAMPLE_SENSITIVE_TOPIC = "event_update-sample-sensitive";
 
-  @Value("${queueconfig.update-sample-sensitive-queue}")
-  private String updateSampleSensitiveQueue;
+  @Value("${queueconfig.case-update-topic}")
+  private String caseUpdateTopic;
 
-  @Autowired private RabbitQueueHelper rabbitQueueHelper;
+  @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
 
   @Autowired private CaseRepository caseRepository;
@@ -54,8 +55,7 @@ public class UpdateSampleSensitiveReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    rabbitQueueHelper.purgeQueue(updateSampleSensitiveQueue);
-    rabbitQueueHelper.purgeQueue(OUTBOUND_CASE_QUEUE);
+    pubsubHelper.purgeMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
@@ -88,7 +88,7 @@ public class UpdateSampleSensitiveReceiverIT {
     responseManagementEvent.setEvent(eventDTO);
 
     //  When
-    rabbitQueueHelper.sendMessage(updateSampleSensitiveQueue, responseManagementEvent);
+    pubsubHelper.sendMessage(UPDATE_SAMPLE_SENSITIVE_TOPIC, responseManagementEvent);
 
     List<Event> events = eventPoller.getEvents(1);
 

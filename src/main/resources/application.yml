@@ -27,33 +27,22 @@ spring:
           lob:
             non_contextual_creation: true
 
-  rabbitmq:
-    username: guest
-    password: guest
-    host: localhost
-    port: 6672
-    virtualhost: /
-
-
 
 queueconfig:
-  telephone-capture-queue: caseApi.caseProcessor.telephoneCapture
-  sample-queue: supportTool.caseProcessor.sample
-  receipt-response-queue: events.caseProcessor.response
-  refusal-response-queue: events.caseProcessor.refusal
-  print-queue: caseProcessor.printFileSvc.printBatchRow
-  invalid-address-queue: events.caseProcessor.invalidAddress
-  survey-launched-queue: events.caseProcessor.surveyLaunched
-  fulfilment-queue: events.caseProcessor.fulfilment
-  deactivate-uac-queue: events.caseProcessor.deactivateUac
-  update-sample-sensitive-queue: events.caseProcessor.updateSampleSensitive
-  case-update-routing-key: events.caseUpdate
-  uac-update-routing-key: events.uacUpdate
-  deactivate-uac-routing-key: events.deactivateUac
-  case-event-exchange: events
-  consumers: 50
-  retry-attempts: 3
-  retry-delay: 1000 #milliseconds
+  telephone-capture-subscription: rm-internal-telephone-capture_case-processor
+  sample-subscription: rm-internal-sample_case-processor
+  receipt-response-subscription: event_receipt_rm-case-processor
+  refusal-response-subscription: event_refusal_rm-case-processor
+  print-topic: rm-internal-print-row
+  invalid-address-subscription: event_invalid_rm-case-processor
+  survey-launched-subscription: event_survey-launched_rm-case-processor
+  fulfilment-subscription: event_paper-fulfilment_rm-case-processor
+  deactivate-uac-subscription: event_deactivate-uac_rm-case-processor
+  update-sample-sensitive-subscription: event_update-sample-sensitive_rm-case-processor
+  case-update-topic: event_case-update
+  uac-update-topic: event_uac-update
+  deactivate-uac-topic: event_deactivate-uac
+  publishtimeout: 30  # In seconds
 
 healthcheck:
   frequency: 15000 #milliseconds

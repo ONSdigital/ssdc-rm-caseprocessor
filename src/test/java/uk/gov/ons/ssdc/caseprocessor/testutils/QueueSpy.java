@@ -2,41 +2,28 @@ package uk.gov.ons.ssdc.caseprocessor.testutils;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
+import com.google.cloud.pubsub.v1.Subscriber;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
-import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 
 @AllArgsConstructor
-public class QueueSpy implements AutoCloseable {
-  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
-
-  @Getter private BlockingQueue<String> queue;
-  private SimpleMessageListenerContainer container;
+public class QueueSpy<T> implements AutoCloseable {
+  @Getter private BlockingQueue<T> queue;
+  private Subscriber subscriber;
 
   @Override
   public void close() {
-    container.stop();
+    subscriber.stopAsync();
   }
 
-  public ResponseManagementEvent checkExpectedMessageReceived()
-      throws IOException, InterruptedException {
-    String actualMessage = queue.poll(20, TimeUnit.SECONDS);
-    assertNotNull("Did not receive message before timeout", actualMessage);
-    ResponseManagementEvent responseManagementEvent =
-        objectMapper.readValue(actualMessage, ResponseManagementEvent.class);
-    assertNotNull(responseManagementEvent);
-    assertEquals("RM", responseManagementEvent.getEvent().getChannel());
-    return responseManagementEvent;
+  public T checkExpectedMessageReceived() throws InterruptedException {
+    return queue.poll(20, TimeUnit.SECONDS);
   }
 
   public void checkMessageIsNotReceived(int timeOut) throws InterruptedException {
-    String actualMessage = queue.poll(timeOut, TimeUnit.SECONDS);
-    assertNull("Message received when not expected", actualMessage);
+    T actualMessage = queue.poll(timeOut, TimeUnit.SECONDS);
+    assertNull(actualMessage, "Message received when not expected");
   }
 }

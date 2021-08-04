@@ -1,7 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_QUEUE;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -29,8 +29,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -39,11 +39,12 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 public class TelephoneCaptureReceiverIT {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final String TELEPHONE_CAPTURE_TOPIC = "rm-internal-telephone-capture";
 
-  @Value("${queueconfig.telephone-capture-queue}")
-  private String telephoneCaptureQueue;
+  @Value("${queueconfig.uac-update-topic}")
+  private String uacUpdateTopic;
 
-  @Autowired private RabbitQueueHelper rabbitQueueHelper;
+  @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
 
   @Autowired private CaseRepository caseRepository;
@@ -52,8 +53,7 @@ public class TelephoneCaptureReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    rabbitQueueHelper.purgeQueue(telephoneCaptureQueue);
-    rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);
+    pubsubHelper.purgeMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
@@ -88,8 +88,9 @@ public class TelephoneCaptureReceiverIT {
     responseManagementEvent.setEvent(eventDTO);
     responseManagementEvent.setPayload(payloadDTO);
 
-    try (QueueSpy outboundUacQueueSpy = rabbitQueueHelper.listen(OUTBOUND_UAC_QUEUE)) {
-      rabbitQueueHelper.sendMessage(telephoneCaptureQueue, responseManagementEvent);
+    try (QueueSpy<ResponseManagementEvent> outboundUacQueueSpy =
+        pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, ResponseManagementEvent.class)) {
+      pubsubHelper.sendMessage(TELEPHONE_CAPTURE_TOPIC, responseManagementEvent);
       ResponseManagementEvent emittedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
 
       assertThat(emittedEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);

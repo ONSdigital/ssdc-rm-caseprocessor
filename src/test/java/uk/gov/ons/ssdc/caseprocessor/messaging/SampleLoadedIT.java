@@ -1,7 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_QUEUE;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -29,8 +29,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseReposito
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -38,11 +38,12 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 @ExtendWith(SpringExtension.class)
 public class SampleLoadedIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final String SAMPLE_TOPIC = "rm-internal-sample";
 
-  @Value("${queueconfig.sample-queue}")
-  private String inboundQueue;
+  @Value("${queueconfig.case-update-topic}")
+  private String caseUpdateTopic;
 
-  @Autowired private RabbitQueueHelper rabbitQueueHelper;
+  @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
 
   @Autowired private CaseService caseService;
@@ -51,14 +52,14 @@ public class SampleLoadedIT {
 
   @BeforeEach
   public void setUp() {
-    rabbitQueueHelper.purgeQueue(inboundQueue);
-    rabbitQueueHelper.purgeQueue(OUTBOUND_CASE_QUEUE);
+    pubsubHelper.purgeMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testSampleLoaded() throws IOException, InterruptedException {
-    try (QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(OUTBOUND_CASE_QUEUE)) {
+    try (QueueSpy<ResponseManagementEvent> outboundCaseQueueSpy =
+        pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, ResponseManagementEvent.class)) {
       CollectionExercise collectionExercise = new CollectionExercise();
       collectionExercise.setId(UUID.randomUUID());
       collectionExerciseRepository.saveAndFlush(collectionExercise);
@@ -76,7 +77,7 @@ public class SampleLoadedIT {
       sampleDto.setSample(sample);
       sampleDto.setSampleSensitive(sampleSensitive);
 
-      rabbitQueueHelper.sendMessage(inboundQueue, sampleDto);
+      pubsubHelper.sendMessage(SAMPLE_TOPIC, sampleDto);
 
       //  THEN
       ResponseManagementEvent actualResponseManagementEvent =

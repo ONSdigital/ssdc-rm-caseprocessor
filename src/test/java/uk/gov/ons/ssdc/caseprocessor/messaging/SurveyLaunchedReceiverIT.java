@@ -1,7 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_QUEUE;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,8 +26,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -37,11 +37,12 @@ public class SurveyLaunchedReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String TEST_QID = "1234334";
   private static final String TEST_UAC = "9434343";
+  private static final String INBOUND_TOPIC = "event_survey-launched";
 
-  @Value("${queueconfig.survey-launched-queue}")
-  private String inboundQueue;
+  @Value("${queueconfig.case-update-topic}")
+  private String caseUpdateTopic;
 
-  @Autowired private RabbitQueueHelper rabbitQueueHelper;
+  @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
 
   @Autowired private CaseRepository caseRepository;
@@ -50,8 +51,7 @@ public class SurveyLaunchedReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    rabbitQueueHelper.purgeQueue(inboundQueue);
-    rabbitQueueHelper.purgeQueue(OUTBOUND_CASE_QUEUE);
+    pubsubHelper.purgeMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
@@ -59,7 +59,8 @@ public class SurveyLaunchedReceiverIT {
   public void testSurveyLaunchLogsEventSetsFlagAndEmitsCorrectCaseUpdatedEvent() throws Exception {
     // GIVEN
 
-    try (QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(OUTBOUND_CASE_QUEUE)) {
+    try (QueueSpy<ResponseManagementEvent> outboundCaseQueueSpy =
+        pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, ResponseManagementEvent.class)) {
       Case caze = new Case();
       caze.setId(TEST_CASE_ID);
       caze.setUacQidLinks(null);
@@ -92,7 +93,7 @@ public class SurveyLaunchedReceiverIT {
       surveyLaunchedEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
 
       // WHEN
-      rabbitQueueHelper.sendMessage(inboundQueue, surveyLaunchedEvent);
+      pubsubHelper.sendMessage(INBOUND_TOPIC, surveyLaunchedEvent);
 
       // THEN
       ResponseManagementEvent caseUpdatedEvent =

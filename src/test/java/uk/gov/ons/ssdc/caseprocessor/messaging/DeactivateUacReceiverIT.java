@@ -1,7 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_QUEUE;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,8 +25,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -35,10 +35,13 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 public class DeactivateUacReceiverIT {
   private static final String TEST_QID = "0123456789";
 
-  @Value("${queueconfig.deactivate-uac-queue}")
-  private String deactivateUacQueue;
+  @Value("${queueconfig.uac-update-topic}")
+  private String uacUpdateTopic;
 
-  @Autowired private RabbitQueueHelper rabbitQueueHelper;
+  @Value("${queueconfig.deactivate-uac-topic}")
+  private String deactivateUacTopic;
+
+  @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
 
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
@@ -46,15 +49,15 @@ public class DeactivateUacReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    rabbitQueueHelper.purgeQueue(deactivateUacQueue);
-    rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);
+    pubsubHelper.purgeMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
   }
 
   @Test
   public void testDeactivateUacReceiver() throws Exception {
-    try (QueueSpy uacRhQueue = rabbitQueueHelper.listen(OUTBOUND_UAC_QUEUE)) {
+    try (QueueSpy<ResponseManagementEvent> uacRhQueue =
+        pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, ResponseManagementEvent.class)) {
       // GIVEN
       ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
       EventDTO eventDTO = new EventDTO();
@@ -75,7 +78,7 @@ public class DeactivateUacReceiverIT {
       uacQidLinkRepository.save(uacQidLink);
 
       // WHEN
-      rabbitQueueHelper.sendMessage(deactivateUacQueue, responseManagementEvent);
+      pubsubHelper.sendMessage(deactivateUacTopic, responseManagementEvent);
 
       // THEN
       ResponseManagementEvent actualResponseManagementEvent =

@@ -11,8 +11,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.DeactivateUacDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
@@ -21,15 +21,14 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 @ExtendWith(MockitoExtension.class)
 public class DeactivateUacProcessorTest {
 
-  @Mock private RabbitTemplate rabbitTemplate;
+  @Mock private MessageSender messageSender;
 
   @InjectMocks private DeactivateUacProcessor underTest;
 
   @Test
   public void testProcessDeactivateUacRow() {
     // Given
-    ReflectionTestUtils.setField(underTest, "outboundExchange", "testExchange");
-    ReflectionTestUtils.setField(underTest, "deactivateUacRoutingKey", "testRoutingKey");
+    ReflectionTestUtils.setField(underTest, "deactivateUacTopic", "testTopic");
 
     Case caze = new Case();
 
@@ -43,11 +42,8 @@ public class DeactivateUacProcessorTest {
     // Then
     ArgumentCaptor<ResponseManagementEvent> responseManagementEventArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
-    verify(rabbitTemplate)
-        .convertAndSend(
-            eq("testExchange"),
-            eq("testRoutingKey"),
-            responseManagementEventArgumentCaptor.capture());
+    verify(messageSender)
+        .sendMessage(eq("testTopic"), responseManagementEventArgumentCaptor.capture());
     DeactivateUacDTO actualDeactivateUac =
         responseManagementEventArgumentCaptor.getValue().getPayload().getDeactivateUac();
     assertThat(actualDeactivateUac.getQid()).isEqualTo(uacQidLink.getQid());

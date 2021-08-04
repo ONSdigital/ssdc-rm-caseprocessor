@@ -1,8 +1,8 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_QUEUE;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_QUEUE;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -35,8 +35,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseReposito
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -46,11 +46,15 @@ public class ReceiptReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String TEST_QID = "123456";
   private static final UUID TEST_UACLINK_ID = UUID.randomUUID();
+  private static final String INBOUND_RECEIPT_TOPIC = "event_receipt";
 
-  @Value("${queueconfig.receipt-response-queue}")
-  private String inboundReceiptQueue;
+  @Value("${queueconfig.case-update-topic}")
+  private String caseUpdateTopic;
 
-  @Autowired private RabbitQueueHelper rabbitQueueHelper;
+  @Value("${queueconfig.uac-update-topic}")
+  private String uacUpdateTopic;
+
+  @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
 
   @Autowired private CaseRepository caseRepository;
@@ -60,16 +64,17 @@ public class ReceiptReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    rabbitQueueHelper.purgeQueue(inboundReceiptQueue);
-    rabbitQueueHelper.purgeQueue(OUTBOUND_CASE_QUEUE);
-    rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);
+    pubsubHelper.purgeMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
+    pubsubHelper.purgeMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testReceipt() throws Exception {
-    try (QueueSpy outboundUacQueueSpy = rabbitQueueHelper.listen(OUTBOUND_UAC_QUEUE);
-        QueueSpy outboundCaseQueueSpy = rabbitQueueHelper.listen(OUTBOUND_CASE_QUEUE)) {
+    try (QueueSpy<ResponseManagementEvent> outboundUacQueueSpy =
+            pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, ResponseManagementEvent.class);
+        QueueSpy<ResponseManagementEvent> outboundCaseQueueSpy =
+            pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, ResponseManagementEvent.class)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -111,7 +116,7 @@ public class ReceiptReceiverIT {
       eventDTO.setTransactionId(UUID.randomUUID());
       responseManagementEvent.setEvent(eventDTO);
 
-      rabbitQueueHelper.sendMessage(inboundReceiptQueue, responseManagementEvent);
+      pubsubHelper.sendMessage(INBOUND_RECEIPT_TOPIC, responseManagementEvent);
 
       //  THEN
       ResponseManagementEvent caseEmittedEvent =

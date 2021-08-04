@@ -1,7 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_QUEUE;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
@@ -32,8 +32,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseReposito
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.testutils.RabbitQueueHelper;
 import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 
 @ContextConfiguration
@@ -41,18 +41,24 @@ import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
 public class ActionRuleIT {
-  @Value("${queueconfig.print-queue}")
-  private String outboundPrinterQueue;
+  private static final String OUTBOUND_PRINTER_SUBSCRIPTION =
+      "rm-internal-print-row_print-file-service";
 
   private static final String PACK_CODE = "test-pack-code";
   private static final String PRINT_SUPPLIER = "test-print-supplier";
+
+  @Value("${queueconfig.uac-update-topic}")
+  private String uacUpdateTopic;
+
+  @Value("${queueconfig.print-topic}")
+  private String printTopic;
 
   @Autowired private DeleteDataHelper deleteDataHelper;
 
   @Autowired private CaseRepository caseRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
-  @Autowired private RabbitQueueHelper rabbitQueueHelper;
+  @Autowired private PubsubHelper pubsubHelper;
   @Autowired private PrintTemplateRepository printTemplateRepository;
   @Autowired private ActionRuleRepository actionRuleRepository;
 
@@ -60,15 +66,17 @@ public class ActionRuleIT {
 
   @BeforeEach
   public void setUp() {
-    rabbitQueueHelper.purgeQueue(outboundPrinterQueue);
-    rabbitQueueHelper.purgeQueue(OUTBOUND_UAC_QUEUE);
+    pubsubHelper.purgeMessages(OUTBOUND_PRINTER_SUBSCRIPTION, printTopic);
+    pubsubHelper.purgeMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testPrinterRule() throws Exception {
-    try (QueueSpy printerQueue = rabbitQueueHelper.listen(outboundPrinterQueue);
-        QueueSpy outboundUacQueue = rabbitQueueHelper.listen(OUTBOUND_UAC_QUEUE)) {
+    try (QueueSpy<PrintRow> printerQueue =
+            pubsubHelper.listen(OUTBOUND_PRINTER_SUBSCRIPTION, PrintRow.class);
+        QueueSpy<ResponseManagementEvent> outboundUacQueue =
+            pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, ResponseManagementEvent.class)) {
       // Given
       CollectionExercise collectionExercise = setUpCollectionExercise();
       Case caze = setUpCase(collectionExercise);
@@ -76,21 +84,17 @@ public class ActionRuleIT {
 
       // When
       setUpActionRule(ActionRuleType.PRINT, collectionExercise, printTemplate);
-      String printRowMessage = printerQueue.getQueue().poll(20, TimeUnit.SECONDS);
-      String uacMessage = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
+      PrintRow printRow = printerQueue.getQueue().poll(20, TimeUnit.SECONDS);
+      ResponseManagementEvent rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
-      assertThat(printRowMessage).isNotNull();
-      PrintRow printRow = objectMapper.readValue(printRowMessage, PrintRow.class);
-
+      assertThat(printRow).isNotNull();
       assertThat(printRow.getBatchQuantity()).isEqualTo(1);
       assertThat(printRow.getPackCode()).isEqualTo(PACK_CODE);
       assertThat(printRow.getPrintSupplier()).isEqualTo(PRINT_SUPPLIER);
       assertThat(printRow.getRow()).startsWith("\"123\"|\"bar\"|\"");
 
-      assertThat(uacMessage).isNotNull();
-      ResponseManagementEvent rme =
-          objectMapper.readValue(uacMessage, ResponseManagementEvent.class);
+      assertThat(rme).isNotNull();
       assertThat(rme.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
       assertThat(rme.getPayload().getUac().getCaseId()).isEqualTo(caze.getId());
     }
@@ -98,7 +102,8 @@ public class ActionRuleIT {
 
   @Test
   public void testDeactivateUacRule() throws Exception {
-    try (QueueSpy outboundUacQueue = rabbitQueueHelper.listen(OUTBOUND_UAC_QUEUE)) {
+    try (QueueSpy<ResponseManagementEvent> outboundUacQueue =
+        pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, ResponseManagementEvent.class)) {
       // Given
       CollectionExercise collectionExercise = setUpCollectionExercise();
       Case caze = setUpCase(collectionExercise);
@@ -106,12 +111,10 @@ public class ActionRuleIT {
 
       // When
       setUpActionRule(ActionRuleType.DEACTIVATE_UAC, collectionExercise, null);
-      String uacMessage = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
+      ResponseManagementEvent rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
-      assertThat(uacMessage).isNotNull();
-      ResponseManagementEvent rme =
-          objectMapper.readValue(uacMessage, ResponseManagementEvent.class);
+      assertThat(rme).isNotNull();
       assertThat(rme.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
       assertThat(rme.getPayload().getUac().getCaseId()).isEqualTo(caze.getId());
       assertThat(rme.getPayload().getUac().isActive()).isFalse();
