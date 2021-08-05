@@ -94,7 +94,7 @@ public class PrintProcessor {
     }
 
     PrintRow printRow = new PrintRow();
-    printRow.setId(UUID.randomUUID());
+    printRow.setMessageId(UUID.randomUUID());
     printRow.setRow(getCsvRow(rowStrings));
     printRow.setBatchId(batchId);
     printRow.setBatchQuantity(batchQuantity);

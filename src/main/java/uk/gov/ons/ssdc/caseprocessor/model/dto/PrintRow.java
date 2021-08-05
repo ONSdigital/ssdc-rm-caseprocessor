@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class PrintRow {
-  private UUID id;
+  private UUID messageId;
   private String row;
   private UUID batchId;
   private int batchQuantity;
