@@ -103,7 +103,7 @@ public class PrintProcessor {
     fileRow.setPackCode(packCode);
     fileRow.setPrintSupplier(printSupplier);
 
-    fileRowRepository.saveAndFlush(fileRow);
+    fileRowRepository.save(fileRow);
 
     eventLogger.logCaseEvent(
         caze,
