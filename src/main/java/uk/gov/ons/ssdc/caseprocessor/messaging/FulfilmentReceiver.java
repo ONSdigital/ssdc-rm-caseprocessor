@@ -35,7 +35,7 @@ public class FulfilmentReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "fulfilmentInputChannel")
+  @ServiceActivator(inputChannel = "fulfilmentInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
     ResponseManagementEvent responseManagementEvent = message.getPayload();
 

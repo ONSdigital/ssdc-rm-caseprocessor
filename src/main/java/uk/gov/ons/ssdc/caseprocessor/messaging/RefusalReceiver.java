@@ -27,7 +27,7 @@ public class RefusalReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "refusalInputChannel")
+  @ServiceActivator(inputChannel = "refusalInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
     ResponseManagementEvent responseManagementEvent = message.getPayload();
 

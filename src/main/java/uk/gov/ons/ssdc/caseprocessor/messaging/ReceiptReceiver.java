@@ -30,8 +30,11 @@ public class ReceiptReceiver {
   }
 
   @Transactional(isolation = Isolation.REPEATABLE_READ)
-  @ServiceActivator(inputChannel = "receiptInputChannel")
+  @ServiceActivator(inputChannel = "receiptInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
+    String blowUpWithNullPointerException = null;
+    blowUpWithNullPointerException.toString();
+
     ResponseManagementEvent responseManagementEvent = message.getPayload();
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 

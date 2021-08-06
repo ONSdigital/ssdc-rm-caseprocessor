@@ -8,12 +8,17 @@ import org.springframework.cloud.gcp.pubsub.integration.inbound.PubSubInboundCha
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.handler.advice.RequestHandlerRetryAdvice;
 import org.springframework.messaging.MessageChannel;
+import uk.gov.ons.ssdc.caseprocessor.client.ExceptionManagerClient;
+import uk.gov.ons.ssdc.caseprocessor.messaging.ManagedMessageRecoverer;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
 
 @Configuration
 public class MessageConsumerConfig {
+  private final ExceptionManagerClient exceptionManagerClient;
+
   @Value("${queueconfig.sample-subscription}")
   private String sampleSubscription;
 
@@ -40,6 +45,10 @@ public class MessageConsumerConfig {
 
   @Value("${queueconfig.update-sample-sensitive-subscription}")
   private String updateSampleSensitiveSubscription;
+
+  public MessageConsumerConfig(ExceptionManagerClient exceptionManagerClient) {
+    this.exceptionManagerClient = exceptionManagerClient;
+  }
 
   @Bean
   public MessageChannel sampleInputChannel() {
@@ -162,5 +171,13 @@ public class MessageConsumerConfig {
     adapter.setAckMode(AckMode.AUTO);
     adapter.setPayloadType(payloadType);
     return adapter;
+  }
+
+  @Bean
+  public RequestHandlerRetryAdvice retryAdvice() {
+    RequestHandlerRetryAdvice requestHandlerRetryAdvice = new RequestHandlerRetryAdvice();
+    requestHandlerRetryAdvice.setRecoveryCallback(
+        new ManagedMessageRecoverer(exceptionManagerClient));
+    return requestHandlerRetryAdvice;
   }
 }

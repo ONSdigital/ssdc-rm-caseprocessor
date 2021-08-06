@@ -34,7 +34,7 @@ public class TelephoneCaptureReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "telephoneCaptureInputChannel")
+  @ServiceActivator(inputChannel = "telephoneCaptureInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     ResponseManagementEvent telephoneCaptureEvent = message.getPayload();

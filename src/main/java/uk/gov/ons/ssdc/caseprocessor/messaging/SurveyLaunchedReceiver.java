@@ -26,7 +26,7 @@ public class SurveyLaunchedReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "surveyLaunchedInputChannel")
+  @ServiceActivator(inputChannel = "surveyLaunchedInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(ResponseManagementEvent surveyEvent) {
     String logEventDescription;
     EventType logEventType;

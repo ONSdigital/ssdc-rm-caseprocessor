@@ -25,7 +25,7 @@ public class InvalidAddressReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "invalidAddressInputChannel")
+  @ServiceActivator(inputChannel = "invalidAddressInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
     ResponseManagementEvent responseManagementEvent = message.getPayload();
     Case caze =

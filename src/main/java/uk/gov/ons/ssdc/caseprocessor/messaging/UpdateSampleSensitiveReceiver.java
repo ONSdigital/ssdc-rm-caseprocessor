@@ -27,7 +27,7 @@ public class UpdateSampleSensitiveReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "updateSampleSensitiveInputChannel")
+  @ServiceActivator(inputChannel = "updateSampleSensitiveInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
     ResponseManagementEvent responseManagementEvent = message.getPayload();
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);

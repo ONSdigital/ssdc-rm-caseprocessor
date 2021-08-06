@@ -44,7 +44,7 @@ public class SampleReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "sampleInputChannel")
+  @ServiceActivator(inputChannel = "sampleInputChannel", adviceChain = "retryAdvice")
   public void receiveSample(Message<Sample> message) {
     Sample sample = message.getPayload();
     if (caseRepository.existsById(sample.getCaseId())) {

@@ -31,7 +31,7 @@ public class ExceptionManagerClient {
 
     ExceptionReport exceptionReport = new ExceptionReport();
     exceptionReport.setExceptionClass(cause.getClass().getName());
-    exceptionReport.setExceptionMessage(cause.getMessage());
+    exceptionReport.setExceptionMessage("stoopid message"); // TODO
     exceptionReport.setExceptionRootCause(stackTraceRootCause);
     exceptionReport.setMessageHash(messageHash);
     exceptionReport.setService(service);

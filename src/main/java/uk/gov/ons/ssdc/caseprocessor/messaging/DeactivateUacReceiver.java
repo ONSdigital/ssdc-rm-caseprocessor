@@ -25,7 +25,7 @@ public class DeactivateUacReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "deactivateUacInputChannel")
+  @ServiceActivator(inputChannel = "deactivateUacInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
     ResponseManagementEvent responseManagementEvent = message.getPayload();
     UacQidLink uacQidLink =
