@@ -48,6 +48,7 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
     Message<?> message = messagingException.getFailedMessage();
     BasicAcknowledgeablePubsubMessage originalMessage =
         (BasicAcknowledgeablePubsubMessage) message.getHeaders().get("gcp_pubsub_original_message");
+    String subscriptionName = originalMessage.getProjectSubscriptionName().getSubscription();
     ByteString originalMessageByteString = originalMessage.getPubsubMessage().getData();
     byte[] rawMessageBody = new byte[originalMessageByteString.size()];
     originalMessageByteString.copyTo(rawMessageBody, 0);
@@ -62,14 +63,15 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
 
     ExceptionReportResponse reportResult =
         getExceptionReportResponse(
-            retryContext.getLastThrowable(), messageHash, stackTraceRootCause);
+            retryContext.getLastThrowable(), messageHash, stackTraceRootCause, subscriptionName);
 
     if (skipMessage(
         reportResult,
         messageHash,
         rawMessageBody,
         retryContext.getLastThrowable(),
-        originalMessage)) {
+        originalMessage,
+        subscriptionName)) {
       return null; // Our work here is done
     }
 
@@ -85,21 +87,16 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
     // Reject the original message where it'll be retried at some future point in time
     originalMessage.nack();
 
-    log.error("OOPSIE!");
     return null;
   }
 
   private ExceptionReportResponse getExceptionReportResponse(
-      Throwable cause, String messageHash, String stackTraceRootCause) {
+      Throwable cause, String messageHash, String stackTraceRootCause, String subscriptionName) {
     ExceptionReportResponse reportResult = null;
     try {
       reportResult =
           exceptionManagerClient.reportException(
-              messageHash,
-              SERVICE_NAME,
-              "TODO", // TODO
-              cause,
-              stackTraceRootCause);
+              messageHash, SERVICE_NAME, subscriptionName, cause, stackTraceRootCause);
     } catch (Exception exceptionManagerClientException) {
       log.with("reason", exceptionManagerClientException.getMessage())
           .warn(
@@ -113,7 +110,8 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
       String messageHash,
       byte[] rawMessageBody,
       Throwable cause,
-      BasicAcknowledgeablePubsubMessage originalMessage) {
+      BasicAcknowledgeablePubsubMessage originalMessage,
+      String subscriptionName) {
 
     if (reportResult == null || !reportResult.isSkipIt()) {
       return false;
@@ -127,7 +125,7 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
       skippedMessage.setMessageHash(messageHash);
       skippedMessage.setMessagePayload(rawMessageBody);
       skippedMessage.setService(SERVICE_NAME);
-      skippedMessage.setQueue("TODO"); // TODO
+      skippedMessage.setQueue(subscriptionName);
       skippedMessage.setContentType("application/json");
       skippedMessage.setHeaders(null);
       skippedMessage.setRoutingKey(null);
