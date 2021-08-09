@@ -42,6 +42,7 @@ queueconfig:
   case-update-topic: event_case-update
   uac-update-topic: event_uac-update
   deactivate-uac-topic: event_deactivate-uac
+  sms-fulfilment-subscription: rm-internal-sms-fulfilemnt_case-processor
   publishtimeout: 30  # In seconds
 
 healthcheck:
