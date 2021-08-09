@@ -12,6 +12,7 @@ import org.springframework.integration.handler.advice.RequestHandlerRetryAdvice;
 import org.springframework.messaging.MessageChannel;
 import uk.gov.ons.ssdc.caseprocessor.client.ExceptionManagerClient;
 import uk.gov.ons.ssdc.caseprocessor.messaging.ManagedMessageRecoverer;
+import uk.gov.ons.ssdc.caseprocessor.messaging.WibbleNorbert;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
 
@@ -170,6 +171,7 @@ public class MessageConsumerConfig {
     adapter.setOutputChannel(channel);
     adapter.setAckMode(AckMode.AUTO);
     adapter.setPayloadType(payloadType);
+    adapter.setErrorMessageStrategy(new WibbleNorbert());
     return adapter;
   }
 

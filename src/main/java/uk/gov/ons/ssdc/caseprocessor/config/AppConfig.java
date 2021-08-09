@@ -26,7 +26,7 @@ public class AppConfig {
 
   @Bean
   public JacksonPubSubMessageConverter messageConverter() {
-    return new JacksonPubSubMessageConverter(ObjectMapperFactory.objectMapper());
+    return new ExceptionHandlingJacksonPubSubMessageConverter(ObjectMapperFactory.objectMapper());
   }
 
   @PostConstruct
