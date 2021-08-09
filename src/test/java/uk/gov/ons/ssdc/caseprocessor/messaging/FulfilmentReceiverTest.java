@@ -75,7 +75,7 @@ public class FulfilmentReceiverTest {
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // When
-    underTest.receiveMessage(message);
+//    underTest.receiveMessage(message);
 
     // Then
     ArgumentCaptor<FulfilmentToProcess> fulfilmentToProcessArgCapt =

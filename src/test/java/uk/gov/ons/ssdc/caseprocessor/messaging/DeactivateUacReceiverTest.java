@@ -54,7 +54,7 @@ public class DeactivateUacReceiverTest {
     when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
 
     // When
-    underTest.receiveMessage(message);
+//    underTest.receiveMessage(message);
 
     // Then
     ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);

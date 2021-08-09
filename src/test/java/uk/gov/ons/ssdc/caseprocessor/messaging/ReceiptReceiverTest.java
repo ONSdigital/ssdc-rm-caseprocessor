@@ -62,7 +62,7 @@ public class ReceiptReceiverTest {
     when(uacService.findByQid(any())).thenReturn(uacQidLink);
     when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
 
-    underTest.receiveMessage(message);
+//    underTest.receiveMessage(message);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
@@ -103,7 +103,7 @@ public class ReceiptReceiverTest {
 
     when(uacService.findByQid(any())).thenReturn(uacQidLink);
 
-    underTest.receiveMessage(message);
+//    underTest.receiveMessage(message);
 
     ArgumentCaptor<String> uacQidLinkCaptor = ArgumentCaptor.forClass(String.class);
     verify(uacService).findByQid(uacQidLinkCaptor.capture());
@@ -150,7 +150,7 @@ public class ReceiptReceiverTest {
     when(uacService.findByQid(any())).thenReturn(uacQidLink);
     when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
 
-    underTest.receiveMessage(message);
+//    underTest.receiveMessage(message);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());

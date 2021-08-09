@@ -3,6 +3,9 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import static uk.gov.ons.ssdc.caseprocessor.utils.EventHelper.createEventDTO;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.ByteString;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +15,7 @@ import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
@@ -20,10 +24,13 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.utils.CaseRefGenerator;
+import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 import uk.gov.ons.ssdc.caseprocessor.utils.RedactHelper;
 
 @MessageEndpoint
 public class SampleReceiver {
+  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
+
   private final CaseRepository caseRepository;
   private final CaseService caseService;
   private final CollectionExerciseRepository collectionExerciseRepository;
@@ -45,8 +52,16 @@ public class SampleReceiver {
 
   @Transactional
   @ServiceActivator(inputChannel = "sampleInputChannel", adviceChain = "retryAdvice")
-  public void receiveSample(Message<Sample> message) {
-    Sample sample = message.getPayload();
+  public void receiveSample(Message<byte[]> message) {
+    byte[] rawMessageBody = message.getPayload();
+
+    Sample sample;
+    try {
+      sample = objectMapper.readValue(rawMessageBody, Sample.class);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
     if (caseRepository.existsById(sample.getCaseId())) {
       // Case already exists, so let's not overwrite it... swallow the message quietly
       return;
@@ -79,7 +94,7 @@ public class SampleReceiver {
         "Create case sample received",
         EventType.CASE_CREATED,
         createEventDTO(EventTypeDTO.SAMPLE_LOADED),
-        RedactHelper.redact(message.getPayload()),
+        RedactHelper.redact(sample),
         messageTimestamp);
   }
 

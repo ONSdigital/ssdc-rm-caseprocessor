@@ -2,6 +2,9 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.ByteString;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.integration.annotation.MessageEndpoint;
@@ -16,9 +19,11 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
+import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 
 @MessageEndpoint
 public class TelephoneCaptureReceiver {
+  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
 
   private final UacService uacService;
   private final CaseService caseService;
@@ -35,11 +40,20 @@ public class TelephoneCaptureReceiver {
 
   @Transactional
   @ServiceActivator(inputChannel = "telephoneCaptureInputChannel", adviceChain = "retryAdvice")
-  public void receiveMessage(Message<ResponseManagementEvent> message) {
+  public void receiveMessage(Message<byte[]> message) {
+    byte[] rawMessageBody = message.getPayload();
+
+    ResponseManagementEvent responseManagementEvent;
+    try {
+      responseManagementEvent = objectMapper.readValue(rawMessageBody, ResponseManagementEvent.class);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    ResponseManagementEvent telephoneCaptureEvent = message.getPayload();
+
     TelephoneCaptureDTO telephoneCapturePayload =
-        telephoneCaptureEvent.getPayload().getTelephoneCapture();
+        responseManagementEvent.getPayload().getTelephoneCapture();
 
     Case caze = caseService.getCaseByCaseId(telephoneCapturePayload.getCaseId());
 
@@ -65,10 +79,10 @@ public class TelephoneCaptureReceiver {
 
     eventLogger.logCaseEvent(
         caze,
-        telephoneCaptureEvent.getEvent().getDateTime(),
+        responseManagementEvent.getEvent().getDateTime(),
         TELEPHONE_CAPTURE_DESCRIPTION,
         EventType.TELEPHONE_CAPTURE_REQUESTED,
-        telephoneCaptureEvent.getEvent(),
+        responseManagementEvent.getEvent(),
         telephoneCapturePayload,
         messageTimestamp);
   }

@@ -2,6 +2,9 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.ByteString;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import org.springframework.integration.annotation.MessageEndpoint;
@@ -13,10 +16,12 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSampleSensitive;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
+import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 import uk.gov.ons.ssdc.caseprocessor.utils.RedactHelper;
 
 @MessageEndpoint
 public class UpdateSampleSensitiveReceiver {
+  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
 
   private final CaseService caseService;
   private final EventLogger eventLogger;
@@ -28,8 +33,16 @@ public class UpdateSampleSensitiveReceiver {
 
   @Transactional
   @ServiceActivator(inputChannel = "updateSampleSensitiveInputChannel", adviceChain = "retryAdvice")
-  public void receiveMessage(Message<ResponseManagementEvent> message) {
-    ResponseManagementEvent responseManagementEvent = message.getPayload();
+  public void receiveMessage(Message<byte[]> message) {
+    byte[] rawMessageBody = message.getPayload();
+
+    ResponseManagementEvent responseManagementEvent;
+    try {
+      responseManagementEvent = objectMapper.readValue(rawMessageBody, ResponseManagementEvent.class);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     UpdateSampleSensitive updateSampleSensitive =
         responseManagementEvent.getPayload().getUpdateSampleSensitive();

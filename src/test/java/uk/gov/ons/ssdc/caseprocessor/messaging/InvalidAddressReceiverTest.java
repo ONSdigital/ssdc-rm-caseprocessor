@@ -53,7 +53,7 @@ public class InvalidAddressReceiverTest {
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // when
-    underTest.receiveMessage(message);
+//    underTest.receiveMessage(message);
 
     // then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);

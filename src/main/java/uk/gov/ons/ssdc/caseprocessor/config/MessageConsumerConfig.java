@@ -12,9 +12,6 @@ import org.springframework.integration.handler.advice.RequestHandlerRetryAdvice;
 import org.springframework.messaging.MessageChannel;
 import uk.gov.ons.ssdc.caseprocessor.client.ExceptionManagerClient;
 import uk.gov.ons.ssdc.caseprocessor.messaging.ManagedMessageRecoverer;
-import uk.gov.ons.ssdc.caseprocessor.messaging.WibbleNorbert;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
 
 @Configuration
 public class MessageConsumerConfig {
@@ -99,19 +96,19 @@ public class MessageConsumerConfig {
   @Bean
   public PubSubInboundChannelAdapter inboundSamples(
       @Qualifier("sampleInputChannel") MessageChannel channel, PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, sampleSubscription, Sample.class);
+    return makeAdapter(channel, pubSubTemplate, sampleSubscription);
   }
 
   @Bean
   public PubSubInboundChannelAdapter receiptInbound(
       @Qualifier("receiptInputChannel") MessageChannel channel, PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, receiptSubscription, ResponseManagementEvent.class);
+    return makeAdapter(channel, pubSubTemplate, receiptSubscription);
   }
 
   @Bean
   public PubSubInboundChannelAdapter refusalInbound(
       @Qualifier("refusalInputChannel") MessageChannel channel, PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, refusalSubscription, ResponseManagementEvent.class);
+    return makeAdapter(channel, pubSubTemplate, refusalSubscription);
   }
 
   @Bean
@@ -119,7 +116,7 @@ public class MessageConsumerConfig {
       @Qualifier("invalidAddressInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
     return makeAdapter(
-        channel, pubSubTemplate, invalidAddressSubscription, ResponseManagementEvent.class);
+        channel, pubSubTemplate, invalidAddressSubscription);
   }
 
   @Bean
@@ -127,14 +124,14 @@ public class MessageConsumerConfig {
       @Qualifier("surveyLaunchedInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
     return makeAdapter(
-        channel, pubSubTemplate, surveyLaunchedSubscription, ResponseManagementEvent.class);
+        channel, pubSubTemplate, surveyLaunchedSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter fulfilmentInbound(
       @Qualifier("fulfilmentInputChannel") MessageChannel channel, PubSubTemplate pubSubTemplate) {
     return makeAdapter(
-        channel, pubSubTemplate, fulfilmentSubscription, ResponseManagementEvent.class);
+        channel, pubSubTemplate, fulfilmentSubscription);
   }
 
   @Bean
@@ -142,7 +139,7 @@ public class MessageConsumerConfig {
       @Qualifier("telephoneCaptureInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
     return makeAdapter(
-        channel, pubSubTemplate, telephoneCaptureSubscription, ResponseManagementEvent.class);
+        channel, pubSubTemplate, telephoneCaptureSubscription);
   }
 
   @Bean
@@ -150,7 +147,7 @@ public class MessageConsumerConfig {
       @Qualifier("deactivateUacInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
     return makeAdapter(
-        channel, pubSubTemplate, deactivateUacSubscription, ResponseManagementEvent.class);
+        channel, pubSubTemplate, deactivateUacSubscription);
   }
 
   @Bean
@@ -158,20 +155,17 @@ public class MessageConsumerConfig {
       @Qualifier("updateSampleSensitiveInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
     return makeAdapter(
-        channel, pubSubTemplate, updateSampleSensitiveSubscription, ResponseManagementEvent.class);
+        channel, pubSubTemplate, updateSampleSensitiveSubscription);
   }
 
   private PubSubInboundChannelAdapter makeAdapter(
       MessageChannel channel,
       PubSubTemplate pubSubTemplate,
-      String subscriptionName,
-      Class<?> payloadType) {
+      String subscriptionName) {
     PubSubInboundChannelAdapter adapter =
         new PubSubInboundChannelAdapter(pubSubTemplate, subscriptionName);
     adapter.setOutputChannel(channel);
     adapter.setAckMode(AckMode.AUTO);
-    adapter.setPayloadType(payloadType);
-    adapter.setErrorMessageStrategy(new WibbleNorbert());
     return adapter;
   }
 
