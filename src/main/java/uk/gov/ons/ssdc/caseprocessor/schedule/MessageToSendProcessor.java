@@ -2,6 +2,8 @@ package uk.gov.ons.ssdc.caseprocessor.schedule;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -29,16 +31,20 @@ public class MessageToSendProcessor {
   public void processChunk() {
     try (Stream<MessageToSend> messagesToSend =
         messageToSendRepository.findMessagesToSend(chunkSize)) {
+      List<MessageToSend> messagesToSendSent = new LinkedList<>();
+
       messagesToSend.forEach(
           messageToSend -> {
             try {
               messageToSendSender.sendMessage(messageToSend);
-              messageToSendRepository.delete(messageToSend);
+              messagesToSendSent.add(messageToSend);
             } catch (Exception exception) {
               log.with(messageToSend)
                   .error("Could not send message. Will retry indefinitely", exception);
             }
           });
+
+      messageToSendRepository.deleteAllInBatch(messagesToSendSent);
     }
   }
 
