@@ -62,7 +62,8 @@ public class FulfilmentReceiver {
         EventType.FULFILMENT,
         responseManagementEvent.getEvent(),
         responseManagementEvent.getPayload(),
-        messageTimestamp);
+        messageTimestamp,
+        responseManagementEvent.getEvent().getCreatedBy());
   }
 
   private PrintTemplate getAllowedPrintTemplate(String packCode, Case caze) {

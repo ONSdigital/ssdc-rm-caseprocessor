@@ -95,6 +95,7 @@ public class FulfilmentReceiverTest {
             eq(EventType.FULFILMENT),
             eq(managementEvent.getEvent()),
             eq(managementEvent.getPayload()),
-            eq(messageDateTime));
+            eq(messageDateTime),
+            eq(null));
   }
 }

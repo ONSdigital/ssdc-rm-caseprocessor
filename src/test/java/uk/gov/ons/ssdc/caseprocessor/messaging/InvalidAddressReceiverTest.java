@@ -72,6 +72,7 @@ public class InvalidAddressReceiverTest {
             eq(EventType.ADDRESS_NOT_VALID),
             eq(managementEvent.getEvent()),
             eq(managementEvent.getPayload()),
-            eq(messageDateTime));
+            eq(messageDateTime),
+            any());
   }
 }

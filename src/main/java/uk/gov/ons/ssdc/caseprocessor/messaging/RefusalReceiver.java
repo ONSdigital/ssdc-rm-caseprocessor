@@ -45,6 +45,7 @@ public class RefusalReceiver {
         EventType.REFUSAL_RECEIVED,
         responseManagementEvent.getEvent(),
         responseManagementEvent.getPayload(),
-        messageTimestamp);
+        messageTimestamp,
+        responseManagementEvent.getEvent().getCreatedBy());
   }
 }

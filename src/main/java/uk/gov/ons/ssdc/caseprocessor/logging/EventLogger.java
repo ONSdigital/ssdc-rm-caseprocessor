@@ -27,7 +27,8 @@ public class EventLogger {
       EventType eventType,
       EventDTO event,
       Object eventPayload,
-      OffsetDateTime messageTimestamp) {
+      OffsetDateTime messageTimestamp,
+      String createdBy) {
     Event loggedEvent =
         buildEvent(eventDate, eventDescription, eventType, event, eventPayload, messageTimestamp);
     loggedEvent.setCaze(caze);
@@ -68,6 +69,7 @@ public class EventLogger {
     loggedEvent.setEventSource(event.getSource());
     loggedEvent.setEventTransactionId(event.getTransactionId());
     loggedEvent.setMessageTimestamp(messageTimestamp);
+    loggedEvent.setCreatedBy(event.getCreatedBy());
 
     loggedEvent.setEventPayload(JsonHelper.convertObjectToJson(eventPayload));
 

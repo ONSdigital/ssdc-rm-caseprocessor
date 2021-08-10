@@ -87,6 +87,7 @@ public class RefusalReceiverTest {
             eq(EventType.REFUSAL_RECEIVED),
             eq(responseManagementEvent.getEvent()),
             eq(responseManagementEvent.getPayload()),
-            eq(expectedDateTime));
+            eq(expectedDateTime),
+            eq(null));
   }
 }

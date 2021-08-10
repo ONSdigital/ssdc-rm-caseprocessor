@@ -95,7 +95,8 @@ public class PrintProcessorTest {
             eq(EventType.PRINTED_PACK_CODE),
             any(EventDTO.class),
             isNull(),
-            any(OffsetDateTime.class));
+            any(OffsetDateTime.class),
+            any());
   }
 
   @Test
@@ -149,6 +150,7 @@ public class PrintProcessorTest {
             eq(EventType.PRINTED_PACK_CODE),
             any(EventDTO.class),
             isNull(),
-            any(OffsetDateTime.class));
+            any(OffsetDateTime.class),
+            any());
   }
 }
