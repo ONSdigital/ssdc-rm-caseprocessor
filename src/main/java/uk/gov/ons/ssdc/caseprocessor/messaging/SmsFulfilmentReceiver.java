@@ -43,33 +43,24 @@ public class SmsFulfilmentReceiver {
 
     Case caze = caseService.getCaseByCaseId(smsFulfilment.getCaseId());
 
-    // TODO Use sms template to decide whether a QID should be on the message
-    if (smsFulfilment.getQid() != null) {
-      if (smsFulfilment.getUac() == null) {
-        // We must have a UAC/QID pair
-        throw new RuntimeException(
-            "SMS fulfilment with QID " + smsFulfilment.getQid() + " is missing a UAC pair");
+    // Double check the QID does not already exist
+    if (uacService.existsByQid(smsFulfilment.getQid())) {
+
+      // If it does exist, check if it is linked to the given case
+      UacQidLink existingUacQidLink = uacService.findByQid(smsFulfilment.getQid());
+      if (existingUacQidLink.getCaze().getId() == smsFulfilment.getCaseId()) {
+
+        // If the QID is already linked to the given case this must be duplicate event, ignore
+        return;
       }
 
-      // Double check the QID does not already exist
-      if (uacService.existsByQid(smsFulfilment.getQid())) {
-
-        // If it does exist, check if it is linked to the given case
-        UacQidLink existingUacQidLink = uacService.findByQid(smsFulfilment.getQid());
-        if (existingUacQidLink.getCaze().getId() == smsFulfilment.getCaseId()) {
-
-          // If the QID is already linked to the given case this must be duplicate event, ignore
-          return;
-        }
-
-        // If not then something has gone wrong, error out
-        throw new RuntimeException(
-            "SMS fulfilment QID "
-                + smsFulfilment.getQid()
-                + " is already linked to a different case");
-      }
-      createNewUacQidLink(caze, smsFulfilment.getUac(), smsFulfilment.getQid());
+      // If not then something has gone wrong, error out
+      throw new RuntimeException(
+          "SMS fulfilment QID "
+              + smsFulfilment.getQid()
+              + " is already linked to a different case");
     }
+    createNewUacQidLink(caze, smsFulfilment.getUac(), smsFulfilment.getQid());
 
     eventLogger.logCaseEvent(
         caze,
