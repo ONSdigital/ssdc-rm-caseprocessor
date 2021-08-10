@@ -16,6 +16,5 @@ public class PayloadDTO {
   private TelephoneCaptureDTO telephoneCapture;
   private DeactivateUacDTO deactivateUac;
   private UpdateSampleSensitive updateSampleSensitive;
-  private SmsFulfilment smsFulfilment;
-  private UacQidDTO uacQidDTO;
+  private EnrichedSmsFulfilment enrichedSmsFulfilment;
 }
