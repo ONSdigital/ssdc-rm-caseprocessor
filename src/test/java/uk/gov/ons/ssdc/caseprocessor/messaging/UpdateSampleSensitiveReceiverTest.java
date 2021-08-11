@@ -11,6 +11,7 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constru
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -43,7 +44,7 @@ public class UpdateSampleSensitiveReceiverTest {
   public void testUpdateSampleSensitiveReceiver() {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now().minusHours(1));
+    managementEvent.getEvent().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
     managementEvent.getEvent().setType(UPDATE_SAMPLE_SENSITIVE);
     managementEvent.getEvent().setChannel("CC");
     managementEvent.setPayload(new PayloadDTO());
@@ -53,7 +54,7 @@ public class UpdateSampleSensitiveReceiverTest {
         .getPayload()
         .getUpdateSampleSensitive()
         .setSampleSensitive(Map.of("PHONE_NUMBER", "9999999"));
-    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(managementEvent);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
 
     // Given
     Case expectedCase = new Case();
@@ -63,7 +64,7 @@ public class UpdateSampleSensitiveReceiverTest {
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // when
-//    underTest.receiveMessage(message);
+    underTest.receiveMessage(message);
 
     // then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
@@ -89,7 +90,7 @@ public class UpdateSampleSensitiveReceiverTest {
   public void testMessageKeyDoesNotMatchExistingEntry() {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now().minusHours(1));
+    managementEvent.getEvent().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
     managementEvent.getEvent().setType(UPDATE_SAMPLE_SENSITIVE);
     managementEvent.getEvent().setChannel("CC");
     managementEvent.setPayload(new PayloadDTO());
@@ -99,7 +100,7 @@ public class UpdateSampleSensitiveReceiverTest {
         .getPayload()
         .getUpdateSampleSensitive()
         .setSampleSensitive(Map.of("UPRN", "9999999"));
-    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(managementEvent);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
 
     // Given
     Case expectedCase = new Case();
@@ -109,6 +110,6 @@ public class UpdateSampleSensitiveReceiverTest {
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
-//    assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+    assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
   }
 }

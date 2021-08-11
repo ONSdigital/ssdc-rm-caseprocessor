@@ -10,6 +10,7 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constru
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,13 +40,13 @@ public class InvalidAddressReceiverTest {
   public void testInvalidAddress() {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now().minusHours(1));
+    managementEvent.getEvent().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
     managementEvent.getEvent().setType(ADDRESS_NOT_VALID);
     managementEvent.getEvent().setChannel("CC");
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setInvalidAddress(new InvalidAddress());
     managementEvent.getPayload().getInvalidAddress().setCaseId(UUID.randomUUID());
-    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(managementEvent);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
 
     // Given
     Case expectedCase = new Case();
@@ -53,7 +54,7 @@ public class InvalidAddressReceiverTest {
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // when
-//    underTest.receiveMessage(message);
+    underTest.receiveMessage(message);
 
     // then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,13 +54,12 @@ public class RefusalReceiverTest {
 
     EventDTO eventDTO = new EventDTO();
     eventDTO.setType(EventTypeDTO.REFUSAL_RECEIVED);
-    eventDTO.setDateTime(OffsetDateTime.now());
+    eventDTO.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
 
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     responseManagementEvent.setPayload(payloadDTO);
     responseManagementEvent.setEvent(eventDTO);
-    Message<ResponseManagementEvent> message =
-        constructMessageWithValidTimeStamp(responseManagementEvent);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(responseManagementEvent);
     OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
 
     Case caze = new Case();
@@ -69,7 +69,7 @@ public class RefusalReceiverTest {
     when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(caze);
 
     // When
-//    underTest.receiveMessage(message);
+    underTest.receiveMessage(message);
 
     // Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);

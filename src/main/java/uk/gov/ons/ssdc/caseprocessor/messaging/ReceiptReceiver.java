@@ -1,10 +1,8 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
+import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToObject;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.protobuf.ByteString;
-import java.io.IOException;
 import java.time.OffsetDateTime;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -18,12 +16,9 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
-import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 
 @MessageEndpoint
 public class ReceiptReceiver {
-  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
-
   private final UacService uacService;
   private final CaseService caseService;
   private final EventLogger eventLogger;
@@ -37,14 +32,8 @@ public class ReceiptReceiver {
   @Transactional(isolation = Isolation.REPEATABLE_READ)
   @ServiceActivator(inputChannel = "receiptInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
-    byte[] rawMessageBody = message.getPayload();
-
-    ResponseManagementEvent responseManagementEvent;
-    try {
-      responseManagementEvent = objectMapper.readValue(rawMessageBody, ResponseManagementEvent.class);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    ResponseManagementEvent responseManagementEvent =
+        convertJsonBytesToObject(message.getPayload(), ResponseManagementEvent.class);
 
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 

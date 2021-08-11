@@ -50,8 +50,7 @@ public class DeactivateUacReceiverIT {
   @BeforeEach
   public void setUp() {
     pubsubHelper.purgeMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
-    eventRepository.deleteAllInBatch();
-    uacQidLinkRepository.deleteAllInBatch();
+    deleteDataHelper.deleteAllData();
   }
 
   @Test

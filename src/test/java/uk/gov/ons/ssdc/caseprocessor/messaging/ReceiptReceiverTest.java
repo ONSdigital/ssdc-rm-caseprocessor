@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,10 +51,9 @@ public class ReceiptReceiverTest {
 
     EventDTO eventDTO = new EventDTO();
     eventDTO.setType(EventTypeDTO.RESPONSE_RECEIVED);
-    eventDTO.setDateTime(OffsetDateTime.now());
+    eventDTO.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     responseManagementEvent.setEvent(eventDTO);
-    Message<ResponseManagementEvent> message =
-        constructMessageWithValidTimeStamp(responseManagementEvent);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(responseManagementEvent);
     OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
 
     UacQidLink uacQidLink = new UacQidLink();
@@ -62,7 +62,7 @@ public class ReceiptReceiverTest {
     when(uacService.findByQid(any())).thenReturn(uacQidLink);
     when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
 
-//    underTest.receiveMessage(message);
+    underTest.receiveMessage(message);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
@@ -92,10 +92,9 @@ public class ReceiptReceiverTest {
 
     EventDTO eventDTO = new EventDTO();
     eventDTO.setType(EventTypeDTO.RESPONSE_RECEIVED);
-    eventDTO.setDateTime(OffsetDateTime.now());
+    eventDTO.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     responseManagementEvent.setEvent(eventDTO);
-    Message<ResponseManagementEvent> message =
-        constructMessageWithValidTimeStamp(responseManagementEvent);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(responseManagementEvent);
     OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
 
     UacQidLink uacQidLink = new UacQidLink();
@@ -103,7 +102,7 @@ public class ReceiptReceiverTest {
 
     when(uacService.findByQid(any())).thenReturn(uacQidLink);
 
-//    underTest.receiveMessage(message);
+    underTest.receiveMessage(message);
 
     ArgumentCaptor<String> uacQidLinkCaptor = ArgumentCaptor.forClass(String.class);
     verify(uacService).findByQid(uacQidLinkCaptor.capture());
@@ -134,10 +133,9 @@ public class ReceiptReceiverTest {
 
     EventDTO eventDTO = new EventDTO();
     eventDTO.setType(EventTypeDTO.RESPONSE_RECEIVED);
-    eventDTO.setDateTime(OffsetDateTime.now());
+    eventDTO.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     responseManagementEvent.setEvent(eventDTO);
-    Message<ResponseManagementEvent> message =
-        constructMessageWithValidTimeStamp(responseManagementEvent);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(responseManagementEvent);
     OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
 
     UacQidLink uacQidLink = new UacQidLink();
@@ -150,7 +148,7 @@ public class ReceiptReceiverTest {
     when(uacService.findByQid(any())).thenReturn(uacQidLink);
     when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
 
-//    underTest.receiveMessage(message);
+    underTest.receiveMessage(message);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());

@@ -115,53 +115,45 @@ public class MessageConsumerConfig {
   PubSubInboundChannelAdapter invalidAddressInbound(
       @Qualifier("invalidAddressInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
-    return makeAdapter(
-        channel, pubSubTemplate, invalidAddressSubscription);
+    return makeAdapter(channel, pubSubTemplate, invalidAddressSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter surveyLaunchedInbound(
       @Qualifier("surveyLaunchedInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
-    return makeAdapter(
-        channel, pubSubTemplate, surveyLaunchedSubscription);
+    return makeAdapter(channel, pubSubTemplate, surveyLaunchedSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter fulfilmentInbound(
       @Qualifier("fulfilmentInputChannel") MessageChannel channel, PubSubTemplate pubSubTemplate) {
-    return makeAdapter(
-        channel, pubSubTemplate, fulfilmentSubscription);
+    return makeAdapter(channel, pubSubTemplate, fulfilmentSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter telephoneCaptureInbound(
       @Qualifier("telephoneCaptureInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
-    return makeAdapter(
-        channel, pubSubTemplate, telephoneCaptureSubscription);
+    return makeAdapter(channel, pubSubTemplate, telephoneCaptureSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter deactivateUacInbound(
       @Qualifier("deactivateUacInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
-    return makeAdapter(
-        channel, pubSubTemplate, deactivateUacSubscription);
+    return makeAdapter(channel, pubSubTemplate, deactivateUacSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter updateSampleSensitiveInbound(
       @Qualifier("updateSampleSensitiveInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
-    return makeAdapter(
-        channel, pubSubTemplate, updateSampleSensitiveSubscription);
+    return makeAdapter(channel, pubSubTemplate, updateSampleSensitiveSubscription);
   }
 
   private PubSubInboundChannelAdapter makeAdapter(
-      MessageChannel channel,
-      PubSubTemplate pubSubTemplate,
-      String subscriptionName) {
+      MessageChannel channel, PubSubTemplate pubSubTemplate, String subscriptionName) {
     PubSubInboundChannelAdapter adapter =
         new PubSubInboundChannelAdapter(pubSubTemplate, subscriptionName);
     adapter.setOutputChannel(channel);

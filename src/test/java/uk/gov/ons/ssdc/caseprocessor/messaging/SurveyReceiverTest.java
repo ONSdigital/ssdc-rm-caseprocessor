@@ -5,8 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +17,7 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
@@ -44,7 +47,7 @@ public class SurveyReceiverTest {
   public void testSurveryLaunchedEventFromRH() {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now());
+    managementEvent.getEvent().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     managementEvent.getEvent().setType(EventTypeDTO.SURVEY_LAUNCHED);
     managementEvent.getEvent().setChannel("RH");
     managementEvent.setPayload(new PayloadDTO());
@@ -60,12 +63,13 @@ public class SurveyReceiverTest {
     Case caze = new Case();
     caze.setId(TEST_CASE_ID);
     expectedUacQidLink.setCaze(caze);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
 
     // Given
     when(uacService.findByQid(TEST_QID_ID)).thenReturn(expectedUacQidLink);
 
     // when
-//    underTest.receiveMessage(managementEvent);
+    underTest.receiveMessage(message);
 
     // then
     verify(uacService).findByQid(TEST_QID_ID);
@@ -95,7 +99,7 @@ public class SurveyReceiverTest {
     // Given
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now());
+    managementEvent.getEvent().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     managementEvent.getEvent().setType(EventTypeDTO.RESPONDENT_AUTHENTICATED);
     managementEvent.setPayload(new PayloadDTO());
 
@@ -108,13 +112,14 @@ public class SurveyReceiverTest {
     UacQidLink expectedUacQidLink = new UacQidLink();
     expectedUacQidLink.setId(TEST_CASE_ID);
     expectedUacQidLink.setUac(TEST_QID_ID);
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
 
     // Given
     when(uacService.findByQid(TEST_QID_ID)).thenReturn(expectedUacQidLink);
 
     // when
-//    underTest.receiveMessage(managementEvent);
+    underTest.receiveMessage(message);
 
     // then
     InOrder inOrder = inOrder(uacService, eventLogger);
@@ -143,13 +148,14 @@ public class SurveyReceiverTest {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
     managementEvent.getEvent().setType(EventTypeDTO.CASE_CREATED);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
 
     String expectedErrorMessage =
         String.format("Event Type '%s' is invalid on this topic", EventTypeDTO.CASE_CREATED);
 
-//    RuntimeException thrown =
-//        assertThrows(RuntimeException.class, () -> underTest.receiveMessage(managementEvent));
+    RuntimeException thrown =
+        assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
 
-//    assertThat(thrown.getMessage()).isEqualTo(expectedErrorMessage);
+    assertThat(thrown.getMessage()).isEqualTo(expectedErrorMessage);
   }
 }

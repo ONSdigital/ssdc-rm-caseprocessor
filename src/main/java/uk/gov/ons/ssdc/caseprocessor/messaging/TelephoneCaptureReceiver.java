@@ -1,10 +1,8 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
+import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToObject;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.protobuf.ByteString;
-import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.integration.annotation.MessageEndpoint;
@@ -19,12 +17,9 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
-import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 
 @MessageEndpoint
 public class TelephoneCaptureReceiver {
-  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
-
   private final UacService uacService;
   private final CaseService caseService;
   private final EventLogger eventLogger;
@@ -41,14 +36,8 @@ public class TelephoneCaptureReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "telephoneCaptureInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
-    byte[] rawMessageBody = message.getPayload();
-
-    ResponseManagementEvent responseManagementEvent;
-    try {
-      responseManagementEvent = objectMapper.readValue(rawMessageBody, ResponseManagementEvent.class);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    ResponseManagementEvent responseManagementEvent =
+        convertJsonBytesToObject(message.getPayload(), ResponseManagementEvent.class);
 
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 
@@ -62,7 +51,7 @@ public class TelephoneCaptureReceiver {
 
       // If it does exist, check if it is linked to the given case
       UacQidLink existingUacQidLink = uacService.findByQid(telephoneCapturePayload.getQid());
-      if (existingUacQidLink.getCaze().getId() == telephoneCapturePayload.getCaseId()) {
+      if (existingUacQidLink.getCaze().getId().equals(telephoneCapturePayload.getCaseId())) {
 
         // If the QID is already linked to the given case this must be duplicate event, ignore
         return;

@@ -10,6 +10,7 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constru
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -49,14 +50,14 @@ public class FulfilmentReceiverTest {
     // Given
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now().minusHours(1));
+    managementEvent.getEvent().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
     managementEvent.getEvent().setType(FULFILMENT);
     managementEvent.getEvent().setChannel("CC");
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setFulfilment(new FulfilmentDTO());
     managementEvent.getPayload().getFulfilment().setCaseId(UUID.randomUUID());
     managementEvent.getPayload().getFulfilment().setPackCode("TEST_FULFILMENT_CODE");
-    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(managementEvent);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
 
     PrintTemplate printTemplate = new PrintTemplate();
     printTemplate.setPackCode("TEST_FULFILMENT_CODE");
@@ -75,7 +76,7 @@ public class FulfilmentReceiverTest {
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // When
-//    underTest.receiveMessage(message);
+    underTest.receiveMessage(message);
 
     // Then
     ArgumentCaptor<FulfilmentToProcess> fulfilmentToProcessArgCapt =

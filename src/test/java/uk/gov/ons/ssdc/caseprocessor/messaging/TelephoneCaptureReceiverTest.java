@@ -47,14 +47,13 @@ public class TelephoneCaptureReceiverTest {
     Case testCase = new Case();
     testCase.setId(CASE_ID);
     ResponseManagementEvent responseManagementEvent = buildTelephoneCaptureEvent();
-    Message<ResponseManagementEvent> eventMessage =
-        constructMessageWithValidTimeStamp(responseManagementEvent);
+    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(responseManagementEvent);
 
     when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(testCase);
     when(uacService.existsByQid(TEST_QID)).thenReturn(false);
 
     // When
-//    underTest.receiveMessage(eventMessage);
+    underTest.receiveMessage(eventMessage);
 
     // Then
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
@@ -82,8 +81,7 @@ public class TelephoneCaptureReceiverTest {
     Case testCase = new Case();
     testCase.setId(CASE_ID);
     ResponseManagementEvent responseManagementEvent = buildTelephoneCaptureEvent();
-    Message<ResponseManagementEvent> eventMessage =
-        constructMessageWithValidTimeStamp(responseManagementEvent);
+    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(responseManagementEvent);
 
     UacQidLink existingUacQidLink = new UacQidLink();
     existingUacQidLink.setQid(TEST_QID);
@@ -95,7 +93,7 @@ public class TelephoneCaptureReceiverTest {
     when(uacService.findByQid(TEST_QID)).thenReturn(existingUacQidLink);
 
     // When
-//    underTest.receiveMessage(eventMessage);
+    underTest.receiveMessage(eventMessage);
 
     // Then
     verify(uacService, never()).saveAndEmitUacUpdatedEvent(any());
@@ -112,8 +110,7 @@ public class TelephoneCaptureReceiverTest {
     otherCase.setId(UUID.randomUUID());
 
     ResponseManagementEvent responseManagementEvent = buildTelephoneCaptureEvent();
-    Message<ResponseManagementEvent> eventMessage =
-        constructMessageWithValidTimeStamp(responseManagementEvent);
+    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(responseManagementEvent);
 
     UacQidLink existingUacQidLink = new UacQidLink();
     existingUacQidLink.setQid(TEST_QID);
@@ -125,7 +122,7 @@ public class TelephoneCaptureReceiverTest {
     when(uacService.findByQid(TEST_QID)).thenReturn(existingUacQidLink);
 
     // When, then throws
-//    assertThrows(RuntimeException.class, () -> underTest.receiveMessage(eventMessage));
+    assertThrows(RuntimeException.class, () -> underTest.receiveMessage(eventMessage));
   }
 
   private ResponseManagementEvent buildTelephoneCaptureEvent() {
