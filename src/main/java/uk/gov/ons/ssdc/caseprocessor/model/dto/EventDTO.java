@@ -11,5 +11,5 @@ public class EventDTO {
   private String channel;
   private OffsetDateTime dateTime;
   private UUID transactionId;
-  private String createdBy;
+  private String originatingUser;
 }
