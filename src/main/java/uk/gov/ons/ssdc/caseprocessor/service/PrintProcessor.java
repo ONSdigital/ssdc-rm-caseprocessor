@@ -109,8 +109,7 @@ public class PrintProcessor {
         EventType.PRINTED_PACK_CODE,
         EventHelper.getDummyEvent(),
         null,
-        OffsetDateTime.now(),
-        null);
+        OffsetDateTime.now());
   }
 
   // Has to be synchronised to stop different threads from mangling writer buffer contents

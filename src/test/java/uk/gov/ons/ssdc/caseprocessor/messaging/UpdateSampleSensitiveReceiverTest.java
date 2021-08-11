@@ -82,8 +82,7 @@ public class UpdateSampleSensitiveReceiverTest {
             eq(EventType.UPDATE_SAMPLE_SENSITIVE),
             eq(managementEvent.getEvent()),
             eq(RedactHelper.redact(managementEvent.getPayload())),
-            eq(messageDateTime),
-            any());
+            eq(messageDateTime));
   }
 
   @Test

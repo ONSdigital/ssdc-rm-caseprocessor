@@ -54,7 +54,6 @@ public class UpdateSampleSensitiveReceiver {
         EventType.UPDATE_SAMPLE_SENSITIVE,
         responseManagementEvent.getEvent(),
         RedactHelper.redact(responseManagementEvent.getPayload()),
-        messageTimestamp,
-        responseManagementEvent.getEvent().getCreatedBy());
+        messageTimestamp);
   }
 }

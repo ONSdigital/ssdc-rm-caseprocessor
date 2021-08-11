@@ -46,8 +46,7 @@ public class EventLoggerTest {
         EventType.CASE_CREATED,
         eventDTO,
         redactMe,
-        messageTime,
-        null);
+        messageTime);
 
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
     verify(eventRepository).save(eventArgumentCaptor.capture());

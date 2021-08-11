@@ -73,8 +73,7 @@ public class TelephoneCaptureReceiverTest {
             EventType.TELEPHONE_CAPTURE_REQUESTED,
             responseManagementEvent.getEvent(),
             responseManagementEvent.getPayload().getTelephoneCapture(),
-            getMsgTimeStamp(eventMessage),
-            null);
+            getMsgTimeStamp(eventMessage));
   }
 
   @Test
@@ -100,8 +99,7 @@ public class TelephoneCaptureReceiverTest {
 
     // Then
     verify(uacService, never()).saveAndEmitUacUpdatedEvent(any());
-    verify(eventLogger, never())
-        .logCaseEvent(any(), any(), any(), any(), any(), any(), any(), any());
+    verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(), any(), any());
   }
 
   @Test

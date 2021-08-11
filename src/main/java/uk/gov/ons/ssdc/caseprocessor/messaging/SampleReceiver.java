@@ -80,8 +80,7 @@ public class SampleReceiver {
         EventType.CASE_CREATED,
         createEventDTO(EventTypeDTO.SAMPLE_LOADED),
         RedactHelper.redact(message.getPayload()),
-        messageTimestamp,
-        null);
+        messageTimestamp);
   }
 
   private Case saveNewCaseAndStampCaseRef(Case caze) {

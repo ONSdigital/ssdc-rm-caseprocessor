@@ -70,8 +70,7 @@ public class TelephoneCaptureReceiver {
         EventType.TELEPHONE_CAPTURE_REQUESTED,
         telephoneCaptureEvent.getEvent(),
         telephoneCapturePayload,
-        messageTimestamp,
-        null);
+        messageTimestamp);
   }
 
   private void createNewUacQidLink(Case caze, String uac, String qid) {

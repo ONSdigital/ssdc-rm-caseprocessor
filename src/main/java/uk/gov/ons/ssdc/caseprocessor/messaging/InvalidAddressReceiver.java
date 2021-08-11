@@ -45,7 +45,6 @@ public class InvalidAddressReceiver {
         EventType.ADDRESS_NOT_VALID,
         responseManagementEvent.getEvent(),
         responseManagementEvent.getPayload(),
-        messageTimestamp,
-        responseManagementEvent.getEvent().getCreatedBy());
+        messageTimestamp);
   }
 }

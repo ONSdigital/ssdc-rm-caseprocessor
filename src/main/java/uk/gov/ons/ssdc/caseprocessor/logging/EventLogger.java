@@ -27,8 +27,7 @@ public class EventLogger {
       EventType eventType,
       EventDTO event,
       Object eventPayload,
-      OffsetDateTime messageTimestamp,
-      String createdBy) {
+      OffsetDateTime messageTimestamp) {
     Event loggedEvent =
         buildEvent(eventDate, eventDescription, eventType, event, eventPayload, messageTimestamp);
     loggedEvent.setCaze(caze);
