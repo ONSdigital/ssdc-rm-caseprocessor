@@ -1,5 +1,14 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,16 +24,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.RefusalType;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class CaseServiceTest {
@@ -51,9 +50,11 @@ public class CaseServiceTest {
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
 
     verify(messageSender).sendMessage(any(), responseManagementEventArgumentCaptor.capture());
-    ResponseManagementEvent actualResponeManagementEvent = responseManagementEventArgumentCaptor.getValue();
+    ResponseManagementEvent actualResponeManagementEvent =
+        responseManagementEventArgumentCaptor.getValue();
 
-    CollectionCase actualCollectionCase = actualResponeManagementEvent.getPayload().getCollectionCase();
+    CollectionCase actualCollectionCase =
+        actualResponeManagementEvent.getPayload().getCollectionCase();
     assertThat(actualCollectionCase.getCaseId()).isEqualTo(caze.getId());
     assertThat(actualCollectionCase.getSample()).isEqualTo(caze.getSample());
     assertThat(actualCollectionCase.isReceiptReceived()).isTrue();
@@ -61,7 +62,8 @@ public class CaseServiceTest {
     assertThat(actualCollectionCase.isSurveyLaunched()).isTrue();
     assertThat(actualCollectionCase.getRefusalReceived()).isEqualTo(RefusalTypeDTO.HARD_REFUSAL);
 
-    assertThat(actualResponeManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
+    assertThat(actualResponeManagementEvent.getEvent().getType())
+        .isEqualTo(EventTypeDTO.CASE_UPDATED);
   }
 
   @Test
@@ -84,20 +86,24 @@ public class CaseServiceTest {
     underTest.emitCaseCreatedEvent(caze);
 
     ArgumentCaptor<ResponseManagementEvent> responseManagementEventArgumentCaptor =
-            ArgumentCaptor.forClass(ResponseManagementEvent.class);
+        ArgumentCaptor.forClass(ResponseManagementEvent.class);
 
     verify(messageSender).sendMessage(any(), responseManagementEventArgumentCaptor.capture());
-    ResponseManagementEvent actualResponeManagementEvent = responseManagementEventArgumentCaptor.getValue();
+    ResponseManagementEvent actualResponeManagementEvent =
+        responseManagementEventArgumentCaptor.getValue();
 
-    CollectionCase actualCollectionCase = actualResponeManagementEvent.getPayload().getCollectionCase();
+    CollectionCase actualCollectionCase =
+        actualResponeManagementEvent.getPayload().getCollectionCase();
     assertThat(actualCollectionCase.getCaseId()).isEqualTo(caze.getId());
     assertThat(actualCollectionCase.getSample()).isEqualTo(caze.getSample());
     assertThat(actualCollectionCase.isReceiptReceived()).isTrue();
     assertThat(actualCollectionCase.isInvalidAddress()).isTrue();
     assertThat(actualCollectionCase.isSurveyLaunched()).isTrue();
-    assertThat(actualCollectionCase.getRefusalReceived()).isEqualTo(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
+    assertThat(actualCollectionCase.getRefusalReceived())
+        .isEqualTo(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
 
-    assertThat(actualResponeManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
+    assertThat(actualResponeManagementEvent.getEvent().getType())
+        .isEqualTo(EventTypeDTO.CASE_CREATED);
   }
 
   @Test
@@ -118,9 +124,8 @@ public class CaseServiceTest {
     String expectedErrorMessage = String.format("Case ID '%s' not present", caseId);
 
     RuntimeException thrown =
-            assertThrows(RuntimeException.class, () -> underTest.getCaseByCaseId(caseId));
+        assertThrows(RuntimeException.class, () -> underTest.getCaseByCaseId(caseId));
 
     Assertions.assertThat(thrown.getMessage()).isEqualTo(expectedErrorMessage);
   }
-
 }

@@ -1,5 +1,13 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+import java.util.UUID;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,15 +20,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
-
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class UacServiceTest {
@@ -73,8 +72,7 @@ public class UacServiceTest {
     String qid = "12345";
     String expectedErrorMessage = String.format("Questionnaire Id '%s' not found!", qid);
 
-    RuntimeException thrown =
-            assertThrows(RuntimeException.class, () -> underTest.findByQid(qid));
+    RuntimeException thrown = assertThrows(RuntimeException.class, () -> underTest.findByQid(qid));
 
     Assertions.assertThat(thrown.getMessage()).isEqualTo(expectedErrorMessage);
   }
