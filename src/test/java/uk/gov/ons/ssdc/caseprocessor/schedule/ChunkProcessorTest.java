@@ -43,7 +43,7 @@ public class ChunkProcessorTest {
     // Then
     verify(caseToProcessRepository).findChunkToProcess(eq(chunkSize));
     verify(caseToProcessProcessor).process(eq(caseToProcess));
-    verify(caseToProcessRepository).delete(eq(caseToProcess));
+    verify(caseToProcessRepository).deleteAllInBatch(eq(List.of(caseToProcess)));
   }
 
   @Test
