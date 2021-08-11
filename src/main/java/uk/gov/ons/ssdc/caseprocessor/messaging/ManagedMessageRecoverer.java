@@ -197,7 +197,7 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
 
     // Iterate through the stack trace until we hit the first problem with our code
     for (String stackTraceLine : stackTrace) {
-      if (stackTraceLine.contains("uk.gov.ons.census")) {
+      if (stackTraceLine.contains("uk.gov.ons")) {
         return stackTraceLine;
       }
     }
