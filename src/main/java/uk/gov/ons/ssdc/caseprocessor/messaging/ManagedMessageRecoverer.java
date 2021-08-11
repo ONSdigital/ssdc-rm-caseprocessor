@@ -61,9 +61,15 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
 
     String stackTraceRootCause = findUsefulRootCauseInStackTrace(retryContext.getLastThrowable());
 
+    Throwable cause = retryContext.getLastThrowable();
+    if (retryContext.getLastThrowable() != null
+        && retryContext.getLastThrowable().getCause() != null
+        && retryContext.getLastThrowable().getCause().getCause() != null) {
+      cause = retryContext.getLastThrowable().getCause().getCause();
+    }
+
     ExceptionReportResponse reportResult =
-        getExceptionReportResponse(
-            retryContext.getLastThrowable(), messageHash, stackTraceRootCause, subscriptionName);
+        getExceptionReportResponse(cause, messageHash, stackTraceRootCause, subscriptionName);
 
     if (skipMessage(
         reportResult,

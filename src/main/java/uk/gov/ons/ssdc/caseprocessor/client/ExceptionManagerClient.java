@@ -31,7 +31,7 @@ public class ExceptionManagerClient {
 
     ExceptionReport exceptionReport = new ExceptionReport();
     exceptionReport.setExceptionClass(cause.getClass().getName());
-    exceptionReport.setExceptionMessage("Deprecated: See stack trace root cause instead");
+    exceptionReport.setExceptionMessage(cause.getMessage());
     exceptionReport.setExceptionRootCause(stackTraceRootCause);
     exceptionReport.setMessageHash(messageHash);
     exceptionReport.setService(service);
