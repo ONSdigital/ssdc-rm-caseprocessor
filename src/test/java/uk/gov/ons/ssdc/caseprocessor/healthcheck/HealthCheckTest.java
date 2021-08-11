@@ -12,10 +12,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.ssdc.caseprocessor.schedule.ClusterLeaderManager;
 
 @ExtendWith(MockitoExtension.class)
-public class HeathCheckTest {
+public class HealthCheckTest {
   @Mock private ClusterLeaderManager clusterLeaderManager;
 
-  @InjectMocks HeathCheck underTest;
+  @InjectMocks
+  HealthCheck underTest;
 
   @Test
   public void testHappyPath() {

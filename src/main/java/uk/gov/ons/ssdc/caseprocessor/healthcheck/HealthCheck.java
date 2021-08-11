@@ -12,13 +12,13 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.schedule.ClusterLeaderManager;
 
 @Component
-public class HeathCheck {
+public class HealthCheck {
   private final ClusterLeaderManager clusterLeaderManager;
 
   @Value("${healthcheck.filename}")
   private String fileName;
 
-  public HeathCheck(ClusterLeaderManager clusterLeaderManager) {
+  public HealthCheck(ClusterLeaderManager clusterLeaderManager) {
     this.clusterLeaderManager = clusterLeaderManager;
   }
 
