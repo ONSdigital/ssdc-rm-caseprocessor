@@ -15,8 +15,7 @@ import uk.gov.ons.ssdc.caseprocessor.schedule.ClusterLeaderManager;
 public class HealthCheckTest {
   @Mock private ClusterLeaderManager clusterLeaderManager;
 
-  @InjectMocks
-  HealthCheck underTest;
+  @InjectMocks HealthCheck underTest;
 
   @Test
   public void testHappyPath() {
