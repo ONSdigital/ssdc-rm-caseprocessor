@@ -23,7 +23,9 @@ public class HeathCheckIT {
   private String fileName;
 
   @Test
-  public void testHappyPath() throws IOException {
+  public void testHappyPath() throws IOException, InterruptedException {
+    Thread.sleep(5000);
+
     Path path = Paths.get(fileName);
 
     try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
