@@ -11,13 +11,13 @@ import org.junit.jupiter.api.Test;
 
 public class CaseRefGeneratorTest {
 
-//    Helps coverage and provides some protection against change.
   @Test
   public void singleCaseRefTest() {
-      final byte[] caserefgeneratorkey = new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
+    final byte[] caserefgeneratorkey = new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
+    final long expectedCaseRef = 2459403677L;
 
-      long caseRef = CaseRefGenerator.getCaseRef(99, caserefgeneratorkey);
-      assertThat(caseRef).isEqualTo(2459403677L);
+    long actualCaseRef = CaseRefGenerator.getCaseRef(99, caserefgeneratorkey);
+    assertThat(actualCaseRef).isEqualTo(expectedCaseRef);
   }
 
   // Marked ignored as it takes a couple of minutes to run
