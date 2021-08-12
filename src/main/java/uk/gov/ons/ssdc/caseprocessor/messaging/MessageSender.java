@@ -20,6 +20,6 @@ public class MessageSender {
     messageToSend.setDestinationTopic(destinationTopic);
     messageToSend.setMessageBody(JsonHelper.convertObjectToJson(message));
 
-    messageToSendRepository.saveAndFlush(messageToSend);
+    messageToSendRepository.save(messageToSend);
   }
 }
