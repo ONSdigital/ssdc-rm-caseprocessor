@@ -28,7 +28,7 @@ public class UacService {
   }
 
   public UacQidLink saveAndEmitUacUpdatedEvent(UacQidLink uacQidLink) {
-    UacQidLink savedUacQidLink = uacQidLinkRepository.saveAndFlush(uacQidLink);
+    UacQidLink savedUacQidLink = uacQidLinkRepository.save(uacQidLink);
 
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.UAC_UPDATED);
 
