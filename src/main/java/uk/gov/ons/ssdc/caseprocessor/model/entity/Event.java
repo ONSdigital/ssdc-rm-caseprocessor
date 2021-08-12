@@ -50,4 +50,6 @@ public class Event {
 
   @Column(columnDefinition = "Timestamp with time zone")
   private OffsetDateTime messageTimestamp;
+
+  @Column private String createdBy;
 }
