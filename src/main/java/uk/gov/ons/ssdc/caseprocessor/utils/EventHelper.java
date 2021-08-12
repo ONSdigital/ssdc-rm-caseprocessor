@@ -10,10 +10,6 @@ public class EventHelper {
   private static final String EVENT_SOURCE = "CASE_PROCESSOR";
   private static final String EVENT_CHANNEL = "RM";
 
-  private EventHelper() {
-    throw new IllegalStateException("Utility class EventHelper should not be instantiated");
-  }
-
   public static EventDTO createEventDTO(
       EventTypeDTO eventType, String eventChannel, String eventSource) {
     EventDTO eventDTO = new EventDTO();
