@@ -16,6 +16,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
+import uk.gov.ons.ssdc.caseprocessor.utils.RedactHelper;
 
 @MessageEndpoint
 public class SmsFulfilmentReceiver {
@@ -43,7 +44,7 @@ public class SmsFulfilmentReceiver {
 
     Case caze = caseService.getCaseByCaseId(smsFulfilment.getCaseId());
 
-    // Double check the QID does not already exist
+    // Check the QID does not already exist
     if (uacService.existsByQid(smsFulfilment.getQid())) {
 
       // If it does exist, check if it is linked to the given case
@@ -68,7 +69,7 @@ public class SmsFulfilmentReceiver {
         SMS_FULFILMENT_DESCRIPTION,
         EventType.SMS_FULFILMENT,
         responseManagementEvent.getEvent(),
-        smsFulfilment,
+        RedactHelper.redact(smsFulfilment),
         messageTimestamp);
   }
 
