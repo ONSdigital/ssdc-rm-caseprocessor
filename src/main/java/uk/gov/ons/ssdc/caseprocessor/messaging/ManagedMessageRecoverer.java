@@ -6,15 +6,18 @@ import com.google.protobuf.ByteString;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import net.logstash.logback.encoder.org.apache.commons.lang.exception.ExceptionUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gcp.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.retry.RecoveryCallback;
 import org.springframework.retry.RetryContext;
+import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.client.ExceptionManagerClient;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ExceptionReportResponse;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.SkippedMessage;
 
+@Component
 public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
   private static final Logger log = LoggerFactory.getLogger(ManagedMessageRecoverer.class);
   private static final String SERVICE_NAME = "Case Processor";
@@ -28,6 +31,9 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
       throw new RuntimeException("Could not initialise hashing", e);
     }
   }
+
+  @Value("${messagelogging.logstacktraces}")
+  private boolean logStackTraces;
 
   private final ExceptionManagerClient exceptionManagerClient;
 
@@ -84,11 +90,7 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
     peekMessage(reportResult, messageHash, rawMessageBody);
 
     logMessage(
-        reportResult,
-        retryContext.getLastThrowable().getCause(),
-        messageHash,
-        rawMessageBody,
-        stackTraceRootCause);
+        reportResult, retryContext.getLastThrowable().getCause(), messageHash, stackTraceRootCause);
 
     // Reject the original message where it'll be retried at some future point in time
     originalMessage.nack();
@@ -170,13 +172,12 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
       ExceptionReportResponse reportResult,
       Throwable cause,
       String messageHash,
-      byte[] rawMessageBody,
       String stackTraceRootCause) {
     if (reportResult != null && !reportResult.isLogIt()) {
       return;
     }
 
-    if (false) { // TODO - config for whether to log stack traces or not
+    if (logStackTraces) {
       log.with("message_hash", messageHash).error("Could not process message", cause);
     } else {
       log.with("message_hash", messageHash)
