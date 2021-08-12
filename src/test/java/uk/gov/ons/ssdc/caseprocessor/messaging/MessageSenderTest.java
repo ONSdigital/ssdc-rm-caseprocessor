@@ -33,7 +33,7 @@ public class MessageSenderTest {
 
     ArgumentCaptor<MessageToSend> messageToSendArgumentCaptor =
         ArgumentCaptor.forClass(MessageToSend.class);
-    verify(messageToSendRepository).saveAndFlush(messageToSendArgumentCaptor.capture());
+    verify(messageToSendRepository).save(messageToSendArgumentCaptor.capture());
 
     MessageToSend actualMessageSent = messageToSendArgumentCaptor.getValue();
     assertThat(actualMessageSent.getDestinationTopic()).isEqualTo(destinationTopic);

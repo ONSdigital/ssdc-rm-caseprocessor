@@ -36,10 +36,10 @@ public class UacServiceTest {
     uacQidLink.setQid("01234");
     uacQidLink.setActive(true);
 
-    when(uacQidLinkRepository.saveAndFlush(uacQidLink)).thenReturn(uacQidLink);
+    when(uacQidLinkRepository.save(uacQidLink)).thenReturn(uacQidLink);
     underTest.saveAndEmitUacUpdatedEvent(uacQidLink);
 
-    verify(uacQidLinkRepository).saveAndFlush(uacQidLink);
+    verify(uacQidLinkRepository).save(uacQidLink);
 
     ArgumentCaptor<ResponseManagementEvent> responseManagementEventArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
