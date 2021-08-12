@@ -68,6 +68,7 @@ public class EventLogger {
     loggedEvent.setEventSource(event.getSource());
     loggedEvent.setEventTransactionId(event.getTransactionId());
     loggedEvent.setMessageTimestamp(messageTimestamp);
+    loggedEvent.setCreatedBy(event.getOriginatingUser());
 
     loggedEvent.setEventPayload(JsonHelper.convertObjectToJson(eventPayload));
 
