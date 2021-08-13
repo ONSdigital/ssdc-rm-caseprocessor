@@ -44,24 +44,26 @@ public class SmsFulfilmentReceiver {
 
     Case caze = caseService.getCaseByCaseId(smsFulfilment.getCaseId());
 
-    // Check the QID does not already exist
-    if (uacService.existsByQid(smsFulfilment.getQid())) {
+    if (smsFulfilment.getQid() != null) {
+      // Check the QID does not already exist
+      if (uacService.existsByQid(smsFulfilment.getQid())) {
 
-      // If it does exist, check if it is linked to the given case
-      UacQidLink existingUacQidLink = uacService.findByQid(smsFulfilment.getQid());
-      if (existingUacQidLink.getCaze().getId() == smsFulfilment.getCaseId()) {
+        // If it does exist, check if it is linked to the given case
+        UacQidLink existingUacQidLink = uacService.findByQid(smsFulfilment.getQid());
+        if (existingUacQidLink.getCaze().getId() == smsFulfilment.getCaseId()) {
 
-        // If the QID is already linked to the given case this must be duplicate event, ignore
-        return;
+          // If the QID is already linked to the given case this must be duplicate event, ignore
+          return;
+        }
+
+        // If not then something has gone wrong, error out
+        throw new RuntimeException(
+            "SMS fulfilment QID "
+                + smsFulfilment.getQid()
+                + " is already linked to a different case");
       }
-
-      // If not then something has gone wrong, error out
-      throw new RuntimeException(
-          "SMS fulfilment QID "
-              + smsFulfilment.getQid()
-              + " is already linked to a different case");
+      createNewUacQidLink(caze, smsFulfilment.getUac(), smsFulfilment.getQid());
     }
-    createNewUacQidLink(caze, smsFulfilment.getUac(), smsFulfilment.getQid());
 
     eventLogger.logCaseEvent(
         caze,
