@@ -20,14 +20,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ReceiptDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
@@ -71,10 +69,10 @@ public class ReceiptReceiverIT {
 
   @Test
   public void testReceipt() throws Exception {
-    try (QueueSpy<ResponseManagementEvent> outboundUacQueueSpy =
-            pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, ResponseManagementEvent.class);
-        QueueSpy<ResponseManagementEvent> outboundCaseQueueSpy =
-            pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, ResponseManagementEvent.class)) {
+    try (QueueSpy<EventDTO> outboundUacQueueSpy =
+            pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class);
+        QueueSpy<EventDTO> outboundCaseQueueSpy =
+            pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -104,36 +102,36 @@ public class ReceiptReceiverIT {
       receiptDTO.setQid(TEST_QID);
       PayloadDTO payloadDTO = new PayloadDTO();
       payloadDTO.setReceipt(receiptDTO);
-      ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-      responseManagementEvent.setPayload(payloadDTO);
+      EventDTO event = new EventDTO();
+      event.setPayload(payloadDTO);
 
-      EventDTO eventDTO = new EventDTO();
-      eventDTO.setType(EventTypeDTO.RECEIPT);
-      eventDTO.setSource("RH");
-      eventDTO.setDateTime(OffsetDateTime.now());
-      eventDTO.setChannel("RH");
-      eventDTO.setTransactionId(UUID.randomUUID());
-      responseManagementEvent.setEvent(eventDTO);
+      EventHeaderDTO eventHeader = new EventHeaderDTO();
+      eventHeader.setTopic(INBOUND_RECEIPT_TOPIC);
+      eventHeader.setSource("RH");
+      eventHeader.setDateTime(OffsetDateTime.now());
+      eventHeader.setChannel("RH");
+      eventHeader.setMessageId(UUID.randomUUID());
+      event.setHeader(eventHeader);
 
-      pubsubHelper.sendMessage(INBOUND_RECEIPT_TOPIC, responseManagementEvent);
+      pubsubHelper.sendMessage(INBOUND_RECEIPT_TOPIC, event);
 
       //  THEN
-      ResponseManagementEvent caseEmittedEvent =
-          outboundCaseQueueSpy.checkExpectedMessageReceived();
+      EventDTO caseEmittedEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
 
       CaseUpdateDTO emittedCase = caseEmittedEvent.getPayload().getCaseUpdate();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(emittedCase.getSample()).isEqualTo(sample);
       assertThat(emittedCase.isReceiptReceived()).isTrue();
 
-      ResponseManagementEvent uacUpdatedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
+      EventDTO uacUpdatedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
       UacUpdateDTO emittedUac = uacUpdatedEvent.getPayload().getUacUpdate();
       assertThat(emittedUac.isActive()).isFalse();
 
-      List<Event> storedEvents = eventRepository.findAll();
+      List<uk.gov.ons.ssdc.caseprocessor.model.entity.Event> storedEvents =
+          eventRepository.findAll();
       assertThat(storedEvents.size()).isEqualTo(1);
       assertThat(storedEvents.get(0).getUacQidLink().getId()).isEqualTo(TEST_UACLINK_ID);
-      assertThat(storedEvents.get(0).getEventType()).isEqualTo(EventType.RECEIPT);
+      assertThat(storedEvents.get(0).getType()).isEqualTo(EventType.RECEIPT);
     }
   }
 }

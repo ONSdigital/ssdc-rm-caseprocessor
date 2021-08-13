@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
@@ -93,7 +93,7 @@ public class PrintProcessorTest {
             any(OffsetDateTime.class),
             eq("Print file generated with pack code test pack code"),
             eq(EventType.PRINT_FILE),
-            any(EventDTO.class),
+            any(EventHeaderDTO.class),
             isNull(),
             any(OffsetDateTime.class));
   }
@@ -147,7 +147,7 @@ public class PrintProcessorTest {
             any(OffsetDateTime.class),
             eq("Print file generated with pack code TEST_FULFILMENT_CODE"),
             eq(EventType.PRINT_FILE),
-            any(EventDTO.class),
+            any(EventHeaderDTO.class),
             isNull(),
             any(OffsetDateTime.class));
   }

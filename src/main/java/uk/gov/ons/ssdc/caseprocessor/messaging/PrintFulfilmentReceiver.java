@@ -9,7 +9,7 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentSurveyPrintTemplate;
@@ -37,16 +37,12 @@ public class PrintFulfilmentReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "printFulfilmentInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
-    ResponseManagementEvent responseManagementEvent =
-        convertJsonBytesToObject(message.getPayload(), ResponseManagementEvent.class);
+    EventDTO event = convertJsonBytesToObject(message.getPayload(), EventDTO.class);
 
-    Case caze =
-        caseService.getCaseByCaseId(
-            responseManagementEvent.getPayload().getPrintFulfilment().getCaseId());
+    Case caze = caseService.getCaseByCaseId(event.getPayload().getPrintFulfilment().getCaseId());
 
     PrintTemplate printTemplate =
-        getAllowedPrintTemplate(
-            responseManagementEvent.getPayload().getPrintFulfilment().getPackCode(), caze);
+        getAllowedPrintTemplate(event.getPayload().getPrintFulfilment().getPackCode(), caze);
 
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 
@@ -58,11 +54,11 @@ public class PrintFulfilmentReceiver {
 
     eventLogger.logCaseEvent(
         caze,
-        responseManagementEvent.getEvent().getDateTime(),
+        event.getHeader().getDateTime(),
         "Print fulfilment requested",
         EventType.PRINT_FULFILMENT,
-        responseManagementEvent.getEvent(),
-        responseManagementEvent.getPayload(),
+        event.getHeader(),
+        event.getPayload(),
         messageTimestamp);
   }
 

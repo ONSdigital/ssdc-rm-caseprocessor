@@ -10,7 +10,7 @@ import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
@@ -32,13 +32,11 @@ public class ReceiptReceiver {
   @Transactional(isolation = Isolation.REPEATABLE_READ)
   @ServiceActivator(inputChannel = "receiptInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
-    ResponseManagementEvent responseManagementEvent =
-        convertJsonBytesToObject(message.getPayload(), ResponseManagementEvent.class);
+    EventDTO event = convertJsonBytesToObject(message.getPayload(), EventDTO.class);
 
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 
-    UacQidLink uacQidLink =
-        uacService.findByQid(responseManagementEvent.getPayload().getReceipt().getQid());
+    UacQidLink uacQidLink = uacService.findByQid(event.getPayload().getReceipt().getQid());
 
     if (uacQidLink.isActive()) {
       uacQidLink.setActive(false);
@@ -53,11 +51,11 @@ public class ReceiptReceiver {
 
     eventLogger.logUacQidEvent(
         uacQidLink,
-        responseManagementEvent.getEvent().getDateTime(),
+        event.getHeader().getDateTime(),
         "Receipt received",
         EventType.RECEIPT,
-        responseManagementEvent.getEvent(),
-        responseManagementEvent.getPayload(),
+        event.getHeader(),
+        event.getPayload(),
         messageTimestamp);
   }
 }

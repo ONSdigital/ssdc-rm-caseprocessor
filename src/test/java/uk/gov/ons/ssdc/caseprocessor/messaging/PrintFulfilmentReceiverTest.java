@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO.PRINT_FULFILMENT;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
@@ -22,9 +21,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintFulfilmentDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
@@ -48,11 +47,11 @@ public class PrintFulfilmentReceiverTest {
   @Test
   public void testReceiveMessage() {
     // Given
-    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
-    managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
-    managementEvent.getEvent().setType(PRINT_FULFILMENT);
-    managementEvent.getEvent().setChannel("CC");
+    EventDTO managementEvent = new EventDTO();
+    managementEvent.setHeader(new EventHeaderDTO());
+    managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
+    managementEvent.getHeader().setTopic("Test topic");
+    managementEvent.getHeader().setChannel("CC");
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setPrintFulfilment(new PrintFulfilmentDTO());
     managementEvent.getPayload().getPrintFulfilment().setCaseId(UUID.randomUUID());
@@ -91,10 +90,10 @@ public class PrintFulfilmentReceiverTest {
     verify(eventLogger)
         .logCaseEvent(
             eq(expectedCase),
-            eq(managementEvent.getEvent().getDateTime()),
+            eq(managementEvent.getHeader().getDateTime()),
             eq("Print fulfilment requested"),
             eq(EventType.PRINT_FULFILMENT),
-            eq(managementEvent.getEvent()),
+            eq(managementEvent.getHeader()),
             eq(managementEvent.getPayload()),
             eq(messageDateTime));
   }

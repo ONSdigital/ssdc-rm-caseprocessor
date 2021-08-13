@@ -15,12 +15,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.SurveyLaunchDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
@@ -58,8 +56,8 @@ public class SurveyLaunchReceiverIT {
   public void testSurveyLaunchLogsEventSetsFlagAndEmitsCorrectCaseUpdatedEvent() throws Exception {
     // GIVEN
 
-    try (QueueSpy<ResponseManagementEvent> outboundCaseQueueSpy =
-        pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, ResponseManagementEvent.class)) {
+    try (QueueSpy<EventDTO> outboundCaseQueueSpy =
+        pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
       Case caze = new Case();
       caze.setId(TEST_CASE_ID);
       caze.setSurveyLaunched(false);
@@ -71,12 +69,12 @@ public class SurveyLaunchReceiverIT {
       uacQidLink.setQid(TEST_QID);
       uacQidLinkRepository.saveAndFlush(uacQidLink);
 
-      ResponseManagementEvent surveyLaunchedEvent = new ResponseManagementEvent();
-      EventDTO eventDTO = new EventDTO();
-      eventDTO.setType(EventTypeDTO.SURVEY_LAUNCH);
-      eventDTO.setSource("Respondent Home");
-      eventDTO.setChannel("RH");
-      surveyLaunchedEvent.setEvent(eventDTO);
+      EventDTO surveyLaunchedEvent = new EventDTO();
+      EventHeaderDTO eventHeader = new EventHeaderDTO();
+      eventHeader.setTopic(INBOUND_TOPIC);
+      eventHeader.setSource("Respondent Home");
+      eventHeader.setChannel("RH");
+      surveyLaunchedEvent.setHeader(eventHeader);
 
       SurveyLaunchDTO surveyLaunch = new SurveyLaunchDTO();
       surveyLaunch.setQid(uacQidLink.getQid());
@@ -88,16 +86,15 @@ public class SurveyLaunchReceiverIT {
       pubsubHelper.sendMessage(INBOUND_TOPIC, surveyLaunchedEvent);
 
       // THEN
-      ResponseManagementEvent caseUpdatedEvent =
-          outboundCaseQueueSpy.checkExpectedMessageReceived();
+      EventDTO caseUpdatedEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
 
       assertThat(caseUpdatedEvent.getPayload().getCaseUpdate().getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(caseUpdatedEvent.getPayload().getCaseUpdate().isSurveyLaunched()).isTrue();
 
-      List<Event> events = eventRepository.findAll();
+      List<uk.gov.ons.ssdc.caseprocessor.model.entity.Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);
-      Event event = events.get(0);
-      assertThat(event.getEventDescription()).isEqualTo("Survey launched");
+      uk.gov.ons.ssdc.caseprocessor.model.entity.Event event = events.get(0);
+      assertThat(event.getDescription()).isEqualTo("Survey launched");
       UacQidLink actualUacQidLink = event.getUacQidLink();
       assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
       assertThat(actualUacQidLink.getCaze().getId()).isEqualTo(TEST_CASE_ID);

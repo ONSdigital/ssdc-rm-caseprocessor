@@ -16,11 +16,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.RefusalType;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
@@ -35,6 +35,8 @@ public class CaseServiceTest {
 
   @Test
   public void saveCaseAndEmitCaseUpdatedEvent() {
+    ReflectionTestUtils.setField(underTest, "caseUpdateTopic", "Test topic");
+
     Case caze = new Case();
     caze.setId(UUID.randomUUID());
     caze.setSample(Map.of("foo", "bar"));
@@ -46,12 +48,10 @@ public class CaseServiceTest {
     underTest.saveCaseAndEmitCaseUpdate(caze);
     verify(caseRepository).saveAndFlush(caze);
 
-    ArgumentCaptor<ResponseManagementEvent> responseManagementEventArgumentCaptor =
-        ArgumentCaptor.forClass(ResponseManagementEvent.class);
+    ArgumentCaptor<EventDTO> eventArgumentCaptor = ArgumentCaptor.forClass(EventDTO.class);
 
-    verify(messageSender).sendMessage(any(), responseManagementEventArgumentCaptor.capture());
-    ResponseManagementEvent actualResponeManagementEvent =
-        responseManagementEventArgumentCaptor.getValue();
+    verify(messageSender).sendMessage(any(), eventArgumentCaptor.capture());
+    EventDTO actualResponeManagementEvent = eventArgumentCaptor.getValue();
 
     CaseUpdateDTO actualCaseUpdate = actualResponeManagementEvent.getPayload().getCaseUpdate();
     assertThat(actualCaseUpdate.getCaseId()).isEqualTo(caze.getId());
@@ -61,8 +61,7 @@ public class CaseServiceTest {
     assertThat(actualCaseUpdate.isSurveyLaunched()).isTrue();
     assertThat(actualCaseUpdate.getRefusalReceived()).isEqualTo(RefusalTypeDTO.HARD_REFUSAL);
 
-    assertThat(actualResponeManagementEvent.getEvent().getType())
-        .isEqualTo(EventTypeDTO.CASE_UPDATE);
+    assertThat(actualResponeManagementEvent.getHeader().getTopic()).isEqualTo("Test topic");
   }
 
   @Test
@@ -74,6 +73,8 @@ public class CaseServiceTest {
 
   @Test
   public void emitCaseCreatedEvent() {
+    ReflectionTestUtils.setField(underTest, "caseUpdateTopic", "Test topic");
+
     Case caze = new Case();
     caze.setId(UUID.randomUUID());
     caze.setSample(Map.of("foo", "bar"));
@@ -84,12 +85,10 @@ public class CaseServiceTest {
 
     underTest.emitCaseUpdate(caze);
 
-    ArgumentCaptor<ResponseManagementEvent> responseManagementEventArgumentCaptor =
-        ArgumentCaptor.forClass(ResponseManagementEvent.class);
+    ArgumentCaptor<EventDTO> eventArgumentCaptor = ArgumentCaptor.forClass(EventDTO.class);
 
-    verify(messageSender).sendMessage(any(), responseManagementEventArgumentCaptor.capture());
-    ResponseManagementEvent actualResponeManagementEvent =
-        responseManagementEventArgumentCaptor.getValue();
+    verify(messageSender).sendMessage(any(), eventArgumentCaptor.capture());
+    EventDTO actualResponeManagementEvent = eventArgumentCaptor.getValue();
 
     CaseUpdateDTO actualCaseUpdate = actualResponeManagementEvent.getPayload().getCaseUpdate();
     assertThat(actualCaseUpdate.getCaseId()).isEqualTo(caze.getId());
@@ -100,8 +99,7 @@ public class CaseServiceTest {
     assertThat(actualCaseUpdate.getRefusalReceived())
         .isEqualTo(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
 
-    assertThat(actualResponeManagementEvent.getEvent().getType())
-        .isEqualTo(EventTypeDTO.CASE_UPDATE);
+    assertThat(actualResponeManagementEvent.getHeader().getTopic()).isEqualTo("Test topic");
   }
 
   @Test

@@ -17,8 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.TelephoneCaptureDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
@@ -46,8 +46,8 @@ public class TelephoneCaptureReceiverTest {
     // Given
     Case testCase = new Case();
     testCase.setId(CASE_ID);
-    ResponseManagementEvent responseManagementEvent = buildTelephoneCaptureEvent();
-    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(responseManagementEvent);
+    EventDTO event = buildTelephoneCaptureEvent();
+    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(event);
 
     when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(testCase);
     when(uacService.existsByQid(TEST_QID)).thenReturn(false);
@@ -67,11 +67,11 @@ public class TelephoneCaptureReceiverTest {
     verify(eventLogger)
         .logCaseEvent(
             testCase,
-            responseManagementEvent.getEvent().getDateTime(),
+            event.getHeader().getDateTime(),
             TELEPHONE_CAPTURE_DESCRIPTION,
             EventType.TELEPHONE_CAPTURE,
-            responseManagementEvent.getEvent(),
-            responseManagementEvent.getPayload().getTelephoneCapture(),
+            event.getHeader(),
+            event.getPayload().getTelephoneCapture(),
             getMsgTimeStamp(eventMessage));
   }
 
@@ -80,8 +80,8 @@ public class TelephoneCaptureReceiverTest {
     // Given
     Case testCase = new Case();
     testCase.setId(CASE_ID);
-    ResponseManagementEvent responseManagementEvent = buildTelephoneCaptureEvent();
-    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(responseManagementEvent);
+    EventDTO event = buildTelephoneCaptureEvent();
+    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(event);
 
     UacQidLink existingUacQidLink = new UacQidLink();
     existingUacQidLink.setQid(TEST_QID);
@@ -109,8 +109,8 @@ public class TelephoneCaptureReceiverTest {
     Case otherCase = new Case();
     otherCase.setId(UUID.randomUUID());
 
-    ResponseManagementEvent responseManagementEvent = buildTelephoneCaptureEvent();
-    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(responseManagementEvent);
+    EventDTO event = buildTelephoneCaptureEvent();
+    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(event);
 
     UacQidLink existingUacQidLink = new UacQidLink();
     existingUacQidLink.setQid(TEST_QID);
@@ -125,20 +125,20 @@ public class TelephoneCaptureReceiverTest {
     assertThrows(RuntimeException.class, () -> underTest.receiveMessage(eventMessage));
   }
 
-  private ResponseManagementEvent buildTelephoneCaptureEvent() {
+  private EventDTO buildTelephoneCaptureEvent() {
     TelephoneCaptureDTO telephoneCaptureDTO = new TelephoneCaptureDTO();
     telephoneCaptureDTO.setCaseId(CASE_ID);
     telephoneCaptureDTO.setQid(TEST_QID);
     telephoneCaptureDTO.setUac(TEST_UAC);
 
-    EventDTO eventDTO = new EventDTO();
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setTelephoneCapture(telephoneCaptureDTO);
 
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setEvent(eventDTO);
-    responseManagementEvent.setPayload(payloadDTO);
+    EventDTO event = new EventDTO();
+    event.setHeader(eventHeader);
+    event.setPayload(payloadDTO);
 
-    return responseManagementEvent;
+    return event;
   }
 }

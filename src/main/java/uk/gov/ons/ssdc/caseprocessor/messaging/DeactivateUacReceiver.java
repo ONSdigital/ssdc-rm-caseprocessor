@@ -9,7 +9,7 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
@@ -27,11 +27,9 @@ public class DeactivateUacReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "deactivateUacInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
-    ResponseManagementEvent responseManagementEvent =
-        convertJsonBytesToObject(message.getPayload(), ResponseManagementEvent.class);
+    EventDTO event = convertJsonBytesToObject(message.getPayload(), EventDTO.class);
 
-    UacQidLink uacQidLink =
-        uacService.findByQid(responseManagementEvent.getPayload().getDeactivateUac().getQid());
+    UacQidLink uacQidLink = uacService.findByQid(event.getPayload().getDeactivateUac().getQid());
 
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     uacQidLink.setActive(false);
@@ -39,11 +37,11 @@ public class DeactivateUacReceiver {
 
     eventLogger.logUacQidEvent(
         uacQidLink,
-        responseManagementEvent.getEvent().getDateTime(),
+        event.getHeader().getDateTime(),
         "Deactivate UAC",
         EventType.DEACTIVATE_UAC,
-        responseManagementEvent.getEvent(),
-        responseManagementEvent.getPayload(),
+        event.getHeader(),
+        event.getPayload(),
         messageTimestamp);
   }
 }

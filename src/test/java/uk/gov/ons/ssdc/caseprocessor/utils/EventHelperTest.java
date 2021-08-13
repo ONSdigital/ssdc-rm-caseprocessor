@@ -5,39 +5,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 
 public class EventHelperTest {
 
   @Test
   public void testCreateEventDTOWithEventType() {
-    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATE);
+    EventHeaderDTO eventHeader = EventHelper.createEventDTO("TOPIC");
 
-    assertThat(eventDTO.getChannel()).isEqualTo("RM");
-    assertThat(eventDTO.getSource()).isEqualTo("CASE_PROCESSOR");
-    assertThat(eventDTO.getDateTime()).isInstanceOf(OffsetDateTime.class);
-    assertThat(eventDTO.getTransactionId()).isInstanceOf(UUID.class);
-    assertThat(eventDTO.getType()).isEqualTo(EventTypeDTO.CASE_UPDATE);
+    assertThat(eventHeader.getTopic()).isEqualTo("TOPIC");
+    assertThat(eventHeader.getChannel()).isEqualTo("RM");
+    assertThat(eventHeader.getSource()).isEqualTo("CASE_PROCESSOR");
+    assertThat(eventHeader.getDateTime()).isInstanceOf(OffsetDateTime.class);
+    assertThat(eventHeader.getMessageId()).isInstanceOf(UUID.class);
   }
 
   @Test
   public void testCreateEventDTOWithEventTypeChannelAndSource() {
-    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATE, "CHANNEL", "SOURCE");
+    EventHeaderDTO eventHeader = EventHelper.createEventDTO("TOPIC", "CHANNEL", "SOURCE");
 
-    assertThat(eventDTO.getChannel()).isEqualTo("CHANNEL");
-    assertThat(eventDTO.getSource()).isEqualTo("SOURCE");
-    assertThat(eventDTO.getDateTime()).isInstanceOf(OffsetDateTime.class);
-    assertThat(eventDTO.getTransactionId()).isInstanceOf(UUID.class);
-    assertThat(eventDTO.getType()).isEqualTo(EventTypeDTO.CASE_UPDATE);
+    assertThat(eventHeader.getChannel()).isEqualTo("CHANNEL");
+    assertThat(eventHeader.getSource()).isEqualTo("SOURCE");
+    assertThat(eventHeader.getDateTime()).isInstanceOf(OffsetDateTime.class);
+    assertThat(eventHeader.getMessageId()).isInstanceOf(UUID.class);
+    assertThat(eventHeader.getTopic()).isEqualTo("TOPIC");
   }
 
   @Test
   public void testGetDummyEvent() {
-    EventDTO eventDTO = EventHelper.getDummyEvent();
+    EventHeaderDTO eventHeader = EventHelper.getDummyEvent();
 
-    assertThat(eventDTO.getChannel()).isEqualTo("RM");
-    assertThat(eventDTO.getSource()).isEqualTo("CASE_PROCESSOR");
-    assertThat(eventDTO.getTransactionId()).isInstanceOf(UUID.class);
+    assertThat(eventHeader.getChannel()).isEqualTo("RM");
+    assertThat(eventHeader.getSource()).isEqualTo("CASE_PROCESSOR");
+    assertThat(eventHeader.getMessageId()).isInstanceOf(UUID.class);
   }
 }

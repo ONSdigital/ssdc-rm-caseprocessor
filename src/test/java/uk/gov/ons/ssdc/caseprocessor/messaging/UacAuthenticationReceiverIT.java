@@ -13,11 +13,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacAuthenticationDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
@@ -51,12 +49,12 @@ public class UacAuthenticationReceiverIT {
     uacQidLink.setQid(TEST_QID);
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
-    ResponseManagementEvent surveyLaunchedEvent = new ResponseManagementEvent();
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.UAC_AUTHENTICATION);
-    eventDTO.setSource("Respondent Home");
-    eventDTO.setChannel("RH");
-    surveyLaunchedEvent.setEvent(eventDTO);
+    EventDTO surveyLaunchedEvent = new EventDTO();
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setTopic(INBOUND_TOPIC);
+    eventHeader.setSource("Respondent Home");
+    eventHeader.setChannel("RH");
+    surveyLaunchedEvent.setHeader(eventHeader);
 
     UacAuthenticationDTO uacAuthentication = new UacAuthenticationDTO();
     uacAuthentication.setQid(uacQidLink.getQid());
@@ -69,10 +67,10 @@ public class UacAuthenticationReceiverIT {
     Thread.sleep(2000);
 
     // THEN
-    List<Event> events = eventRepository.findAll();
+    List<uk.gov.ons.ssdc.caseprocessor.model.entity.Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);
-    Event event = events.get(0);
-    assertThat(event.getEventDescription()).isEqualTo("Respondent authenticated");
+    uk.gov.ons.ssdc.caseprocessor.model.entity.Event event = events.get(0);
+    assertThat(event.getDescription()).isEqualTo("Respondent authenticated");
     UacQidLink actualUacQidLink = event.getUacQidLink();
     assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
   }

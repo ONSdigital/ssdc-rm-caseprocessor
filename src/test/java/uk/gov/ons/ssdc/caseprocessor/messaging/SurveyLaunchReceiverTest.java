@@ -18,9 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.SurveyLaunchDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
@@ -42,11 +41,11 @@ public class SurveyLaunchReceiverTest {
 
   @Test
   public void testSurveryLaunchedEventFromRH() {
-    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
-    managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
-    managementEvent.getEvent().setType(EventTypeDTO.SURVEY_LAUNCH);
-    managementEvent.getEvent().setChannel("RH");
+    EventDTO managementEvent = new EventDTO();
+    managementEvent.setHeader(new EventHeaderDTO());
+    managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
+    managementEvent.getHeader().setTopic("Test topic");
+    managementEvent.getHeader().setChannel("RH");
     managementEvent.setPayload(new PayloadDTO());
 
     SurveyLaunchDTO surveyLaunch = new SurveyLaunchDTO();
@@ -80,7 +79,7 @@ public class SurveyLaunchReceiverTest {
             any(OffsetDateTime.class),
             eq("Survey launched"),
             eq(EventType.SURVEY_LAUNCH),
-            eq(managementEvent.getEvent()),
+            eq(managementEvent.getHeader()),
             any(),
             any());
 

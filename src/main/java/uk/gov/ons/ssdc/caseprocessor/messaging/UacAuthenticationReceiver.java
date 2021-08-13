@@ -9,7 +9,7 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
@@ -27,21 +27,20 @@ public class UacAuthenticationReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "uacAuthenticationInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
-    ResponseManagementEvent responseManagementEvent =
-        convertJsonBytesToObject(message.getPayload(), ResponseManagementEvent.class);
+    EventDTO event = convertJsonBytesToObject(message.getPayload(), EventDTO.class);
 
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 
     UacQidLink uacQidLink =
-        uacService.findByQid(responseManagementEvent.getPayload().getUacAuthentication().getQid());
+        uacService.findByQid(event.getPayload().getUacAuthentication().getQid());
 
     eventLogger.logUacQidEvent(
         uacQidLink,
-        responseManagementEvent.getEvent().getDateTime(),
+        event.getHeader().getDateTime(),
         "Respondent authenticated",
         EventType.UAC_AUTHENTICATION,
-        responseManagementEvent.getEvent(),
-        responseManagementEvent.getPayload().getUacAuthentication(),
+        event.getHeader(),
+        event.getPayload().getUacAuthentication(),
         messageTimestamp);
   }
 }

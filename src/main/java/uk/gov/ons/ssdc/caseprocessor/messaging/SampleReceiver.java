@@ -1,5 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.TOPIC_SAMPLE;
 import static uk.gov.ons.ssdc.caseprocessor.utils.EventHelper.createEventDTO;
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToObject;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
@@ -12,7 +13,6 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
@@ -80,7 +80,7 @@ public class SampleReceiver {
         OffsetDateTime.now(),
         "New case created from sample load",
         EventType.NEW_CASE,
-        createEventDTO(EventTypeDTO.NEW_CASE),
+        createEventDTO(TOPIC_SAMPLE),
         RedactHelper.redact(sample),
         messageTimestamp);
   }

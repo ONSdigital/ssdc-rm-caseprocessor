@@ -5,9 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
@@ -30,7 +29,7 @@ public class UacService {
   public UacQidLink saveAndEmitUacUpdateEvent(UacQidLink uacQidLink) {
     UacQidLink savedUacQidLink = uacQidLinkRepository.save(uacQidLink);
 
-    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.UAC_UPDATE);
+    EventHeaderDTO eventHeader = EventHelper.createEventDTO(uacUpdateTopic);
 
     UacUpdateDTO uac = new UacUpdateDTO();
     uac.setQid(savedUacQidLink.getQid());
@@ -44,11 +43,11 @@ public class UacService {
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setUacUpdate(uac);
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setEvent(eventDTO);
-    responseManagementEvent.setPayload(payloadDTO);
+    EventDTO event = new EventDTO();
+    event.setHeader(eventHeader);
+    event.setPayload(payloadDTO);
 
-    messageSender.sendMessage(uacUpdateTopic, responseManagementEvent);
+    messageSender.sendMessage(uacUpdateTopic, event);
 
     return savedUacQidLink;
   }

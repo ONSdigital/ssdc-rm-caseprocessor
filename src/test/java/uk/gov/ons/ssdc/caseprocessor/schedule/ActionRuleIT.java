@@ -17,9 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRule;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
@@ -75,8 +74,8 @@ public class ActionRuleIT {
   public void testPrinterRule() throws Exception {
     try (QueueSpy<PrintRow> printerQueue =
             pubsubHelper.listen(OUTBOUND_PRINTER_SUBSCRIPTION, PrintRow.class);
-        QueueSpy<ResponseManagementEvent> outboundUacQueue =
-            pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, ResponseManagementEvent.class)) {
+        QueueSpy<EventDTO> outboundUacQueue =
+            pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       CollectionExercise collectionExercise = setUpCollectionExercise();
       Case caze = setUpCase(collectionExercise);
@@ -85,7 +84,7 @@ public class ActionRuleIT {
       // When
       setUpActionRule(ActionRuleType.PRINT, collectionExercise, printTemplate);
       PrintRow printRow = printerQueue.getQueue().poll(20, TimeUnit.SECONDS);
-      ResponseManagementEvent rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
+      EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
       assertThat(printRow).isNotNull();
@@ -95,15 +94,15 @@ public class ActionRuleIT {
       assertThat(printRow.getRow()).startsWith("\"123\"|\"bar\"|\"");
 
       assertThat(rme).isNotNull();
-      assertThat(rme.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATE);
+      assertThat(rme.getHeader().getTopic()).isEqualTo(uacUpdateTopic);
       assertThat(rme.getPayload().getUacUpdate().getCaseId()).isEqualTo(caze.getId());
     }
   }
 
   @Test
   public void testDeactivateUacRule() throws Exception {
-    try (QueueSpy<ResponseManagementEvent> outboundUacQueue =
-        pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, ResponseManagementEvent.class)) {
+    try (QueueSpy<EventDTO> outboundUacQueue =
+        pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       CollectionExercise collectionExercise = setUpCollectionExercise();
       Case caze = setUpCase(collectionExercise);
@@ -111,11 +110,11 @@ public class ActionRuleIT {
 
       // When
       setUpActionRule(ActionRuleType.DEACTIVATE_UAC, collectionExercise, null);
-      ResponseManagementEvent rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
+      EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
       assertThat(rme).isNotNull();
-      assertThat(rme.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATE);
+      assertThat(rme.getHeader().getTopic()).isEqualTo(uacUpdateTopic);
       assertThat(rme.getPayload().getUacUpdate().getCaseId()).isEqualTo(caze.getId());
       assertThat(rme.getPayload().getUacUpdate().isActive()).isFalse();
       assertThat(rme.getPayload().getUacUpdate().getQid()).isEqualTo(uacQidLink.getQid());

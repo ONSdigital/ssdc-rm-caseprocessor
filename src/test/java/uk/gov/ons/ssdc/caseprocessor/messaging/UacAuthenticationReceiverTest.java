@@ -19,9 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacAuthenticationDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
@@ -40,11 +39,11 @@ public class UacAuthenticationReceiverTest {
 
   @Test
   public void testUacAuthentication() {
-    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
-    managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
-    managementEvent.getEvent().setType(EventTypeDTO.UAC_AUTHENTICATION);
-    managementEvent.getEvent().setChannel("RH");
+    EventDTO managementEvent = new EventDTO();
+    managementEvent.setHeader(new EventHeaderDTO());
+    managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
+    managementEvent.getHeader().setTopic("Test topic");
+    managementEvent.getHeader().setChannel("RH");
     managementEvent.setPayload(new PayloadDTO());
 
     UacAuthenticationDTO uacAuthentication = new UacAuthenticationDTO();
@@ -73,7 +72,7 @@ public class UacAuthenticationReceiverTest {
             any(OffsetDateTime.class),
             eq("Respondent authenticated"),
             eq(EventType.UAC_AUTHENTICATION),
-            eq(managementEvent.getEvent()),
+            eq(managementEvent.getHeader()),
             eq(uacAuthentication),
             any());
 

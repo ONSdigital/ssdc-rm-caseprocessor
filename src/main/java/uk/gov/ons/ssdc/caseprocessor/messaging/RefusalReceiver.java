@@ -9,8 +9,8 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.RefusalType;
@@ -29,10 +29,9 @@ public class RefusalReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "refusalInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
-    ResponseManagementEvent responseManagementEvent =
-        convertJsonBytesToObject(message.getPayload(), ResponseManagementEvent.class);
+    EventDTO event = convertJsonBytesToObject(message.getPayload(), EventDTO.class);
 
-    RefusalDTO refusal = responseManagementEvent.getPayload().getRefusal();
+    RefusalDTO refusal = event.getPayload().getRefusal();
     Case refusedCase = caseService.getCaseByCaseId(refusal.getCaseId());
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     refusedCase.setRefusalReceived(RefusalType.valueOf(refusal.getType().name()));
@@ -41,11 +40,11 @@ public class RefusalReceiver {
 
     eventLogger.logCaseEvent(
         refusedCase,
-        responseManagementEvent.getEvent().getDateTime(),
+        event.getHeader().getDateTime(),
         "Refusal Received",
         EventType.REFUSAL,
-        responseManagementEvent.getEvent(),
-        responseManagementEvent.getPayload(),
+        event.getHeader(),
+        event.getPayload(),
         messageTimestamp);
   }
 }

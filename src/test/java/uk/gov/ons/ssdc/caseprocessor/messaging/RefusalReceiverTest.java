@@ -18,11 +18,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.RefusalType;
@@ -49,14 +48,14 @@ public class RefusalReceiverTest {
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setRefusal(refusalDTO);
 
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.REFUSAL);
-    eventDTO.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setTopic("Test topic");
+    eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
 
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setPayload(payloadDTO);
-    responseManagementEvent.setEvent(eventDTO);
-    Message<byte[]> message = constructMessageWithValidTimeStamp(responseManagementEvent);
+    EventDTO event = new EventDTO();
+    event.setPayload(payloadDTO);
+    event.setHeader(eventHeader);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(event);
     OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
 
     Case caze = new Case();
@@ -79,11 +78,11 @@ public class RefusalReceiverTest {
     verify(eventLogger)
         .logCaseEvent(
             eq(caze),
-            eq(responseManagementEvent.getEvent().getDateTime()),
+            eq(event.getHeader().getDateTime()),
             eq("Refusal Received"),
             eq(EventType.REFUSAL),
-            eq(responseManagementEvent.getEvent()),
-            eq(responseManagementEvent.getPayload()),
+            eq(event.getHeader()),
+            eq(event.getPayload()),
             eq(expectedDateTime));
   }
 }

@@ -9,7 +9,7 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
@@ -27,12 +27,9 @@ public class InvalidCaseReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "invalidCaseInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
-    ResponseManagementEvent responseManagementEvent =
-        convertJsonBytesToObject(message.getPayload(), ResponseManagementEvent.class);
+    EventDTO event = convertJsonBytesToObject(message.getPayload(), EventDTO.class);
 
-    Case caze =
-        caseService.getCaseByCaseId(
-            responseManagementEvent.getPayload().getInvalidCase().getCaseId());
+    Case caze = caseService.getCaseByCaseId(event.getPayload().getInvalidCase().getCaseId());
 
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 
@@ -42,11 +39,11 @@ public class InvalidCaseReceiver {
 
     eventLogger.logCaseEvent(
         caze,
-        responseManagementEvent.getEvent().getDateTime(),
+        event.getHeader().getDateTime(),
         "Invalid case",
         EventType.INVALID_CASE,
-        responseManagementEvent.getEvent(),
-        responseManagementEvent.getPayload(),
+        event.getHeader(),
+        event.getPayload(),
         messageTimestamp);
   }
 }

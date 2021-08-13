@@ -16,10 +16,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.InvalidCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
@@ -57,8 +56,8 @@ public class InvalidCaseReceiverIT {
 
   @Test
   public void testInvalidCase() throws Exception {
-    try (QueueSpy<ResponseManagementEvent> outboundCaseQueueSpy =
-        pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, ResponseManagementEvent.class)) {
+    try (QueueSpy<EventDTO> outboundCaseQueueSpy =
+        pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -77,32 +76,31 @@ public class InvalidCaseReceiverIT {
       invalidCase.setReason("Not found");
       PayloadDTO payloadDTO = new PayloadDTO();
       payloadDTO.setInvalidCase(invalidCase);
-      ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-      responseManagementEvent.setPayload(payloadDTO);
+      EventDTO event = new EventDTO();
+      event.setPayload(payloadDTO);
 
-      EventDTO eventDTO = new EventDTO();
-      eventDTO.setType(EventTypeDTO.INVALID_CASE);
-      eventDTO.setSource("RH");
-      eventDTO.setDateTime(OffsetDateTime.now());
-      eventDTO.setChannel("RH");
-      eventDTO.setTransactionId(UUID.randomUUID());
-      responseManagementEvent.setEvent(eventDTO);
+      EventHeaderDTO eventHeader = new EventHeaderDTO();
+      eventHeader.setTopic(INBOUND_INVALID_CASE_TOPIC);
+      eventHeader.setSource("RH");
+      eventHeader.setDateTime(OffsetDateTime.now());
+      eventHeader.setChannel("RH");
+      eventHeader.setMessageId(UUID.randomUUID());
+      event.setHeader(eventHeader);
 
       //  When
-      pubsubHelper.sendMessage(INBOUND_INVALID_CASE_TOPIC, responseManagementEvent);
+      pubsubHelper.sendMessage(INBOUND_INVALID_CASE_TOPIC, event);
 
       //  Then
-      ResponseManagementEvent actualResponseManagementEvent =
-          outboundCaseQueueSpy.checkExpectedMessageReceived();
+      EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
 
-      CaseUpdateDTO emittedCase = actualResponseManagementEvent.getPayload().getCaseUpdate();
+      CaseUpdateDTO emittedCase = actualEvent.getPayload().getCaseUpdate();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(emittedCase.isInvalid()).isTrue();
 
       assertThat(eventRepository.findAll().size()).isEqualTo(1);
-      Event event = eventRepository.findAll().get(0);
-      assertThat(event.getCaze().getId()).isEqualTo(TEST_CASE_ID);
-      assertThat(event.getEventType()).isEqualTo(EventType.INVALID_CASE);
+      Event databaseEvent = eventRepository.findAll().get(0);
+      assertThat(databaseEvent.getCaze().getId()).isEqualTo(TEST_CASE_ID);
+      assertThat(databaseEvent.getType()).isEqualTo(EventType.INVALID_CASE);
     }
   }
 }

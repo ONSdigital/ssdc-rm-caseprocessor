@@ -7,10 +7,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
@@ -38,13 +37,13 @@ public class CaseService {
   }
 
   public void emitCaseUpdate(Case caze) {
-    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATE);
+    EventHeaderDTO eventHeader = EventHelper.createEventDTO(caseUpdateTopic);
 
-    ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
-    messageSender.sendMessage(caseUpdateTopic, responseManagementEvent);
+    EventDTO event = prepareCaseEvent(caze, eventHeader);
+    messageSender.sendMessage(caseUpdateTopic, event);
   }
 
-  private ResponseManagementEvent prepareCaseEvent(Case caze, EventDTO eventDTO) {
+  private EventDTO prepareCaseEvent(Case caze, EventHeaderDTO eventHeader) {
     PayloadDTO payloadDTO = new PayloadDTO();
     CaseUpdateDTO caseUpdate = new CaseUpdateDTO();
     caseUpdate.setCaseId(caze.getId());
@@ -58,10 +57,10 @@ public class CaseService {
       caseUpdate.setRefusalReceived(null);
     }
     payloadDTO.setCaseUpdate(caseUpdate);
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setEvent(eventDTO);
-    responseManagementEvent.setPayload(payloadDTO);
-    return responseManagementEvent;
+    EventDTO event = new EventDTO();
+    event.setHeader(eventHeader);
+    event.setPayload(payloadDTO);
+    return event;
   }
 
   public Case getCaseByCaseId(UUID caseId) {

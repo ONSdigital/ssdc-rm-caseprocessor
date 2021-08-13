@@ -15,11 +15,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
@@ -57,8 +56,8 @@ public class RefusalReceiverIT {
 
   @Test
   public void testRefusal() throws Exception {
-    try (QueueSpy<ResponseManagementEvent> outboundCaseQueueSpy =
-        pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, ResponseManagementEvent.class)) {
+    try (QueueSpy<EventDTO> outboundCaseQueueSpy =
+        pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -77,27 +76,26 @@ public class RefusalReceiverIT {
       refusalDTO.setType(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
       PayloadDTO payloadDTO = new PayloadDTO();
       payloadDTO.setRefusal(refusalDTO);
-      ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-      responseManagementEvent.setPayload(payloadDTO);
+      EventDTO event = new EventDTO();
+      event.setPayload(payloadDTO);
 
-      EventDTO eventDTO = new EventDTO();
-      eventDTO.setType(EventTypeDTO.REFUSAL);
-      responseManagementEvent.setEvent(eventDTO);
+      EventHeaderDTO eventHeader = new EventHeaderDTO();
+      eventHeader.setTopic(INBOUND_REFUSAL_TOPIC);
+      event.setHeader(eventHeader);
 
-      pubsubHelper.sendMessage(INBOUND_REFUSAL_TOPIC, responseManagementEvent);
+      pubsubHelper.sendMessage(INBOUND_REFUSAL_TOPIC, event);
 
       //  THEN
-      ResponseManagementEvent actualResponseManagementEvent =
-          outboundCaseQueueSpy.checkExpectedMessageReceived();
+      EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
 
-      CaseUpdateDTO emittedCase = actualResponseManagementEvent.getPayload().getCaseUpdate();
+      CaseUpdateDTO emittedCase = actualEvent.getPayload().getCaseUpdate();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(emittedCase.getRefusalReceived()).isEqualTo(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
 
       assertThat(eventRepository.findAll().size()).isEqualTo(1);
-      Event event = eventRepository.findAll().get(0);
-      assertThat(event.getCaze().getId()).isEqualTo(TEST_CASE_ID);
-      assertThat(event.getEventType()).isEqualTo(EventType.REFUSAL);
+      Event databaseEvent = eventRepository.findAll().get(0);
+      assertThat(databaseEvent.getCaze().getId()).isEqualTo(TEST_CASE_ID);
+      assertThat(databaseEvent.getType()).isEqualTo(EventType.REFUSAL);
     }
   }
 }

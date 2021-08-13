@@ -17,10 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ReceiptDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
@@ -46,14 +45,14 @@ public class ReceiptReceiverTest {
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setReceipt(receiptDTO);
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setPayload(payloadDTO);
+    EventDTO event = new EventDTO();
+    event.setPayload(payloadDTO);
 
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.RECEIPT);
-    eventDTO.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
-    responseManagementEvent.setEvent(eventDTO);
-    Message<byte[]> message = constructMessageWithValidTimeStamp(responseManagementEvent);
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setTopic("Test topic");
+    eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
+    event.setHeader(eventHeader);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(event);
     OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
 
     UacQidLink uacQidLink = new UacQidLink();
@@ -75,8 +74,8 @@ public class ReceiptReceiverTest {
             any(),
             eq("Receipt received"),
             eq(EventType.RECEIPT),
-            eq(responseManagementEvent.getEvent()),
-            eq(responseManagementEvent.getPayload()),
+            eq(event.getHeader()),
+            eq(event.getPayload()),
             eq(expectedDateTime));
   }
 
@@ -87,14 +86,14 @@ public class ReceiptReceiverTest {
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setReceipt(receiptDTO);
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setPayload(payloadDTO);
+    EventDTO event = new EventDTO();
+    event.setPayload(payloadDTO);
 
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.RECEIPT);
-    eventDTO.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
-    responseManagementEvent.setEvent(eventDTO);
-    Message<byte[]> message = constructMessageWithValidTimeStamp(responseManagementEvent);
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setTopic("Test topic");
+    eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
+    event.setHeader(eventHeader);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(event);
     OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
 
     UacQidLink uacQidLink = new UacQidLink();
@@ -113,8 +112,8 @@ public class ReceiptReceiverTest {
             any(),
             eq("Receipt received"),
             eq(EventType.RECEIPT),
-            eq(responseManagementEvent.getEvent()),
-            eq(responseManagementEvent.getPayload()),
+            eq(event.getHeader()),
+            eq(event.getPayload()),
             eq(expectedDateTime));
 
     verifyNoMoreInteractions(uacService);
@@ -128,14 +127,14 @@ public class ReceiptReceiverTest {
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setReceipt(receiptDTO);
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setPayload(payloadDTO);
+    EventDTO event = new EventDTO();
+    event.setPayload(payloadDTO);
 
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.RECEIPT);
-    eventDTO.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
-    responseManagementEvent.setEvent(eventDTO);
-    Message<byte[]> message = constructMessageWithValidTimeStamp(responseManagementEvent);
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setTopic("Test topic");
+    eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
+    event.setHeader(eventHeader);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(event);
     OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
 
     UacQidLink uacQidLink = new UacQidLink();
@@ -164,11 +163,11 @@ public class ReceiptReceiverTest {
     verify(eventLogger)
         .logUacQidEvent(
             eq(actualUacQidLink),
-            eq(responseManagementEvent.getEvent().getDateTime()),
+            eq(event.getHeader().getDateTime()),
             eq("Receipt received"),
             eq(EventType.RECEIPT),
-            eq(responseManagementEvent.getEvent()),
-            eq(responseManagementEvent.getPayload()),
+            eq(event.getHeader()),
+            eq(event.getPayload()),
             eq(expectedDateTime));
   }
 }

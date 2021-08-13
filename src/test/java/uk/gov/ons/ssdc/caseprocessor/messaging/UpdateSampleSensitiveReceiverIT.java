@@ -20,9 +20,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSampleSensitive;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
@@ -76,32 +75,32 @@ public class UpdateSampleSensitiveReceiverIT {
     payloadDTO.getUpdateSampleSensitive().setCaseId(TEST_CASE_ID);
     payloadDTO.getUpdateSampleSensitive().setSampleSensitive(Map.of("PHONE_NUMBER", "9999999"));
 
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setPayload(payloadDTO);
+    EventDTO event = new EventDTO();
+    event.setPayload(payloadDTO);
 
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.UPDATE_SAMPLE_SENSITIVE);
-    eventDTO.setSource("RH");
-    eventDTO.setDateTime(OffsetDateTime.now());
-    eventDTO.setChannel("RH");
-    eventDTO.setTransactionId(UUID.randomUUID());
-    responseManagementEvent.setEvent(eventDTO);
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setTopic(UPDATE_SAMPLE_SENSITIVE_TOPIC);
+    eventHeader.setSource("RH");
+    eventHeader.setDateTime(OffsetDateTime.now());
+    eventHeader.setChannel("RH");
+    eventHeader.setMessageId(UUID.randomUUID());
+    event.setHeader(eventHeader);
 
     //  When
-    pubsubHelper.sendMessage(UPDATE_SAMPLE_SENSITIVE_TOPIC, responseManagementEvent);
+    pubsubHelper.sendMessage(UPDATE_SAMPLE_SENSITIVE_TOPIC, event);
 
-    List<Event> events = eventPoller.getEvents(1);
+    List<Event> databaseEvents = eventPoller.getEvents(1);
 
     //  Then
     Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "9999999"));
 
-    assertThat(events.size()).isEqualTo(1);
-    Event event = events.get(0);
-    assertThat(event.getCaze().getId()).isEqualTo(TEST_CASE_ID);
-    assertThat(event.getEventType()).isEqualTo(EventType.UPDATE_SAMPLE_SENSITIVE);
+    assertThat(databaseEvents.size()).isEqualTo(1);
+    Event databaseEvent = databaseEvents.get(0);
+    assertThat(databaseEvent.getCaze().getId()).isEqualTo(TEST_CASE_ID);
+    assertThat(databaseEvent.getType()).isEqualTo(EventType.UPDATE_SAMPLE_SENSITIVE);
 
-    PayloadDTO actualPayload = objectMapper.readValue(event.getEventPayload(), PayloadDTO.class);
+    PayloadDTO actualPayload = objectMapper.readValue(databaseEvent.getPayload(), PayloadDTO.class);
     assertThat(actualPayload.getUpdateSampleSensitive().getSampleSensitive())
         .isEqualTo(Map.of("PHONE_NUMBER", "REDACTED"));
   }

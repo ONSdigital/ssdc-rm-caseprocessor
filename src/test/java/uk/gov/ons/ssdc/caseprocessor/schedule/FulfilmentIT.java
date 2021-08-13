@@ -3,7 +3,6 @@ package uk.gov.ons.ssdc.caseprocessor.schedule;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
@@ -18,11 +17,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintFulfilmentDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentNextTrigger;
@@ -38,7 +36,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 
 @ContextConfiguration
 @SpringBootTest
@@ -70,8 +67,6 @@ public class FulfilmentIT {
   @Autowired
   private FulfilmentSurveyPrintTemplateRepository fulfilmentSurveyPrintTemplateRepository;
 
-  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
-
   @BeforeEach
   public void setUp() {
     pubsubHelper.purgeMessages(OUTBOUND_PRINTER_SUBSCRIPTION, printTopic);
@@ -83,8 +78,8 @@ public class FulfilmentIT {
   public void testFulfilmentTrigger() throws Exception {
     try (QueueSpy<PrintRow> printerQueue =
             pubsubHelper.listen(OUTBOUND_PRINTER_SUBSCRIPTION, PrintRow.class);
-        QueueSpy<ResponseManagementEvent> outboundUacQueue =
-            pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, ResponseManagementEvent.class)) {
+        QueueSpy<EventDTO> outboundUacQueue =
+            pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       PrintTemplate printTemplate = new PrintTemplate();
       printTemplate.setPackCode(PACK_CODE);
@@ -112,18 +107,18 @@ public class FulfilmentIT {
       PayloadDTO payload = new PayloadDTO();
       payload.setPrintFulfilment(fulfilment);
 
-      ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-      responseManagementEvent.setPayload(payload);
+      EventDTO event = new EventDTO();
+      event.setPayload(payload);
 
-      EventDTO eventDTO = new EventDTO();
-      eventDTO.setType(EventTypeDTO.PRINT_FULFILMENT);
-      eventDTO.setSource("RH");
-      eventDTO.setDateTime(OffsetDateTime.now());
-      eventDTO.setChannel("RH");
-      eventDTO.setTransactionId(UUID.randomUUID());
-      responseManagementEvent.setEvent(eventDTO);
+      EventHeaderDTO eventHeader = new EventHeaderDTO();
+      eventHeader.setTopic(FULFILMENT_TOPIC);
+      eventHeader.setSource("RH");
+      eventHeader.setDateTime(OffsetDateTime.now());
+      eventHeader.setChannel("RH");
+      eventHeader.setMessageId(UUID.randomUUID());
+      event.setHeader(eventHeader);
 
-      pubsubHelper.sendMessage(FULFILMENT_TOPIC, responseManagementEvent);
+      pubsubHelper.sendMessage(FULFILMENT_TOPIC, event);
 
       Thread.sleep(3000);
 
@@ -133,7 +128,7 @@ public class FulfilmentIT {
       fulfilmentNextTriggerRepository.saveAndFlush(fulfilmentNextTrigger);
 
       PrintRow printRow = printerQueue.getQueue().poll(20, TimeUnit.SECONDS);
-      ResponseManagementEvent rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
+      EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
       assertThat(printRow).isNotNull();
@@ -143,7 +138,7 @@ public class FulfilmentIT {
       assertThat(printRow.getRow()).startsWith("\"123\"|\"bar\"|\"");
 
       assertThat(rme).isNotNull();
-      assertThat(rme.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATE);
+      assertThat(rme.getHeader().getTopic()).isEqualTo(uacUpdateTopic);
       assertThat(rme.getPayload().getUacUpdate().getCaseId()).isEqualTo(caze.getId());
     }
   }

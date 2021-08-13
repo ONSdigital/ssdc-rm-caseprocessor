@@ -10,7 +10,7 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSampleSensitive;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
@@ -29,12 +29,10 @@ public class UpdateSampleSensitiveReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "updateSampleSensitiveInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
-    ResponseManagementEvent responseManagementEvent =
-        convertJsonBytesToObject(message.getPayload(), ResponseManagementEvent.class);
+    EventDTO event = convertJsonBytesToObject(message.getPayload(), EventDTO.class);
 
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    UpdateSampleSensitive updateSampleSensitive =
-        responseManagementEvent.getPayload().getUpdateSampleSensitive();
+    UpdateSampleSensitive updateSampleSensitive = event.getPayload().getUpdateSampleSensitive();
 
     Case caze = caseService.getCaseByCaseId(updateSampleSensitive.getCaseId());
 
@@ -51,11 +49,11 @@ public class UpdateSampleSensitiveReceiver {
 
     eventLogger.logCaseEvent(
         caze,
-        responseManagementEvent.getEvent().getDateTime(),
+        event.getHeader().getDateTime(),
         "Sensitive data updated",
         EventType.UPDATE_SAMPLE_SENSITIVE,
-        responseManagementEvent.getEvent(),
-        RedactHelper.redact(responseManagementEvent.getPayload()),
+        event.getHeader(),
+        RedactHelper.redact(event.getPayload()),
         messageTimestamp);
   }
 }

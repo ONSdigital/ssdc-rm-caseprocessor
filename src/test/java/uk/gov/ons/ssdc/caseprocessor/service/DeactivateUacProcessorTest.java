@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.DeactivateUacDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 
@@ -40,12 +40,10 @@ public class DeactivateUacProcessorTest {
     underTest.process(caze);
 
     // Then
-    ArgumentCaptor<ResponseManagementEvent> responseManagementEventArgumentCaptor =
-        ArgumentCaptor.forClass(ResponseManagementEvent.class);
-    verify(messageSender)
-        .sendMessage(eq("testTopic"), responseManagementEventArgumentCaptor.capture());
+    ArgumentCaptor<EventDTO> eventArgumentCaptor = ArgumentCaptor.forClass(EventDTO.class);
+    verify(messageSender).sendMessage(eq("testTopic"), eventArgumentCaptor.capture());
     DeactivateUacDTO actualDeactivateUac =
-        responseManagementEventArgumentCaptor.getValue().getPayload().getDeactivateUac();
+        eventArgumentCaptor.getValue().getPayload().getDeactivateUac();
     assertThat(actualDeactivateUac.getQid()).isEqualTo(uacQidLink.getQid());
   }
 }

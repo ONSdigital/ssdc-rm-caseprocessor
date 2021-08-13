@@ -10,7 +10,7 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.TelephoneCaptureDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
@@ -36,13 +36,11 @@ public class TelephoneCaptureReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "telephoneCaptureInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
-    ResponseManagementEvent responseManagementEvent =
-        convertJsonBytesToObject(message.getPayload(), ResponseManagementEvent.class);
+    EventDTO event = convertJsonBytesToObject(message.getPayload(), EventDTO.class);
 
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 
-    TelephoneCaptureDTO telephoneCapturePayload =
-        responseManagementEvent.getPayload().getTelephoneCapture();
+    TelephoneCaptureDTO telephoneCapturePayload = event.getPayload().getTelephoneCapture();
 
     Case caze = caseService.getCaseByCaseId(telephoneCapturePayload.getCaseId());
 
@@ -68,10 +66,10 @@ public class TelephoneCaptureReceiver {
 
     eventLogger.logCaseEvent(
         caze,
-        responseManagementEvent.getEvent().getDateTime(),
+        event.getHeader().getDateTime(),
         TELEPHONE_CAPTURE_DESCRIPTION,
         EventType.TELEPHONE_CAPTURE,
-        responseManagementEvent.getEvent(),
+        event.getHeader(),
         telephoneCapturePayload,
         messageTimestamp);
   }

@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO.INVALID_CASE;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
@@ -21,9 +20,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.InvalidCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
@@ -38,11 +37,11 @@ public class InvalidCaseReceiverTest {
 
   @Test
   public void testInvalidCase() {
-    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
-    managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
-    managementEvent.getEvent().setType(INVALID_CASE);
-    managementEvent.getEvent().setChannel("CC");
+    EventDTO managementEvent = new EventDTO();
+    managementEvent.setHeader(new EventHeaderDTO());
+    managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
+    managementEvent.getHeader().setTopic("Test topic");
+    managementEvent.getHeader().setChannel("CC");
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setInvalidCase(new InvalidCase());
     managementEvent.getPayload().getInvalidCase().setCaseId(UUID.randomUUID());
@@ -68,10 +67,10 @@ public class InvalidCaseReceiverTest {
     verify(eventLogger)
         .logCaseEvent(
             eq(expectedCase),
-            eq(managementEvent.getEvent().getDateTime()),
+            eq(managementEvent.getHeader().getDateTime()),
             eq("Invalid case"),
             eq(EventType.INVALID_CASE),
-            eq(managementEvent.getEvent()),
+            eq(managementEvent.getHeader()),
             eq(managementEvent.getPayload()),
             eq(messageDateTime));
   }
