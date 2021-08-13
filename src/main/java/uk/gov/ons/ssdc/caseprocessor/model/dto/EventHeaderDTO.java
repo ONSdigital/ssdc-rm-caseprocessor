@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class EventHeaderDTO {
+  private String version;
   private String topic;
   private String source;
   private String channel;

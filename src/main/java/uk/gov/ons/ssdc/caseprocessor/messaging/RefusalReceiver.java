@@ -1,6 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
-import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToObject;
+import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
@@ -29,7 +29,7 @@ public class RefusalReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "refusalInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
-    EventDTO event = convertJsonBytesToObject(message.getPayload(), EventDTO.class);
+    EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
     RefusalDTO refusal = event.getPayload().getRefusal();
     Case refusedCase = caseService.getCaseByCaseId(refusal.getCaseId());

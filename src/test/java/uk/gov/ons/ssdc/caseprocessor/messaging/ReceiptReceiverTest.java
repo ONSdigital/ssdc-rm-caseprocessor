@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -49,6 +50,7 @@ public class ReceiptReceiverTest {
     event.setPayload(payloadDTO);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
     eventHeader.setTopic("Test topic");
     eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     event.setHeader(eventHeader);
@@ -90,6 +92,7 @@ public class ReceiptReceiverTest {
     event.setPayload(payloadDTO);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
     eventHeader.setTopic("Test topic");
     eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     event.setHeader(eventHeader);
@@ -131,6 +134,7 @@ public class ReceiptReceiverTest {
     event.setPayload(payloadDTO);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
     eventHeader.setTopic("Test topic");
     eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     event.setHeader(eventHeader);

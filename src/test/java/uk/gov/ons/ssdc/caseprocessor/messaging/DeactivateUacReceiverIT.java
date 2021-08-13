@@ -2,6 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,6 +59,7 @@ public class DeactivateUacReceiverIT {
       // GIVEN
       EventDTO event = new EventDTO();
       EventHeaderDTO eventHeader = new EventHeaderDTO();
+      eventHeader.setVersion(EVENT_SCHEMA_VERSION);
       eventHeader.setTopic(deactivateUacTopic);
       event.setHeader(eventHeader);
 

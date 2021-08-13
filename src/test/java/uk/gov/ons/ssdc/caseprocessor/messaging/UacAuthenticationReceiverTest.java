@@ -6,6 +6,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -41,6 +42,7 @@ public class UacAuthenticationReceiverTest {
   public void testUacAuthentication() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
+    managementEvent.getHeader().setVersion(EVENT_SCHEMA_VERSION);
     managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     managementEvent.getHeader().setTopic("Test topic");
     managementEvent.getHeader().setChannel("RH");

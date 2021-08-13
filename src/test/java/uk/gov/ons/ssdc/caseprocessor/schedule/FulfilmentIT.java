@@ -2,6 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.schedule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -111,6 +112,7 @@ public class FulfilmentIT {
       event.setPayload(payload);
 
       EventHeaderDTO eventHeader = new EventHeaderDTO();
+      eventHeader.setVersion(EVENT_SCHEMA_VERSION);
       eventHeader.setTopic(FULFILMENT_TOPIC);
       eventHeader.setSource("RH");
       eventHeader.setDateTime(OffsetDateTime.now());

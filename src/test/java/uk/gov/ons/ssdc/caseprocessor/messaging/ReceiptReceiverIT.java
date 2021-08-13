@@ -3,6 +3,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -106,6 +107,7 @@ public class ReceiptReceiverIT {
       event.setPayload(payloadDTO);
 
       EventHeaderDTO eventHeader = new EventHeaderDTO();
+      eventHeader.setVersion(EVENT_SCHEMA_VERSION);
       eventHeader.setTopic(INBOUND_RECEIPT_TOPIC);
       eventHeader.setSource("RH");
       eventHeader.setDateTime(OffsetDateTime.now());

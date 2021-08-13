@@ -1,5 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.utils;
 
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
+
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
@@ -13,6 +15,7 @@ public class EventHelper {
       String topic, String eventChannel, String eventSource) {
     EventHeaderDTO eventHeader = new EventHeaderDTO();
 
+    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
     eventHeader.setChannel(eventChannel);
     eventHeader.setSource(eventSource);
     eventHeader.setDateTime(OffsetDateTime.now());

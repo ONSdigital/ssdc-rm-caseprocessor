@@ -1,6 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
-import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToObject;
+import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
@@ -31,7 +31,7 @@ public class SurveyLaunchReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "surveyLaunchInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
-    EventDTO event = convertJsonBytesToObject(message.getPayload(), EventDTO.class);
+    EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 

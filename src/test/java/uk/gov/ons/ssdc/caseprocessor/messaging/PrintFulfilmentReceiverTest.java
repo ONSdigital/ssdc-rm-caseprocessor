@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
@@ -49,6 +50,7 @@ public class PrintFulfilmentReceiverTest {
     // Given
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
+    managementEvent.getHeader().setVersion(EVENT_SCHEMA_VERSION);
     managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
     managementEvent.getHeader().setTopic("Test topic");
     managementEvent.getHeader().setChannel("CC");

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.util.UUID;
@@ -132,6 +133,7 @@ public class TelephoneCaptureReceiverTest {
     telephoneCaptureDTO.setUac(TEST_UAC);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setTelephoneCapture(telephoneCaptureDTO);
 

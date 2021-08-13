@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -49,6 +50,7 @@ public class RefusalReceiverTest {
     payloadDTO.setRefusal(refusalDTO);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
     eventHeader.setTopic("Test topic");
     eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
 
