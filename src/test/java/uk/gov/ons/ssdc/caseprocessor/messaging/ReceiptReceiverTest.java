@@ -19,7 +19,7 @@ import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.ReceiptDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
@@ -41,16 +41,16 @@ public class ReceiptReceiverTest {
 
   @Test
   public void testUnlinkedUacQidReceiptWhereActive() {
-    ResponseDTO responseDTO = new ResponseDTO();
-    responseDTO.setQuestionnaireId(QUESTIONNAIRE_ID);
+    ReceiptDTO receiptDTO = new ReceiptDTO();
+    receiptDTO.setQid(QUESTIONNAIRE_ID);
 
     PayloadDTO payloadDTO = new PayloadDTO();
-    payloadDTO.setResponse(responseDTO);
+    payloadDTO.setReceipt(receiptDTO);
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     responseManagementEvent.setPayload(payloadDTO);
 
     EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.RESPONSE_RECEIVED);
+    eventDTO.setType(EventTypeDTO.RECEIPT);
     eventDTO.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     responseManagementEvent.setEvent(eventDTO);
     Message<byte[]> message = constructMessageWithValidTimeStamp(responseManagementEvent);
@@ -60,12 +60,12 @@ public class ReceiptReceiverTest {
     uacQidLink.setActive(true);
 
     when(uacService.findByQid(any())).thenReturn(uacQidLink);
-    when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
+    when(uacService.saveAndEmitUacUpdateEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
 
     underTest.receiveMessage(message);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.isActive()).isFalse();
 
@@ -73,8 +73,8 @@ public class ReceiptReceiverTest {
         .logUacQidEvent(
             eq(actualUacQidLink),
             any(),
-            eq("QID Receipted"),
-            eq(EventType.RESPONSE_RECEIVED),
+            eq("Receipt received"),
+            eq(EventType.RECEIPT),
             eq(responseManagementEvent.getEvent()),
             eq(responseManagementEvent.getPayload()),
             eq(expectedDateTime));
@@ -82,16 +82,16 @@ public class ReceiptReceiverTest {
 
   @Test
   public void testUnlinkedUacQidReceiptWhereInactive() {
-    ResponseDTO responseDTO = new ResponseDTO();
-    responseDTO.setQuestionnaireId(QUESTIONNAIRE_ID);
+    ReceiptDTO receiptDTO = new ReceiptDTO();
+    receiptDTO.setQid(QUESTIONNAIRE_ID);
 
     PayloadDTO payloadDTO = new PayloadDTO();
-    payloadDTO.setResponse(responseDTO);
+    payloadDTO.setReceipt(receiptDTO);
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     responseManagementEvent.setPayload(payloadDTO);
 
     EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.RESPONSE_RECEIVED);
+    eventDTO.setType(EventTypeDTO.RECEIPT);
     eventDTO.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     responseManagementEvent.setEvent(eventDTO);
     Message<byte[]> message = constructMessageWithValidTimeStamp(responseManagementEvent);
@@ -111,8 +111,8 @@ public class ReceiptReceiverTest {
         .logUacQidEvent(
             eq(uacQidLink),
             any(),
-            eq("QID Receipted"),
-            eq(EventType.RESPONSE_RECEIVED),
+            eq("Receipt received"),
+            eq(EventType.RECEIPT),
             eq(responseManagementEvent.getEvent()),
             eq(responseManagementEvent.getPayload()),
             eq(expectedDateTime));
@@ -123,16 +123,16 @@ public class ReceiptReceiverTest {
 
   @Test
   public void testUnlinkedUacQidReceiptsUacQidAndCase() {
-    ResponseDTO responseDTO = new ResponseDTO();
-    responseDTO.setQuestionnaireId(QUESTIONNAIRE_ID);
+    ReceiptDTO receiptDTO = new ReceiptDTO();
+    receiptDTO.setQid(QUESTIONNAIRE_ID);
 
     PayloadDTO payloadDTO = new PayloadDTO();
-    payloadDTO.setResponse(responseDTO);
+    payloadDTO.setReceipt(receiptDTO);
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     responseManagementEvent.setPayload(payloadDTO);
 
     EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.RESPONSE_RECEIVED);
+    eventDTO.setType(EventTypeDTO.RECEIPT);
     eventDTO.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     responseManagementEvent.setEvent(eventDTO);
     Message<byte[]> message = constructMessageWithValidTimeStamp(responseManagementEvent);
@@ -146,17 +146,17 @@ public class ReceiptReceiverTest {
     uacQidLink.setCaze(caze);
 
     when(uacService.findByQid(any())).thenReturn(uacQidLink);
-    when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
+    when(uacService.saveAndEmitUacUpdateEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
 
     underTest.receiveMessage(message);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.isActive()).isFalse();
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    verify(caseService).saveCaseAndEmitCaseUpdate(caseArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.getId()).isEqualTo(caze.getId());
     assertThat(actualCase.isReceiptReceived()).isTrue();
@@ -165,8 +165,8 @@ public class ReceiptReceiverTest {
         .logUacQidEvent(
             eq(actualUacQidLink),
             eq(responseManagementEvent.getEvent().getDateTime()),
-            eq("QID Receipted"),
-            eq(EventType.RESPONSE_RECEIVED),
+            eq("Receipt received"),
+            eq(EventType.RECEIPT),
             eq(responseManagementEvent.getEvent()),
             eq(responseManagementEvent.getPayload()),
             eq(expectedDateTime));

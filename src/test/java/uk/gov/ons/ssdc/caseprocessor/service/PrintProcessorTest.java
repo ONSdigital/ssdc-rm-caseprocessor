@@ -80,7 +80,7 @@ public class PrintProcessorTest {
     assertThat(actualPrintRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
@@ -92,7 +92,7 @@ public class PrintProcessorTest {
             eq(caze),
             any(OffsetDateTime.class),
             eq("Print file generated with pack code test pack code"),
-            eq(EventType.PRINTED_PACK_CODE),
+            eq(EventType.PRINT_FILE),
             any(EventDTO.class),
             isNull(),
             any(OffsetDateTime.class));
@@ -134,7 +134,7 @@ public class PrintProcessorTest {
     assertThat(actualPrintRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
@@ -146,7 +146,7 @@ public class PrintProcessorTest {
             eq(caze),
             any(OffsetDateTime.class),
             eq("Print file generated with pack code TEST_FULFILMENT_CODE"),
-            eq(EventType.PRINTED_PACK_CODE),
+            eq(EventType.PRINT_FILE),
             any(EventDTO.class),
             isNull(),
             any(OffsetDateTime.class));

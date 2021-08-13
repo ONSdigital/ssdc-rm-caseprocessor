@@ -70,7 +70,7 @@ public class TelephoneCaptureReceiver {
         caze,
         responseManagementEvent.getEvent().getDateTime(),
         TELEPHONE_CAPTURE_DESCRIPTION,
-        EventType.TELEPHONE_CAPTURE_REQUESTED,
+        EventType.TELEPHONE_CAPTURE,
         responseManagementEvent.getEvent(),
         telephoneCapturePayload,
         messageTimestamp);
@@ -85,6 +85,6 @@ public class TelephoneCaptureReceiver {
     uacQidLink.setCaze(caze);
     uacQidLink.setCreatedAt(now);
     uacQidLink.setLastUpdatedAt(now);
-    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+    uacService.saveAndEmitUacUpdateEvent(uacQidLink);
   }
 }

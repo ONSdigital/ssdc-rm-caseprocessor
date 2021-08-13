@@ -95,8 +95,8 @@ public class ActionRuleIT {
       assertThat(printRow.getRow()).startsWith("\"123\"|\"bar\"|\"");
 
       assertThat(rme).isNotNull();
-      assertThat(rme.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
-      assertThat(rme.getPayload().getUac().getCaseId()).isEqualTo(caze.getId());
+      assertThat(rme.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATE);
+      assertThat(rme.getPayload().getUacUpdate().getCaseId()).isEqualTo(caze.getId());
     }
   }
 
@@ -115,10 +115,10 @@ public class ActionRuleIT {
 
       // Then
       assertThat(rme).isNotNull();
-      assertThat(rme.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
-      assertThat(rme.getPayload().getUac().getCaseId()).isEqualTo(caze.getId());
-      assertThat(rme.getPayload().getUac().isActive()).isFalse();
-      assertThat(rme.getPayload().getUac().getQuestionnaireId()).isEqualTo(uacQidLink.getQid());
+      assertThat(rme.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATE);
+      assertThat(rme.getPayload().getUacUpdate().getCaseId()).isEqualTo(caze.getId());
+      assertThat(rme.getPayload().getUacUpdate().isActive()).isFalse();
+      assertThat(rme.getPayload().getUacUpdate().getQid()).isEqualTo(uacQidLink.getQid());
 
       assertThat(uacQidLinkRepository.findByQid(uacQidLink.getQid()).get().isActive()).isFalse();
     }

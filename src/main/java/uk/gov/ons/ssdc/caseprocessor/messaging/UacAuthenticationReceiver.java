@@ -7,30 +7,25 @@ import java.time.OffsetDateTime;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
-import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 
 @MessageEndpoint
-public class ReceiptReceiver {
+public class UacAuthenticationReceiver {
   private final UacService uacService;
-  private final CaseService caseService;
   private final EventLogger eventLogger;
 
-  public ReceiptReceiver(UacService uacService, CaseService caseService, EventLogger eventLogger) {
+  public UacAuthenticationReceiver(UacService uacService, EventLogger eventLogger) {
     this.uacService = uacService;
-    this.caseService = caseService;
     this.eventLogger = eventLogger;
   }
 
-  @Transactional(isolation = Isolation.REPEATABLE_READ)
-  @ServiceActivator(inputChannel = "receiptInputChannel", adviceChain = "retryAdvice")
+  @Transactional
+  @ServiceActivator(inputChannel = "uacAuthenticationInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
     ResponseManagementEvent responseManagementEvent =
         convertJsonBytesToObject(message.getPayload(), ResponseManagementEvent.class);
@@ -38,26 +33,15 @@ public class ReceiptReceiver {
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 
     UacQidLink uacQidLink =
-        uacService.findByQid(responseManagementEvent.getPayload().getReceipt().getQid());
-
-    if (uacQidLink.isActive()) {
-      uacQidLink.setActive(false);
-      uacQidLink = uacService.saveAndEmitUacUpdateEvent(uacQidLink);
-
-      if (uacQidLink.getCaze() != null) {
-        Case caze = uacQidLink.getCaze();
-        caze.setReceiptReceived(true);
-        caseService.saveCaseAndEmitCaseUpdate(caze);
-      }
-    }
+        uacService.findByQid(responseManagementEvent.getPayload().getUacAuthentication().getQid());
 
     eventLogger.logUacQidEvent(
         uacQidLink,
         responseManagementEvent.getEvent().getDateTime(),
-        "Receipt received",
-        EventType.RECEIPT,
+        "Respondent authenticated",
+        EventType.UAC_AUTHENTICATION,
         responseManagementEvent.getEvent(),
-        responseManagementEvent.getPayload(),
+        responseManagementEvent.getPayload().getUacAuthentication(),
         messageTimestamp);
   }
 }

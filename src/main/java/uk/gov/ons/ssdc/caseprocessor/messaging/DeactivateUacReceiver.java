@@ -35,7 +35,7 @@ public class DeactivateUacReceiver {
 
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     uacQidLink.setActive(false);
-    uacQidLink = uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+    uacQidLink = uacService.saveAndEmitUacUpdateEvent(uacQidLink);
 
     eventLogger.logUacQidEvent(
         uacQidLink,

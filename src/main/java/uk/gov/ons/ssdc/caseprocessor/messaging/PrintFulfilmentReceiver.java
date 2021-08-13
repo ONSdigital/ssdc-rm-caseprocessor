@@ -20,12 +20,12 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessReposit
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 
 @MessageEndpoint
-public class FulfilmentReceiver {
+public class PrintFulfilmentReceiver {
   private final CaseService caseService;
   private final EventLogger eventLogger;
   private final FulfilmentToProcessRepository fulfilmentToProcessRepository;
 
-  public FulfilmentReceiver(
+  public PrintFulfilmentReceiver(
       CaseService caseService,
       EventLogger eventLogger,
       FulfilmentToProcessRepository fulfilmentToProcessRepository) {
@@ -35,18 +35,18 @@ public class FulfilmentReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "fulfilmentInputChannel", adviceChain = "retryAdvice")
+  @ServiceActivator(inputChannel = "printFulfilmentInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
     ResponseManagementEvent responseManagementEvent =
         convertJsonBytesToObject(message.getPayload(), ResponseManagementEvent.class);
 
     Case caze =
         caseService.getCaseByCaseId(
-            responseManagementEvent.getPayload().getFulfilment().getCaseId());
+            responseManagementEvent.getPayload().getPrintFulfilment().getCaseId());
 
     PrintTemplate printTemplate =
         getAllowedPrintTemplate(
-            responseManagementEvent.getPayload().getFulfilment().getPackCode(), caze);
+            responseManagementEvent.getPayload().getPrintFulfilment().getPackCode(), caze);
 
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 
@@ -59,8 +59,8 @@ public class FulfilmentReceiver {
     eventLogger.logCaseEvent(
         caze,
         responseManagementEvent.getEvent().getDateTime(),
-        "Fulfilment requested",
-        EventType.FULFILMENT,
+        "Print fulfilment requested",
+        EventType.PRINT_FULFILMENT,
         responseManagementEvent.getEvent(),
         responseManagementEvent.getPayload(),
         messageTimestamp);

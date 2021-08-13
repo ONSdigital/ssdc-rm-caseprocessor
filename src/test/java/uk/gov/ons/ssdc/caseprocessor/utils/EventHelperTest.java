@@ -12,24 +12,24 @@ public class EventHelperTest {
 
   @Test
   public void testCreateEventDTOWithEventType() {
-    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
+    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATE);
 
     assertThat(eventDTO.getChannel()).isEqualTo("RM");
     assertThat(eventDTO.getSource()).isEqualTo("CASE_PROCESSOR");
     assertThat(eventDTO.getDateTime()).isInstanceOf(OffsetDateTime.class);
     assertThat(eventDTO.getTransactionId()).isInstanceOf(UUID.class);
-    assertThat(eventDTO.getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
+    assertThat(eventDTO.getType()).isEqualTo(EventTypeDTO.CASE_UPDATE);
   }
 
   @Test
   public void testCreateEventDTOWithEventTypeChannelAndSource() {
-    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED, "CHANNEL", "SOURCE");
+    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATE, "CHANNEL", "SOURCE");
 
     assertThat(eventDTO.getChannel()).isEqualTo("CHANNEL");
     assertThat(eventDTO.getSource()).isEqualTo("SOURCE");
     assertThat(eventDTO.getDateTime()).isInstanceOf(OffsetDateTime.class);
     assertThat(eventDTO.getTransactionId()).isInstanceOf(UUID.class);
-    assertThat(eventDTO.getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
+    assertThat(eventDTO.getType()).isEqualTo(EventTypeDTO.CASE_UPDATE);
   }
 
   @Test

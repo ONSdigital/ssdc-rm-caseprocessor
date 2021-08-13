@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO.FULFILMENT;
+import static uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO.PRINT_FULFILMENT;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
@@ -22,8 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.FulfilmentDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintFulfilmentDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
@@ -36,14 +36,14 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessReposit
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 
 @ExtendWith(MockitoExtension.class)
-public class FulfilmentReceiverTest {
+public class PrintFulfilmentReceiverTest {
   @Mock private CaseService caseService;
 
   @Mock private EventLogger eventLogger;
 
   @Mock private FulfilmentToProcessRepository fulfilmentToProcessRepository;
 
-  @InjectMocks private FulfilmentReceiver underTest;
+  @InjectMocks private PrintFulfilmentReceiver underTest;
 
   @Test
   public void testReceiveMessage() {
@@ -51,12 +51,12 @@ public class FulfilmentReceiverTest {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
     managementEvent.getEvent().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
-    managementEvent.getEvent().setType(FULFILMENT);
+    managementEvent.getEvent().setType(PRINT_FULFILMENT);
     managementEvent.getEvent().setChannel("CC");
     managementEvent.setPayload(new PayloadDTO());
-    managementEvent.getPayload().setFulfilment(new FulfilmentDTO());
-    managementEvent.getPayload().getFulfilment().setCaseId(UUID.randomUUID());
-    managementEvent.getPayload().getFulfilment().setPackCode("TEST_FULFILMENT_CODE");
+    managementEvent.getPayload().setPrintFulfilment(new PrintFulfilmentDTO());
+    managementEvent.getPayload().getPrintFulfilment().setCaseId(UUID.randomUUID());
+    managementEvent.getPayload().getPrintFulfilment().setPackCode("TEST_FULFILMENT_CODE");
     Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
 
     PrintTemplate printTemplate = new PrintTemplate();
@@ -92,8 +92,8 @@ public class FulfilmentReceiverTest {
         .logCaseEvent(
             eq(expectedCase),
             eq(managementEvent.getEvent().getDateTime()),
-            eq("Fulfilment requested"),
-            eq(EventType.FULFILMENT),
+            eq("Print fulfilment requested"),
+            eq(EventType.PRINT_FULFILMENT),
             eq(managementEvent.getEvent()),
             eq(managementEvent.getPayload()),
             eq(messageDateTime));

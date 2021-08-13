@@ -57,7 +57,7 @@ public class TelephoneCaptureReceiverTest {
 
     // Then
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.isActive()).isTrue();
     assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
@@ -69,7 +69,7 @@ public class TelephoneCaptureReceiverTest {
             testCase,
             responseManagementEvent.getEvent().getDateTime(),
             TELEPHONE_CAPTURE_DESCRIPTION,
-            EventType.TELEPHONE_CAPTURE_REQUESTED,
+            EventType.TELEPHONE_CAPTURE,
             responseManagementEvent.getEvent(),
             responseManagementEvent.getPayload().getTelephoneCapture(),
             getMsgTimeStamp(eventMessage));
@@ -96,7 +96,7 @@ public class TelephoneCaptureReceiverTest {
     underTest.receiveMessage(eventMessage);
 
     // Then
-    verify(uacService, never()).saveAndEmitUacUpdatedEvent(any());
+    verify(uacService, never()).saveAndEmitUacUpdateEvent(any());
     verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(), any(), any());
   }
 

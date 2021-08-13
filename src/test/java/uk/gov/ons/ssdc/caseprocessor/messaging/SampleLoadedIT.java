@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
@@ -65,7 +65,7 @@ public class SampleLoadedIT {
       collectionExerciseRepository.saveAndFlush(collectionExercise);
 
       Map<String, String> sample = new HashMap<>();
-      sample.put("Address", "Tenby");
+      sample.put("CanYouKickIt", "YesYouCan");
       sample.put("Org", "Brewery");
 
       Map<String, String> sampleSensitive = new HashMap<>();
@@ -83,7 +83,7 @@ public class SampleLoadedIT {
       ResponseManagementEvent actualResponseManagementEvent =
           outboundCaseQueueSpy.checkExpectedMessageReceived();
 
-      CollectionCase emittedCase = actualResponseManagementEvent.getPayload().getCollectionCase();
+      CaseUpdateDTO emittedCase = actualResponseManagementEvent.getPayload().getCaseUpdate();
       Assertions.assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
 
       Case actualCase = caseService.getCaseByCaseId(TEST_CASE_ID);
@@ -95,7 +95,7 @@ public class SampleLoadedIT {
 
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);
-      assertThat(events.get(0).getEventType()).isEqualTo(EventType.CASE_CREATED);
+      assertThat(events.get(0).getEventType()).isEqualTo(EventType.NEW_CASE);
     }
   }
 }

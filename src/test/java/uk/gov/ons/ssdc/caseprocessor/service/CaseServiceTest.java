@@ -17,7 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
@@ -39,11 +39,11 @@ public class CaseServiceTest {
     caze.setId(UUID.randomUUID());
     caze.setSample(Map.of("foo", "bar"));
     caze.setReceiptReceived(true);
-    caze.setAddressInvalid(true);
+    caze.setInvalid(true);
     caze.setSurveyLaunched(true);
     caze.setRefusalReceived(RefusalType.HARD_REFUSAL);
 
-    underTest.saveCaseAndEmitCaseUpdatedEvent(caze);
+    underTest.saveCaseAndEmitCaseUpdate(caze);
     verify(caseRepository).saveAndFlush(caze);
 
     ArgumentCaptor<ResponseManagementEvent> responseManagementEventArgumentCaptor =
@@ -53,17 +53,16 @@ public class CaseServiceTest {
     ResponseManagementEvent actualResponeManagementEvent =
         responseManagementEventArgumentCaptor.getValue();
 
-    CollectionCase actualCollectionCase =
-        actualResponeManagementEvent.getPayload().getCollectionCase();
-    assertThat(actualCollectionCase.getCaseId()).isEqualTo(caze.getId());
-    assertThat(actualCollectionCase.getSample()).isEqualTo(caze.getSample());
-    assertThat(actualCollectionCase.isReceiptReceived()).isTrue();
-    assertThat(actualCollectionCase.isInvalidAddress()).isTrue();
-    assertThat(actualCollectionCase.isSurveyLaunched()).isTrue();
-    assertThat(actualCollectionCase.getRefusalReceived()).isEqualTo(RefusalTypeDTO.HARD_REFUSAL);
+    CaseUpdateDTO actualCaseUpdate = actualResponeManagementEvent.getPayload().getCaseUpdate();
+    assertThat(actualCaseUpdate.getCaseId()).isEqualTo(caze.getId());
+    assertThat(actualCaseUpdate.getSample()).isEqualTo(caze.getSample());
+    assertThat(actualCaseUpdate.isReceiptReceived()).isTrue();
+    assertThat(actualCaseUpdate.isInvalid()).isTrue();
+    assertThat(actualCaseUpdate.isSurveyLaunched()).isTrue();
+    assertThat(actualCaseUpdate.getRefusalReceived()).isEqualTo(RefusalTypeDTO.HARD_REFUSAL);
 
     assertThat(actualResponeManagementEvent.getEvent().getType())
-        .isEqualTo(EventTypeDTO.CASE_UPDATED);
+        .isEqualTo(EventTypeDTO.CASE_UPDATE);
   }
 
   @Test
@@ -79,11 +78,11 @@ public class CaseServiceTest {
     caze.setId(UUID.randomUUID());
     caze.setSample(Map.of("foo", "bar"));
     caze.setReceiptReceived(true);
-    caze.setAddressInvalid(true);
+    caze.setInvalid(true);
     caze.setSurveyLaunched(true);
     caze.setRefusalReceived(RefusalType.EXTRAORDINARY_REFUSAL);
 
-    underTest.emitCaseCreatedEvent(caze);
+    underTest.emitCaseUpdate(caze);
 
     ArgumentCaptor<ResponseManagementEvent> responseManagementEventArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
@@ -92,18 +91,17 @@ public class CaseServiceTest {
     ResponseManagementEvent actualResponeManagementEvent =
         responseManagementEventArgumentCaptor.getValue();
 
-    CollectionCase actualCollectionCase =
-        actualResponeManagementEvent.getPayload().getCollectionCase();
-    assertThat(actualCollectionCase.getCaseId()).isEqualTo(caze.getId());
-    assertThat(actualCollectionCase.getSample()).isEqualTo(caze.getSample());
-    assertThat(actualCollectionCase.isReceiptReceived()).isTrue();
-    assertThat(actualCollectionCase.isInvalidAddress()).isTrue();
-    assertThat(actualCollectionCase.isSurveyLaunched()).isTrue();
-    assertThat(actualCollectionCase.getRefusalReceived())
+    CaseUpdateDTO actualCaseUpdate = actualResponeManagementEvent.getPayload().getCaseUpdate();
+    assertThat(actualCaseUpdate.getCaseId()).isEqualTo(caze.getId());
+    assertThat(actualCaseUpdate.getSample()).isEqualTo(caze.getSample());
+    assertThat(actualCaseUpdate.isReceiptReceived()).isTrue();
+    assertThat(actualCaseUpdate.isInvalid()).isTrue();
+    assertThat(actualCaseUpdate.isSurveyLaunched()).isTrue();
+    assertThat(actualCaseUpdate.getRefusalReceived())
         .isEqualTo(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
 
     assertThat(actualResponeManagementEvent.getEvent().getType())
-        .isEqualTo(EventTypeDTO.CASE_CREATED);
+        .isEqualTo(EventTypeDTO.CASE_UPDATE);
   }
 
   @Test

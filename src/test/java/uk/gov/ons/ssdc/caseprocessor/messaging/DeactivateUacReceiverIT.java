@@ -18,7 +18,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.UacDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
@@ -83,8 +83,8 @@ public class DeactivateUacReceiverIT {
       ResponseManagementEvent actualResponseManagementEvent =
           uacRhQueue.checkExpectedMessageReceived();
 
-      UacDTO uac = actualResponseManagementEvent.getPayload().getUac();
-      assertThat(uac.getQuestionnaireId()).isEqualTo(TEST_QID);
+      UacUpdateDTO uac = actualResponseManagementEvent.getPayload().getUacUpdate();
+      assertThat(uac.getQid()).isEqualTo(TEST_QID);
       assertThat(uac.isActive()).isFalse();
 
       UacQidLink sentUacQidLinkUpdated = uacQidLinkRepository.findByQid(TEST_QID).get();

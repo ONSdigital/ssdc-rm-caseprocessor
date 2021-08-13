@@ -16,12 +16,12 @@ import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 
 @MessageEndpoint
-public class SurveyLaunchedReceiver {
+public class SurveyLaunchReceiver {
   private final UacService uacService;
   private final CaseService caseService;
   private final EventLogger eventLogger;
 
-  public SurveyLaunchedReceiver(
+  public SurveyLaunchReceiver(
       UacService uacService, CaseService caseService, EventLogger eventLogger) {
     this.uacService = uacService;
     this.caseService = caseService;
@@ -29,51 +29,26 @@ public class SurveyLaunchedReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "surveyLaunchedInputChannel", adviceChain = "retryAdvice")
+  @ServiceActivator(inputChannel = "surveyLaunchInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
     ResponseManagementEvent responseManagementEvent =
         convertJsonBytesToObject(message.getPayload(), ResponseManagementEvent.class);
 
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 
-    String logEventDescription;
-    EventType logEventType;
-
-    switch (responseManagementEvent.getEvent().getType()) {
-      case SURVEY_LAUNCHED:
-        logEventDescription = "Survey launched";
-        logEventType = EventType.SURVEY_LAUNCHED;
-        break;
-
-      case RESPONDENT_AUTHENTICATED:
-        logEventDescription = "Respondent authenticated";
-        logEventType = EventType.RESPONDENT_AUTHENTICATED;
-        break;
-
-      default:
-        // Should never get here
-        throw new RuntimeException(
-            String.format(
-                "Event Type '%s' is invalid on this topic",
-                responseManagementEvent.getEvent().getType()));
-    }
-
     UacQidLink uacQidLink =
-        uacService.findByQid(
-            responseManagementEvent.getPayload().getResponse().getQuestionnaireId());
+        uacService.findByQid(responseManagementEvent.getPayload().getSurveyLaunch().getQid());
 
     eventLogger.logUacQidEvent(
         uacQidLink,
         responseManagementEvent.getEvent().getDateTime(),
-        logEventDescription,
-        logEventType,
+        "Survey launched",
+        EventType.SURVEY_LAUNCH,
         responseManagementEvent.getEvent(),
-        responseManagementEvent.getPayload().getResponse(),
+        responseManagementEvent.getPayload().getReceipt(),
         messageTimestamp);
 
-    if (logEventType == EventType.SURVEY_LAUNCHED && uacQidLink.getCaze() != null) {
-      uacQidLink.getCaze().setSurveyLaunched(true);
-      caseService.saveCaseAndEmitCaseUpdatedEvent(uacQidLink.getCaze());
-    }
+    uacQidLink.getCaze().setSurveyLaunched(true);
+    caseService.saveCaseAndEmitCaseUpdate(uacQidLink.getCaze());
   }
 }

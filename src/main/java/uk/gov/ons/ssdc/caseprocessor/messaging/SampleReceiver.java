@@ -73,14 +73,14 @@ public class SampleReceiver {
     newCase.setSampleSensitive(sample.getSampleSensitive());
 
     newCase = saveNewCaseAndStampCaseRef(newCase);
-    caseService.emitCaseCreatedEvent(newCase);
+    caseService.emitCaseUpdate(newCase);
 
     eventLogger.logCaseEvent(
         newCase,
         OffsetDateTime.now(),
-        "Create case sample received",
-        EventType.CASE_CREATED,
-        createEventDTO(EventTypeDTO.SAMPLE_LOADED),
+        "New case created from sample load",
+        EventType.NEW_CASE,
+        createEventDTO(EventTypeDTO.NEW_CASE),
         RedactHelper.redact(sample),
         messageTimestamp);
   }

@@ -15,36 +15,36 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 
 @MessageEndpoint
-public class InvalidAddressReceiver {
+public class InvalidCaseReceiver {
   private final CaseService caseService;
   private final EventLogger eventLogger;
 
-  public InvalidAddressReceiver(CaseService caseService, EventLogger eventLogger) {
+  public InvalidCaseReceiver(CaseService caseService, EventLogger eventLogger) {
     this.caseService = caseService;
     this.eventLogger = eventLogger;
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "invalidAddressInputChannel", adviceChain = "retryAdvice")
+  @ServiceActivator(inputChannel = "invalidCaseInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
     ResponseManagementEvent responseManagementEvent =
         convertJsonBytesToObject(message.getPayload(), ResponseManagementEvent.class);
 
     Case caze =
         caseService.getCaseByCaseId(
-            responseManagementEvent.getPayload().getInvalidAddress().getCaseId());
+            responseManagementEvent.getPayload().getInvalidCase().getCaseId());
 
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 
-    caze.setAddressInvalid(true);
+    caze.setInvalid(true);
 
-    caseService.saveCaseAndEmitCaseUpdatedEvent(caze);
+    caseService.saveCaseAndEmitCaseUpdate(caze);
 
     eventLogger.logCaseEvent(
         caze,
         responseManagementEvent.getEvent().getDateTime(),
-        "Invalid address",
-        EventType.ADDRESS_NOT_VALID,
+        "Invalid case",
+        EventType.INVALID_CASE,
         responseManagementEvent.getEvent(),
         responseManagementEvent.getPayload(),
         messageTimestamp);

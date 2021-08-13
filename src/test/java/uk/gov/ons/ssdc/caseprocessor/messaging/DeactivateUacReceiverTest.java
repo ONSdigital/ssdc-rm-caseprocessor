@@ -52,7 +52,7 @@ public class DeactivateUacReceiverTest {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setActive(true);
     when(uacService.findByQid("0123456789")).thenReturn(uacQidLink);
-    when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
+    when(uacService.saveAndEmitUacUpdateEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
 
     // When
     underTest.receiveMessage(message);
@@ -60,7 +60,7 @@ public class DeactivateUacReceiverTest {
     // Then
     ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
 
-    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkArgumentCaptor.capture());
+    verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkArgumentCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkArgumentCaptor.getValue();
     assertThat(actualUacQidLink.isActive()).isFalse();
 

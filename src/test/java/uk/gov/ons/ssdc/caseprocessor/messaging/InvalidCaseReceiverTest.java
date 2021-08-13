@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO.ADDRESS_NOT_VALID;
+import static uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO.INVALID_CASE;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
@@ -21,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.InvalidAddress;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.InvalidCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
@@ -29,28 +29,28 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 
 @ExtendWith(MockitoExtension.class)
-public class InvalidAddressReceiverTest {
+public class InvalidCaseReceiverTest {
 
   @Mock private CaseService caseService;
   @Mock private EventLogger eventLogger;
 
-  @InjectMocks InvalidAddressReceiver underTest;
+  @InjectMocks InvalidCaseReceiver underTest;
 
   @Test
-  public void testInvalidAddress() {
+  public void testInvalidCase() {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
     managementEvent.getEvent().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
-    managementEvent.getEvent().setType(ADDRESS_NOT_VALID);
+    managementEvent.getEvent().setType(INVALID_CASE);
     managementEvent.getEvent().setChannel("CC");
     managementEvent.setPayload(new PayloadDTO());
-    managementEvent.getPayload().setInvalidAddress(new InvalidAddress());
-    managementEvent.getPayload().getInvalidAddress().setCaseId(UUID.randomUUID());
+    managementEvent.getPayload().setInvalidCase(new InvalidCase());
+    managementEvent.getPayload().getInvalidCase().setCaseId(UUID.randomUUID());
     Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
 
     // Given
     Case expectedCase = new Case();
-    expectedCase.setAddressInvalid(false);
+    expectedCase.setInvalid(false);
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // when
@@ -59,9 +59,9 @@ public class InvalidAddressReceiverTest {
     // then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
 
-    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    verify(caseService).saveCaseAndEmitCaseUpdate(caseArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
-    assertThat(actualCase.isAddressInvalid()).isTrue();
+    assertThat(actualCase.isInvalid()).isTrue();
 
     OffsetDateTime messageDateTime = getMsgTimeStamp(message);
 
@@ -69,8 +69,8 @@ public class InvalidAddressReceiverTest {
         .logCaseEvent(
             eq(expectedCase),
             eq(managementEvent.getEvent().getDateTime()),
-            eq("Invalid address"),
-            eq(EventType.ADDRESS_NOT_VALID),
+            eq("Invalid case"),
+            eq(EventType.INVALID_CASE),
             eq(managementEvent.getEvent()),
             eq(managementEvent.getPayload()),
             eq(messageDateTime));

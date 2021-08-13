@@ -33,17 +33,17 @@ public class RefusalReceiver {
         convertJsonBytesToObject(message.getPayload(), ResponseManagementEvent.class);
 
     RefusalDTO refusal = responseManagementEvent.getPayload().getRefusal();
-    Case refusedCase = caseService.getCaseByCaseId(refusal.getCollectionCase().getCaseId());
+    Case refusedCase = caseService.getCaseByCaseId(refusal.getCaseId());
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     refusedCase.setRefusalReceived(RefusalType.valueOf(refusal.getType().name()));
 
-    caseService.saveCaseAndEmitCaseUpdatedEvent(refusedCase);
+    caseService.saveCaseAndEmitCaseUpdate(refusedCase);
 
     eventLogger.logCaseEvent(
         refusedCase,
         responseManagementEvent.getEvent().getDateTime(),
         "Refusal Received",
-        EventType.REFUSAL_RECEIVED,
+        EventType.REFUSAL,
         responseManagementEvent.getEvent(),
         responseManagementEvent.getPayload(),
         messageTimestamp);

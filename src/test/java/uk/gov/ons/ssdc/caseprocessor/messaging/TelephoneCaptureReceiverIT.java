@@ -22,8 +22,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.TelephoneCaptureDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.UacDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
@@ -80,7 +80,7 @@ public class TelephoneCaptureReceiverIT {
     payloadDTO.setTelephoneCapture(telephoneCaptureDTO);
     EventDTO eventDTO = new EventDTO();
     eventDTO.setDateTime(OffsetDateTime.now());
-    eventDTO.setType(EventTypeDTO.TELEPHONE_CAPTURE_REQUESTED);
+    eventDTO.setType(EventTypeDTO.TELEPHONE_CAPTURE);
     eventDTO.setTransactionId(UUID.randomUUID());
     eventDTO.setChannel("RM");
     eventDTO.setSource("RM");
@@ -93,13 +93,12 @@ public class TelephoneCaptureReceiverIT {
       pubsubHelper.sendMessage(TELEPHONE_CAPTURE_TOPIC, responseManagementEvent);
       ResponseManagementEvent emittedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
 
-      assertThat(emittedEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
+      assertThat(emittedEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATE);
 
-      UacDTO uacUpdatedEvent = emittedEvent.getPayload().getUac();
+      UacUpdateDTO uacUpdatedEvent = emittedEvent.getPayload().getUacUpdate();
       assertThat(uacUpdatedEvent.getCaseId()).isEqualTo(testCase.getId());
       assertThat(uacUpdatedEvent.getUac()).isEqualTo(telephoneCaptureUacQid.getUac());
-      assertThat(uacUpdatedEvent.getQuestionnaireId()).isEqualTo(telephoneCaptureUacQid.getQid());
-      assertThat(uacUpdatedEvent.getCollectionExerciseId()).isEqualTo(collectionExercise.getId());
+      assertThat(uacUpdatedEvent.getQid()).isEqualTo(telephoneCaptureUacQid.getQid());
     }
   }
 

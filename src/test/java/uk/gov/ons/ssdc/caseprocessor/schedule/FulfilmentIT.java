@@ -19,8 +19,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.FulfilmentDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintFulfilmentDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
@@ -47,7 +47,7 @@ import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 public class FulfilmentIT {
   private static final String OUTBOUND_PRINTER_SUBSCRIPTION =
       "rm-internal-print-row_print-file-service";
-  private static final String FULFILMENT_TOPIC = "event_paper-fulfilment";
+  private static final String FULFILMENT_TOPIC = "event_print-fulfilment";
 
   private static final String PACK_CODE = "test-pack-code";
   private static final String PRINT_SUPPLIER = "FOOBAR_PRINT_SUPPLIER";
@@ -105,18 +105,18 @@ public class FulfilmentIT {
       Case caze = setUpCase(collectionExercise);
 
       // When
-      FulfilmentDTO fulfilment = new FulfilmentDTO();
+      PrintFulfilmentDTO fulfilment = new PrintFulfilmentDTO();
       fulfilment.setCaseId(caze.getId());
       fulfilment.setPackCode(PACK_CODE);
 
       PayloadDTO payload = new PayloadDTO();
-      payload.setFulfilment(fulfilment);
+      payload.setPrintFulfilment(fulfilment);
 
       ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
       responseManagementEvent.setPayload(payload);
 
       EventDTO eventDTO = new EventDTO();
-      eventDTO.setType(EventTypeDTO.FULFILMENT);
+      eventDTO.setType(EventTypeDTO.PRINT_FULFILMENT);
       eventDTO.setSource("RH");
       eventDTO.setDateTime(OffsetDateTime.now());
       eventDTO.setChannel("RH");
@@ -143,8 +143,8 @@ public class FulfilmentIT {
       assertThat(printRow.getRow()).startsWith("\"123\"|\"bar\"|\"");
 
       assertThat(rme).isNotNull();
-      assertThat(rme.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
-      assertThat(rme.getPayload().getUac().getCaseId()).isEqualTo(caze.getId());
+      assertThat(rme.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATE);
+      assertThat(rme.getPayload().getUacUpdate().getCaseId()).isEqualTo(caze.getId());
     }
   }
 

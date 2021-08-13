@@ -13,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
@@ -73,9 +73,7 @@ public class RefusalReceiverIT {
       caseRepository.saveAndFlush(caze);
 
       RefusalDTO refusalDTO = new RefusalDTO();
-      CollectionCase collectionCase = new CollectionCase();
-      collectionCase.setCaseId(TEST_CASE_ID);
-      refusalDTO.setCollectionCase(collectionCase);
+      refusalDTO.setCaseId(TEST_CASE_ID);
       refusalDTO.setType(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
       PayloadDTO payloadDTO = new PayloadDTO();
       payloadDTO.setRefusal(refusalDTO);
@@ -83,7 +81,7 @@ public class RefusalReceiverIT {
       responseManagementEvent.setPayload(payloadDTO);
 
       EventDTO eventDTO = new EventDTO();
-      eventDTO.setType(EventTypeDTO.REFUSAL_RECEIVED);
+      eventDTO.setType(EventTypeDTO.REFUSAL);
       responseManagementEvent.setEvent(eventDTO);
 
       pubsubHelper.sendMessage(INBOUND_REFUSAL_TOPIC, responseManagementEvent);
@@ -92,14 +90,14 @@ public class RefusalReceiverIT {
       ResponseManagementEvent actualResponseManagementEvent =
           outboundCaseQueueSpy.checkExpectedMessageReceived();
 
-      CollectionCase emittedCase = actualResponseManagementEvent.getPayload().getCollectionCase();
+      CaseUpdateDTO emittedCase = actualResponseManagementEvent.getPayload().getCaseUpdate();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(emittedCase.getRefusalReceived()).isEqualTo(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
 
       assertThat(eventRepository.findAll().size()).isEqualTo(1);
       Event event = eventRepository.findAll().get(0);
       assertThat(event.getCaze().getId()).isEqualTo(TEST_CASE_ID);
-      assertThat(event.getEventType()).isEqualTo(EventType.REFUSAL_RECEIVED);
+      assertThat(event.getEventType()).isEqualTo(EventType.REFUSAL);
     }
   }
 }

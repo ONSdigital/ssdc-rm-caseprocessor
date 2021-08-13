@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
@@ -28,21 +28,17 @@ public class CaseService {
     this.messageSender = messageSender;
   }
 
-  public void saveCaseAndEmitCaseUpdatedEvent(Case caze) {
-    caseRepository.saveAndFlush(caze);
-
-    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATED);
-
-    ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
-    messageSender.sendMessage(caseUpdateTopic, responseManagementEvent);
+  public void saveCaseAndEmitCaseUpdate(Case caze) {
+    saveCase(caze);
+    emitCaseUpdate(caze);
   }
 
   public void saveCase(Case caze) {
     caseRepository.saveAndFlush(caze);
   }
 
-  public void emitCaseCreatedEvent(Case caze) {
-    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
+  public void emitCaseUpdate(Case caze) {
+    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATE);
 
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     messageSender.sendMessage(caseUpdateTopic, responseManagementEvent);
@@ -50,18 +46,18 @@ public class CaseService {
 
   private ResponseManagementEvent prepareCaseEvent(Case caze, EventDTO eventDTO) {
     PayloadDTO payloadDTO = new PayloadDTO();
-    CollectionCase collectionCase = new CollectionCase();
-    collectionCase.setCaseId(caze.getId());
-    collectionCase.setSample(caze.getSample());
-    collectionCase.setReceiptReceived(caze.isReceiptReceived());
-    collectionCase.setInvalidAddress(caze.isAddressInvalid());
-    collectionCase.setSurveyLaunched(caze.isSurveyLaunched());
+    CaseUpdateDTO caseUpdate = new CaseUpdateDTO();
+    caseUpdate.setCaseId(caze.getId());
+    caseUpdate.setSample(caze.getSample());
+    caseUpdate.setReceiptReceived(caze.isReceiptReceived());
+    caseUpdate.setInvalid(caze.isInvalid());
+    caseUpdate.setSurveyLaunched(caze.isSurveyLaunched());
     if (caze.getRefusalReceived() != null) {
-      collectionCase.setRefusalReceived(RefusalTypeDTO.valueOf(caze.getRefusalReceived().name()));
+      caseUpdate.setRefusalReceived(RefusalTypeDTO.valueOf(caze.getRefusalReceived().name()));
     } else {
-      collectionCase.setRefusalReceived(null);
+      caseUpdate.setRefusalReceived(null);
     }
-    payloadDTO.setCollectionCase(collectionCase);
+    payloadDTO.setCaseUpdate(caseUpdate);
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     responseManagementEvent.setEvent(eventDTO);
     responseManagementEvent.setPayload(payloadDTO);
