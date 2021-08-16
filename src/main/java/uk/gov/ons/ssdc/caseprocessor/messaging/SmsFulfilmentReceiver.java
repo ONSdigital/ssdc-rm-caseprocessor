@@ -1,22 +1,24 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
-
-import java.time.OffsetDateTime;
-import java.util.UUID;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EnrichedSmsFulfilment;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 import uk.gov.ons.ssdc.caseprocessor.utils.RedactHelper;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
+import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 @MessageEndpoint
 public class SmsFulfilmentReceiver {
@@ -36,11 +38,10 @@ public class SmsFulfilmentReceiver {
 
   @Transactional
   @ServiceActivator(inputChannel = "smsFulfilmentInputChannel")
-  public void receiveMessage(Message<ResponseManagementEvent> message) {
+  public void receiveMessage(Message<byte[]> message) {
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    ResponseManagementEvent responseManagementEvent = message.getPayload();
-    EnrichedSmsFulfilment smsFulfilment =
-        responseManagementEvent.getPayload().getEnrichedSmsFulfilment();
+    EventDTO event = convertJsonBytesToEvent(message.getPayload());
+    EnrichedSmsFulfilment smsFulfilment = event.getPayload().getEnrichedSmsFulfilment();
 
     Case caze = caseService.getCaseByCaseId(smsFulfilment.getCaseId());
 
@@ -67,10 +68,10 @@ public class SmsFulfilmentReceiver {
 
     eventLogger.logCaseEvent(
         caze,
-        responseManagementEvent.getEvent().getDateTime(),
+        event.getHeader().getDateTime(),
         SMS_FULFILMENT_DESCRIPTION,
         EventType.SMS_FULFILMENT,
-        responseManagementEvent.getEvent(),
+        event.getHeader(),
         RedactHelper.redact(smsFulfilment),
         messageTimestamp);
   }
@@ -84,6 +85,6 @@ public class SmsFulfilmentReceiver {
     uacQidLink.setCaze(caze);
     uacQidLink.setCreatedAt(now);
     uacQidLink.setLastUpdatedAt(now);
-    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+    uacService.saveAndEmitUacUpdateEvent(uacQidLink);
   }
 }

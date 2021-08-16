@@ -16,8 +16,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.UacDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 
@@ -37,20 +37,18 @@ public class UacServiceTest {
     uacQidLink.setActive(true);
 
     when(uacQidLinkRepository.save(uacQidLink)).thenReturn(uacQidLink);
-    underTest.saveAndEmitUacUpdatedEvent(uacQidLink);
+    underTest.saveAndEmitUacUpdateEvent(uacQidLink);
 
     verify(uacQidLinkRepository).save(uacQidLink);
 
-    ArgumentCaptor<ResponseManagementEvent> responseManagementEventArgumentCaptor =
-        ArgumentCaptor.forClass(ResponseManagementEvent.class);
+    ArgumentCaptor<EventDTO> eventArgumentCaptor = ArgumentCaptor.forClass(EventDTO.class);
 
-    verify(messageSender).sendMessage(any(), responseManagementEventArgumentCaptor.capture());
-    ResponseManagementEvent actualResponseManagementEvent =
-        responseManagementEventArgumentCaptor.getValue();
+    verify(messageSender).sendMessage(any(), eventArgumentCaptor.capture());
+    EventDTO actualEvent = eventArgumentCaptor.getValue();
 
-    UacDTO uacDto = actualResponseManagementEvent.getPayload().getUac();
-    assertThat(uacDto.getUac()).isEqualTo(uacQidLink.getUac());
-    assertThat(uacDto.getQuestionnaireId()).isEqualTo(uacDto.getQuestionnaireId());
+    UacUpdateDTO uacUpdateDto = actualEvent.getPayload().getUacUpdate();
+    assertThat(uacUpdateDto.getUac()).isEqualTo(uacQidLink.getUac());
+    assertThat(uacUpdateDto.getQid()).isEqualTo(uacUpdateDto.getQid());
   }
 
   @Test

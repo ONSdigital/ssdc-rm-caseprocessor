@@ -2,6 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,13 +14,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
@@ -57,8 +57,8 @@ public class RefusalReceiverIT {
 
   @Test
   public void testRefusal() throws Exception {
-    try (QueueSpy<ResponseManagementEvent> outboundCaseQueueSpy =
-        pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, ResponseManagementEvent.class)) {
+    try (QueueSpy<EventDTO> outboundCaseQueueSpy =
+        pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -73,33 +73,31 @@ public class RefusalReceiverIT {
       caseRepository.saveAndFlush(caze);
 
       RefusalDTO refusalDTO = new RefusalDTO();
-      CollectionCase collectionCase = new CollectionCase();
-      collectionCase.setCaseId(TEST_CASE_ID);
-      refusalDTO.setCollectionCase(collectionCase);
+      refusalDTO.setCaseId(TEST_CASE_ID);
       refusalDTO.setType(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
       PayloadDTO payloadDTO = new PayloadDTO();
       payloadDTO.setRefusal(refusalDTO);
-      ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-      responseManagementEvent.setPayload(payloadDTO);
+      EventDTO event = new EventDTO();
+      event.setPayload(payloadDTO);
 
-      EventDTO eventDTO = new EventDTO();
-      eventDTO.setType(EventTypeDTO.REFUSAL_RECEIVED);
-      responseManagementEvent.setEvent(eventDTO);
+      EventHeaderDTO eventHeader = new EventHeaderDTO();
+      eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+      eventHeader.setTopic(INBOUND_REFUSAL_TOPIC);
+      event.setHeader(eventHeader);
 
-      pubsubHelper.sendMessage(INBOUND_REFUSAL_TOPIC, responseManagementEvent);
+      pubsubHelper.sendMessage(INBOUND_REFUSAL_TOPIC, event);
 
       //  THEN
-      ResponseManagementEvent actualResponseManagementEvent =
-          outboundCaseQueueSpy.checkExpectedMessageReceived();
+      EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
 
-      CollectionCase emittedCase = actualResponseManagementEvent.getPayload().getCollectionCase();
+      CaseUpdateDTO emittedCase = actualEvent.getPayload().getCaseUpdate();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(emittedCase.getRefusalReceived()).isEqualTo(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
 
       assertThat(eventRepository.findAll().size()).isEqualTo(1);
-      Event event = eventRepository.findAll().get(0);
-      assertThat(event.getCaze().getId()).isEqualTo(TEST_CASE_ID);
-      assertThat(event.getEventType()).isEqualTo(EventType.REFUSAL_RECEIVED);
+      Event databaseEvent = eventRepository.findAll().get(0);
+      assertThat(databaseEvent.getCaze().getId()).isEqualTo(TEST_CASE_ID);
+      assertThat(databaseEvent.getType()).isEqualTo(EventType.REFUSAL);
     }
   }
 }

@@ -11,6 +11,7 @@ import java.util.concurrent.TimeoutException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import org.springframework.retry.annotation.Backoff;
@@ -27,7 +28,9 @@ import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 @ActiveProfiles("test")
 @EnableRetry
 public class PubsubHelper {
-  @Autowired private PubSubTemplate pubSubTemplate;
+  @Autowired
+  @Qualifier("pubSubTemplateForIntegrationTests")
+  private PubSubTemplate pubSubTemplate;
 
   @Value("${spring.cloud.gcp.pubsub.emulator-host}")
   private String pubsubEmulatorHost;
