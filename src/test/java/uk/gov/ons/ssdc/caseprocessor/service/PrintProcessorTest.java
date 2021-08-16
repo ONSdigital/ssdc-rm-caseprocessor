@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
@@ -80,7 +80,7 @@ public class PrintProcessorTest {
     assertThat(actualPrintRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
@@ -92,8 +92,8 @@ public class PrintProcessorTest {
             eq(caze),
             any(OffsetDateTime.class),
             eq("Print file generated with pack code test pack code"),
-            eq(EventType.PRINTED_PACK_CODE),
-            any(EventDTO.class),
+            eq(EventType.PRINT_FILE),
+            any(EventHeaderDTO.class),
             isNull(),
             any(OffsetDateTime.class));
   }
@@ -134,7 +134,7 @@ public class PrintProcessorTest {
     assertThat(actualPrintRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
@@ -146,8 +146,8 @@ public class PrintProcessorTest {
             eq(caze),
             any(OffsetDateTime.class),
             eq("Print file generated with pack code TEST_FULFILMENT_CODE"),
-            eq(EventType.PRINTED_PACK_CODE),
-            any(EventDTO.class),
+            eq(EventType.PRINT_FILE),
+            any(EventHeaderDTO.class),
             isNull(),
             any(OffsetDateTime.class));
   }

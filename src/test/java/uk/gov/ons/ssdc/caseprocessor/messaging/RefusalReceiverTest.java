@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -17,13 +18,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.RefusalType;
@@ -44,22 +43,21 @@ public class RefusalReceiverTest {
   public void testRefusal() {
     // Given
     RefusalDTO refusalDTO = new RefusalDTO();
-    CollectionCase collectionCase = new CollectionCase();
-    collectionCase.setCaseId(CASE_ID);
-    refusalDTO.setCollectionCase(collectionCase);
+    refusalDTO.setCaseId(CASE_ID);
     refusalDTO.setType(RefusalTypeDTO.HARD_REFUSAL);
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setRefusal(refusalDTO);
 
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.REFUSAL_RECEIVED);
-    eventDTO.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setTopic("Test topic");
+    eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
 
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setPayload(payloadDTO);
-    responseManagementEvent.setEvent(eventDTO);
-    Message<byte[]> message = constructMessageWithValidTimeStamp(responseManagementEvent);
+    EventDTO event = new EventDTO();
+    event.setPayload(payloadDTO);
+    event.setHeader(eventHeader);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(event);
     OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
 
     Case caze = new Case();
@@ -73,7 +71,7 @@ public class RefusalReceiverTest {
 
     // Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    verify(caseService).saveCaseAndEmitCaseUpdate(caseArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
 
     assertThat(actualCase.getId()).isEqualTo(CASE_ID);
@@ -82,11 +80,11 @@ public class RefusalReceiverTest {
     verify(eventLogger)
         .logCaseEvent(
             eq(caze),
-            eq(responseManagementEvent.getEvent().getDateTime()),
+            eq(event.getHeader().getDateTime()),
             eq("Refusal Received"),
-            eq(EventType.REFUSAL_RECEIVED),
-            eq(responseManagementEvent.getEvent()),
-            eq(responseManagementEvent.getPayload()),
+            eq(EventType.REFUSAL),
+            eq(event.getHeader()),
+            eq(event.getPayload()),
             eq(expectedDateTime));
   }
 }

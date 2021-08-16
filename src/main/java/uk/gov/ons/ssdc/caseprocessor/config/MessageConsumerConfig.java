@@ -19,20 +19,23 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.sample-subscription}")
   private String sampleSubscription;
 
-  @Value("${queueconfig.fulfilment-subscription}")
-  private String fulfilmentSubscription;
+  @Value("${queueconfig.print-fulfilment-subscription}")
+  private String printFulfilmentSubscription;
 
-  @Value("${queueconfig.receipt-response-subscription}")
+  @Value("${queueconfig.receipt-subscription}")
   private String receiptSubscription;
 
-  @Value("${queueconfig.refusal-response-subscription}")
+  @Value("${queueconfig.refusal-subscription}")
   private String refusalSubscription;
 
-  @Value("${queueconfig.invalid-address-subscription}")
-  private String invalidAddressSubscription;
+  @Value("${queueconfig.invalid-case-subscription}")
+  private String invalidCaseSubscription;
 
-  @Value("${queueconfig.survey-launched-subscription}")
-  private String surveyLaunchedSubscription;
+  @Value("${queueconfig.survey-launch-subscription}")
+  private String surveyLaunchSubscription;
+
+  @Value("${queueconfig.uac-authentication-subscription}")
+  private String uacAuthenticationSubscription;
 
   @Value("${queueconfig.telephone-capture-subscription}")
   private String telephoneCaptureSubscription;
@@ -63,17 +66,22 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public MessageChannel invalidAddressInputChannel() {
+  public MessageChannel invalidCaseInputChannel() {
     return new DirectChannel();
   }
 
   @Bean
-  public MessageChannel surveyLaunchedInputChannel() {
+  public MessageChannel surveyLaunchInputChannel() {
     return new DirectChannel();
   }
 
   @Bean
-  public MessageChannel fulfilmentInputChannel() {
+  public MessageChannel uacAuthenticationInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel printFulfilmentInputChannel() {
     return new DirectChannel();
   }
 
@@ -111,23 +119,30 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  PubSubInboundChannelAdapter invalidAddressInbound(
-      @Qualifier("invalidAddressInputChannel") MessageChannel channel,
-      PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, invalidAddressSubscription);
+  PubSubInboundChannelAdapter invalidCaseInbound(
+      @Qualifier("invalidCaseInputChannel") MessageChannel channel, PubSubTemplate pubSubTemplate) {
+    return makeAdapter(channel, pubSubTemplate, invalidCaseSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter surveyLaunchedInbound(
-      @Qualifier("surveyLaunchedInputChannel") MessageChannel channel,
+      @Qualifier("surveyLaunchInputChannel") MessageChannel channel,
       PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, surveyLaunchedSubscription);
+    return makeAdapter(channel, pubSubTemplate, surveyLaunchSubscription);
+  }
+
+  @Bean
+  PubSubInboundChannelAdapter uacAuthenticationInbound(
+      @Qualifier("uacAuthenticationInputChannel") MessageChannel channel,
+      PubSubTemplate pubSubTemplate) {
+    return makeAdapter(channel, pubSubTemplate, uacAuthenticationSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter fulfilmentInbound(
-      @Qualifier("fulfilmentInputChannel") MessageChannel channel, PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, fulfilmentSubscription);
+      @Qualifier("printFulfilmentInputChannel") MessageChannel channel,
+      PubSubTemplate pubSubTemplate) {
+    return makeAdapter(channel, pubSubTemplate, printFulfilmentSubscription);
   }
 
   @Bean

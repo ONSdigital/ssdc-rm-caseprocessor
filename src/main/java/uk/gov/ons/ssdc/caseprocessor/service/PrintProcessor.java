@@ -106,7 +106,7 @@ public class PrintProcessor {
         caze,
         OffsetDateTime.now(),
         String.format("Print file generated with pack code %s", packCode),
-        EventType.PRINTED_PACK_CODE,
+        EventType.PRINT_FILE,
         EventHelper.getDummyEvent(),
         null,
         OffsetDateTime.now());
@@ -127,7 +127,7 @@ public class PrintProcessor {
     uacQidLink.setQid(uacQidDTO.getQid());
     uacQidLink.setUac(uacQidDTO.getUac());
     uacQidLink.setCaze(caze);
-    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+    uacService.saveAndEmitUacUpdateEvent(uacQidLink);
 
     return uacQidDTO;
   }

@@ -4,7 +4,7 @@ import java.util.UUID;
 import lombok.Data;
 
 @Data
-public class FulfilmentDTO {
+public class PrintFulfilmentDTO {
   private UUID caseId;
   private String packCode;
 }
