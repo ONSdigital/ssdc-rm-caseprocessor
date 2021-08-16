@@ -31,6 +31,9 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.SkippedMessage;
 
 @ExtendWith(MockitoExtension.class)
 class ManagedMessageRecovererTest {
+  private static String TEST_MESSAGE_HASH =
+      "90f56b5b3ffe9558a546af25a7256da4b2761864575f9d59c81b70629023465b";
+
   @Mock private BasicAcknowledgeablePubsubMessage originalMessage;
 
   @Mock private ExceptionManagerClient exceptionManagerClient;
@@ -49,7 +52,7 @@ class ManagedMessageRecovererTest {
     // Then
     verify(exceptionManagerClient)
         .reportException(
-            eq("90f56b5b3ffe9558a546af25a7256da4b2761864575f9d59c81b70629023465b"),
+            eq(TEST_MESSAGE_HASH),
             eq("Case Processor"),
             eq("TEST SUBSCRIPTION"),
             any(Throwable.class),
@@ -71,7 +74,7 @@ class ManagedMessageRecovererTest {
     // Then
     verify(exceptionManagerClient)
         .reportException(
-            eq("90f56b5b3ffe9558a546af25a7256da4b2761864575f9d59c81b70629023465b"),
+            eq(TEST_MESSAGE_HASH),
             eq("Case Processor"),
             eq("TEST SUBSCRIPTION"),
             any(RuntimeException.class),
@@ -94,7 +97,7 @@ class ManagedMessageRecovererTest {
     // Then
     verify(exceptionManagerClient)
         .reportException(
-            eq("90f56b5b3ffe9558a546af25a7256da4b2761864575f9d59c81b70629023465b"),
+            eq(TEST_MESSAGE_HASH),
             eq("Case Processor"),
             eq("TEST SUBSCRIPTION"),
             any(RuntimeException.class),
@@ -107,8 +110,7 @@ class ManagedMessageRecovererTest {
         ArgumentCaptor.forClass(SkippedMessage.class);
     verify(exceptionManagerClient).storeMessageBeforeSkipping(skippedMessageArgCapt.capture());
     SkippedMessage skippedMessage = skippedMessageArgCapt.getValue();
-    assertThat(skippedMessage.getMessageHash())
-        .isEqualTo("90f56b5b3ffe9558a546af25a7256da4b2761864575f9d59c81b70629023465b");
+    assertThat(skippedMessage.getMessageHash()).isEqualTo(TEST_MESSAGE_HASH);
     assertThat(skippedMessage.getMessagePayload()).isEqualTo("TEST PAYLOAD".getBytes());
     assertThat(skippedMessage.getQueue()).isEqualTo("TEST SUBSCRIPTION");
     assertThat(skippedMessage.getService()).isEqualTo("Case Processor");
@@ -131,7 +133,7 @@ class ManagedMessageRecovererTest {
     // Then
     verify(exceptionManagerClient)
         .reportException(
-            eq("90f56b5b3ffe9558a546af25a7256da4b2761864575f9d59c81b70629023465b"),
+            eq(TEST_MESSAGE_HASH),
             eq("Case Processor"),
             eq("TEST SUBSCRIPTION"),
             any(RuntimeException.class),
@@ -154,7 +156,7 @@ class ManagedMessageRecovererTest {
     // Then
     verify(exceptionManagerClient)
         .reportException(
-            eq("90f56b5b3ffe9558a546af25a7256da4b2761864575f9d59c81b70629023465b"),
+            eq(TEST_MESSAGE_HASH),
             eq("Case Processor"),
             eq("TEST SUBSCRIPTION"),
             any(RuntimeException.class),
@@ -163,10 +165,7 @@ class ManagedMessageRecovererTest {
     verify(originalMessage).nack();
     verify(originalMessage, never()).ack();
 
-    verify(exceptionManagerClient)
-        .respondToPeek(
-            "90f56b5b3ffe9558a546af25a7256da4b2761864575f9d59c81b70629023465b",
-            "TEST PAYLOAD".getBytes());
+    verify(exceptionManagerClient).respondToPeek(TEST_MESSAGE_HASH, "TEST PAYLOAD".getBytes());
   }
 
   private RetryContext testSetupTestRecover(ExceptionReportResponse exceptionReportResponse) {
