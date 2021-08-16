@@ -20,14 +20,17 @@ curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/subscriptions/event_re
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/topics/rm-internal-print-row
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/subscriptions/rm-internal-print-row_print-file-service -H 'Content-Type: application/json' -d '{"topic": "projects/project/topics/rm-internal-print-row"}'
 
-curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/topics/event_invalid
-curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/subscriptions/event_invalid_rm-case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/project/topics/event_invalid"}'
+curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/topics/event_invalid-case
+curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/subscriptions/event_invalid-case_rm-case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/project/topics/event_invalid-case"}'
 
-curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/topics/event_survey-launched
-curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/subscriptions/event_survey-launched_rm-case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/project/topics/event_survey-launched"}'
+curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/topics/event_survey-launch
+curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/subscriptions/event_survey-launch_rm-case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/project/topics/event_survey-launch"}'
 
-curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/topics/event_paper-fulfilment
-curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/subscriptions/event_paper-fulfilment_rm-case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/project/topics/event_paper-fulfilment"}'
+curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/topics/event_uac-authentication
+curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/subscriptions/event_uac-authentication_rm-case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/project/topics/event_uac-authentication"}'
+
+curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/topics/event_print-fulfilment
+curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/subscriptions/event_print-fulfilment_rm-case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/project/topics/event_print-fulfilment"}'
 
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/topics/event_deactivate-uac
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/project/subscriptions/event_deactivate-uac_rm-case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/project/topics/event_deactivate-uac"}'

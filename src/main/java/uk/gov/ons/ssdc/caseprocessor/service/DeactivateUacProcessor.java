@@ -8,9 +8,8 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.DeactivateUacDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 
@@ -30,23 +29,23 @@ public class DeactivateUacProcessor {
 
     for (UacQidLink uacQidLink : uacQidLinks) {
       if (uacQidLink.isActive()) {
-        ResponseManagementEvent responseManagementEvent = prepareDeactivateUacEvent(uacQidLink);
-        messageSender.sendMessage(deactivateUacTopic, responseManagementEvent);
+        EventDTO event = prepareDeactivateUacEvent(uacQidLink);
+        messageSender.sendMessage(deactivateUacTopic, event);
       }
     }
   }
 
-  private ResponseManagementEvent prepareDeactivateUacEvent(UacQidLink uacQidLink) {
-    EventDTO eventDTO = createEventDTO(EventTypeDTO.DEACTIVATE_UAC);
+  private EventDTO prepareDeactivateUacEvent(UacQidLink uacQidLink) {
+    EventHeaderDTO eventHeader = createEventDTO(deactivateUacTopic);
 
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setEvent(eventDTO);
+    EventDTO event = new EventDTO();
+    event.setHeader(eventHeader);
 
     PayloadDTO payloadDTO = new PayloadDTO();
     DeactivateUacDTO deactivateUacDTO = new DeactivateUacDTO();
     deactivateUacDTO.setQid(uacQidLink.getQid());
     payloadDTO.setDeactivateUac(deactivateUacDTO);
-    responseManagementEvent.setPayload(payloadDTO);
-    return responseManagementEvent;
+    event.setPayload(payloadDTO);
+    return event;
   }
 }

@@ -1,80 +1,84 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.DeactivateUacDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UacAuthenticationDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 
 @ExtendWith(MockitoExtension.class)
-public class DeactivateUacReceiverTest {
+public class UacAuthenticationReceiverTest {
+
+  private final UUID TEST_CASE_ID = UUID.randomUUID();
+  private final String TEST_QID_ID = "1234567890123456";
 
   @Mock private UacService uacService;
   @Mock private EventLogger eventLogger;
 
-  @InjectMocks DeactivateUacReceiver underTest;
+  @InjectMocks UacAuthenticationReceiver underTest;
 
   @Test
-  public void testDeactivateUac() {
-    // Given
+  public void testUacAuthentication() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
     managementEvent.getHeader().setVersion(EVENT_SCHEMA_VERSION);
-    managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
+    managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     managementEvent.getHeader().setTopic("Test topic");
-    managementEvent.getHeader().setChannel("RM");
+    managementEvent.getHeader().setChannel("RH");
     managementEvent.setPayload(new PayloadDTO());
-    managementEvent.getPayload().setDeactivateUac(new DeactivateUacDTO());
-    managementEvent.getPayload().getDeactivateUac().setQid("0123456789");
 
+    UacAuthenticationDTO uacAuthentication = new UacAuthenticationDTO();
+    uacAuthentication.setQid(TEST_QID_ID);
+    managementEvent.getPayload().setUacAuthentication(uacAuthentication);
+
+    UacQidLink expectedUacQidLink = new UacQidLink();
+    expectedUacQidLink.setUac(TEST_QID_ID);
     Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
 
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setActive(true);
-    when(uacService.findByQid("0123456789")).thenReturn(uacQidLink);
-    when(uacService.saveAndEmitUacUpdateEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
+    // Given
+    when(uacService.findByQid(TEST_QID_ID)).thenReturn(expectedUacQidLink);
 
-    // When
+    // when
     underTest.receiveMessage(message);
 
-    // Then
-    ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    // then
+    InOrder inOrder = inOrder(uacService, eventLogger);
 
-    verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkArgumentCaptor.capture());
-    UacQidLink actualUacQidLink = uacQidLinkArgumentCaptor.getValue();
-    assertThat(actualUacQidLink.isActive()).isFalse();
+    inOrder.verify(uacService).findByQid(TEST_QID_ID);
 
-    OffsetDateTime messageDateTime = getMsgTimeStamp(message);
-
-    verify(eventLogger)
+    inOrder
+        .verify(eventLogger)
         .logUacQidEvent(
-            eq(uacQidLink),
-            eq(managementEvent.getHeader().getDateTime()),
-            eq("Deactivate UAC"),
-            eq(EventType.DEACTIVATE_UAC),
+            eq(expectedUacQidLink),
+            any(OffsetDateTime.class),
+            eq("Respondent authenticated"),
+            eq(EventType.UAC_AUTHENTICATION),
             eq(managementEvent.getHeader()),
-            eq(managementEvent.getPayload()),
-            eq(messageDateTime));
+            eq(uacAuthentication),
+            any());
+
+    verifyNoMoreInteractions(uacService);
+    verifyNoMoreInteractions(eventLogger);
   }
 }

@@ -22,8 +22,8 @@
     <dependencies>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-dependencies</artifactId>
-        <version>Hoxton.SR12</version>
+        <artifactId>spring-cloud-gcp-dependencies</artifactId>
+        <version>1.2.8.RELEASE</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
