@@ -32,7 +32,7 @@ Just build the image
 ## Internal Events
 
 ### Sample Load
-Topic: `rm-internal-telephone-capture`
+Topic: `rm-internal-sample_case-processor`
 Example message:
 
 ```json
