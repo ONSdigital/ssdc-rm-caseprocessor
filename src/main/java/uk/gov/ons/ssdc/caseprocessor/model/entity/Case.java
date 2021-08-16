@@ -59,7 +59,7 @@ public class Case {
   private RefusalType refusalReceived;
 
   @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-  private boolean addressInvalid;
+  private boolean invalid;
 
   @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
   private boolean surveyLaunched;

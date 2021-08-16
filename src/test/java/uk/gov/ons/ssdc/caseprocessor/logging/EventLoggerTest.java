@@ -10,8 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
@@ -31,9 +30,9 @@ public class EventLoggerTest {
     Case caze = new Case();
     OffsetDateTime eventTime = OffsetDateTime.now();
     OffsetDateTime messageTime = OffsetDateTime.now().minusSeconds(30);
-    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
-    eventDTO.setSource("Test source");
-    eventDTO.setChannel("Test channel");
+    EventHeaderDTO eventHeader = EventHelper.createEventDTO("Test topic");
+    eventHeader.setSource("Test source");
+    eventHeader.setChannel("Test channel");
 
     UacQidDTO redactMe = new UacQidDTO();
     redactMe.setQid("TEST QID");
@@ -43,8 +42,8 @@ public class EventLoggerTest {
         caze,
         eventTime,
         "Test description",
-        EventType.CASE_CREATED,
-        eventDTO,
+        EventType.NEW_CASE,
+        eventHeader,
         redactMe,
         messageTime);
 
@@ -53,14 +52,13 @@ public class EventLoggerTest {
     Event actualEvent = eventArgumentCaptor.getValue();
     assertThat(caze).isEqualTo(actualEvent.getCaze());
     assertThat(actualEvent.getUacQidLink()).isNull();
-    assertThat(eventTime).isEqualTo(actualEvent.getEventDate());
-    assertThat("Test source").isEqualTo(actualEvent.getEventSource());
-    assertThat("Test channel").isEqualTo(actualEvent.getEventChannel());
-    assertThat(EventType.CASE_CREATED).isEqualTo(actualEvent.getEventType());
-    assertThat("Test description").isEqualTo(actualEvent.getEventDescription());
-    assertThat("{\"uac\":\"SECRET UAC\",\"qid\":\"TEST QID\"}")
-        .isEqualTo(actualEvent.getEventPayload());
-    assertThat(eventDTO.getTransactionId()).isEqualTo(actualEvent.getEventTransactionId());
+    assertThat(eventTime).isEqualTo(actualEvent.getDateTime());
+    assertThat("Test source").isEqualTo(actualEvent.getSource());
+    assertThat("Test channel").isEqualTo(actualEvent.getChannel());
+    assertThat(EventType.NEW_CASE).isEqualTo(actualEvent.getType());
+    assertThat("Test description").isEqualTo(actualEvent.getDescription());
+    assertThat("{\"uac\":\"SECRET UAC\",\"qid\":\"TEST QID\"}").isEqualTo(actualEvent.getPayload());
+    assertThat(eventHeader.getMessageId()).isEqualTo(actualEvent.getMessageId());
     assertThat(messageTime).isEqualTo(actualEvent.getMessageTimestamp());
   }
 
@@ -69,9 +67,9 @@ public class EventLoggerTest {
     UacQidLink uacQidLink = new UacQidLink();
     OffsetDateTime eventTime = OffsetDateTime.now();
     OffsetDateTime messageTime = OffsetDateTime.now().minusSeconds(30);
-    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
-    eventDTO.setSource("Test source");
-    eventDTO.setChannel("Test channel");
+    EventHeaderDTO eventHeader = EventHelper.createEventDTO("Test topic");
+    eventHeader.setSource("Test source");
+    eventHeader.setChannel("Test channel");
 
     UacQidDTO redactMe = new UacQidDTO();
     redactMe.setQid("TEST QID");
@@ -81,8 +79,8 @@ public class EventLoggerTest {
         uacQidLink,
         eventTime,
         "Test description",
-        EventType.CASE_CREATED,
-        eventDTO,
+        EventType.NEW_CASE,
+        eventHeader,
         redactMe,
         messageTime);
 
@@ -91,14 +89,13 @@ public class EventLoggerTest {
     Event actualEvent = eventArgumentCaptor.getValue();
     assertThat(uacQidLink).isEqualTo(actualEvent.getUacQidLink());
     assertThat(actualEvent.getCaze()).isNull();
-    assertThat(eventTime).isEqualTo(actualEvent.getEventDate());
-    assertThat("Test source").isEqualTo(actualEvent.getEventSource());
-    assertThat("Test channel").isEqualTo(actualEvent.getEventChannel());
-    assertThat(EventType.CASE_CREATED).isEqualTo(actualEvent.getEventType());
-    assertThat("Test description").isEqualTo(actualEvent.getEventDescription());
-    assertThat("{\"uac\":\"SECRET UAC\",\"qid\":\"TEST QID\"}")
-        .isEqualTo(actualEvent.getEventPayload());
-    assertThat(eventDTO.getTransactionId()).isEqualTo(actualEvent.getEventTransactionId());
+    assertThat(eventTime).isEqualTo(actualEvent.getDateTime());
+    assertThat("Test source").isEqualTo(actualEvent.getSource());
+    assertThat("Test channel").isEqualTo(actualEvent.getChannel());
+    assertThat(EventType.NEW_CASE).isEqualTo(actualEvent.getType());
+    assertThat("Test description").isEqualTo(actualEvent.getDescription());
+    assertThat("{\"uac\":\"SECRET UAC\",\"qid\":\"TEST QID\"}").isEqualTo(actualEvent.getPayload());
+    assertThat(eventHeader.getMessageId()).isEqualTo(actualEvent.getMessageId());
     assertThat(messageTime).isEqualTo(actualEvent.getMessageTimestamp());
   }
 }

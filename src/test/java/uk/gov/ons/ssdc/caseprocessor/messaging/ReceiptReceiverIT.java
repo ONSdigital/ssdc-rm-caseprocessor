@@ -3,6 +3,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -18,16 +19,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.UacDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.ReceiptDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
@@ -71,10 +70,10 @@ public class ReceiptReceiverIT {
 
   @Test
   public void testReceipt() throws Exception {
-    try (QueueSpy<ResponseManagementEvent> outboundUacQueueSpy =
-            pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, ResponseManagementEvent.class);
-        QueueSpy<ResponseManagementEvent> outboundCaseQueueSpy =
-            pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, ResponseManagementEvent.class)) {
+    try (QueueSpy<EventDTO> outboundUacQueueSpy =
+            pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class);
+        QueueSpy<EventDTO> outboundCaseQueueSpy =
+            pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -86,7 +85,7 @@ public class ReceiptReceiverIT {
       caze.setCollectionExercise(collectionExercise);
 
       Map<String, String> sample = new HashMap<>();
-      sample.put("Address", "Tenby");
+      sample.put("CanYouKickIt", "YesYouCan");
       sample.put("Org", "Brewery");
       caze.setReceiptReceived(false);
       caze.setSample(sample);
@@ -100,41 +99,41 @@ public class ReceiptReceiverIT {
       uacQidLink.setActive(true);
       uacQidLinkRepository.saveAndFlush(uacQidLink);
 
-      ResponseDTO responseDTO = new ResponseDTO();
-      responseDTO.setQuestionnaireId(TEST_QID);
-      responseDTO.setResponseDateTime(OffsetDateTime.now());
+      ReceiptDTO receiptDTO = new ReceiptDTO();
+      receiptDTO.setQid(TEST_QID);
       PayloadDTO payloadDTO = new PayloadDTO();
-      payloadDTO.setResponse(responseDTO);
-      ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-      responseManagementEvent.setPayload(payloadDTO);
+      payloadDTO.setReceipt(receiptDTO);
+      EventDTO event = new EventDTO();
+      event.setPayload(payloadDTO);
 
-      EventDTO eventDTO = new EventDTO();
-      eventDTO.setType(EventTypeDTO.RESPONSE_RECEIVED);
-      eventDTO.setSource("RH");
-      eventDTO.setDateTime(OffsetDateTime.now());
-      eventDTO.setChannel("RH");
-      eventDTO.setTransactionId(UUID.randomUUID());
-      responseManagementEvent.setEvent(eventDTO);
+      EventHeaderDTO eventHeader = new EventHeaderDTO();
+      eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+      eventHeader.setTopic(INBOUND_RECEIPT_TOPIC);
+      eventHeader.setSource("RH");
+      eventHeader.setDateTime(OffsetDateTime.now());
+      eventHeader.setChannel("RH");
+      eventHeader.setMessageId(UUID.randomUUID());
+      event.setHeader(eventHeader);
 
-      pubsubHelper.sendMessage(INBOUND_RECEIPT_TOPIC, responseManagementEvent);
+      pubsubHelper.sendMessage(INBOUND_RECEIPT_TOPIC, event);
 
       //  THEN
-      ResponseManagementEvent caseEmittedEvent =
-          outboundCaseQueueSpy.checkExpectedMessageReceived();
+      EventDTO caseEmittedEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
 
-      CollectionCase emittedCase = caseEmittedEvent.getPayload().getCollectionCase();
+      CaseUpdateDTO emittedCase = caseEmittedEvent.getPayload().getCaseUpdate();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(emittedCase.getSample()).isEqualTo(sample);
       assertThat(emittedCase.isReceiptReceived()).isTrue();
 
-      ResponseManagementEvent uacUpdatedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
-      UacDTO emittedUac = uacUpdatedEvent.getPayload().getUac();
+      EventDTO uacUpdatedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
+      UacUpdateDTO emittedUac = uacUpdatedEvent.getPayload().getUacUpdate();
       assertThat(emittedUac.isActive()).isFalse();
 
-      List<Event> storedEvents = eventRepository.findAll();
+      List<uk.gov.ons.ssdc.caseprocessor.model.entity.Event> storedEvents =
+          eventRepository.findAll();
       assertThat(storedEvents.size()).isEqualTo(1);
       assertThat(storedEvents.get(0).getUacQidLink().getId()).isEqualTo(TEST_UACLINK_ID);
-      assertThat(storedEvents.get(0).getEventType()).isEqualTo(EventType.RESPONSE_RECEIVED);
+      assertThat(storedEvents.get(0).getType()).isEqualTo(EventType.RECEIPT);
     }
   }
 }

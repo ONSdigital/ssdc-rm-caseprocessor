@@ -5,10 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.UacDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
@@ -27,29 +26,28 @@ public class UacService {
     this.uacQidLinkRepository = uacQidLinkRepository;
   }
 
-  public UacQidLink saveAndEmitUacUpdatedEvent(UacQidLink uacQidLink) {
+  public UacQidLink saveAndEmitUacUpdateEvent(UacQidLink uacQidLink) {
     UacQidLink savedUacQidLink = uacQidLinkRepository.save(uacQidLink);
 
-    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.UAC_UPDATED);
+    EventHeaderDTO eventHeader = EventHelper.createEventDTO(uacUpdateTopic);
 
-    UacDTO uac = new UacDTO();
-    uac.setQuestionnaireId(savedUacQidLink.getQid());
+    UacUpdateDTO uac = new UacUpdateDTO();
+    uac.setQid(savedUacQidLink.getQid());
     uac.setUac(savedUacQidLink.getUac());
     uac.setActive(savedUacQidLink.isActive());
 
     Case caze = savedUacQidLink.getCaze();
     if (caze != null) {
       uac.setCaseId(caze.getId());
-      uac.setCollectionExerciseId(caze.getCollectionExercise().getId());
     }
 
     PayloadDTO payloadDTO = new PayloadDTO();
-    payloadDTO.setUac(uac);
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setEvent(eventDTO);
-    responseManagementEvent.setPayload(payloadDTO);
+    payloadDTO.setUacUpdate(uac);
+    EventDTO event = new EventDTO();
+    event.setHeader(eventHeader);
+    event.setPayload(payloadDTO);
 
-    messageSender.sendMessage(uacUpdateTopic, responseManagementEvent);
+    messageSender.sendMessage(uacUpdateTopic, event);
 
     return savedUacQidLink;
   }

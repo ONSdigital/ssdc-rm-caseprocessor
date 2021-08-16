@@ -1,7 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 
 import java.util.UUID;
@@ -11,7 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.MessageToSend;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.MessageToSendRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper;
@@ -26,10 +25,10 @@ public class MessageSenderTest {
   @Test
   public void testSendMessage() {
     String destinationTopic = "test-topic";
-    CollectionCase collectionCase = new CollectionCase();
-    collectionCase.setCaseId(UUID.randomUUID());
+    CaseUpdateDTO caseUpdate = new CaseUpdateDTO();
+    caseUpdate.setCaseId(UUID.randomUUID());
 
-    underTest.sendMessage(destinationTopic, collectionCase);
+    underTest.sendMessage(destinationTopic, caseUpdate);
 
     ArgumentCaptor<MessageToSend> messageToSendArgumentCaptor =
         ArgumentCaptor.forClass(MessageToSend.class);
@@ -38,6 +37,6 @@ public class MessageSenderTest {
     MessageToSend actualMessageSent = messageToSendArgumentCaptor.getValue();
     assertThat(actualMessageSent.getDestinationTopic()).isEqualTo(destinationTopic);
     assertThat(actualMessageSent.getMessageBody())
-        .isEqualTo(JsonHelper.convertObjectToJson(collectionCase));
+        .isEqualTo(JsonHelper.convertObjectToJson(caseUpdate));
   }
 }

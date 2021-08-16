@@ -1,5 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
+import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
@@ -9,7 +10,7 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSampleSensitive;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
@@ -17,7 +18,6 @@ import uk.gov.ons.ssdc.caseprocessor.utils.RedactHelper;
 
 @MessageEndpoint
 public class UpdateSampleSensitiveReceiver {
-
   private final CaseService caseService;
   private final EventLogger eventLogger;
 
@@ -27,12 +27,12 @@ public class UpdateSampleSensitiveReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "updateSampleSensitiveInputChannel")
-  public void receiveMessage(Message<ResponseManagementEvent> message) {
-    ResponseManagementEvent responseManagementEvent = message.getPayload();
+  @ServiceActivator(inputChannel = "updateSampleSensitiveInputChannel", adviceChain = "retryAdvice")
+  public void receiveMessage(Message<byte[]> message) {
+    EventDTO event = convertJsonBytesToEvent(message.getPayload());
+
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    UpdateSampleSensitive updateSampleSensitive =
-        responseManagementEvent.getPayload().getUpdateSampleSensitive();
+    UpdateSampleSensitive updateSampleSensitive = event.getPayload().getUpdateSampleSensitive();
 
     Case caze = caseService.getCaseByCaseId(updateSampleSensitive.getCaseId());
 
@@ -49,11 +49,11 @@ public class UpdateSampleSensitiveReceiver {
 
     eventLogger.logCaseEvent(
         caze,
-        responseManagementEvent.getEvent().getDateTime(),
+        event.getHeader().getDateTime(),
         "Sensitive data updated",
         EventType.UPDATE_SAMPLE_SENSITIVE,
-        responseManagementEvent.getEvent(),
-        RedactHelper.redact(responseManagementEvent.getPayload()),
+        event.getHeader(),
+        RedactHelper.redact(event.getPayload()),
         messageTimestamp);
   }
 }

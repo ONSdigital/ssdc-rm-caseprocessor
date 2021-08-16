@@ -3,7 +3,7 @@ package uk.gov.ons.ssdc.caseprocessor.logging;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
@@ -25,7 +25,7 @@ public class EventLogger {
       OffsetDateTime eventDate,
       String eventDescription,
       EventType eventType,
-      EventDTO event,
+      EventHeaderDTO event,
       Object eventPayload,
       OffsetDateTime messageTimestamp) {
     Event loggedEvent =
@@ -40,7 +40,7 @@ public class EventLogger {
       OffsetDateTime eventDate,
       String eventDescription,
       EventType eventType,
-      EventDTO event,
+      EventHeaderDTO event,
       Object eventPayload,
       OffsetDateTime messageTimestamp) {
     Event loggedEvent =
@@ -54,23 +54,23 @@ public class EventLogger {
       OffsetDateTime eventDate,
       String eventDescription,
       EventType eventType,
-      EventDTO event,
+      EventHeaderDTO event,
       Object eventPayload,
       OffsetDateTime messageTimestamp) {
     Event loggedEvent = new Event();
 
     loggedEvent.setId(UUID.randomUUID());
-    loggedEvent.setEventDate(eventDate);
-    loggedEvent.setRmEventProcessed(OffsetDateTime.now());
-    loggedEvent.setEventDescription(eventDescription);
-    loggedEvent.setEventType(eventType);
-    loggedEvent.setEventChannel(event.getChannel());
-    loggedEvent.setEventSource(event.getSource());
-    loggedEvent.setEventTransactionId(event.getTransactionId());
+    loggedEvent.setDateTime(eventDate);
+    loggedEvent.setProcessedAt(OffsetDateTime.now());
+    loggedEvent.setDescription(eventDescription);
+    loggedEvent.setType(eventType);
+    loggedEvent.setChannel(event.getChannel());
+    loggedEvent.setSource(event.getSource());
+    loggedEvent.setMessageId(event.getMessageId());
     loggedEvent.setMessageTimestamp(messageTimestamp);
     loggedEvent.setCreatedBy(event.getOriginatingUser());
 
-    loggedEvent.setEventPayload(JsonHelper.convertObjectToJson(eventPayload));
+    loggedEvent.setPayload(JsonHelper.convertObjectToJson(eventPayload));
 
     return loggedEvent;
   }

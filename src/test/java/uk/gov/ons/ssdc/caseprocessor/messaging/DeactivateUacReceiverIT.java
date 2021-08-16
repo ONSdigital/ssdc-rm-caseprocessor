@@ -2,6 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,11 +16,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.DeactivateUacDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.UacDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
@@ -50,25 +49,25 @@ public class DeactivateUacReceiverIT {
   @BeforeEach
   public void setUp() {
     pubsubHelper.purgeMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
-    eventRepository.deleteAllInBatch();
-    uacQidLinkRepository.deleteAllInBatch();
+    deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testDeactivateUacReceiver() throws Exception {
-    try (QueueSpy<ResponseManagementEvent> uacRhQueue =
-        pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, ResponseManagementEvent.class)) {
+    try (QueueSpy<EventDTO> uacRhQueue =
+        pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // GIVEN
-      ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-      EventDTO eventDTO = new EventDTO();
-      eventDTO.setType(EventTypeDTO.DEACTIVATE_UAC);
-      responseManagementEvent.setEvent(eventDTO);
+      EventDTO event = new EventDTO();
+      EventHeaderDTO eventHeader = new EventHeaderDTO();
+      eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+      eventHeader.setTopic(deactivateUacTopic);
+      event.setHeader(eventHeader);
 
       PayloadDTO payloadDTO = new PayloadDTO();
       DeactivateUacDTO deactivateUacDTO = new DeactivateUacDTO();
       deactivateUacDTO.setQid(TEST_QID);
       payloadDTO.setDeactivateUac(deactivateUacDTO);
-      responseManagementEvent.setPayload(payloadDTO);
+      event.setPayload(payloadDTO);
 
       UacQidLink uacQidLink = new UacQidLink();
       uacQidLink.setId(UUID.randomUUID());
@@ -78,22 +77,22 @@ public class DeactivateUacReceiverIT {
       uacQidLinkRepository.save(uacQidLink);
 
       // WHEN
-      pubsubHelper.sendMessage(deactivateUacTopic, responseManagementEvent);
+      pubsubHelper.sendMessage(deactivateUacTopic, event);
 
       // THEN
-      ResponseManagementEvent actualResponseManagementEvent =
-          uacRhQueue.checkExpectedMessageReceived();
+      EventDTO actualEvent = uacRhQueue.checkExpectedMessageReceived();
 
-      UacDTO uac = actualResponseManagementEvent.getPayload().getUac();
-      assertThat(uac.getQuestionnaireId()).isEqualTo(TEST_QID);
+      UacUpdateDTO uac = actualEvent.getPayload().getUacUpdate();
+      assertThat(uac.getQid()).isEqualTo(TEST_QID);
       assertThat(uac.isActive()).isFalse();
 
       UacQidLink sentUacQidLinkUpdated = uacQidLinkRepository.findByQid(TEST_QID).get();
 
       assertThat(sentUacQidLinkUpdated.isActive()).isFalse();
 
-      Event event = eventRepository.findAll().get(0);
-      assertThat(event.getEventType()).isEqualTo(EventType.DEACTIVATE_UAC);
+      uk.gov.ons.ssdc.caseprocessor.model.entity.Event databaseEvent =
+          eventRepository.findAll().get(0);
+      assertThat(databaseEvent.getType()).isEqualTo(EventType.DEACTIVATE_UAC);
     }
   }
 }

@@ -33,12 +33,13 @@ spring:
 queueconfig:
   telephone-capture-subscription: rm-internal-telephone-capture_case-processor
   sample-subscription: rm-internal-sample_case-processor
-  receipt-response-subscription: event_receipt_rm-case-processor
-  refusal-response-subscription: event_refusal_rm-case-processor
+  receipt-subscription: event_receipt_rm-case-processor
+  refusal-subscription: event_refusal_rm-case-processor
   print-topic: rm-internal-print-row
-  invalid-address-subscription: event_invalid_rm-case-processor
-  survey-launched-subscription: event_survey-launched_rm-case-processor
-  fulfilment-subscription: event_paper-fulfilment_rm-case-processor
+  invalid-case-subscription: event_invalid-case_rm-case-processor
+  survey-launch-subscription: event_survey-launch_rm-case-processor
+  uac-authentication-subscription: event_uac-authentication_rm-case-processor
+  print-fulfilment-subscription: event_print-fulfilment_rm-case-processor
   deactivate-uac-subscription: event_deactivate-uac_rm-case-processor
   update-sample-sensitive-subscription: event_update-sample-sensitive_rm-case-processor
   case-update-topic: event_case-update
