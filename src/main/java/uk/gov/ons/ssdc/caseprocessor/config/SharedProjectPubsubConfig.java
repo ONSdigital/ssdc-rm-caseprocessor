@@ -24,8 +24,7 @@ public class SharedProjectPubsubConfig {
 
   private final GcpPubSubProperties gcpPubSubProperties;
 
-  public SharedProjectPubsubConfig(
-      GcpPubSubProperties gcpPubSubProperties) {
+  public SharedProjectPubsubConfig(GcpPubSubProperties gcpPubSubProperties) {
     this.gcpPubSubProperties = gcpPubSubProperties;
   }
 
@@ -42,9 +41,12 @@ public class SharedProjectPubsubConfig {
   }
 
   @Bean("sharedProjectPublisherFactory")
-  public DefaultPublisherFactory publisherFactory(CredentialsProvider credentialsProvider,
-      @Qualifier("publisherTransportChannelProvider") TransportChannelProvider transportChannelProvider) {
-    final DefaultPublisherFactory defaultPublisherFactory = new DefaultPublisherFactory(() -> sharedPubsubProject);
+  public DefaultPublisherFactory publisherFactory(
+      CredentialsProvider credentialsProvider,
+      @Qualifier("publisherTransportChannelProvider")
+          TransportChannelProvider transportChannelProvider) {
+    final DefaultPublisherFactory defaultPublisherFactory =
+        new DefaultPublisherFactory(() -> sharedPubsubProject);
 
     if (gcpPubSubProperties.getEmulatorHost() == null
         || "false".equals(gcpPubSubProperties.getEmulatorHost())) {
@@ -61,9 +63,12 @@ public class SharedProjectPubsubConfig {
   }
 
   @Bean("sharedProjectSubscriberFactory")
-  public DefaultSubscriberFactory subscriberFactory(CredentialsProvider credentialsProvider,
-      @Qualifier("subscriberTransportChannelProvider") TransportChannelProvider transportChannelProvider) {
-    final DefaultSubscriberFactory defaultSubscriberFactory = new DefaultSubscriberFactory(() -> sharedPubsubProject);
+  public DefaultSubscriberFactory subscriberFactory(
+      CredentialsProvider credentialsProvider,
+      @Qualifier("subscriberTransportChannelProvider")
+          TransportChannelProvider transportChannelProvider) {
+    final DefaultSubscriberFactory defaultSubscriberFactory =
+        new DefaultSubscriberFactory(() -> sharedPubsubProject);
 
     if (gcpPubSubProperties.getEmulatorHost() == null
         || "false".equals(gcpPubSubProperties.getEmulatorHost())) {
@@ -82,10 +87,13 @@ public class SharedProjectPubsubConfig {
 
   @Bean(name = "sharedProjectPubSubTemplate")
   public PubSubTemplate pubSubTemplate(
-      PubSubPublisherTemplate pubSubPublisherTemplate,
-      PubSubSubscriberTemplate pubSubSubscriberTemplate,
+      @Qualifier("sharedProjectPubSubPublisherTemplate")
+          PubSubPublisherTemplate pubSubPublisherTemplate,
+      @Qualifier("sharedProjectPubSubSubscriberTemplate")
+          PubSubSubscriberTemplate pubSubSubscriberTemplate,
       SimplePubSubMessageConverter simplePubSubMessageConverter) {
-    PubSubTemplate pubSubTemplate = new PubSubTemplate(pubSubPublisherTemplate, pubSubSubscriberTemplate);
+    PubSubTemplate pubSubTemplate =
+        new PubSubTemplate(pubSubPublisherTemplate, pubSubSubscriberTemplate);
     pubSubTemplate.setMessageConverter(simplePubSubMessageConverter);
     return pubSubTemplate;
   }

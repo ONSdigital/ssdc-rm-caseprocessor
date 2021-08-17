@@ -6,10 +6,8 @@ import org.springframework.cloud.gcp.autoconfigure.pubsub.GcpPubSubAutoConfigura
 import org.springframework.cloud.gcp.autoconfigure.pubsub.GcpPubSubReactiveAutoConfiguration;
 import org.springframework.integration.annotation.IntegrationComponentScan;
 
-@SpringBootApplication(exclude = {
-    GcpPubSubAutoConfiguration.class,
-    GcpPubSubReactiveAutoConfiguration.class})
-//@SpringBootApplication
+@SpringBootApplication(
+    exclude = {GcpPubSubAutoConfiguration.class, GcpPubSubReactiveAutoConfiguration.class})
 @IntegrationComponentScan
 public class Application {
   public static void main(String[] args) {

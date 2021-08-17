@@ -52,7 +52,7 @@ queueconfig:
   deactivate-uac-topic: event_deactivate-uac
   publishtimeout: 30  # In seconds
   our-pubsub-project: our-project
-  shared-pubsub-project: project
+  shared-pubsub-project: shared-project
 
 healthcheck:
   frequency: 15000 #milliseconds

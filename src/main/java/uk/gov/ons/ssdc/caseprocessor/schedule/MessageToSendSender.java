@@ -19,7 +19,8 @@ public class MessageToSendSender {
   @Value("${queueconfig.publishtimeout}")
   private int publishTimeout;
 
-  public MessageToSendSender(@Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
+  public MessageToSendSender(
+      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     this.pubSubTemplate = pubSubTemplate;
   }
 

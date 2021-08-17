@@ -19,74 +19,82 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class OurProjectPubsubConfig {
-//  @Value("${queueconfig.shared-pubsub-project}")
-//  private String sharedPubsubProject;
-//
-//  private final GcpPubSubProperties gcpPubSubProperties;
-//
-//  public OurProjectPubsubConfig(
-//      GcpPubSubProperties gcpPubSubProperties) {
-//    this.gcpPubSubProperties = gcpPubSubProperties;
-//  }
-//
-//  @Bean("sharedProjectPubSubSubscriberTemplate")
-//  public PubSubSubscriberTemplate pubSubSubscriberTemplate(
-//      @Qualifier("sharedProjectSubscriberFactory") SubscriberFactory subscriberFactory) {
-//    return new PubSubSubscriberTemplate(subscriberFactory);
-//  }
-//
-//  @Bean("sharedProjectPubSubPublisherTemplate")
-//  public PubSubPublisherTemplate pubSubPublisherTemplate(
-//      @Qualifier("sharedProjectPublisherFactory") PublisherFactory publisherFactory) {
-//    return new PubSubPublisherTemplate(publisherFactory);
-//  }
-//
-//  @Bean("sharedProjectPublisherFactory")
-//  public DefaultPublisherFactory publisherFactory(CredentialsProvider credentialsProvider,
-//      @Qualifier("publisherTransportChannelProvider") TransportChannelProvider transportChannelProvider) {
-//    final DefaultPublisherFactory defaultPublisherFactory = new DefaultPublisherFactory(() -> sharedPubsubProject);
-//
-//    if (gcpPubSubProperties.getEmulatorHost() == null
-//        || "false".equals(gcpPubSubProperties.getEmulatorHost())) {
-//      defaultPublisherFactory.setCredentialsProvider(credentialsProvider);
-//    } else {
-//      // Since we cannot create a general NoCredentialsProvider if the emulator host is enabled
-//      // (because it would also be used for the other components), we have to create one here
-//      // for this particular case.
-//      defaultPublisherFactory.setCredentialsProvider(NoCredentialsProvider.create());
-//    }
-//
-//    defaultPublisherFactory.setChannelProvider(transportChannelProvider);
-//    return defaultPublisherFactory;
-//  }
-//
-//  @Bean("sharedProjectSubscriberFactory")
-//  public DefaultSubscriberFactory subscriberFactory(CredentialsProvider credentialsProvider,
-//      @Qualifier("subscriberTransportChannelProvider") TransportChannelProvider transportChannelProvider) {
-//    final DefaultSubscriberFactory defaultSubscriberFactory = new DefaultSubscriberFactory(() -> sharedPubsubProject);
-//
-//    if (gcpPubSubProperties.getEmulatorHost() == null
-//        || "false".equals(gcpPubSubProperties.getEmulatorHost())) {
-//      defaultSubscriberFactory.setCredentialsProvider(credentialsProvider);
-//    } else {
-//      // Since we cannot create a general NoCredentialsProvider if the emulator host is enabled
-//      // (because it would also be used for the other components), we have to create one here
-//      // for this particular case.
-//      defaultSubscriberFactory.setCredentialsProvider(NoCredentialsProvider.create());
-//    }
-//
-//    defaultSubscriberFactory.setCredentialsProvider(NoCredentialsProvider.create());
-//    defaultSubscriberFactory.setChannelProvider(transportChannelProvider);
-//    return defaultSubscriberFactory;
-//  }
-//
-//  @Bean(name = "sharedProjectPubSubTemplate")
-//  public PubSubTemplate pubSubTemplate(
-//      PubSubPublisherTemplate pubSubPublisherTemplate,
-//      PubSubSubscriberTemplate pubSubSubscriberTemplate,
-//      SimplePubSubMessageConverter simplePubSubMessageConverter) {
-//    PubSubTemplate pubSubTemplate = new PubSubTemplate(pubSubPublisherTemplate, pubSubSubscriberTemplate);
-//    pubSubTemplate.setMessageConverter(simplePubSubMessageConverter);
-//    return pubSubTemplate;
-//  }
+  @Value("${queueconfig.our-pubsub-project}")
+  private String ourPubsubProject;
+
+  private final GcpPubSubProperties gcpPubSubProperties;
+
+  public OurProjectPubsubConfig(GcpPubSubProperties gcpPubSubProperties) {
+    this.gcpPubSubProperties = gcpPubSubProperties;
+  }
+
+  @Bean("ourProjectPubSubSubscriberTemplate")
+  public PubSubSubscriberTemplate pubSubSubscriberTemplate(
+      @Qualifier("ourProjectSubscriberFactory") SubscriberFactory subscriberFactory) {
+    return new PubSubSubscriberTemplate(subscriberFactory);
+  }
+
+  @Bean("ourProjectPubSubPublisherTemplate")
+  public PubSubPublisherTemplate pubSubPublisherTemplate(
+      @Qualifier("ourProjectPublisherFactory") PublisherFactory publisherFactory) {
+    return new PubSubPublisherTemplate(publisherFactory);
+  }
+
+  @Bean("ourProjectPublisherFactory")
+  public DefaultPublisherFactory publisherFactory(
+      CredentialsProvider credentialsProvider,
+      @Qualifier("publisherTransportChannelProvider")
+          TransportChannelProvider transportChannelProvider) {
+    final DefaultPublisherFactory defaultPublisherFactory =
+        new DefaultPublisherFactory(() -> ourPubsubProject);
+
+    if (gcpPubSubProperties.getEmulatorHost() == null
+        || "false".equals(gcpPubSubProperties.getEmulatorHost())) {
+      defaultPublisherFactory.setCredentialsProvider(credentialsProvider);
+    } else {
+      // Since we cannot create a general NoCredentialsProvider if the emulator host is enabled
+      // (because it would also be used for the other components), we have to create one here
+      // for this particular case.
+      defaultPublisherFactory.setCredentialsProvider(NoCredentialsProvider.create());
+    }
+
+    defaultPublisherFactory.setChannelProvider(transportChannelProvider);
+    return defaultPublisherFactory;
+  }
+
+  @Bean("ourProjectSubscriberFactory")
+  public DefaultSubscriberFactory subscriberFactory(
+      CredentialsProvider credentialsProvider,
+      @Qualifier("subscriberTransportChannelProvider")
+          TransportChannelProvider transportChannelProvider) {
+    final DefaultSubscriberFactory defaultSubscriberFactory =
+        new DefaultSubscriberFactory(() -> ourPubsubProject);
+
+    if (gcpPubSubProperties.getEmulatorHost() == null
+        || "false".equals(gcpPubSubProperties.getEmulatorHost())) {
+      defaultSubscriberFactory.setCredentialsProvider(credentialsProvider);
+    } else {
+      // Since we cannot create a general NoCredentialsProvider if the emulator host is enabled
+      // (because it would also be used for the other components), we have to create one here
+      // for this particular case.
+      defaultSubscriberFactory.setCredentialsProvider(NoCredentialsProvider.create());
+    }
+
+    defaultSubscriberFactory.setCredentialsProvider(NoCredentialsProvider.create());
+    defaultSubscriberFactory.setChannelProvider(transportChannelProvider);
+    return defaultSubscriberFactory;
+  }
+
+  @Bean(name = "ourProjectPubSubTemplate")
+  public PubSubTemplate pubSubTemplate(
+      @Qualifier("ourProjectPubSubPublisherTemplate")
+          PubSubPublisherTemplate pubSubPublisherTemplate,
+      @Qualifier("ourProjectPubSubSubscriberTemplate")
+          PubSubSubscriberTemplate pubSubSubscriberTemplate,
+      SimplePubSubMessageConverter simplePubSubMessageConverter) {
+    PubSubTemplate pubSubTemplate =
+        new PubSubTemplate(pubSubPublisherTemplate, pubSubSubscriberTemplate);
+    pubSubTemplate.setMessageConverter(simplePubSubMessageConverter);
+    return pubSubTemplate;
+  }
 }

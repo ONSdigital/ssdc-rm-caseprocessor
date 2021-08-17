@@ -102,25 +102,29 @@ public class MessageConsumerConfig {
 
   @Bean
   public PubSubInboundChannelAdapter inboundSamples(
-      @Qualifier("sampleInputChannel") MessageChannel channel, @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
+      @Qualifier("sampleInputChannel") MessageChannel channel,
+      @Qualifier("ourProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, sampleSubscription);
   }
 
   @Bean
   public PubSubInboundChannelAdapter receiptInbound(
-      @Qualifier("receiptInputChannel") MessageChannel channel, @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
+      @Qualifier("receiptInputChannel") MessageChannel channel,
+      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, receiptSubscription);
   }
 
   @Bean
   public PubSubInboundChannelAdapter refusalInbound(
-      @Qualifier("refusalInputChannel") MessageChannel channel, @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
+      @Qualifier("refusalInputChannel") MessageChannel channel,
+      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, refusalSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter invalidCaseInbound(
-      @Qualifier("invalidCaseInputChannel") MessageChannel channel, @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
+      @Qualifier("invalidCaseInputChannel") MessageChannel channel,
+      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, invalidCaseSubscription);
   }
 
@@ -148,7 +152,7 @@ public class MessageConsumerConfig {
   @Bean
   PubSubInboundChannelAdapter telephoneCaptureInbound(
       @Qualifier("telephoneCaptureInputChannel") MessageChannel channel,
-      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
+      @Qualifier("ourProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, telephoneCaptureSubscription);
   }
 
