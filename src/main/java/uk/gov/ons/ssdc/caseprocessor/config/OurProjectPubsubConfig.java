@@ -80,7 +80,6 @@ public class OurProjectPubsubConfig {
       defaultSubscriberFactory.setCredentialsProvider(NoCredentialsProvider.create());
     }
 
-    defaultSubscriberFactory.setCredentialsProvider(NoCredentialsProvider.create());
     defaultSubscriberFactory.setChannelProvider(transportChannelProvider);
     return defaultSubscriberFactory;
   }
