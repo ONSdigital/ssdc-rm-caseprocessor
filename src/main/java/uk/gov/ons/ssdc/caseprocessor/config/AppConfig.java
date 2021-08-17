@@ -1,5 +1,10 @@
 package uk.gov.ons.ssdc.caseprocessor.config;
 
+import com.google.api.gax.grpc.GrpcTransportChannel;
+import com.google.api.gax.rpc.FixedTransportChannelProvider;
+import com.google.api.gax.rpc.TransportChannelProvider;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import java.util.TimeZone;
 import javax.annotation.PostConstruct;
 import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
@@ -14,19 +19,18 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class AppConfig {
   @Bean
-  public PubSubTemplate pubSubTemplate(
-      PublisherFactory publisherFactory,
-      SubscriberFactory subscriberFactory,
-      SimplePubSubMessageConverter simplePubSubMessageConverter) {
-    PubSubTemplate pubSubTemplate = new PubSubTemplate(publisherFactory, subscriberFactory);
-    pubSubTemplate.setMessageConverter(simplePubSubMessageConverter);
-    return pubSubTemplate;
-  }
-
-  @Bean
   public SimplePubSubMessageConverter messageConverter() {
     return new SimplePubSubMessageConverter();
   }
+
+//  @Bean
+//  public TransportChannelProvider transportChannelProvider() {
+//    String hostport = System.getenv("PUBSUB_EMULATOR_HOST");
+//    ManagedChannel channel = ManagedChannelBuilder.forTarget(hostport).usePlaintext().build();
+//    TransportChannelProvider channelProvider =
+//        FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
+//    return channelProvider;
+//  }
 
   @PostConstruct
   public void init() {

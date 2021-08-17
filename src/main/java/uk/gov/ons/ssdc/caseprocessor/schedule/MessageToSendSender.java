@@ -5,6 +5,7 @@ import com.google.pubsub.v1.PubsubMessage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,7 @@ public class MessageToSendSender {
   @Value("${queueconfig.publishtimeout}")
   private int publishTimeout;
 
-  public MessageToSendSender(PubSubTemplate pubSubTemplate) {
+  public MessageToSendSender(@Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     this.pubSubTemplate = pubSubTemplate;
   }
 
