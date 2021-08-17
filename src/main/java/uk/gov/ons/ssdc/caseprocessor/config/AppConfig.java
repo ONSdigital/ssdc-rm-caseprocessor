@@ -15,15 +15,6 @@ public class AppConfig {
     return new SimplePubSubMessageConverter();
   }
 
-  //  @Bean
-  //  public TransportChannelProvider transportChannelProvider() {
-  //    String hostport = System.getenv("PUBSUB_EMULATOR_HOST");
-  //    ManagedChannel channel = ManagedChannelBuilder.forTarget(hostport).usePlaintext().build();
-  //    TransportChannelProvider channelProvider =
-  //        FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
-  //    return channelProvider;
-  //  }
-
   @PostConstruct
   public void init() {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));

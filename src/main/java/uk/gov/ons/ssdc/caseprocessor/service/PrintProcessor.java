@@ -100,7 +100,7 @@ public class PrintProcessor {
     printRow.setPackCode(packCode);
     printRow.setPrintSupplier(printSupplier);
 
-    messageSender.sendMessage(printTopic, printRow);
+    messageSender.sendMessage(printTopic, printRow, true);
 
     eventLogger.logCaseEvent(
         caze,

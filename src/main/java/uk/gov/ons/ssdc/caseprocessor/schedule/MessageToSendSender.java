@@ -14,14 +14,17 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.MessageToSend;
 
 @Component
 public class MessageToSendSender {
-  private final PubSubTemplate pubSubTemplate;
+  private final PubSubTemplate sharedProjectPubSubTemplate;
+  private final PubSubTemplate ourProjectPubSubTemplate;
 
   @Value("${queueconfig.publishtimeout}")
   private int publishTimeout;
 
   public MessageToSendSender(
-      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
-    this.pubSubTemplate = pubSubTemplate;
+      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate sharedProjectPubSubTemplate,
+      @Qualifier("ourProjectPubSubTemplate") PubSubTemplate ourProjectPubSubTemplate) {
+    this.sharedProjectPubSubTemplate = sharedProjectPubSubTemplate;
+    this.ourProjectPubSubTemplate = ourProjectPubSubTemplate;
   }
 
   public void sendMessage(MessageToSend messageToSend) {
@@ -30,8 +33,14 @@ public class MessageToSendSender {
             .setData(ByteString.copyFromUtf8(messageToSend.getMessageBody()))
             .build();
 
-    ListenableFuture<String> future =
-        pubSubTemplate.publish(messageToSend.getDestinationTopic(), pubsubMessage);
+    ListenableFuture<String> future;
+
+    if (messageToSend.isSendToOurProject()) {
+      future = ourProjectPubSubTemplate.publish(messageToSend.getDestinationTopic(), pubsubMessage);
+    } else {
+      future =
+          sharedProjectPubSubTemplate.publish(messageToSend.getDestinationTopic(), pubsubMessage);
+    }
 
     try {
       future.get(publishTimeout, TimeUnit.SECONDS);
