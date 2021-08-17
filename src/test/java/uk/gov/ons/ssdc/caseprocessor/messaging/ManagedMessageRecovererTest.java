@@ -112,7 +112,7 @@ class ManagedMessageRecovererTest {
     SkippedMessage skippedMessage = skippedMessageArgCapt.getValue();
     assertThat(skippedMessage.getMessageHash()).isEqualTo(TEST_MESSAGE_HASH);
     assertThat(skippedMessage.getMessagePayload()).isEqualTo("TEST PAYLOAD".getBytes());
-    assertThat(skippedMessage.getQueue()).isEqualTo("TEST SUBSCRIPTION");
+    assertThat(skippedMessage.getSubscription()).isEqualTo("TEST SUBSCRIPTION");
     assertThat(skippedMessage.getService()).isEqualTo("Case Processor");
   }
 
