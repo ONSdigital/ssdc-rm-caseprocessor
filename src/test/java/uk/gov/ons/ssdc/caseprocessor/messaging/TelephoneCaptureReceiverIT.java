@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -98,7 +99,8 @@ public class TelephoneCaptureReceiverIT {
 
       UacUpdateDTO uacUpdatedEvent = emittedEvent.getPayload().getUacUpdate();
       assertThat(uacUpdatedEvent.getCaseId()).isEqualTo(testCase.getId());
-      assertThat(uacUpdatedEvent.getUacHash()).isEqualTo(telephoneCaptureUacQid.getUac());
+      assertThat(uacUpdatedEvent.getUacHash())
+          .isEqualTo(DigestUtils.sha256Hex(telephoneCaptureUacQid.getUac()));
       assertThat(uacUpdatedEvent.getQid()).isEqualTo(telephoneCaptureUacQid.getQid());
     }
   }
