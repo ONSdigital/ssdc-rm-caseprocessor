@@ -136,6 +136,7 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
       skippedMessage.setSubscription(subscriptionName);
       skippedMessage.setContentType("application/json");
       skippedMessage.setHeaders(null);
+      skippedMessage.setRoutingKey(null);
       exceptionManagerClient.storeMessageBeforeSkipping(skippedMessage);
       result = true;
     } catch (Exception exceptionManagerClientException) {
