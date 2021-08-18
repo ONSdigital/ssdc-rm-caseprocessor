@@ -95,6 +95,7 @@ public class ReceiptReceiverIT {
       UacQidLink uacQidLink = new UacQidLink();
       uacQidLink.setId(TEST_UACLINK_ID);
       uacQidLink.setQid(TEST_QID);
+      uacQidLink.setUac("abc");
       uacQidLink.setCaze(caze);
       uacQidLink.setActive(true);
       uacQidLinkRepository.saveAndFlush(uacQidLink);
