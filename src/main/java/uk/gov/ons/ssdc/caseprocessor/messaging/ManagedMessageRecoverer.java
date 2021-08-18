@@ -3,9 +3,8 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import com.google.protobuf.ByteString;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import net.logstash.logback.encoder.org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gcp.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import org.springframework.messaging.Message;
@@ -21,16 +20,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.SkippedMessage;
 public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
   private static final Logger log = LoggerFactory.getLogger(ManagedMessageRecoverer.class);
   private static final String SERVICE_NAME = "Case Processor";
-  private static final MessageDigest digest;
-
-  static {
-    try {
-      digest = MessageDigest.getInstance("SHA-256");
-    } catch (NoSuchAlgorithmException e) {
-      log.error("Could not initialise hashing", e);
-      throw new RuntimeException("Could not initialise hashing", e);
-    }
-  }
 
   @Value("${messagelogging.logstacktraces}")
   private boolean logStackTraces;
@@ -58,12 +47,8 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
     ByteString originalMessageByteString = originalMessage.getPubsubMessage().getData();
     byte[] rawMessageBody = new byte[originalMessageByteString.size()];
     originalMessageByteString.copyTo(rawMessageBody, 0);
-    String messageHash;
 
-    // Digest is not thread-safe
-    synchronized (digest) {
-      messageHash = bytesToHexString(digest.digest(rawMessageBody));
-    }
+    String messageHash = DigestUtils.sha256Hex(rawMessageBody);
 
     String stackTraceRootCause = findUsefulRootCauseInStackTrace(retryContext.getLastThrowable());
 
@@ -185,18 +170,6 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
           .with("root_cause", stackTraceRootCause)
           .error("Could not process message");
     }
-  }
-
-  private String bytesToHexString(byte[] hash) {
-    StringBuffer hexString = new StringBuffer();
-    for (int i = 0; i < hash.length; i++) {
-      String hex = Integer.toHexString(0xff & hash[i]);
-      if (hex.length() == 1) {
-        hexString.append('0');
-      }
-      hexString.append(hex);
-    }
-    return hexString.toString();
   }
 
   private String findUsefulRootCauseInStackTrace(Throwable cause) {
