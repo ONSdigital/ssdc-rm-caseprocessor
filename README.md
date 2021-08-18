@@ -29,10 +29,22 @@ Just build the image
     mvn -DskipTests -DskipITs -DdockerCompose.skip
 ```
 
+## Running Locally
+
+You can run this service dockerised with [docker dev](https://github.com/ONSdigital/ssdc-rm-docker-dev).
+
+If you wish to run it from an IDE to debug first make sure you've set these environment variables in the run configuration so that it uses your local backing services, then spin up docker dev as usual and stop the `caseprocessor` container so it does not conflict.
+
+```shell
+SPRING_CLOUD_GCP_PUBSUB_EMULATOR_HOST=localhost:8538
+SPRING_CLOUD_GCP_PUBSUB_PROJECT_ID=project
+```
+
 ## Internal Events
 
 ### Sample Load
 Topic: `rm-internal-sample_case-processor`
+
 Example message:
 
 ```json
@@ -41,6 +53,33 @@ Example message:
   "collectionExerciseId": "58d971eb-c8f0-45b4-bfd8-af7b9ad8c781",
   "sample": {
     "foo": "bar"
+  }
+}
+```
+
+### Enriched SMS Fulfilment
+Topic: `rm-internal-sms-fulfilment_case-processor`
+
+Example message:
+```json
+{
+  "header": {
+    "source": "TEST",
+    "channel": "TEST",
+    "topic": "rm-internal-sms-fulfilment_case-processor",
+    "version": "v0.2_RELEASE",
+    "dateTime": "2021-06-09T13:49:19.716761Z",
+    "messageId": "92df974c-f03e-4519-8d55-05e9c0ecea43",
+    "correlationId": "d6fc3b21-368e-43b5-baad-ef68d1a08629",
+    "originatingUser": "dummy@example.com"
+  },
+  "payload": {
+    "smsFulfilment": {
+      "caseId": "2f2dc309-37cf-4749-85ea-ccb76ee69e4d",
+      "packCode": "TEST_SMS_UAC",
+      "uac": "RANDOMCHARS",
+      "qid": "0123456789"
+    }
   }
 }
 ```

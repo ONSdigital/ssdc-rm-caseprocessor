@@ -1,5 +1,10 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
+import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
+import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -13,12 +18,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 import uk.gov.ons.ssdc.caseprocessor.utils.RedactHelper;
-
-import java.time.OffsetDateTime;
-import java.util.UUID;
-
-import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 @MessageEndpoint
 public class SmsFulfilmentReceiver {
