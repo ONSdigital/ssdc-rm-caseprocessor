@@ -5,7 +5,6 @@ import com.google.api.gax.core.NoCredentialsProvider;
 import com.google.api.gax.rpc.TransportChannelProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.gcp.autoconfigure.pubsub.GcpPubSubProperties;
 import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import org.springframework.cloud.gcp.pubsub.core.publisher.PubSubPublisherTemplate;
 import org.springframework.cloud.gcp.pubsub.core.subscriber.PubSubSubscriberTemplate;
@@ -22,11 +21,8 @@ public class SharedProjectPubsubConfig {
   @Value("${queueconfig.shared-pubsub-project}")
   private String sharedPubsubProject;
 
-  private final GcpPubSubProperties gcpPubSubProperties;
-
-  public SharedProjectPubsubConfig(GcpPubSubProperties gcpPubSubProperties) {
-    this.gcpPubSubProperties = gcpPubSubProperties;
-  }
+  @Value("${spring.cloud.gcp.pubsub.emulator-host}")
+  private String pubsubEmulatorHost;
 
   @Bean("sharedProjectPubSubSubscriberTemplate")
   public PubSubSubscriberTemplate pubSubSubscriberTemplate(
@@ -48,8 +44,7 @@ public class SharedProjectPubsubConfig {
     final DefaultPublisherFactory defaultPublisherFactory =
         new DefaultPublisherFactory(() -> sharedPubsubProject);
 
-    if (gcpPubSubProperties.getEmulatorHost() == null
-        || "false".equals(gcpPubSubProperties.getEmulatorHost())) {
+    if (pubsubEmulatorHost == null || "false".equals(pubsubEmulatorHost)) {
       defaultPublisherFactory.setCredentialsProvider(credentialsProvider);
     } else {
       // Since we cannot create a general NoCredentialsProvider if the emulator host is enabled
@@ -70,8 +65,7 @@ public class SharedProjectPubsubConfig {
     final DefaultSubscriberFactory defaultSubscriberFactory =
         new DefaultSubscriberFactory(() -> sharedPubsubProject);
 
-    if (gcpPubSubProperties.getEmulatorHost() == null
-        || "false".equals(gcpPubSubProperties.getEmulatorHost())) {
+    if (pubsubEmulatorHost == null || "false".equals(pubsubEmulatorHost)) {
       defaultSubscriberFactory.setCredentialsProvider(credentialsProvider);
     } else {
       // Since we cannot create a general NoCredentialsProvider if the emulator host is enabled
