@@ -1,5 +1,7 @@
-package uk.gov.ons.ssdc.caseprocessor.config;
+package uk.gov.ons.ssdc.caseprocessor.config.emulator;
 
+import com.google.api.gax.core.NoCredentialsProvider;
+import com.google.api.gax.rpc.TransportChannelProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
@@ -15,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile({"!test & !emulator"})
+@Profile({"emulator"})
 public class OurProjectPubsubConfig {
   @Value("${queueconfig.our-pubsub-project}")
   private String ourPubsubProject;
@@ -33,13 +35,28 @@ public class OurProjectPubsubConfig {
   }
 
   @Bean("ourProjectPublisherFactory")
-  public PublisherFactory publisherFactory() {
-    return new DefaultPublisherFactory(() -> ourPubsubProject);
+  public PublisherFactory publisherFactory(
+      @Qualifier("publisherTransportChannelProvider")
+          TransportChannelProvider transportChannelProvider) {
+    DefaultPublisherFactory publisherFactory = new DefaultPublisherFactory(() -> ourPubsubProject);
+
+    publisherFactory.setCredentialsProvider(NoCredentialsProvider.create());
+    publisherFactory.setChannelProvider(transportChannelProvider);
+
+    return publisherFactory;
   }
 
   @Bean("ourProjectSubscriberFactory")
-  public SubscriberFactory subscriberFactory() {
-    return new DefaultSubscriberFactory(() -> ourPubsubProject);
+  public SubscriberFactory subscriberFactory(
+      @Qualifier("subscriberTransportChannelProvider")
+          TransportChannelProvider transportChannelProvider) {
+    DefaultSubscriberFactory subscriberFactory =
+        new DefaultSubscriberFactory(() -> ourPubsubProject);
+
+    subscriberFactory.setCredentialsProvider(NoCredentialsProvider.create());
+    subscriberFactory.setChannelProvider(transportChannelProvider);
+
+    return subscriberFactory;
   }
 
   @Bean(name = "ourProjectPubSubTemplate")
