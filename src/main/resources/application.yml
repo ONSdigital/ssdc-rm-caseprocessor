@@ -12,6 +12,11 @@ spring:
     hikari:
       maximumPoolSize: 50
 
+  cloud:
+    gcp:
+      pubsub:
+        emulator-host: false
+
   sql:
     init:
       mode: always
@@ -28,7 +33,6 @@ spring:
           order_inserts: true
           lob:
             non_contextual_creation: true
-
 
 queueconfig:
   telephone-capture-subscription: rm-internal-telephone-capture_case-processor
@@ -47,6 +51,8 @@ queueconfig:
   deactivate-uac-topic: event_deactivate-uac
   sms-fulfilment-subscription: rm-internal-sms-fulfilment_case-processor
   publishtimeout: 30  # In seconds
+  our-pubsub-project: our-project
+  shared-pubsub-project: shared-project
 
 healthcheck:
   frequency: 15000 #milliseconds

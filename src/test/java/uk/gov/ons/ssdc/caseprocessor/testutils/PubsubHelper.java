@@ -29,21 +29,41 @@ import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 @EnableRetry
 public class PubsubHelper {
   @Autowired
-  @Qualifier("pubSubTemplateForIntegrationTests")
-  private PubSubTemplate pubSubTemplate;
+  @Qualifier("sharedProjectPubSubTemplateForIntegrationTests")
+  private PubSubTemplate sharedProjectPubSubTemplate;
+
+  @Autowired
+  @Qualifier("ourProjectPubSubTemplateForIntegrationTests")
+  private PubSubTemplate ourProjectPubSubTemplate;
 
   @Value("${spring.cloud.gcp.pubsub.emulator-host}")
   private String pubsubEmulatorHost;
 
-  @Value("${spring.cloud.gcp.pubsub.project-id}")
-  private String pubsubProjectId;
+  @Value("${queueconfig.shared-pubsub-project}")
+  private String sharedPubsubProject;
+
+  @Value("${queueconfig.our-pubsub-project}")
+  private String ourPubsubProject;
 
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
 
   public <T> QueueSpy listen(String subscription, Class<T> contentClass) {
+    return listen(subscription, contentClass, false);
+  }
+
+  public <T> QueueSpy listen(
+      String subscription, Class<T> contentClass, boolean receiveFromOurProject) {
+    if (receiveFromOurProject) {
+      return listen(subscription, contentClass, ourProjectPubSubTemplate);
+    } else {
+      return listen(subscription, contentClass, sharedProjectPubSubTemplate);
+    }
+  }
+
+  private <T> QueueSpy listen(String subscription, Class<T> contentClass, PubSubTemplate template) {
     BlockingQueue<T> queue = new ArrayBlockingQueue(50);
     Subscriber subscriber =
-        pubSubTemplate.subscribe(
+        template.subscribe(
             subscription,
             message -> {
               try {
@@ -63,12 +83,24 @@ public class PubsubHelper {
     return new QueueSpy(queue, subscriber);
   }
 
+  public void sendMessage(String topicName, Object message) {
+    sendMessage(topicName, message, false);
+  }
+
+  public void sendMessage(String topicName, Object message, boolean sendToOurProject) {
+    if (sendToOurProject) {
+      sendMessage(topicName, message, ourProjectPubSubTemplate);
+    } else {
+      sendMessage(topicName, message, sharedProjectPubSubTemplate);
+    }
+  }
+
   @Retryable(
       value = {java.io.IOException.class},
       maxAttempts = 10,
       backoff = @Backoff(delay = 5000))
-  public void sendMessage(String topicName, Object message) {
-    ListenableFuture<String> future = pubSubTemplate.publish(topicName, message);
+  private void sendMessage(String topicName, Object message, PubSubTemplate template) {
+    ListenableFuture<String> future = template.publish(topicName, message);
 
     try {
       future.get(30, TimeUnit.SECONDS);
@@ -78,13 +110,25 @@ public class PubsubHelper {
   }
 
   public void purgeMessages(String subscription, String topic) {
+    purgeMessages(subscription, topic, false);
+  }
+
+  public void purgeMessages(String subscription, String topic, boolean ourProject) {
+    if (ourProject) {
+      purgeMessages(subscription, topic, ourPubsubProject);
+    } else {
+      purgeMessages(subscription, topic, sharedPubsubProject);
+    }
+  }
+
+  private void purgeMessages(String subscription, String topic, String project) {
     RestTemplate restTemplate = new RestTemplate();
 
     String subscriptionUrl =
         "http://"
             + pubsubEmulatorHost
             + "/v1/projects/"
-            + pubsubProjectId
+            + project
             + "/subscriptions/"
             + subscription;
 
@@ -99,8 +143,7 @@ public class PubsubHelper {
 
     try {
       restTemplate.put(
-          subscriptionUrl,
-          new SubscriptionTopic("projects/" + pubsubProjectId + "/topics/" + topic));
+          subscriptionUrl, new SubscriptionTopic("projects/" + project + "/topics/" + topic));
     } catch (HttpClientErrorException exception) {
       if (exception.getRawStatusCode() != 409) {
         throw exception;

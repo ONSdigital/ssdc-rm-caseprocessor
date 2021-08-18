@@ -110,67 +110,71 @@ public class MessageConsumerConfig {
 
   @Bean
   public PubSubInboundChannelAdapter inboundSamples(
-      @Qualifier("sampleInputChannel") MessageChannel channel, PubSubTemplate pubSubTemplate) {
+      @Qualifier("sampleInputChannel") MessageChannel channel,
+      @Qualifier("ourProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, sampleSubscription);
   }
 
   @Bean
   public PubSubInboundChannelAdapter receiptInbound(
-      @Qualifier("receiptInputChannel") MessageChannel channel, PubSubTemplate pubSubTemplate) {
+      @Qualifier("receiptInputChannel") MessageChannel channel,
+      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, receiptSubscription);
   }
 
   @Bean
   public PubSubInboundChannelAdapter refusalInbound(
-      @Qualifier("refusalInputChannel") MessageChannel channel, PubSubTemplate pubSubTemplate) {
+      @Qualifier("refusalInputChannel") MessageChannel channel,
+      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, refusalSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter invalidCaseInbound(
-      @Qualifier("invalidCaseInputChannel") MessageChannel channel, PubSubTemplate pubSubTemplate) {
+      @Qualifier("invalidCaseInputChannel") MessageChannel channel,
+      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, invalidCaseSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter surveyLaunchedInbound(
       @Qualifier("surveyLaunchInputChannel") MessageChannel channel,
-      PubSubTemplate pubSubTemplate) {
+      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, surveyLaunchSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter uacAuthenticationInbound(
       @Qualifier("uacAuthenticationInputChannel") MessageChannel channel,
-      PubSubTemplate pubSubTemplate) {
+      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, uacAuthenticationSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter fulfilmentInbound(
       @Qualifier("printFulfilmentInputChannel") MessageChannel channel,
-      PubSubTemplate pubSubTemplate) {
+      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, printFulfilmentSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter telephoneCaptureInbound(
       @Qualifier("telephoneCaptureInputChannel") MessageChannel channel,
-      PubSubTemplate pubSubTemplate) {
+      @Qualifier("ourProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, telephoneCaptureSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter deactivateUacInbound(
       @Qualifier("deactivateUacInputChannel") MessageChannel channel,
-      PubSubTemplate pubSubTemplate) {
+      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, deactivateUacSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter updateSampleSensitiveInbound(
       @Qualifier("updateSampleSensitiveInputChannel") MessageChannel channel,
-      PubSubTemplate pubSubTemplate) {
+      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, updateSampleSensitiveSubscription);
   }
 
