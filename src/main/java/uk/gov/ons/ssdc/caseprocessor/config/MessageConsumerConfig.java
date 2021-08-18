@@ -181,7 +181,7 @@ public class MessageConsumerConfig {
   @Bean
   PubSubInboundChannelAdapter smsFulfilmentInbound(
       @Qualifier("smsFulfilmentInputChannel") MessageChannel channel,
-      PubSubTemplate pubSubTemplate) {
+      @Qualifier("ourProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
     return makeAdapter(channel, pubSubTemplate, smsFulfilmentSubscription);
   }
 
