@@ -1,6 +1,8 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
@@ -65,5 +67,17 @@ public class UacService {
 
   public boolean existsByQid(String qid) {
     return uacQidLinkRepository.existsByQid(qid);
+  }
+
+  public void createLinkAndEmitNewUacQid(Case caze, String uac, String qid) {
+    OffsetDateTime now = OffsetDateTime.now();
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setId(UUID.randomUUID());
+    uacQidLink.setUac(uac);
+    uacQidLink.setQid(qid);
+    uacQidLink.setCaze(caze);
+    uacQidLink.setCreatedAt(now);
+    uacQidLink.setLastUpdatedAt(now);
+    saveAndEmitUacUpdateEvent(uacQidLink);
   }
 }
