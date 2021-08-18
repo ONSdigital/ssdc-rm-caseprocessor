@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @JsonInclude(Include.NON_NULL)
 public class UacUpdateDTO {
-  private String uac;
+  private String uacHash;
   private boolean active;
   private String qid;
   private UUID caseId;

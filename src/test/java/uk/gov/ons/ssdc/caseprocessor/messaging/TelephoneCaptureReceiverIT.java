@@ -98,7 +98,7 @@ public class TelephoneCaptureReceiverIT {
 
       UacUpdateDTO uacUpdatedEvent = emittedEvent.getPayload().getUacUpdate();
       assertThat(uacUpdatedEvent.getCaseId()).isEqualTo(testCase.getId());
-      assertThat(uacUpdatedEvent.getUac()).isEqualTo(telephoneCaptureUacQid.getUac());
+      assertThat(uacUpdatedEvent.getUacHash()).isEqualTo(telephoneCaptureUacQid.getUac());
       assertThat(uacUpdatedEvent.getQid()).isEqualTo(telephoneCaptureUacQid.getQid());
     }
   }
