@@ -15,13 +15,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class UacQidLink {
   @Id private UUID id;
 
-  @Column(
-      name = "qid", // "name" annotation is required for index on this column to work
-      nullable = false)
+  @Column(name = "qid") // "name" annotation is required for index on this column to work
   private String qid;
 
-  @Column(nullable = false)
-  private String uac;
+  @Column private String uac;
 
   @ManyToOne private Case caze;
 
