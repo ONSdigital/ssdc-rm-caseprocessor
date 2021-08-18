@@ -17,19 +17,15 @@ public class TestConfig {
 
   @Bean("ourProjectPubSubPublisherTemplateForIntegrationTests")
   public PubSubPublisherTemplate ourProjectPubSubPublisherTemplateForIntegrationTests(
-      @Qualifier("ourProjectPublisherFactory") PublisherFactory publisherFactory,
-      JacksonPubSubMessageConverter jacksonPubSubMessageConverterForIntegrationTests) {
+      @Qualifier("ourProjectPublisherFactory") PublisherFactory publisherFactory) {
     PubSubPublisherTemplate publisherTemplate = new PubSubPublisherTemplate(publisherFactory);
-    publisherTemplate.setMessageConverter(jacksonPubSubMessageConverterForIntegrationTests);
     return publisherTemplate;
   }
 
   @Bean("sharedProjectPubSubPublisherTemplateForIntegrationTests")
   public PubSubPublisherTemplate sharedProjectPubSubPublisherTemplateForIntegrationTests(
-      @Qualifier("sharedProjectPublisherFactory") PublisherFactory publisherFactory,
-      JacksonPubSubMessageConverter jacksonPubSubMessageConverterForIntegrationTests) {
+      @Qualifier("sharedProjectPublisherFactory") PublisherFactory publisherFactory) {
     PubSubPublisherTemplate publisherTemplate = new PubSubPublisherTemplate(publisherFactory);
-    publisherTemplate.setMessageConverter(jacksonPubSubMessageConverterForIntegrationTests);
     return publisherTemplate;
   }
 
