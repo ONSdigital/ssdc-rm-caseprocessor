@@ -8,15 +8,15 @@ import java.security.NoSuchAlgorithmException;
 public class HashHelper {
   private static final Logger log = LoggerFactory.getLogger(Class.class);
 
-  public static byte[] getSHA256(byte[] input) {
-    MessageDigest digest;
+  public static byte[] stringToBytes(byte[] input) {
+    MessageDigest messageDigest;
     try {
-      digest = MessageDigest.getInstance("SHA-256");
+      messageDigest = MessageDigest.getInstance("SHA-256");
     } catch (NoSuchAlgorithmException e) {
       log.error("Could not initialise hashing", e);
       throw new RuntimeException("Could not initialise hashing", e);
     }
-    return digest.digest(input);
+    return messageDigest.digest(input);
   }
 
   public static String bytesToHexString(byte[] hash) {

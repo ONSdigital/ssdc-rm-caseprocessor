@@ -1,7 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
@@ -15,16 +14,20 @@ class HashHelperTest {
   };
 
   @Test
-  void testHashString() {
-    byte[] testEncodedUacHash = HashHelper.getSHA256("abc".getBytes(StandardCharsets.UTF_8));
+  void testStringToBytes() {
+    // GIVEN WHEN
+    byte[] testEncodedUacHash = HashHelper.stringToBytes("abc".getBytes(StandardCharsets.UTF_8));
 
-    assertArrayEquals(TEST_STRING_IN_BYTES, testEncodedUacHash);
+    // THEN
+    assertThat(testEncodedUacHash).isEqualTo(TEST_STRING_IN_BYTES);
   }
 
   @Test
   void testBytesToHexString() {
+    // GIVEN WHEN
     String hashedResult = HashHelper.bytesToHexString(TEST_STRING_IN_BYTES);
 
+    // THEN
     assertThat(hashedResult).isEqualTo(TEST_UAC_HASH);
   }
 }
