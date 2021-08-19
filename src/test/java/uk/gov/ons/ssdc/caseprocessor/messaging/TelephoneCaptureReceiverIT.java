@@ -92,7 +92,7 @@ public class TelephoneCaptureReceiverIT {
 
     try (QueueSpy<EventDTO> outboundUacQueueSpy =
         pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
-      pubsubHelper.sendMessage(TELEPHONE_CAPTURE_TOPIC, event);
+      pubsubHelper.sendMessage(TELEPHONE_CAPTURE_TOPIC, event, true);
       EventDTO emittedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
 
       assertThat(emittedEvent.getHeader().getTopic()).isEqualTo(uacUpdateTopic);

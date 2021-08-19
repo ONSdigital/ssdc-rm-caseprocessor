@@ -3,7 +3,6 @@ package uk.gov.ons.ssdc.caseprocessor.schedule;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
@@ -33,7 +32,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 
 @ContextConfiguration
 @SpringBootTest
@@ -61,11 +59,9 @@ public class ActionRuleIT {
   @Autowired private PrintTemplateRepository printTemplateRepository;
   @Autowired private ActionRuleRepository actionRuleRepository;
 
-  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
-
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeMessages(OUTBOUND_PRINTER_SUBSCRIPTION, printTopic);
+    pubsubHelper.purgeMessages(OUTBOUND_PRINTER_SUBSCRIPTION, printTopic, true);
     pubsubHelper.purgeMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
@@ -73,7 +69,7 @@ public class ActionRuleIT {
   @Test
   public void testPrinterRule() throws Exception {
     try (QueueSpy<PrintRow> printerQueue =
-            pubsubHelper.listen(OUTBOUND_PRINTER_SUBSCRIPTION, PrintRow.class);
+            pubsubHelper.listen(OUTBOUND_PRINTER_SUBSCRIPTION, PrintRow.class, true);
         QueueSpy<EventDTO> outboundUacQueue =
             pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given

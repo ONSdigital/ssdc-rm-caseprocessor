@@ -75,7 +75,7 @@ public class SampleLoadedIT {
       sampleDto.setSample(sample);
       sampleDto.setSampleSensitive(sampleSensitive);
 
-      pubsubHelper.sendMessage(TOPIC_SAMPLE, sampleDto);
+      pubsubHelper.sendMessage(TOPIC_SAMPLE, sampleDto, true);
 
       //  THEN
       EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
