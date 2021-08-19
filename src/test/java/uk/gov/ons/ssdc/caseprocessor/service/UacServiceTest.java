@@ -23,7 +23,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class UacServiceTest {
-  private static String TEST_MESSAGE_HASH =
+  private static String TEST_UAC_HASH =
       "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
   @Mock UacQidLinkRepository uacQidLinkRepository;
   @Mock MessageSender messageSender;
@@ -49,7 +49,7 @@ public class UacServiceTest {
     EventDTO actualEvent = eventArgumentCaptor.getValue();
 
     UacUpdateDTO uacUpdateDto = actualEvent.getPayload().getUacUpdate();
-    assertThat(uacUpdateDto.getUacHash()).isEqualTo(TEST_MESSAGE_HASH);
+    assertThat(uacUpdateDto.getUacHash()).isEqualTo(TEST_UAC_HASH);
     assertThat(uacUpdateDto.getQid()).isEqualTo(uacUpdateDto.getQid());
   }
 

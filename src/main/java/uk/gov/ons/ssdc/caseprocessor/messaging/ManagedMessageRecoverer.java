@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.client.ExceptionManagerClient;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ExceptionReportResponse;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.SkippedMessage;
+import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 
 @Component
 public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
@@ -62,7 +63,7 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
 
     // Digest is not thread-safe
     synchronized (digest) {
-      messageHash = bytesToHexString(digest.digest(rawMessageBody));
+      messageHash = HashHelper.bytesToHexString(digest.digest(rawMessageBody));
     }
     String stackTraceRootCause = findUsefulRootCauseInStackTrace(retryContext.getLastThrowable());
 
@@ -184,18 +185,6 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
           .with("root_cause", stackTraceRootCause)
           .error("Could not process message");
     }
-  }
-
-  private String bytesToHexString(byte[] hash) {
-    StringBuffer hexString = new StringBuffer();
-    for (int i = 0; i < hash.length; i++) {
-      String hex = Integer.toHexString(0xff & hash[i]);
-      if (hex.length() == 1) {
-        hexString.append('0');
-      }
-      hexString.append(hex);
-    }
-    return hexString.toString();
   }
 
   private String findUsefulRootCauseInStackTrace(Throwable cause) {

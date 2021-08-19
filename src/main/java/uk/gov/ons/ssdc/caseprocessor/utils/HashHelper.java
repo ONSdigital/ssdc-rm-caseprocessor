@@ -8,7 +8,7 @@ import java.security.NoSuchAlgorithmException;
 public class HashHelper {
   private static final Logger log = LoggerFactory.getLogger(Class.class);
 
-  public static byte[] hashString(byte[] input) {
+  public static byte[] getSHA256(byte[] input) {
     MessageDigest digest;
     try {
       digest = MessageDigest.getInstance("SHA-256");

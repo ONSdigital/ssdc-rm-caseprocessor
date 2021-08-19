@@ -37,7 +37,7 @@ public class UacService {
     uac.setQid(savedUacQidLink.getQid());
 
     byte[] encodedUacHash =
-        HashHelper.hashString(savedUacQidLink.getUac().getBytes(StandardCharsets.UTF_8));
+        HashHelper.getSHA256(savedUacQidLink.getUac().getBytes(StandardCharsets.UTF_8));
 
     uac.setUacHash(HashHelper.bytesToHexString(encodedUacHash));
     uac.setActive(savedUacQidLink.isActive());
