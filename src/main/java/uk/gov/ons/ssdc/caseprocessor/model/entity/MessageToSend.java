@@ -15,6 +15,8 @@ public class MessageToSend {
 
   @Column private String destinationTopic;
 
+  @Column private boolean sendToOurProject;
+
   @Lob
   @Type(type = "org.hibernate.type.BinaryType")
   @Column

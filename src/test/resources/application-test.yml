@@ -6,7 +6,6 @@ spring:
     gcp:
       pubsub:
         emulator-host: localhost:18538
-        project-id: project
 
 uacservice:
   connection:
