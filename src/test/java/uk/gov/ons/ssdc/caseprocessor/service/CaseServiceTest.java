@@ -36,6 +36,7 @@ public class CaseServiceTest {
   @Test
   public void saveCaseAndEmitCaseUpdatedEvent() {
     ReflectionTestUtils.setField(underTest, "caseUpdateTopic", "Test topic");
+    ReflectionTestUtils.setField(underTest, "sharedPubsubProject", "Test project");
 
     Case caze = new Case();
     caze.setId(UUID.randomUUID());
@@ -74,6 +75,7 @@ public class CaseServiceTest {
   @Test
   public void emitCaseCreatedEvent() {
     ReflectionTestUtils.setField(underTest, "caseUpdateTopic", "Test topic");
+    ReflectionTestUtils.setField(underTest, "sharedPubsubProject", "Test project");
 
     Case caze = new Case();
     caze.setId(UUID.randomUUID());

@@ -1,5 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
+import static org.springframework.cloud.gcp.pubsub.support.PubSubTopicUtils.toProjectTopicName;
+
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +24,9 @@ public class CaseService {
   @Value("${queueconfig.case-update-topic}")
   private String caseUpdateTopic;
 
+  @Value("${queueconfig.shared-pubsub-project}")
+  private String sharedPubsubProject;
+
   public CaseService(CaseRepository caseRepository, MessageSender messageSender) {
     this.caseRepository = caseRepository;
     this.messageSender = messageSender;
@@ -40,7 +45,9 @@ public class CaseService {
     EventHeaderDTO eventHeader = EventHelper.createEventDTO(caseUpdateTopic);
 
     EventDTO event = prepareCaseEvent(caze, eventHeader);
-    messageSender.sendMessage(caseUpdateTopic, event);
+
+    String topic = toProjectTopicName(caseUpdateTopic, sharedPubsubProject).toString();
+    messageSender.sendMessage(topic, event);
   }
 
   private EventDTO prepareCaseEvent(Case caze, EventHeaderDTO eventHeader) {

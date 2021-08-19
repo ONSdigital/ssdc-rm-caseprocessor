@@ -73,7 +73,7 @@ public class PrintProcessorTest {
 
     // Then
     ArgumentCaptor<PrintRow> printRowArgumentCaptor = ArgumentCaptor.forClass(PrintRow.class);
-    verify(messageSender).sendMessage(eq(printTopic), printRowArgumentCaptor.capture(), eq(true));
+    verify(messageSender).sendMessage(eq(printTopic), printRowArgumentCaptor.capture());
     PrintRow actualPrintRow = printRowArgumentCaptor.getValue();
     assertThat(actualPrintRow.getPackCode()).isEqualTo("test pack code");
     assertThat(actualPrintRow.getPrintSupplier()).isEqualTo("test print supplier");
@@ -127,7 +127,7 @@ public class PrintProcessorTest {
 
     // Then
     ArgumentCaptor<PrintRow> printRowArgumentCaptor = ArgumentCaptor.forClass(PrintRow.class);
-    verify(messageSender).sendMessage(eq(printTopic), printRowArgumentCaptor.capture(), eq(true));
+    verify(messageSender).sendMessage(eq(printTopic), printRowArgumentCaptor.capture());
     PrintRow actualPrintRow = printRowArgumentCaptor.getValue();
     assertThat(actualPrintRow.getPackCode()).isEqualTo("TEST_FULFILMENT_CODE");
     assertThat(actualPrintRow.getPrintSupplier()).isEqualTo("FOOBAR_PRINT_SUPPLIER");
