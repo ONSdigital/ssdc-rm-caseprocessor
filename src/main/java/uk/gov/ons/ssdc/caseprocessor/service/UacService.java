@@ -1,7 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
@@ -13,6 +13,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
+import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 
 @Service
 public class UacService {
@@ -34,7 +35,11 @@ public class UacService {
 
     UacUpdateDTO uac = new UacUpdateDTO();
     uac.setQid(savedUacQidLink.getQid());
-    uac.setUacHash(DigestUtils.sha256Hex(savedUacQidLink.getUac()));
+
+    byte[] encodedUacHash =
+        HashHelper.hashString(savedUacQidLink.getUac().getBytes(StandardCharsets.UTF_8));
+
+    uac.setUacHash(HashHelper.bytesToHexString(encodedUacHash));
     uac.setActive(savedUacQidLink.isActive());
 
     Case caze = savedUacQidLink.getCaze();
