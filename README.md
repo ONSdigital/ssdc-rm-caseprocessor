@@ -33,11 +33,11 @@ Just build the image
 
 You can run this service dockerised with [docker dev](https://github.com/ONSdigital/ssdc-rm-docker-dev).
 
+### Debugging
 If you wish to run it from an IDE to debug first make sure you've set these environment variables in the run configuration so that it uses your local backing services, then spin up docker dev as usual and stop the `caseprocessor` container so it does not conflict.
 
 ```shell
 SPRING_CLOUD_GCP_PUBSUB_EMULATOR_HOST=localhost:8538
-SPRING_CLOUD_GCP_PUBSUB_PROJECT_ID=project
 ```
 
 ## Internal Events

@@ -27,11 +27,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
@@ -109,7 +106,6 @@ class SmsFulfilmentReceiverIT {
       assertThat(uacUpdatedEvent.getUac()).isEqualTo(smsUacQid.getUac());
       assertThat(uacUpdatedEvent.getQid()).isEqualTo(smsUacQid.getQid());
     }
-
   }
 
   private Case setUpCase(CollectionExercise collectionExercise) {
