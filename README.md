@@ -29,6 +29,20 @@ Just build the image
     mvn -DskipTests -DskipITs -DdockerCompose.skip
 ```
 
+## Debugging With PubSub Emulator
+Make sure you have the following environment variables set if you want to run in the debugger in your IDE:
+```
+SPRING_CLOUD_GCP_PUBSUB_EMULATOR_HOST=pubsub-emulator:8538
+QUEUECONFIG_SHARED-PUBSUB-PROJECT=shared-project
+```
+
+## Debugging With GCP PubSub Project
+If you want to use real GCP PubSub topics and subscriptions, make sure you have the following environment variables set if you want to run in the debugger in your IDE:
+```
+SPRING_CLOUD_GCP_PUBSUB_PROJECT-ID=<GCP Project>
+QUEUECONFIG_SHARED-PUBSUB-PROJECT=<GCP Project>
+```
+
 ## Internal Events
 
 ### Sample Load
