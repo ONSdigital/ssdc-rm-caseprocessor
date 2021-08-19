@@ -38,6 +38,7 @@ If you wish to run it from an IDE to debug first make sure you've set these envi
 
 ```shell
 SPRING_CLOUD_GCP_PUBSUB_EMULATOR_HOST=localhost:8538
+spring_profiles_active=emulator
 ```
 
 ## Internal Events
