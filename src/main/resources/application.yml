@@ -12,11 +12,6 @@ spring:
     hikari:
       maximumPoolSize: 50
 
-  cloud:
-    gcp:
-      pubsub:
-        emulator-host: false
-
   sql:
     init:
       mode: always
