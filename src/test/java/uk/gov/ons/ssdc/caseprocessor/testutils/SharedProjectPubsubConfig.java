@@ -1,5 +1,7 @@
-package uk.gov.ons.ssdc.caseprocessor.config;
+package uk.gov.ons.ssdc.caseprocessor.testutils;
 
+import com.google.api.gax.core.NoCredentialsProvider;
+import com.google.api.gax.rpc.TransportChannelProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
@@ -12,10 +14,10 @@ import org.springframework.cloud.gcp.pubsub.support.SubscriberFactory;
 import org.springframework.cloud.gcp.pubsub.support.converter.SimplePubSubMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.test.context.ActiveProfiles;
 
 @Configuration
-@Profile({"!test & !emulator"})
+@ActiveProfiles("test")
 public class SharedProjectPubsubConfig {
   @Value("${queueconfig.shared-pubsub-project}")
   private String sharedPubsubProject;
@@ -33,13 +35,28 @@ public class SharedProjectPubsubConfig {
   }
 
   @Bean("sharedProjectPublisherFactory")
-  public DefaultPublisherFactory publisherFactory() {
-    return new DefaultPublisherFactory(() -> sharedPubsubProject);
+  public DefaultPublisherFactory publisherFactory(
+      @Qualifier("publisherTransportChannelProvider")
+          TransportChannelProvider transportChannelProvider) {
+    final DefaultPublisherFactory defaultPublisherFactory =
+        new DefaultPublisherFactory(() -> sharedPubsubProject);
+
+    defaultPublisherFactory.setCredentialsProvider(NoCredentialsProvider.create());
+    defaultPublisherFactory.setChannelProvider(transportChannelProvider);
+
+    return defaultPublisherFactory;
   }
 
   @Bean("sharedProjectSubscriberFactory")
-  public DefaultSubscriberFactory subscriberFactory() {
-    return new DefaultSubscriberFactory(() -> sharedPubsubProject);
+  public DefaultSubscriberFactory subscriberFactory(
+      @Qualifier("subscriberTransportChannelProvider")
+          TransportChannelProvider transportChannelProvider) {
+    final DefaultSubscriberFactory defaultSubscriberFactory =
+        new DefaultSubscriberFactory(() -> sharedPubsubProject);
+
+    defaultSubscriberFactory.setCredentialsProvider(NoCredentialsProvider.create());
+    defaultSubscriberFactory.setChannelProvider(transportChannelProvider);
+    return defaultSubscriberFactory;
   }
 
   @Bean(name = "sharedProjectPubSubTemplate")
