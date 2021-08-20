@@ -34,7 +34,7 @@ public class SmsFulfilmentReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "smsFulfilmentInputChannel")
+  @ServiceActivator(inputChannel = "smsFulfilmentInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
