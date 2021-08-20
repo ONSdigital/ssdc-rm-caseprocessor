@@ -3,8 +3,6 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import com.google.protobuf.ByteString;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import net.logstash.logback.encoder.org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gcp.pubsub.support.BasicAcknowledgeablePubsubMessage;
@@ -22,16 +20,6 @@ import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
   private static final Logger log = LoggerFactory.getLogger(ManagedMessageRecoverer.class);
   private static final String SERVICE_NAME = "Case Processor";
-  private static final MessageDigest digest;
-
-  static {
-    try {
-      digest = MessageDigest.getInstance("SHA-256");
-    } catch (NoSuchAlgorithmException e) {
-      log.error("Could not initialise hashing", e);
-      throw new RuntimeException("Could not initialise hashing", e);
-    }
-  }
 
   @Value("${messagelogging.logstacktraces}")
   private boolean logStackTraces;
@@ -59,12 +47,9 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
     ByteString originalMessageByteString = originalMessage.getPubsubMessage().getData();
     byte[] rawMessageBody = new byte[originalMessageByteString.size()];
     originalMessageByteString.copyTo(rawMessageBody, 0);
-    String messageHash;
 
-    // Digest is not thread-safe
-    synchronized (digest) {
-      messageHash = HashHelper.bytesToHexString(digest.digest(rawMessageBody));
-    }
+    String messageHash = HashHelper.hash(rawMessageBody);
+
     String stackTraceRootCause = findUsefulRootCauseInStackTrace(retryContext.getLastThrowable());
 
     Throwable cause = retryContext.getLastThrowable();

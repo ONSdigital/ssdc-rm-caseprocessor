@@ -1,6 +1,5 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -35,11 +34,7 @@ public class UacService {
 
     UacUpdateDTO uac = new UacUpdateDTO();
     uac.setQid(savedUacQidLink.getQid());
-
-    byte[] encodedUacHash =
-        HashHelper.stringToBytes(savedUacQidLink.getUac().getBytes(StandardCharsets.UTF_8));
-
-    uac.setUacHash(HashHelper.bytesToHexString(encodedUacHash));
+    uac.setUacHash(HashHelper.hash(savedUacQidLink.getUac()));
     uac.setActive(savedUacQidLink.isActive());
 
     Case caze = savedUacQidLink.getCaze();

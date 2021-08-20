@@ -1,33 +1,34 @@
 package uk.gov.ons.ssdc.caseprocessor.utils;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import javax.xml.bind.DatatypeConverter;
 
 public class HashHelper {
-  private static final Logger log = LoggerFactory.getLogger(Class.class);
+  private static final MessageDigest digest;
 
-  public static byte[] stringToBytes(byte[] input) {
-    MessageDigest messageDigest;
+  static {
     try {
-      messageDigest = MessageDigest.getInstance("SHA-256");
+      digest = MessageDigest.getInstance("SHA-256");
     } catch (NoSuchAlgorithmException e) {
-      log.error("Could not initialise hashing", e);
       throw new RuntimeException("Could not initialise hashing", e);
     }
-    return messageDigest.digest(input);
   }
 
-  public static String bytesToHexString(byte[] hash) {
-    StringBuilder hexString = new StringBuilder();
-    for (byte b : hash) {
-      String hex = Integer.toHexString(0xff & b);
-      if (hex.length() == 1) {
-        hexString.append('0');
-      }
-      hexString.append(hex);
+  public static String hash(String stringToHash) {
+
+    return hash(stringToHash.getBytes(StandardCharsets.UTF_8));
+  }
+
+  public static String hash(byte[] bytesToHash) {
+    byte[] hash;
+
+    // Digest is not thread safe
+    synchronized (digest) {
+      hash = digest.digest(bytesToHash);
     }
-    return hexString.toString();
+
+    return DatatypeConverter.printHexBinary(hash).toLowerCase();
   }
 }

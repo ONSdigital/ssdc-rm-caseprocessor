@@ -8,7 +8,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,12 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.client.UacQidServiceClient;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.TelephoneCaptureDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.*;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
@@ -32,6 +26,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseReposito
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
+import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -100,7 +95,7 @@ public class TelephoneCaptureReceiverIT {
       UacUpdateDTO uacUpdatedEvent = emittedEvent.getPayload().getUacUpdate();
       assertThat(uacUpdatedEvent.getCaseId()).isEqualTo(testCase.getId());
       assertThat(uacUpdatedEvent.getUacHash())
-          .isEqualTo(DigestUtils.sha256Hex(telephoneCaptureUacQid.getUac()));
+          .isEqualTo(HashHelper.hash(telephoneCaptureUacQid.getUac()));
       assertThat(uacUpdatedEvent.getQid()).isEqualTo(telephoneCaptureUacQid.getQid());
     }
   }
