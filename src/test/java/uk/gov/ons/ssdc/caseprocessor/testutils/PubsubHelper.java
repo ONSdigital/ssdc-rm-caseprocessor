@@ -1,11 +1,13 @@
 package uk.gov.ons.ssdc.caseprocessor.testutils;
 
-import static org.springframework.cloud.gcp.pubsub.support.PubSubSubscriptionUtils.toProjectSubscriptionName;
-import static org.springframework.cloud.gcp.pubsub.support.PubSubTopicUtils.toProjectTopicName;
+import static com.google.cloud.spring.pubsub.support.PubSubSubscriptionUtils.toProjectSubscriptionName;
+import static com.google.cloud.spring.pubsub.support.PubSubTopicUtils.toProjectTopicName;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUR_PUBSUB_PROJECT;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.pubsub.v1.Subscriber;
+import com.google.cloud.spring.autoconfigure.pubsub.GcpPubSubProperties;
+import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -17,8 +19,6 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.gcp.autoconfigure.pubsub.GcpPubSubProperties;
-import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.retry.annotation.Retryable;

@@ -1,6 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
-import static org.springframework.cloud.gcp.pubsub.support.PubSubTopicUtils.toProjectTopicName;
+import static com.google.cloud.spring.pubsub.support.PubSubTopicUtils.toProjectTopicName;
 
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
