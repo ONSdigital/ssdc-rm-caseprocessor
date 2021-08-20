@@ -61,17 +61,17 @@ public class ActionRuleIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeMessages(OUTBOUND_PRINTER_SUBSCRIPTION, printTopic, true);
-    pubsubHelper.purgeMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
+    pubsubHelper.purgeMessages(OUTBOUND_PRINTER_SUBSCRIPTION, printTopic);
+    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testPrinterRule() throws Exception {
     try (QueueSpy<PrintRow> printerQueue =
-            pubsubHelper.listen(OUTBOUND_PRINTER_SUBSCRIPTION, PrintRow.class, true);
+            pubsubHelper.listen(OUTBOUND_PRINTER_SUBSCRIPTION, PrintRow.class);
         QueueSpy<EventDTO> outboundUacQueue =
-            pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+            pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       CollectionExercise collectionExercise = setUpCollectionExercise();
       Case caze = setUpCase(collectionExercise);
@@ -98,7 +98,7 @@ public class ActionRuleIT {
   @Test
   public void testDeactivateUacRule() throws Exception {
     try (QueueSpy<EventDTO> outboundUacQueue =
-        pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       CollectionExercise collectionExercise = setUpCollectionExercise();
       Case caze = setUpCase(collectionExercise);

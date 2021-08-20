@@ -1,5 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
+import static com.google.cloud.spring.pubsub.support.PubSubTopicUtils.toProjectTopicName;
 import static uk.gov.ons.ssdc.caseprocessor.utils.EventHelper.createEventDTO;
 
 import java.util.List;
@@ -20,17 +21,21 @@ public class DeactivateUacProcessor {
   @Value("${queueconfig.deactivate-uac-topic}")
   private String deactivateUacTopic;
 
+  @Value("${queueconfig.shared-pubsub-project}")
+  private String sharedPubsubProject;
+
   public DeactivateUacProcessor(MessageSender messageSender) {
     this.messageSender = messageSender;
   }
 
   public void process(Case caze) {
+    String topic = toProjectTopicName(deactivateUacTopic, sharedPubsubProject).toString();
     List<UacQidLink> uacQidLinks = caze.getUacQidLinks();
 
     for (UacQidLink uacQidLink : uacQidLinks) {
       if (uacQidLink.isActive()) {
         EventDTO event = prepareDeactivateUacEvent(uacQidLink);
-        messageSender.sendMessage(deactivateUacTopic, event);
+        messageSender.sendMessage(topic, event);
       }
     }
   }

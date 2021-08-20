@@ -70,17 +70,17 @@ public class FulfilmentIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeMessages(OUTBOUND_PRINTER_SUBSCRIPTION, printTopic, true);
-    pubsubHelper.purgeMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
+    pubsubHelper.purgeMessages(OUTBOUND_PRINTER_SUBSCRIPTION, printTopic);
+    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testFulfilmentTrigger() throws Exception {
     try (QueueSpy<PrintRow> printerQueue =
-            pubsubHelper.listen(OUTBOUND_PRINTER_SUBSCRIPTION, PrintRow.class, true);
+            pubsubHelper.listen(OUTBOUND_PRINTER_SUBSCRIPTION, PrintRow.class);
         QueueSpy<EventDTO> outboundUacQueue =
-            pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+            pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       PrintTemplate printTemplate = new PrintTemplate();
       printTemplate.setPackCode(PACK_CODE);
@@ -120,7 +120,7 @@ public class FulfilmentIT {
       eventHeader.setMessageId(UUID.randomUUID());
       event.setHeader(eventHeader);
 
-      pubsubHelper.sendMessage(FULFILMENT_TOPIC, event);
+      pubsubHelper.sendMessageToSharedProject(FULFILMENT_TOPIC, event);
 
       Thread.sleep(3000);
 

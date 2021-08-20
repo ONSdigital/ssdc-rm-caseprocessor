@@ -50,14 +50,14 @@ public class SampleLoadedIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
+    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testSampleLoaded() throws InterruptedException {
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
-        pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
       CollectionExercise collectionExercise = new CollectionExercise();
       collectionExercise.setId(UUID.randomUUID());
       collectionExerciseRepository.saveAndFlush(collectionExercise);
@@ -75,7 +75,7 @@ public class SampleLoadedIT {
       sampleDto.setSample(sample);
       sampleDto.setSampleSensitive(sampleSensitive);
 
-      pubsubHelper.sendMessage(TOPIC_SAMPLE, sampleDto, true);
+      pubsubHelper.sendMessage(TOPIC_SAMPLE, sampleDto);
 
       //  THEN
       EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
