@@ -1,7 +1,13 @@
 package uk.gov.ons.ssdc.caseprocessor.testutils;
 
+import static com.google.cloud.spring.pubsub.support.PubSubSubscriptionUtils.toProjectSubscriptionName;
+import static com.google.cloud.spring.pubsub.support.PubSubTopicUtils.toProjectTopicName;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUR_PUBSUB_PROJECT;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.pubsub.v1.Subscriber;
+import com.google.cloud.spring.autoconfigure.pubsub.GcpPubSubProperties;
+import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -13,7 +19,6 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.retry.annotation.Retryable;
@@ -28,42 +33,27 @@ import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 @ActiveProfiles("test")
 @EnableRetry
 public class PubsubHelper {
+  @Qualifier("pubSubTemplateForIntegrationTests")
   @Autowired
-  @Qualifier("sharedProjectPubSubTemplateForIntegrationTests")
-  private PubSubTemplate sharedProjectPubSubTemplate;
+  private PubSubTemplate pubSubTemplate;
 
-  @Autowired
-  @Qualifier("ourProjectPubSubTemplateForIntegrationTests")
-  private PubSubTemplate ourProjectPubSubTemplate;
-
-  @Value("${spring.cloud.gcp.pubsub.emulator-host}")
-  private String pubsubEmulatorHost;
+  @Autowired private GcpPubSubProperties gcpPubSubProperties;
 
   @Value("${queueconfig.shared-pubsub-project}")
   private String sharedPubsubProject;
 
-  @Value("${queueconfig.our-pubsub-project}")
-  private String ourPubsubProject;
-
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
 
+  public <T> QueueSpy sharedProjectListen(String subscription, Class<T> contentClass) {
+    String fullyQualifiedSubscription =
+        toProjectSubscriptionName(subscription, sharedPubsubProject).toString();
+    return listen(fullyQualifiedSubscription, contentClass);
+  }
+
   public <T> QueueSpy listen(String subscription, Class<T> contentClass) {
-    return listen(subscription, contentClass, false);
-  }
-
-  public <T> QueueSpy listen(
-      String subscription, Class<T> contentClass, boolean receiveFromOurProject) {
-    if (receiveFromOurProject) {
-      return listen(subscription, contentClass, ourProjectPubSubTemplate);
-    } else {
-      return listen(subscription, contentClass, sharedProjectPubSubTemplate);
-    }
-  }
-
-  private <T> QueueSpy listen(String subscription, Class<T> contentClass, PubSubTemplate template) {
     BlockingQueue<T> queue = new ArrayBlockingQueue(50);
     Subscriber subscriber =
-        template.subscribe(
+        pubSubTemplate.subscribe(
             subscription,
             message -> {
               try {
@@ -83,24 +73,17 @@ public class PubsubHelper {
     return new QueueSpy(queue, subscriber);
   }
 
-  public void sendMessage(String topicName, Object message) {
-    sendMessage(topicName, message, false);
-  }
-
-  public void sendMessage(String topicName, Object message, boolean sendToOurProject) {
-    if (sendToOurProject) {
-      sendMessage(topicName, message, ourProjectPubSubTemplate);
-    } else {
-      sendMessage(topicName, message, sharedProjectPubSubTemplate);
-    }
+  public void sendMessageToSharedProject(String topicName, Object message) {
+    String fullyQualifiedTopic = toProjectTopicName(topicName, sharedPubsubProject).toString();
+    sendMessage(fullyQualifiedTopic, message);
   }
 
   @Retryable(
       value = {java.io.IOException.class},
       maxAttempts = 10,
       backoff = @Backoff(delay = 5000))
-  private void sendMessage(String topicName, Object message, PubSubTemplate template) {
-    ListenableFuture<String> future = template.publish(topicName, message);
+  public void sendMessage(String topicName, Object message) {
+    ListenableFuture<String> future = pubSubTemplate.publish(topicName, message);
 
     try {
       future.get(30, TimeUnit.SECONDS);
@@ -110,15 +93,11 @@ public class PubsubHelper {
   }
 
   public void purgeMessages(String subscription, String topic) {
-    purgeMessages(subscription, topic, false);
+    purgeMessages(subscription, topic, OUR_PUBSUB_PROJECT);
   }
 
-  public void purgeMessages(String subscription, String topic, boolean ourProject) {
-    if (ourProject) {
-      purgeMessages(subscription, topic, ourPubsubProject);
-    } else {
-      purgeMessages(subscription, topic, sharedPubsubProject);
-    }
+  public void purgeSharedProjectMessages(String subscription, String topic) {
+    purgeMessages(subscription, topic, sharedPubsubProject);
   }
 
   private void purgeMessages(String subscription, String topic, String project) {
@@ -126,7 +105,7 @@ public class PubsubHelper {
 
     String subscriptionUrl =
         "http://"
-            + pubsubEmulatorHost
+            + gcpPubSubProperties.getEmulatorHost()
             + "/v1/projects/"
             + project
             + "/subscriptions/"

@@ -1,5 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
+import static com.google.cloud.spring.pubsub.support.PubSubTopicUtils.toProjectTopicName;
+
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +23,9 @@ public class UacService {
 
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
+
+  @Value("${queueconfig.shared-pubsub-project}")
+  private String sharedPubsubProject;
 
   public UacService(UacQidLinkRepository uacQidLinkRepository, MessageSender messageSender) {
     this.messageSender = messageSender;
@@ -48,7 +53,8 @@ public class UacService {
     event.setHeader(eventHeader);
     event.setPayload(payloadDTO);
 
-    messageSender.sendMessage(uacUpdateTopic, event);
+    String topic = toProjectTopicName(uacUpdateTopic, sharedPubsubProject).toString();
+    messageSender.sendMessage(topic, event);
 
     return savedUacQidLink;
   }

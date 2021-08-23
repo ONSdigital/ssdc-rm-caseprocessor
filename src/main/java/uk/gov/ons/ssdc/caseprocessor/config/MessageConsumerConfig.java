@@ -1,10 +1,12 @@
 package uk.gov.ons.ssdc.caseprocessor.config;
 
+import static com.google.cloud.spring.pubsub.support.PubSubSubscriptionUtils.toProjectSubscriptionName;
+
+import com.google.cloud.spring.pubsub.core.PubSubTemplate;
+import com.google.cloud.spring.pubsub.integration.AckMode;
+import com.google.cloud.spring.pubsub.integration.inbound.PubSubInboundChannelAdapter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
-import org.springframework.cloud.gcp.pubsub.integration.AckMode;
-import org.springframework.cloud.gcp.pubsub.integration.inbound.PubSubInboundChannelAdapter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.DirectChannel;
@@ -15,6 +17,10 @@ import uk.gov.ons.ssdc.caseprocessor.messaging.ManagedMessageRecoverer;
 @Configuration
 public class MessageConsumerConfig {
   private final ManagedMessageRecoverer managedMessageRecoverer;
+  private final PubSubTemplate pubSubTemplate;
+
+  @Value("${queueconfig.shared-pubsub-project}")
+  private String sharedPubsubProject;
 
   @Value("${queueconfig.sample-subscription}")
   private String sampleSubscription;
@@ -49,8 +55,10 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.sms-fulfilment-subscription}")
   private String smsFulfilmentSubscription;
 
-  public MessageConsumerConfig(ManagedMessageRecoverer managedMessageRecoverer) {
+  public MessageConsumerConfig(
+      ManagedMessageRecoverer managedMessageRecoverer, PubSubTemplate pubSubTemplate) {
     this.managedMessageRecoverer = managedMessageRecoverer;
+    this.pubSubTemplate = pubSubTemplate;
   }
 
   @Bean
@@ -110,83 +118,88 @@ public class MessageConsumerConfig {
 
   @Bean
   public PubSubInboundChannelAdapter inboundSamples(
-      @Qualifier("sampleInputChannel") MessageChannel channel,
-      @Qualifier("ourProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, sampleSubscription);
+      @Qualifier("sampleInputChannel") MessageChannel channel) {
+    return makeAdapter(channel, sampleSubscription);
   }
 
   @Bean
   public PubSubInboundChannelAdapter receiptInbound(
-      @Qualifier("receiptInputChannel") MessageChannel channel,
-      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, receiptSubscription);
+      @Qualifier("receiptInputChannel") MessageChannel channel) {
+    String subscription =
+        toProjectSubscriptionName(receiptSubscription, sharedPubsubProject).toString();
+    return makeAdapter(channel, subscription);
   }
 
   @Bean
   public PubSubInboundChannelAdapter refusalInbound(
-      @Qualifier("refusalInputChannel") MessageChannel channel,
-      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, refusalSubscription);
+      @Qualifier("refusalInputChannel") MessageChannel channel) {
+    String subscription =
+        toProjectSubscriptionName(refusalSubscription, sharedPubsubProject).toString();
+    return makeAdapter(channel, subscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter invalidCaseInbound(
-      @Qualifier("invalidCaseInputChannel") MessageChannel channel,
-      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, invalidCaseSubscription);
+      @Qualifier("invalidCaseInputChannel") MessageChannel channel) {
+    String subscription =
+        toProjectSubscriptionName(invalidCaseSubscription, sharedPubsubProject).toString();
+    return makeAdapter(channel, subscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter surveyLaunchedInbound(
-      @Qualifier("surveyLaunchInputChannel") MessageChannel channel,
-      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, surveyLaunchSubscription);
+      @Qualifier("surveyLaunchInputChannel") MessageChannel channel) {
+    String subscription =
+        toProjectSubscriptionName(surveyLaunchSubscription, sharedPubsubProject).toString();
+    return makeAdapter(channel, subscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter uacAuthenticationInbound(
-      @Qualifier("uacAuthenticationInputChannel") MessageChannel channel,
-      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, uacAuthenticationSubscription);
+      @Qualifier("uacAuthenticationInputChannel") MessageChannel channel) {
+    String subscription =
+        toProjectSubscriptionName(uacAuthenticationSubscription, sharedPubsubProject).toString();
+    return makeAdapter(channel, subscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter fulfilmentInbound(
-      @Qualifier("printFulfilmentInputChannel") MessageChannel channel,
-      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, printFulfilmentSubscription);
+      @Qualifier("printFulfilmentInputChannel") MessageChannel channel) {
+    String subscription =
+        toProjectSubscriptionName(printFulfilmentSubscription, sharedPubsubProject).toString();
+    return makeAdapter(channel, subscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter telephoneCaptureInbound(
-      @Qualifier("telephoneCaptureInputChannel") MessageChannel channel,
-      @Qualifier("ourProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, telephoneCaptureSubscription);
+      @Qualifier("telephoneCaptureInputChannel") MessageChannel channel) {
+    return makeAdapter(channel, telephoneCaptureSubscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter deactivateUacInbound(
-      @Qualifier("deactivateUacInputChannel") MessageChannel channel,
-      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, deactivateUacSubscription);
+      @Qualifier("deactivateUacInputChannel") MessageChannel channel) {
+    String subscription =
+        toProjectSubscriptionName(deactivateUacSubscription, sharedPubsubProject).toString();
+    return makeAdapter(channel, subscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter updateSampleSensitiveInbound(
-      @Qualifier("updateSampleSensitiveInputChannel") MessageChannel channel,
-      @Qualifier("sharedProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, updateSampleSensitiveSubscription);
+      @Qualifier("updateSampleSensitiveInputChannel") MessageChannel channel) {
+    String subscription =
+        toProjectSubscriptionName(updateSampleSensitiveSubscription, sharedPubsubProject)
+            .toString();
+    return makeAdapter(channel, subscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter smsFulfilmentInbound(
-      @Qualifier("smsFulfilmentInputChannel") MessageChannel channel,
-      @Qualifier("ourProjectPubSubTemplate") PubSubTemplate pubSubTemplate) {
-    return makeAdapter(channel, pubSubTemplate, smsFulfilmentSubscription);
+      @Qualifier("smsFulfilmentInputChannel") MessageChannel channel) {
+    return makeAdapter(channel, smsFulfilmentSubscription);
   }
 
-  private PubSubInboundChannelAdapter makeAdapter(
-      MessageChannel channel, PubSubTemplate pubSubTemplate, String subscriptionName) {
+  private PubSubInboundChannelAdapter makeAdapter(MessageChannel channel, String subscriptionName) {
     PubSubInboundChannelAdapter adapter =
         new PubSubInboundChannelAdapter(pubSubTemplate, subscriptionName);
     adapter.setOutputChannel(channel);

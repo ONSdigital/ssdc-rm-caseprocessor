@@ -54,7 +54,7 @@ class SmsFulfilmentReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
+    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
@@ -95,8 +95,8 @@ class SmsFulfilmentReceiverIT {
     event.setPayload(payloadDTO);
 
     try (QueueSpy<EventDTO> outboundUacQueueSpy =
-        pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
-      pubsubHelper.sendMessage(SMS_FULFILMENT_TOPIC, event, true);
+        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+      pubsubHelper.sendMessage(SMS_FULFILMENT_TOPIC, event);
       EventDTO emittedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
 
       assertThat(emittedEvent.getHeader().getTopic()).isEqualTo(uacUpdateTopic);

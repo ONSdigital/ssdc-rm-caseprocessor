@@ -14,17 +14,12 @@ public class MessageSender {
     this.messageToSendRepository = messageToSendRepository;
   }
 
-  public void sendMessage(String destinationTopic, Object message, boolean sendToOurProject) {
+  public void sendMessage(String destinationTopic, Object message) {
     MessageToSend messageToSend = new MessageToSend();
     messageToSend.setId(UUID.randomUUID());
     messageToSend.setDestinationTopic(destinationTopic);
     messageToSend.setMessageBody(JsonHelper.convertObjectToJson(message));
-    messageToSend.setSendToOurProject(sendToOurProject);
 
     messageToSendRepository.save(messageToSend);
-  }
-
-  public void sendMessage(String destinationTopic, Object message) {
-    sendMessage(destinationTopic, message, false);
   }
 }

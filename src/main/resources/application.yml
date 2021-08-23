@@ -46,8 +46,7 @@ queueconfig:
   uac-update-topic: event_uac-update
   deactivate-uac-topic: event_deactivate-uac
   publishtimeout: 30  # In seconds
-  our-pubsub-project: our-project
-  shared-pubsub-project: shared-project
+  shared-pubsub-project: REPLACEME
 
 healthcheck:
   frequency: 15000 #milliseconds

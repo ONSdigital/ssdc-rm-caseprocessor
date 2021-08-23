@@ -29,16 +29,18 @@ Just build the image
     mvn -DskipTests -DskipITs -DdockerCompose.skip
 ```
 
-## Running Locally
-
-You can run this service dockerised with [docker dev](https://github.com/ONSdigital/ssdc-rm-docker-dev).
-
-### Debugging
-If you wish to run it from an IDE to debug first make sure you've set these environment variables in the run configuration so that it uses your local backing services, then spin up docker dev as usual and stop the `caseprocessor` container so it does not conflict.
-
-```shell
+## Debugging With PubSub Emulator
+Make sure you have the following environment variables set if you want to run in the debugger in your IDE:
+```
 SPRING_CLOUD_GCP_PUBSUB_EMULATOR_HOST=localhost:8538
-spring_profiles_active=emulator
+QUEUECONFIG_SHARED-PUBSUB-PROJECT=shared-project
+```
+
+## Debugging With GCP PubSub Project
+If you want to use real GCP PubSub topics and subscriptions, make sure you have the following environment variables set if you want to run in the debugger in your IDE:
+```
+SPRING_CLOUD_GCP_PUBSUB_PROJECT-ID=<GCP Project>
+QUEUECONFIG_SHARED-PUBSUB-PROJECT=<GCP Project>
 ```
 
 ## Internal Events

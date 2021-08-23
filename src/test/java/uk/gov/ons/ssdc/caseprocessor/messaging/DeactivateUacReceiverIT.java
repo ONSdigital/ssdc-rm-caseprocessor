@@ -48,14 +48,14 @@ public class DeactivateUacReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
+    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testDeactivateUacReceiver() throws Exception {
     try (QueueSpy<EventDTO> uacRhQueue =
-        pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // GIVEN
       EventDTO event = new EventDTO();
       EventHeaderDTO eventHeader = new EventHeaderDTO();
@@ -77,7 +77,7 @@ public class DeactivateUacReceiverIT {
       uacQidLinkRepository.save(uacQidLink);
 
       // WHEN
-      pubsubHelper.sendMessage(deactivateUacTopic, event);
+      pubsubHelper.sendMessageToSharedProject(deactivateUacTopic, event);
 
       // THEN
       EventDTO actualEvent = uacRhQueue.checkExpectedMessageReceived();
