@@ -49,7 +49,7 @@ public class SurveyLaunchReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
+    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
@@ -58,7 +58,7 @@ public class SurveyLaunchReceiverIT {
     // GIVEN
 
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
-        pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
       Case caze = new Case();
       caze.setId(TEST_CASE_ID);
       caze.setSurveyLaunched(false);
@@ -85,7 +85,7 @@ public class SurveyLaunchReceiverIT {
       surveyLaunchedEvent.setPayload(payloadDTO);
 
       // WHEN
-      pubsubHelper.sendMessage(INBOUND_TOPIC, surveyLaunchedEvent);
+      pubsubHelper.sendMessageToSharedProject(INBOUND_TOPIC, surveyLaunchedEvent);
 
       // THEN
       EventDTO caseUpdatedEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();

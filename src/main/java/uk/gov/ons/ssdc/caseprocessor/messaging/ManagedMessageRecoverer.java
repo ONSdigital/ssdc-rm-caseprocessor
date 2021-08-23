@@ -2,12 +2,13 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import com.google.cloud.spring.pubsub.support.BasicAcknowledgeablePubsubMessage;
+import com.google.cloud.spring.pubsub.support.GcpPubSubHeaders;
 import com.google.protobuf.ByteString;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import net.logstash.logback.encoder.org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.gcp.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.retry.RecoveryCallback;
@@ -53,7 +54,8 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
     MessagingException messagingException = (MessagingException) retryContext.getLastThrowable();
     Message<?> message = messagingException.getFailedMessage();
     BasicAcknowledgeablePubsubMessage originalMessage =
-        (BasicAcknowledgeablePubsubMessage) message.getHeaders().get("gcp_pubsub_original_message");
+        (BasicAcknowledgeablePubsubMessage)
+            message.getHeaders().get(GcpPubSubHeaders.ORIGINAL_MESSAGE);
     String subscriptionName = originalMessage.getProjectSubscriptionName().getSubscription();
     ByteString originalMessageByteString = originalMessage.getPubsubMessage().getData();
     byte[] rawMessageBody = new byte[originalMessageByteString.size()];

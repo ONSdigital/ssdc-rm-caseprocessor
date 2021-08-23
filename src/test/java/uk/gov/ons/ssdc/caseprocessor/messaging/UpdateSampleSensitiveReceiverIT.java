@@ -55,7 +55,7 @@ public class UpdateSampleSensitiveReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
+    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
@@ -89,7 +89,7 @@ public class UpdateSampleSensitiveReceiverIT {
     event.setHeader(eventHeader);
 
     //  When
-    pubsubHelper.sendMessage(UPDATE_SAMPLE_SENSITIVE_TOPIC, event);
+    pubsubHelper.sendMessageToSharedProject(UPDATE_SAMPLE_SENSITIVE_TOPIC, event);
 
     List<Event> databaseEvents = eventPoller.getEvents(1);
 

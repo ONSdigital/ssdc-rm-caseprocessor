@@ -6,6 +6,7 @@ spring:
     gcp:
       pubsub:
         emulator-host: localhost:18538
+        project-id: our-project
 
 uacservice:
   connection:
@@ -16,3 +17,6 @@ uacservice:
   uacqid-get-timeout: 1   #seconds
 
 caserefgeneratorkey: rPr3qsjlU42hsDX5npfuCzlyF4UYfDTO
+
+queueconfig:
+  shared-pubsub-project: shared-project

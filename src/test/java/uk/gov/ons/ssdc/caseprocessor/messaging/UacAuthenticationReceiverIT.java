@@ -65,7 +65,7 @@ public class UacAuthenticationReceiverIT {
     surveyLaunchedEvent.setPayload(payloadDTO);
 
     // WHEN
-    pubsubHelper.sendMessage(INBOUND_TOPIC, surveyLaunchedEvent);
+    pubsubHelper.sendMessageToSharedProject(INBOUND_TOPIC, surveyLaunchedEvent);
     Thread.sleep(2000);
 
     // THEN
