@@ -32,6 +32,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseReposito
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
+import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -103,7 +104,7 @@ class SmsFulfilmentReceiverIT {
 
       UacUpdateDTO uacUpdatedEvent = emittedEvent.getPayload().getUacUpdate();
       assertThat(uacUpdatedEvent.getCaseId()).isEqualTo(testCase.getId());
-      assertThat(uacUpdatedEvent.getUac()).isEqualTo(smsUacQid.getUac());
+      assertThat(uacUpdatedEvent.getUacHash()).isEqualTo(HashHelper.hash(smsUacQid.getUac()));
       assertThat(uacUpdatedEvent.getQid()).isEqualTo(smsUacQid.getQid());
     }
   }
