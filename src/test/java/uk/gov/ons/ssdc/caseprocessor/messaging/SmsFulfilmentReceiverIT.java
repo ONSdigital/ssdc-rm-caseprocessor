@@ -2,7 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TELEPHONE_CAPTURE_TOPIC;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.SMS_FULFILMENT_TOPIC;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
@@ -19,7 +19,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.client.UacQidServiceClient;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.*;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EnrichedSmsFulfilment;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
@@ -27,15 +32,15 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseReposito
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-class TelephoneCaptureReceiverIT {
+class SmsFulfilmentReceiverIT {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final String PACK_CODE = "TEST_SMS";
 
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
@@ -58,7 +63,7 @@ class TelephoneCaptureReceiverIT {
     // Given
     // Get a new UAC QID pair
     List<UacQidDTO> uacQidDTOList = uacQidServiceClient.getUacQids(1, 1);
-    UacQidDTO telephoneCaptureUacQid = uacQidDTOList.get(0);
+    UacQidDTO smsUacQid = uacQidDTOList.get(0);
 
     CollectionExercise collectionExercise = new CollectionExercise();
     collectionExercise.setId(UUID.randomUUID());
@@ -68,35 +73,38 @@ class TelephoneCaptureReceiverIT {
     Case testCase = setUpCase(collectionExercise);
 
     // Build the event message
-    TelephoneCaptureDTO telephoneCaptureDTO = new TelephoneCaptureDTO();
-    telephoneCaptureDTO.setUac(telephoneCaptureUacQid.getUac());
-    telephoneCaptureDTO.setQid(telephoneCaptureUacQid.getQid());
-    telephoneCaptureDTO.setCaseId(testCase.getId());
+    EnrichedSmsFulfilment enrichedSmsFulfilment = new EnrichedSmsFulfilment();
+    enrichedSmsFulfilment.setUac(smsUacQid.getUac());
+    enrichedSmsFulfilment.setQid(smsUacQid.getQid());
+    enrichedSmsFulfilment.setCaseId(testCase.getId());
+    enrichedSmsFulfilment.setPackCode(PACK_CODE);
+
     PayloadDTO payloadDTO = new PayloadDTO();
-    payloadDTO.setTelephoneCapture(telephoneCaptureDTO);
+    payloadDTO.setEnrichedSmsFulfilment(enrichedSmsFulfilment);
+
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(EVENT_SCHEMA_VERSION);
     eventHeader.setDateTime(OffsetDateTime.now());
-    eventHeader.setTopic(TELEPHONE_CAPTURE_TOPIC);
+    eventHeader.setTopic(SMS_FULFILMENT_TOPIC);
     eventHeader.setMessageId(UUID.randomUUID());
     eventHeader.setChannel("RM");
     eventHeader.setSource("RM");
+
     EventDTO event = new EventDTO();
     event.setHeader(eventHeader);
     event.setPayload(payloadDTO);
 
     try (QueueSpy<EventDTO> outboundUacQueueSpy =
         pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
-      pubsubHelper.sendMessage(TELEPHONE_CAPTURE_TOPIC, event);
+      pubsubHelper.sendMessage(SMS_FULFILMENT_TOPIC, event);
       EventDTO emittedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
 
       assertThat(emittedEvent.getHeader().getTopic()).isEqualTo(uacUpdateTopic);
 
       UacUpdateDTO uacUpdatedEvent = emittedEvent.getPayload().getUacUpdate();
       assertThat(uacUpdatedEvent.getCaseId()).isEqualTo(testCase.getId());
-      assertThat(uacUpdatedEvent.getUacHash())
-          .isEqualTo(HashHelper.hash(telephoneCaptureUacQid.getUac()));
-      assertThat(uacUpdatedEvent.getQid()).isEqualTo(telephoneCaptureUacQid.getQid());
+      assertThat(uacUpdatedEvent.getUac()).isEqualTo(smsUacQid.getUac());
+      assertThat(uacUpdatedEvent.getQid()).isEqualTo(smsUacQid.getQid());
     }
   }
 
