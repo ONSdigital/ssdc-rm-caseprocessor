@@ -15,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
@@ -32,6 +33,9 @@ public class UacServiceTest {
 
   @Test
   public void saveAndEmitUacUpdatedEvent() {
+    ReflectionTestUtils.setField(underTest, "uacUpdateTopic", "Test topic");
+    ReflectionTestUtils.setField(underTest, "sharedPubsubProject", "Test project");
+
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setUac("abc");

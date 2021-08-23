@@ -29,6 +29,7 @@ public class DeactivateUacProcessorTest {
   public void testProcessDeactivateUacRow() {
     // Given
     ReflectionTestUtils.setField(underTest, "deactivateUacTopic", "testTopic");
+    ReflectionTestUtils.setField(underTest, "sharedPubsubProject", "Test project");
 
     Case caze = new Case();
 
@@ -41,7 +42,8 @@ public class DeactivateUacProcessorTest {
 
     // Then
     ArgumentCaptor<EventDTO> eventArgumentCaptor = ArgumentCaptor.forClass(EventDTO.class);
-    verify(messageSender).sendMessage(eq("testTopic"), eventArgumentCaptor.capture());
+    verify(messageSender)
+        .sendMessage(eq("projects/Test project/topics/testTopic"), eventArgumentCaptor.capture());
     DeactivateUacDTO actualDeactivateUac =
         eventArgumentCaptor.getValue().getPayload().getDeactivateUac();
     assertThat(actualDeactivateUac.getQid()).isEqualTo(uacQidLink.getQid());

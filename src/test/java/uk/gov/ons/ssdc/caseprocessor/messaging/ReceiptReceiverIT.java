@@ -63,17 +63,17 @@ public class ReceiptReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
-    pubsubHelper.purgeMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
+    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
+    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testReceipt() throws Exception {
     try (QueueSpy<EventDTO> outboundUacQueueSpy =
-            pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class);
+            pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class);
         QueueSpy<EventDTO> outboundCaseQueueSpy =
-            pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
+            pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -116,7 +116,7 @@ public class ReceiptReceiverIT {
       eventHeader.setMessageId(UUID.randomUUID());
       event.setHeader(eventHeader);
 
-      pubsubHelper.sendMessage(INBOUND_RECEIPT_TOPIC, event);
+      pubsubHelper.sendMessageToSharedProject(INBOUND_RECEIPT_TOPIC, event);
 
       //  THEN
       EventDTO caseEmittedEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
