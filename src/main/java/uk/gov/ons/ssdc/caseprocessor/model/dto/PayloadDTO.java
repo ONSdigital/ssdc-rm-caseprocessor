@@ -18,4 +18,5 @@ public class PayloadDTO {
   private UpdateSampleSensitive updateSampleSensitive;
   private SurveyLaunchDTO surveyLaunch;
   private UacAuthenticationDTO uacAuthentication;
+  private EnrichedSmsFulfilment enrichedSmsFulfilment;
 }

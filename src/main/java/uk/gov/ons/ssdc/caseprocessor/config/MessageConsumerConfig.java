@@ -52,6 +52,9 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.update-sample-sensitive-subscription}")
   private String updateSampleSensitiveSubscription;
 
+  @Value("${queueconfig.sms-fulfilment-subscription}")
+  private String smsFulfilmentSubscription;
+
   public MessageConsumerConfig(
       ManagedMessageRecoverer managedMessageRecoverer, PubSubTemplate pubSubTemplate) {
     this.managedMessageRecoverer = managedMessageRecoverer;
@@ -105,6 +108,11 @@ public class MessageConsumerConfig {
 
   @Bean
   public MessageChannel updateSampleSensitiveInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel smsFulfilmentInputChannel() {
     return new DirectChannel();
   }
 
@@ -183,6 +191,12 @@ public class MessageConsumerConfig {
         toProjectSubscriptionName(updateSampleSensitiveSubscription, sharedPubsubProject)
             .toString();
     return makeAdapter(channel, subscription);
+  }
+
+  @Bean
+  PubSubInboundChannelAdapter smsFulfilmentInbound(
+      @Qualifier("smsFulfilmentInputChannel") MessageChannel channel) {
+    return makeAdapter(channel, smsFulfilmentSubscription);
   }
 
   private PubSubInboundChannelAdapter makeAdapter(MessageChannel channel, String subscriptionName) {
