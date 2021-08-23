@@ -22,6 +22,10 @@ public class RedactHelper {
   };
 
   public static Object redact(Object rootObjectToRedact) {
+    if (rootObjectToRedact == null) {
+      return null; // can't redact null!
+    }
+
     try {
       Object rootObjectToRedactDeepCopy =
           objectMapper.readValue(
