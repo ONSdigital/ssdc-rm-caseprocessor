@@ -1,7 +1,13 @@
 package uk.gov.ons.ssdc.caseprocessor.testutils;
 
+import static com.google.cloud.spring.pubsub.support.PubSubSubscriptionUtils.toProjectSubscriptionName;
+import static com.google.cloud.spring.pubsub.support.PubSubTopicUtils.toProjectTopicName;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUR_PUBSUB_PROJECT;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.pubsub.v1.Subscriber;
+import com.google.cloud.spring.autoconfigure.pubsub.GcpPubSubProperties;
+import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -13,7 +19,6 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.retry.annotation.Retryable;
@@ -28,17 +33,22 @@ import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 @ActiveProfiles("test")
 @EnableRetry
 public class PubsubHelper {
-  @Autowired
   @Qualifier("pubSubTemplateForIntegrationTests")
+  @Autowired
   private PubSubTemplate pubSubTemplate;
 
-  @Value("${spring.cloud.gcp.pubsub.emulator-host}")
-  private String pubsubEmulatorHost;
+  @Autowired private GcpPubSubProperties gcpPubSubProperties;
 
-  @Value("${spring.cloud.gcp.pubsub.project-id}")
-  private String pubsubProjectId;
+  @Value("${queueconfig.shared-pubsub-project}")
+  private String sharedPubsubProject;
 
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
+
+  public <T> QueueSpy sharedProjectListen(String subscription, Class<T> contentClass) {
+    String fullyQualifiedSubscription =
+        toProjectSubscriptionName(subscription, sharedPubsubProject).toString();
+    return listen(fullyQualifiedSubscription, contentClass);
+  }
 
   public <T> QueueSpy listen(String subscription, Class<T> contentClass) {
     BlockingQueue<T> queue = new ArrayBlockingQueue(50);
@@ -63,6 +73,11 @@ public class PubsubHelper {
     return new QueueSpy(queue, subscriber);
   }
 
+  public void sendMessageToSharedProject(String topicName, Object message) {
+    String fullyQualifiedTopic = toProjectTopicName(topicName, sharedPubsubProject).toString();
+    sendMessage(fullyQualifiedTopic, message);
+  }
+
   @Retryable(
       value = {java.io.IOException.class},
       maxAttempts = 10,
@@ -78,13 +93,21 @@ public class PubsubHelper {
   }
 
   public void purgeMessages(String subscription, String topic) {
+    purgeMessages(subscription, topic, OUR_PUBSUB_PROJECT);
+  }
+
+  public void purgeSharedProjectMessages(String subscription, String topic) {
+    purgeMessages(subscription, topic, sharedPubsubProject);
+  }
+
+  private void purgeMessages(String subscription, String topic, String project) {
     RestTemplate restTemplate = new RestTemplate();
 
     String subscriptionUrl =
         "http://"
-            + pubsubEmulatorHost
+            + gcpPubSubProperties.getEmulatorHost()
             + "/v1/projects/"
-            + pubsubProjectId
+            + project
             + "/subscriptions/"
             + subscription;
 
@@ -99,8 +122,7 @@ public class PubsubHelper {
 
     try {
       restTemplate.put(
-          subscriptionUrl,
-          new SubscriptionTopic("projects/" + pubsubProjectId + "/topics/" + topic));
+          subscriptionUrl, new SubscriptionTopic("projects/" + project + "/topics/" + topic));
     } catch (HttpClientErrorException exception) {
       if (exception.getRawStatusCode() != 409) {
         throw exception;
