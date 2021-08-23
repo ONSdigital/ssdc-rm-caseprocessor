@@ -25,7 +25,7 @@ public class ExceptionManagerClient {
   public ExceptionReportResponse reportException(
       String messageHash,
       String service,
-      String queue,
+      String subscription,
       Throwable cause,
       String stackTraceRootCause) {
 
@@ -35,7 +35,7 @@ public class ExceptionManagerClient {
     exceptionReport.setExceptionRootCause(stackTraceRootCause);
     exceptionReport.setMessageHash(messageHash);
     exceptionReport.setService(service);
-    exceptionReport.setQueue(queue);
+    exceptionReport.setSubscription(subscription);
 
     RestTemplate restTemplate = new RestTemplate();
     UriComponents uriComponents = createUriComponents("/reportexception");
