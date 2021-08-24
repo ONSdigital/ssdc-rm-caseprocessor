@@ -32,6 +32,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseReposito
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
+import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -98,7 +99,8 @@ class TelephoneCaptureReceiverIT {
 
       UacUpdateDTO uacUpdatedEvent = emittedEvent.getPayload().getUacUpdate();
       assertThat(uacUpdatedEvent.getCaseId()).isEqualTo(testCase.getId());
-      assertThat(uacUpdatedEvent.getUac()).isEqualTo(telephoneCaptureUacQid.getUac());
+      assertThat(uacUpdatedEvent.getUacHash())
+          .isEqualTo(HashHelper.hash(telephoneCaptureUacQid.getUac()));
       assertThat(uacUpdatedEvent.getQid()).isEqualTo(telephoneCaptureUacQid.getQid());
     }
   }

@@ -15,6 +15,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
+import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 
 @Service
 public class UacService {
@@ -39,7 +40,7 @@ public class UacService {
 
     UacUpdateDTO uac = new UacUpdateDTO();
     uac.setQid(savedUacQidLink.getQid());
-    uac.setUac(savedUacQidLink.getUac());
+    uac.setUacHash(HashHelper.hash(savedUacQidLink.getUac()));
     uac.setActive(savedUacQidLink.isActive());
 
     Case caze = savedUacQidLink.getCaze();

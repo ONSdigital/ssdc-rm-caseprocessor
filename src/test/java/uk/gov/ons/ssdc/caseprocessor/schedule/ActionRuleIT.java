@@ -159,6 +159,7 @@ public class ActionRuleIT {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setQid("123456789");
+    uacQidLink.setUac("abc");
     uacQidLink.setActive(true);
     uacQidLink.setCaze(caze);
     return uacQidLinkRepository.saveAndFlush(uacQidLink);

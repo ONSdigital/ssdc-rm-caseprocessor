@@ -22,9 +22,12 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
+import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 
 @ExtendWith(MockitoExtension.class)
 public class UacServiceTest {
+  private static String TEST_UAC_HASH =
+      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
   @Mock UacQidLinkRepository uacQidLinkRepository;
   @Mock MessageSender messageSender;
 
@@ -52,7 +55,7 @@ public class UacServiceTest {
     EventDTO actualEvent = eventArgumentCaptor.getValue();
 
     UacUpdateDTO uacUpdateDto = actualEvent.getPayload().getUacUpdate();
-    assertThat(uacUpdateDto.getUac()).isEqualTo(uacQidLink.getUac());
+    assertThat(uacUpdateDto.getUacHash()).isEqualTo(TEST_UAC_HASH);
     assertThat(uacUpdateDto.getQid()).isEqualTo(uacUpdateDto.getQid());
   }
 
@@ -119,7 +122,7 @@ public class UacServiceTest {
     verify(messageSender).sendMessage(any(), eventArgumentCaptor.capture());
     EventDTO actualEvent = eventArgumentCaptor.getValue();
     UacUpdateDTO uacUpdateDto = actualEvent.getPayload().getUacUpdate();
-    assertThat(uacUpdateDto.getUac()).isEqualTo(uac);
+    assertThat(uacUpdateDto.getUacHash()).isEqualTo(HashHelper.hash(uac));
     assertThat(uacUpdateDto.getQid()).isEqualTo(qid);
     assertThat(uacUpdateDto.getCaseId()).isEqualTo(testCase.getId());
   }
