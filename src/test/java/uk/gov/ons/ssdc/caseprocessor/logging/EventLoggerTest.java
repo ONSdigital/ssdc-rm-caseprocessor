@@ -57,7 +57,7 @@ public class EventLoggerTest {
     assertThat("Test channel").isEqualTo(actualEvent.getChannel());
     assertThat(EventType.NEW_CASE).isEqualTo(actualEvent.getType());
     assertThat("Test description").isEqualTo(actualEvent.getDescription());
-    assertThat("{\"uac\":\"SECRET UAC\",\"qid\":\"TEST QID\"}").isEqualTo(actualEvent.getPayload());
+    assertThat("{\"uac\":\"REDACTED\",\"qid\":\"TEST QID\"}").isEqualTo(actualEvent.getPayload());
     assertThat(eventHeader.getMessageId()).isEqualTo(actualEvent.getMessageId());
     assertThat(messageTime).isEqualTo(actualEvent.getMessageTimestamp());
   }
@@ -94,7 +94,7 @@ public class EventLoggerTest {
     assertThat("Test channel").isEqualTo(actualEvent.getChannel());
     assertThat(EventType.NEW_CASE).isEqualTo(actualEvent.getType());
     assertThat("Test description").isEqualTo(actualEvent.getDescription());
-    assertThat("{\"uac\":\"SECRET UAC\",\"qid\":\"TEST QID\"}").isEqualTo(actualEvent.getPayload());
+    assertThat("{\"uac\":\"REDACTED\",\"qid\":\"TEST QID\"}").isEqualTo(actualEvent.getPayload());
     assertThat(eventHeader.getMessageId()).isEqualTo(actualEvent.getMessageId());
     assertThat(messageTime).isEqualTo(actualEvent.getMessageTimestamp());
   }

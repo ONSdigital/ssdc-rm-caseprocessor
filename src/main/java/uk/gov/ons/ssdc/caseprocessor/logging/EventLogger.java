@@ -10,6 +10,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper;
+import uk.gov.ons.ssdc.caseprocessor.utils.RedactHelper;
 
 @Component
 public class EventLogger {
@@ -29,7 +30,13 @@ public class EventLogger {
       Object eventPayload,
       OffsetDateTime messageTimestamp) {
     Event loggedEvent =
-        buildEvent(eventDate, eventDescription, eventType, event, eventPayload, messageTimestamp);
+        buildEvent(
+            eventDate,
+            eventDescription,
+            eventType,
+            event,
+            RedactHelper.redact(eventPayload),
+            messageTimestamp);
     loggedEvent.setCaze(caze);
 
     eventRepository.save(loggedEvent);
@@ -44,7 +51,13 @@ public class EventLogger {
       Object eventPayload,
       OffsetDateTime messageTimestamp) {
     Event loggedEvent =
-        buildEvent(eventDate, eventDescription, eventType, event, eventPayload, messageTimestamp);
+        buildEvent(
+            eventDate,
+            eventDescription,
+            eventType,
+            event,
+            RedactHelper.redact(eventPayload),
+            messageTimestamp);
     loggedEvent.setUacQidLink(uacQidLink);
 
     eventRepository.save(loggedEvent);
