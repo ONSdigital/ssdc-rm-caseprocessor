@@ -5,7 +5,6 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,18 +22,14 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintFulfilmentDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentNextTrigger;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentSurveyPrintTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.PrintTemplate;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Survey;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentNextTriggerRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentSurveyPrintTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintTemplateRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 
@@ -57,10 +52,8 @@ public class FulfilmentIT {
   private String printTopic;
 
   @Autowired private DeleteDataHelper deleteDataHelper;
+  @Autowired private JunkDataHelper junkDataHelper;
 
-  @Autowired private CaseRepository caseRepository;
-  @Autowired private CollectionExerciseRepository collectionExerciseRepository;
-  @Autowired private SurveyRepository surveyRepository;
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private FulfilmentNextTriggerRepository fulfilmentNextTriggerRepository;
   @Autowired private PrintTemplateRepository printTemplateRepository;
@@ -88,17 +81,14 @@ public class FulfilmentIT {
       printTemplate.setTemplate(new String[] {"__caseref__", "foo", "__uac__"});
       printTemplateRepository.saveAndFlush(printTemplate);
 
-      Survey survey = setUpSurvey();
+      Case caze = junkDataHelper.setupJunkCase();
 
       FulfilmentSurveyPrintTemplate fulfilmentSurveyPrintTemplate =
           new FulfilmentSurveyPrintTemplate();
       fulfilmentSurveyPrintTemplate.setId(UUID.randomUUID());
-      fulfilmentSurveyPrintTemplate.setSurvey(survey);
+      fulfilmentSurveyPrintTemplate.setSurvey(caze.getCollectionExercise().getSurvey());
       fulfilmentSurveyPrintTemplate.setPrintTemplate(printTemplate);
       fulfilmentSurveyPrintTemplateRepository.saveAndFlush(fulfilmentSurveyPrintTemplate);
-
-      CollectionExercise collectionExercise = setUpCollectionExercise(survey);
-      Case caze = setUpCase(collectionExercise);
 
       // When
       PrintFulfilmentDTO fulfilment = new PrintFulfilmentDTO();
@@ -114,10 +104,7 @@ public class FulfilmentIT {
       EventHeaderDTO eventHeader = new EventHeaderDTO();
       eventHeader.setVersion(EVENT_SCHEMA_VERSION);
       eventHeader.setTopic(FULFILMENT_TOPIC);
-      eventHeader.setSource("RH");
-      eventHeader.setDateTime(OffsetDateTime.now());
-      eventHeader.setChannel("RH");
-      eventHeader.setMessageId(UUID.randomUUID());
+      junkDataHelper.junkify(eventHeader);
       event.setHeader(eventHeader);
 
       pubsubHelper.sendMessageToSharedProject(FULFILMENT_TOPIC, event);
@@ -137,34 +124,11 @@ public class FulfilmentIT {
       assertThat(printRow.getBatchQuantity()).isEqualTo(1);
       assertThat(printRow.getPackCode()).isEqualTo(PACK_CODE);
       assertThat(printRow.getPrintSupplier()).isEqualTo(PRINT_SUPPLIER);
-      assertThat(printRow.getRow()).startsWith("\"123\"|\"bar\"|\"");
+      assertThat(printRow.getRow()).startsWith("\"" + caze.getCaseRef() + "\"|\"bar\"|\"");
 
       assertThat(rme).isNotNull();
       assertThat(rme.getHeader().getTopic()).isEqualTo(uacUpdateTopic);
       assertThat(rme.getPayload().getUacUpdate().getCaseId()).isEqualTo(caze.getId());
     }
-  }
-
-  private Survey setUpSurvey() {
-    Survey survey = new Survey();
-    survey.setId(UUID.randomUUID());
-    survey.setSampleSeparator(',');
-    return surveyRepository.saveAndFlush(survey);
-  }
-
-  private CollectionExercise setUpCollectionExercise(Survey survey) {
-    CollectionExercise collectionExercise = new CollectionExercise();
-    collectionExercise.setId(UUID.randomUUID());
-    collectionExercise.setSurvey(survey);
-    return collectionExerciseRepository.saveAndFlush(collectionExercise);
-  }
-
-  private Case setUpCase(CollectionExercise collectionExercise) {
-    Case randomCase = new Case();
-    randomCase.setId(UUID.randomUUID());
-    randomCase.setCaseRef(123L);
-    randomCase.setCollectionExercise(collectionExercise);
-    randomCase.setSample(Map.of("foo", "bar"));
-    return caseRepository.saveAndFlush(randomCase);
   }
 }

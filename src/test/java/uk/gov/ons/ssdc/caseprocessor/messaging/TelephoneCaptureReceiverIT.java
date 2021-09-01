@@ -5,9 +5,7 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TELEPHONE_CAPTURE_TOPIC;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
-import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,10 +24,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.TelephoneCaptureDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
@@ -47,9 +43,8 @@ class TelephoneCaptureReceiverIT {
 
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
+  @Autowired private JunkDataHelper junkDataHelper;
 
-  @Autowired private CaseRepository caseRepository;
-  @Autowired private CollectionExerciseRepository collectionExerciseRepository;
   @Autowired private UacQidServiceClient uacQidServiceClient;
 
   @BeforeEach
@@ -65,12 +60,8 @@ class TelephoneCaptureReceiverIT {
     List<UacQidDTO> uacQidDTOList = uacQidServiceClient.getUacQids(1, 1);
     UacQidDTO telephoneCaptureUacQid = uacQidDTOList.get(0);
 
-    CollectionExercise collectionExercise = new CollectionExercise();
-    collectionExercise.setId(UUID.randomUUID());
-    collectionExerciseRepository.saveAndFlush(collectionExercise);
-
     // Create the case
-    Case testCase = setUpCase(collectionExercise);
+    Case testCase = junkDataHelper.setupJunkCase();
 
     // Build the event message
     TelephoneCaptureDTO telephoneCaptureDTO = new TelephoneCaptureDTO();
@@ -81,11 +72,8 @@ class TelephoneCaptureReceiverIT {
     payloadDTO.setTelephoneCapture(telephoneCaptureDTO);
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(EVENT_SCHEMA_VERSION);
-    eventHeader.setDateTime(OffsetDateTime.now());
     eventHeader.setTopic(TELEPHONE_CAPTURE_TOPIC);
-    eventHeader.setMessageId(UUID.randomUUID());
-    eventHeader.setChannel("RM");
-    eventHeader.setSource("RM");
+    junkDataHelper.junkify(eventHeader);
     EventDTO event = new EventDTO();
     event.setHeader(eventHeader);
     event.setPayload(payloadDTO);
@@ -103,16 +91,5 @@ class TelephoneCaptureReceiverIT {
           .isEqualTo(HashHelper.hash(telephoneCaptureUacQid.getUac()));
       assertThat(uacUpdatedEvent.getQid()).isEqualTo(telephoneCaptureUacQid.getQid());
     }
-  }
-
-  private Case setUpCase(CollectionExercise collectionExercise) {
-    Case randomCase = new Case();
-    randomCase.setId(TEST_CASE_ID);
-    randomCase.setCollectionExercise(collectionExercise);
-    randomCase.setCaseRef(123L);
-    randomCase.setSample(Map.of("foo", "bar"));
-    randomCase.setUacQidLinks(null);
-    randomCase.setEvents(null);
-    return caseRepository.saveAndFlush(randomCase);
   }
 }

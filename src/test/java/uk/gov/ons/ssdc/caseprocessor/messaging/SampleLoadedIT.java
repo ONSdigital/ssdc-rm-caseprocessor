@@ -24,10 +24,10 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
-import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 
@@ -43,10 +43,10 @@ public class SampleLoadedIT {
 
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
+  @Autowired private JunkDataHelper junkDataHelper;
 
-  @Autowired private CaseService caseService;
-  @Autowired private CollectionExerciseRepository collectionExerciseRepository;
   @Autowired private EventRepository eventRepository;
+  @Autowired private CaseRepository caseRepository;
 
   @BeforeEach
   public void setUp() {
@@ -58,9 +58,7 @@ public class SampleLoadedIT {
   public void testSampleLoaded() throws InterruptedException {
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
         pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
-      CollectionExercise collectionExercise = new CollectionExercise();
-      collectionExercise.setId(UUID.randomUUID());
-      collectionExerciseRepository.saveAndFlush(collectionExercise);
+      CollectionExercise collectionExercise = junkDataHelper.setupJunkCollex();
 
       Map<String, String> sample = new HashMap<>();
       sample.put("CanYouKickIt", "YesYouCan");
@@ -74,6 +72,7 @@ public class SampleLoadedIT {
       sampleDto.setCollectionExerciseId(collectionExercise.getId());
       sampleDto.setSample(sample);
       sampleDto.setSampleSensitive(sampleSensitive);
+      sampleDto.setJobId(UUID.randomUUID());
 
       pubsubHelper.sendMessage(TOPIC_SAMPLE, sampleDto);
 
@@ -83,7 +82,7 @@ public class SampleLoadedIT {
       CaseUpdateDTO emittedCase = actualEvent.getPayload().getCaseUpdate();
       Assertions.assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
 
-      Case actualCase = caseService.getCaseByCaseId(TEST_CASE_ID);
+      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
 
       assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID);
       assertThat(actualCase.getCollectionExercise().getId()).isEqualTo(collectionExercise.getId());

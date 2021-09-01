@@ -15,7 +15,8 @@ import lombok.ToString;
 public class User {
   @Id private UUID id;
 
-  @Column private String email;
+  @Column(nullable = false)
+  private String email;
 
   @OneToMany(mappedBy = "user")
   private List<UserGroupMember> memberOf;

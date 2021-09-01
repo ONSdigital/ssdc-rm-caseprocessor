@@ -25,10 +25,10 @@ public class ActionRule {
   @Id private UUID id;
 
   @Enumerated(EnumType.STRING)
-  @Column
+  @Column(nullable = false)
   private ActionRuleType type;
 
-  @Column(columnDefinition = "timestamp with time zone")
+  @Column(nullable = false, columnDefinition = "timestamp with time zone")
   private OffsetDateTime triggerDateTime;
 
   @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
@@ -41,7 +41,8 @@ public class ActionRule {
 
   @ManyToOne private PrintTemplate printTemplate;
 
-  @ManyToOne private CollectionExercise collectionExercise;
+  @ManyToOne(optional = false)
+  private CollectionExercise collectionExercise;
 
   public void setClassifiers(String classifierClauseStr) {
     if (classifierClauseStr == null) {

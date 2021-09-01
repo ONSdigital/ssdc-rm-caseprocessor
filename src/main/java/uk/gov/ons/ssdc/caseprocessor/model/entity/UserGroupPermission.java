@@ -16,7 +16,8 @@ import lombok.ToString;
 public class UserGroupPermission {
   @Id private UUID id;
 
-  @ManyToOne private UserGroup group;
+  @ManyToOne(optional = false)
+  private UserGroup group;
 
   @ManyToOne private Survey survey;
 
