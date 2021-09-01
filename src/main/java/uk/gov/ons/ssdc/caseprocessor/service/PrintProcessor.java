@@ -109,7 +109,7 @@ public class PrintProcessor {
         OffsetDateTime.now(),
         String.format("Print file generated with pack code %s", packCode),
         EventType.PRINT_FILE,
-        EventHelper.getDummyEvent(),
+        EventHelper.getDummyEvent(correlationId),
         null,
         OffsetDateTime.now());
   }
