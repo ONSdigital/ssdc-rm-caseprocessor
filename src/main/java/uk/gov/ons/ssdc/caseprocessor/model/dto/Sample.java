@@ -13,4 +13,7 @@ public class Sample {
   private Map<String, String> sample;
 
   private Map<String, String> sampleSensitive;
+
+  private UUID jobId;
+  private String originatingUser;
 }

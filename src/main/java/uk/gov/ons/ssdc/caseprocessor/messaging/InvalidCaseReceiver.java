@@ -35,7 +35,8 @@ public class InvalidCaseReceiver {
 
     caze.setInvalid(true);
 
-    caseService.saveCaseAndEmitCaseUpdate(caze);
+    caseService.saveCaseAndEmitCaseUpdate(
+        caze, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
 
     eventLogger.logCaseEvent(
         caze,

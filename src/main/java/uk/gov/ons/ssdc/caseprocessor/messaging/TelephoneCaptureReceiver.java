@@ -62,7 +62,11 @@ public class TelephoneCaptureReceiver {
     }
 
     uacService.createLinkAndEmitNewUacQid(
-        caze, telephoneCapturePayload.getUac(), telephoneCapturePayload.getQid());
+        caze,
+        telephoneCapturePayload.getUac(),
+        telephoneCapturePayload.getQid(),
+        event.getHeader().getCorrelationId(),
+        event.getHeader().getOriginatingUser());
 
     eventLogger.logCaseEvent(
         caze,

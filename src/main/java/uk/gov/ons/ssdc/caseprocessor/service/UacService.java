@@ -33,10 +33,12 @@ public class UacService {
     this.uacQidLinkRepository = uacQidLinkRepository;
   }
 
-  public UacQidLink saveAndEmitUacUpdateEvent(UacQidLink uacQidLink) {
+  public UacQidLink saveAndEmitUacUpdateEvent(
+      UacQidLink uacQidLink, UUID correlationId, String originatingUser) {
     UacQidLink savedUacQidLink = uacQidLinkRepository.save(uacQidLink);
 
-    EventHeaderDTO eventHeader = EventHelper.createEventDTO(uacUpdateTopic);
+    EventHeaderDTO eventHeader =
+        EventHelper.createEventDTO(uacUpdateTopic, correlationId, originatingUser);
 
     UacUpdateDTO uac = new UacUpdateDTO();
     uac.setQid(savedUacQidLink.getQid());
@@ -75,12 +77,13 @@ public class UacService {
     return uacQidLinkRepository.existsByQid(qid);
   }
 
-  public void createLinkAndEmitNewUacQid(Case caze, String uac, String qid) {
+  public void createLinkAndEmitNewUacQid(
+      Case caze, String uac, String qid, UUID correlationId, String originatingUser) {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setUac(uac);
     uacQidLink.setQid(qid);
     uacQidLink.setCaze(caze);
-    saveAndEmitUacUpdateEvent(uacQidLink);
+    saveAndEmitUacUpdateEvent(uacQidLink, correlationId, originatingUser);
   }
 }
