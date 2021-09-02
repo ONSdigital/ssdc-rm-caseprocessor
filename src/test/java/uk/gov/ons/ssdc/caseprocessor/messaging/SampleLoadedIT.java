@@ -21,15 +21,16 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
+import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.common.model.entity.Event;
+import uk.gov.ons.ssdc.common.model.entity.EventType;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -89,7 +90,7 @@ public class SampleLoadedIT {
       assertThat(actualCase.getSample()).isEqualTo(sample);
       assertThat(actualCase.getSampleSensitive()).isEqualTo(sampleSensitive);
 
-      List<uk.gov.ons.ssdc.caseprocessor.model.entity.Event> events = eventRepository.findAll();
+      List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);
       assertThat(events.get(0).getType()).isEqualTo(EventType.NEW_CASE);
     }

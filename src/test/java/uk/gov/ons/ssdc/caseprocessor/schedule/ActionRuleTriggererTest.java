@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRule;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
+import uk.gov.ons.ssdc.common.model.entity.ActionRule;
 
 public class ActionRuleTriggererTest {
   private final ActionRuleRepository actionRuleRepository = mock(ActionRuleRepository.class);

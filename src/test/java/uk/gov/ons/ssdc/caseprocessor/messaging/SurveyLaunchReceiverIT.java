@@ -19,14 +19,15 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.SurveyLaunchDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
+import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.Event;
+import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -90,9 +91,9 @@ public class SurveyLaunchReceiverIT {
       assertThat(caseUpdatedEvent.getPayload().getCaseUpdate().getCaseId()).isEqualTo(caze.getId());
       assertThat(caseUpdatedEvent.getPayload().getCaseUpdate().isSurveyLaunched()).isTrue();
 
-      List<uk.gov.ons.ssdc.caseprocessor.model.entity.Event> events = eventRepository.findAll();
+      List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);
-      uk.gov.ons.ssdc.caseprocessor.model.entity.Event event = events.get(0);
+      Event event = events.get(0);
       assertThat(event.getDescription()).isEqualTo("Survey launched");
       UacQidLink actualUacQidLink = event.getUacQidLink();
       assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);

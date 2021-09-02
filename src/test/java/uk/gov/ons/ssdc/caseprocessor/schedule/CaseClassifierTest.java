@@ -8,9 +8,9 @@ import static org.mockito.Mockito.verify;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRule;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRuleType;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.common.model.entity.ActionRule;
+import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
+import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 
 public class CaseClassifierTest {
 

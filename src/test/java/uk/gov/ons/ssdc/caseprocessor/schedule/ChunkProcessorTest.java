@@ -14,9 +14,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.CaseToProcess;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseToProcessProcessor;
+import uk.gov.ons.ssdc.common.model.entity.CaseToProcess;
 
 @ExtendWith(MockitoExtension.class)
 public class ChunkProcessorTest {

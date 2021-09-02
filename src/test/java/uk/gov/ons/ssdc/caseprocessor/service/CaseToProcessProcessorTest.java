@@ -9,11 +9,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRule;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRuleType;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.CaseToProcess;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.PrintTemplate;
+import uk.gov.ons.ssdc.common.model.entity.ActionRule;
+import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
+import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.CaseToProcess;
+import uk.gov.ons.ssdc.common.model.entity.PrintTemplate;
 
 @ExtendWith(MockitoExtension.class)
 public class CaseToProcessProcessorTest {

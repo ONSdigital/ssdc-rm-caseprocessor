@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.MessageToSend;
+import uk.gov.ons.ssdc.common.model.entity.MessageToSend;
 
 public interface MessageToSendRepository extends JpaRepository<MessageToSend, UUID> {
   @Query(

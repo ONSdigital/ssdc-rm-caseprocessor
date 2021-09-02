@@ -11,8 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentNextTrigger;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentNextTriggerRepository;
+import uk.gov.ons.ssdc.common.model.entity.FulfilmentNextTrigger;
 
 @ExtendWith(MockitoExtension.class)
 public class FulfilmentSchedulerTest {

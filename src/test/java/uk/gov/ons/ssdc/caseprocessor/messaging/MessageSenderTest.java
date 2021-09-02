@@ -11,9 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.MessageToSend;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.MessageToSendRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper;
+import uk.gov.ons.ssdc.common.model.entity.MessageToSend;
 
 @ExtendWith(MockitoExtension.class)
 public class MessageSenderTest {
