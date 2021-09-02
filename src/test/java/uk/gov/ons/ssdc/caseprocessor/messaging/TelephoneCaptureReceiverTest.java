@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
@@ -55,7 +57,9 @@ class TelephoneCaptureReceiverTest {
     underTest.receiveMessage(eventMessage);
 
     // Then
-    verify(uacService).createLinkAndEmitNewUacQid(testCase, TEST_UAC, TEST_QID);
+    verify(uacService)
+        .createLinkAndEmitNewUacQid(
+            testCase, TEST_UAC, TEST_QID, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
 
     verify(eventLogger)
         .logCaseEvent(
@@ -89,7 +93,7 @@ class TelephoneCaptureReceiverTest {
     underTest.receiveMessage(eventMessage);
 
     // Then
-    verify(uacService, never()).saveAndEmitUacUpdateEvent(any());
+    verify(uacService, never()).saveAndEmitUacUpdateEvent(any(), any(UUID.class), anyString());
     verifyNoInteractions(eventLogger);
   }
 
@@ -127,6 +131,8 @@ class TelephoneCaptureReceiverTest {
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setCorrelationId(TEST_CORRELATION_ID);
+    eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setTelephoneCapture(telephoneCaptureDTO);
 

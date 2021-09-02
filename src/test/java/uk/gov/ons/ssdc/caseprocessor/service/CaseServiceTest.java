@@ -1,15 +1,16 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -27,7 +28,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class CaseServiceTest {
-
   @Mock CaseRepository caseRepository;
   @Mock MessageSender messageSender;
 
@@ -46,23 +46,25 @@ public class CaseServiceTest {
     caze.setSurveyLaunched(true);
     caze.setRefusalReceived(RefusalType.HARD_REFUSAL);
 
-    underTest.saveCaseAndEmitCaseUpdate(caze);
+    underTest.saveCaseAndEmitCaseUpdate(caze, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
     verify(caseRepository).saveAndFlush(caze);
 
     ArgumentCaptor<EventDTO> eventArgumentCaptor = ArgumentCaptor.forClass(EventDTO.class);
 
     verify(messageSender).sendMessage(any(), eventArgumentCaptor.capture());
-    EventDTO actualResponeManagementEvent = eventArgumentCaptor.getValue();
+    EventDTO actualEvent = eventArgumentCaptor.getValue();
 
-    CaseUpdateDTO actualCaseUpdate = actualResponeManagementEvent.getPayload().getCaseUpdate();
+    assertThat(actualEvent.getHeader().getTopic()).isEqualTo("Test topic");
+    assertThat(actualEvent.getHeader().getCorrelationId()).isEqualTo(TEST_CORRELATION_ID);
+    assertThat(actualEvent.getHeader().getOriginatingUser()).isEqualTo(TEST_ORIGINATING_USER);
+
+    CaseUpdateDTO actualCaseUpdate = actualEvent.getPayload().getCaseUpdate();
     assertThat(actualCaseUpdate.getCaseId()).isEqualTo(caze.getId());
     assertThat(actualCaseUpdate.getSample()).isEqualTo(caze.getSample());
     assertThat(actualCaseUpdate.isReceiptReceived()).isTrue();
     assertThat(actualCaseUpdate.isInvalid()).isTrue();
     assertThat(actualCaseUpdate.isSurveyLaunched()).isTrue();
     assertThat(actualCaseUpdate.getRefusalReceived()).isEqualTo(RefusalTypeDTO.HARD_REFUSAL);
-
-    assertThat(actualResponeManagementEvent.getHeader().getTopic()).isEqualTo("Test topic");
   }
 
   @Test
@@ -85,14 +87,18 @@ public class CaseServiceTest {
     caze.setSurveyLaunched(true);
     caze.setRefusalReceived(RefusalType.EXTRAORDINARY_REFUSAL);
 
-    underTest.emitCaseUpdate(caze);
+    underTest.emitCaseUpdate(caze, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
 
     ArgumentCaptor<EventDTO> eventArgumentCaptor = ArgumentCaptor.forClass(EventDTO.class);
 
     verify(messageSender).sendMessage(any(), eventArgumentCaptor.capture());
-    EventDTO actualResponeManagementEvent = eventArgumentCaptor.getValue();
+    EventDTO actualEvent = eventArgumentCaptor.getValue();
 
-    CaseUpdateDTO actualCaseUpdate = actualResponeManagementEvent.getPayload().getCaseUpdate();
+    assertThat(actualEvent.getHeader().getTopic()).isEqualTo("Test topic");
+    assertThat(actualEvent.getHeader().getCorrelationId()).isEqualTo(TEST_CORRELATION_ID);
+    assertThat(actualEvent.getHeader().getOriginatingUser()).isEqualTo(TEST_ORIGINATING_USER);
+
+    CaseUpdateDTO actualCaseUpdate = actualEvent.getPayload().getCaseUpdate();
     assertThat(actualCaseUpdate.getCaseId()).isEqualTo(caze.getId());
     assertThat(actualCaseUpdate.getSample()).isEqualTo(caze.getSample());
     assertThat(actualCaseUpdate.isReceiptReceived()).isTrue();
@@ -100,8 +106,6 @@ public class CaseServiceTest {
     assertThat(actualCaseUpdate.isSurveyLaunched()).isTrue();
     assertThat(actualCaseUpdate.getRefusalReceived())
         .isEqualTo(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
-
-    assertThat(actualResponeManagementEvent.getHeader().getTopic()).isEqualTo("Test topic");
   }
 
   @Test
@@ -124,6 +128,6 @@ public class CaseServiceTest {
     RuntimeException thrown =
         assertThrows(RuntimeException.class, () -> underTest.getCaseByCaseId(caseId));
 
-    Assertions.assertThat(thrown.getMessage()).isEqualTo(expectedErrorMessage);
+    assertThat(thrown.getMessage()).isEqualTo(expectedErrorMessage);
   }
 }
