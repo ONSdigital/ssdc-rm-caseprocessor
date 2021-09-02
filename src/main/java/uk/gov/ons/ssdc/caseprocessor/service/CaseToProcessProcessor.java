@@ -28,9 +28,11 @@ public class CaseToProcessProcessor {
           caseToProcess.getBatchId(),
           caseToProcess.getBatchQuantity(),
           printTemplate.getPackCode(),
-          printTemplate.getPrintSupplier());
+          printTemplate.getPrintSupplier(),
+          caseToProcess.getActionRule().getId());
     } else if (actionRuleType == ActionRuleType.DEACTIVATE_UAC) {
-      deactivateUacProcessor.process(caseToProcess.getCaze());
+      deactivateUacProcessor.process(
+          caseToProcess.getCaze(), caseToProcess.getActionRule().getId());
     } else {
       throw new NotImplementedException("No implementation for other types of action rule yet");
     }

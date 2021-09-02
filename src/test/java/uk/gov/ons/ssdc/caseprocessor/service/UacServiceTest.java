@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -26,8 +28,9 @@ import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 
 @ExtendWith(MockitoExtension.class)
 public class UacServiceTest {
-  private static String TEST_UAC_HASH =
+  private static final String TEST_UAC_HASH =
       "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
+
   @Mock UacQidLinkRepository uacQidLinkRepository;
   @Mock MessageSender messageSender;
 
@@ -45,7 +48,7 @@ public class UacServiceTest {
     uacQidLink.setActive(true);
 
     when(uacQidLinkRepository.save(uacQidLink)).thenReturn(uacQidLink);
-    underTest.saveAndEmitUacUpdateEvent(uacQidLink);
+    underTest.saveAndEmitUacUpdateEvent(uacQidLink, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
 
     verify(uacQidLinkRepository).save(uacQidLink);
 
@@ -53,6 +56,9 @@ public class UacServiceTest {
 
     verify(messageSender).sendMessage(any(), eventArgumentCaptor.capture());
     EventDTO actualEvent = eventArgumentCaptor.getValue();
+
+    assertThat(actualEvent.getHeader().getCorrelationId()).isEqualTo(TEST_CORRELATION_ID);
+    assertThat(actualEvent.getHeader().getOriginatingUser()).isEqualTo(TEST_ORIGINATING_USER);
 
     UacUpdateDTO uacUpdateDto = actualEvent.getPayload().getUacUpdate();
     assertThat(uacUpdateDto.getUacHash()).isEqualTo(TEST_UAC_HASH);
@@ -109,7 +115,8 @@ public class UacServiceTest {
     when(uacQidLinkRepository.save(uacQidLinkCaptor.capture())).thenReturn(expectedSavedUacQidLink);
 
     // When
-    underTest.createLinkAndEmitNewUacQid(testCase, uac, qid);
+    underTest.createLinkAndEmitNewUacQid(
+        testCase, uac, qid, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
 
     // Then
     UacQidLink actualSavedUacQidLink = uacQidLinkCaptor.getValue();
@@ -121,6 +128,10 @@ public class UacServiceTest {
     ArgumentCaptor<EventDTO> eventArgumentCaptor = ArgumentCaptor.forClass(EventDTO.class);
     verify(messageSender).sendMessage(any(), eventArgumentCaptor.capture());
     EventDTO actualEvent = eventArgumentCaptor.getValue();
+
+    assertThat(actualEvent.getHeader().getCorrelationId()).isEqualTo(TEST_CORRELATION_ID);
+    assertThat(actualEvent.getHeader().getOriginatingUser()).isEqualTo(TEST_ORIGINATING_USER);
+
     UacUpdateDTO uacUpdateDto = actualEvent.getPayload().getUacUpdate();
     assertThat(uacUpdateDto.getUacHash()).isEqualTo(HashHelper.hash(uac));
     assertThat(uacUpdateDto.getQid()).isEqualTo(qid);

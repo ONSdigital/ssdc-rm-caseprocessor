@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
@@ -45,6 +47,8 @@ public class SurveyLaunchReceiverTest {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
     managementEvent.getHeader().setVersion(EVENT_SCHEMA_VERSION);
+    managementEvent.getHeader().setCorrelationId(TEST_CORRELATION_ID);
+    managementEvent.getHeader().setOriginatingUser(TEST_ORIGINATING_USER);
     managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     managementEvent.getHeader().setTopic("Test topic");
     managementEvent.getHeader().setChannel("RH");
@@ -71,7 +75,9 @@ public class SurveyLaunchReceiverTest {
     verify(uacService).findByQid(TEST_QID_ID);
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveCaseAndEmitCaseUpdate(caseArgumentCaptor.capture());
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdate(
+            caseArgumentCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
     assertThat(caseArgumentCaptor.getValue().getId()).isEqualTo(TEST_CASE_ID);
     assertThat(caseArgumentCaptor.getValue().isSurveyLaunched()).isTrue();
 

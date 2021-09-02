@@ -47,6 +47,9 @@ public class SurveyLaunchReceiver {
         messageTimestamp);
 
     uacQidLink.getCaze().setSurveyLaunched(true);
-    caseService.saveCaseAndEmitCaseUpdate(uacQidLink.getCaze());
+    caseService.saveCaseAndEmitCaseUpdate(
+        uacQidLink.getCaze(),
+        event.getHeader().getCorrelationId(),
+        event.getHeader().getOriginatingUser());
   }
 }

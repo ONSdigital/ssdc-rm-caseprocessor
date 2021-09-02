@@ -60,7 +60,12 @@ public class SmsFulfilmentReceiver {
                 + smsFulfilment.getQid()
                 + " is already linked to a different case");
       }
-      uacService.createLinkAndEmitNewUacQid(caze, smsFulfilment.getUac(), smsFulfilment.getQid());
+      uacService.createLinkAndEmitNewUacQid(
+          caze,
+          smsFulfilment.getUac(),
+          smsFulfilment.getQid(),
+          event.getHeader().getCorrelationId(),
+          event.getHeader().getOriginatingUser());
     }
 
     eventLogger.logCaseEvent(

@@ -40,12 +40,17 @@ public class ReceiptReceiver {
 
     if (uacQidLink.isActive()) {
       uacQidLink.setActive(false);
-      uacQidLink = uacService.saveAndEmitUacUpdateEvent(uacQidLink);
+      uacQidLink =
+          uacService.saveAndEmitUacUpdateEvent(
+              uacQidLink,
+              event.getHeader().getCorrelationId(),
+              event.getHeader().getOriginatingUser());
 
       if (uacQidLink.getCaze() != null) {
         Case caze = uacQidLink.getCaze();
         caze.setReceiptReceived(true);
-        caseService.saveCaseAndEmitCaseUpdate(caze);
+        caseService.saveCaseAndEmitCaseUpdate(
+            caze, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
       }
     }
 

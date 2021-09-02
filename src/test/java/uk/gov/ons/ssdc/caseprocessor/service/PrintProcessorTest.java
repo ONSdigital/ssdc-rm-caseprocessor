@@ -48,6 +48,7 @@ public class PrintProcessorTest {
     printTemplate.setPrintSupplier("test print supplier");
 
     ActionRule actionRule = new ActionRule();
+    actionRule.setId(UUID.randomUUID());
     actionRule.setType(ActionRuleType.PRINT);
     actionRule.setPrintTemplate(printTemplate);
 
@@ -69,7 +70,8 @@ public class PrintProcessorTest {
         caseToProcess.getBatchId(),
         caseToProcess.getBatchQuantity(),
         printTemplate.getPackCode(),
-        printTemplate.getPrintSupplier());
+        printTemplate.getPrintSupplier(),
+        actionRule.getId());
 
     // Then
     ArgumentCaptor<PrintRow> printRowArgumentCaptor = ArgumentCaptor.forClass(PrintRow.class);
@@ -80,7 +82,8 @@ public class PrintProcessorTest {
     assertThat(actualPrintRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture());
+    verify(uacService)
+        .saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture(), eq(actionRule.getId()), isNull());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
@@ -134,7 +137,9 @@ public class PrintProcessorTest {
     assertThat(actualPrintRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture());
+    verify(uacService)
+        .saveAndEmitUacUpdateEvent(
+            uacQidLinkCaptor.capture(), eq(fulfilmentToProcess.getBatchId()), isNull());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
