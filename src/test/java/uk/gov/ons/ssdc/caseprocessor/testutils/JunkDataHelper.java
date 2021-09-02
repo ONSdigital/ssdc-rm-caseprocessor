@@ -14,6 +14,9 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.Survey;
+import uk.gov.ons.ssdc.common.validation.ColumnValidator;
+import uk.gov.ons.ssdc.common.validation.MandatoryRule;
+import uk.gov.ons.ssdc.common.validation.Rule;
 
 @Component
 @ActiveProfiles("test")
@@ -40,7 +43,10 @@ public class JunkDataHelper {
     Survey junkSurvey = new Survey();
     junkSurvey.setId(UUID.randomUUID());
     junkSurvey.setName("Junk survey");
-    junkSurvey.setSampleValidationRules("{\"junk\":\"more junk\"}");
+    junkSurvey.setSampleValidationRules(
+        new ColumnValidator[] {
+          new ColumnValidator("Junk", false, new Rule[] {new MandatoryRule()})
+        });
     junkSurvey.setSampleSeparator('j');
     surveyRepository.saveAndFlush(junkSurvey);
 
