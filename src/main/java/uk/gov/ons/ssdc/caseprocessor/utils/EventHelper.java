@@ -12,7 +12,11 @@ public class EventHelper {
   private static final String EVENT_CHANNEL = "RM";
 
   public static EventHeaderDTO createEventDTO(
-      String topic, String eventChannel, String eventSource) {
+      String topic,
+      String eventChannel,
+      String eventSource,
+      UUID correlationId,
+      String originatingUser) {
     EventHeaderDTO eventHeader = new EventHeaderDTO();
 
     eventHeader.setVersion(EVENT_SCHEMA_VERSION);
@@ -20,21 +24,25 @@ public class EventHelper {
     eventHeader.setSource(eventSource);
     eventHeader.setDateTime(OffsetDateTime.now());
     eventHeader.setMessageId(UUID.randomUUID());
+    eventHeader.setCorrelationId(correlationId);
+    eventHeader.setOriginatingUser(originatingUser);
     eventHeader.setTopic(topic);
 
     return eventHeader;
   }
 
-  public static EventHeaderDTO createEventDTO(String topic) {
-    return createEventDTO(topic, EVENT_CHANNEL, EVENT_SOURCE);
+  public static EventHeaderDTO createEventDTO(
+      String topic, UUID correlationId, String originatingUser) {
+    return createEventDTO(topic, EVENT_CHANNEL, EVENT_SOURCE, correlationId, originatingUser);
   }
 
-  public static EventHeaderDTO getDummyEvent() {
+  public static EventHeaderDTO getDummyEvent(UUID correlationId) {
     EventHeaderDTO event = new EventHeaderDTO();
 
     event.setChannel(EVENT_CHANNEL);
     event.setSource(EVENT_SOURCE);
     event.setMessageId(UUID.randomUUID());
+    event.setCorrelationId(correlationId);
 
     return event;
   }

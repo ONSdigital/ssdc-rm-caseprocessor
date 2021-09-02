@@ -36,7 +36,8 @@ public class RefusalReceiver {
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     refusedCase.setRefusalReceived(RefusalType.valueOf(refusal.getType().name()));
 
-    caseService.saveCaseAndEmitCaseUpdate(refusedCase);
+    caseService.saveCaseAndEmitCaseUpdate(
+        refusedCase, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
 
     eventLogger.logCaseEvent(
         refusedCase,

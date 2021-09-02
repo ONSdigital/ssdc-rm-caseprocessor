@@ -32,17 +32,18 @@ public class CaseService {
     this.messageSender = messageSender;
   }
 
-  public void saveCaseAndEmitCaseUpdate(Case caze) {
+  public void saveCaseAndEmitCaseUpdate(Case caze, UUID correlationId, String originatingUser) {
     saveCase(caze);
-    emitCaseUpdate(caze);
+    emitCaseUpdate(caze, correlationId, originatingUser);
   }
 
   public void saveCase(Case caze) {
     caseRepository.saveAndFlush(caze);
   }
 
-  public void emitCaseUpdate(Case caze) {
-    EventHeaderDTO eventHeader = EventHelper.createEventDTO(caseUpdateTopic);
+  public void emitCaseUpdate(Case caze, UUID correlationId, String originatingUser) {
+    EventHeaderDTO eventHeader =
+        EventHelper.createEventDTO(caseUpdateTopic, correlationId, originatingUser);
 
     EventDTO event = prepareCaseEvent(caze, eventHeader);
 
