@@ -2,6 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -14,12 +15,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.CollectionCase;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.InvalidAddress;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.InvalidCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
@@ -35,9 +35,9 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 @ActiveProfiles("test")
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-public class InvalidAddressIT {
+public class InvalidCaseReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  private static final String INBOUND_INVALID_ADDRESS_TOPIC = "event_invalid";
+  private static final String INBOUND_INVALID_CASE_TOPIC = "event_invalid-case";
 
   @Value("${queueconfig.case-update-topic}")
   private String caseUpdateTopic;
@@ -51,14 +51,14 @@ public class InvalidAddressIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
+    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
-  public void testInvalidAddress() throws Exception {
-    try (QueueSpy<ResponseManagementEvent> outboundCaseQueueSpy =
-        pubsubHelper.listen(OUTBOUND_CASE_SUBSCRIPTION, ResponseManagementEvent.class)) {
+  public void testInvalidCase() throws Exception {
+    try (QueueSpy<EventDTO> outboundCaseQueueSpy =
+        pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
       // GIVEN
 
       CollectionExercise collectionExercise = new CollectionExercise();
@@ -68,42 +68,41 @@ public class InvalidAddressIT {
       Case caze = new Case();
       caze.setId(TEST_CASE_ID);
       caze.setCollectionExercise(collectionExercise);
-      caze.setAddressInvalid(false);
+      caze.setInvalid(false);
 
       caseRepository.saveAndFlush(caze);
 
-      InvalidAddress invalidAddress = new InvalidAddress();
-      invalidAddress.setCaseId(TEST_CASE_ID);
-      invalidAddress.setReason("Not found");
-      invalidAddress.setNotes("Looked hard");
+      InvalidCase invalidCase = new InvalidCase();
+      invalidCase.setCaseId(TEST_CASE_ID);
+      invalidCase.setReason("Not found");
       PayloadDTO payloadDTO = new PayloadDTO();
-      payloadDTO.setInvalidAddress(invalidAddress);
-      ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-      responseManagementEvent.setPayload(payloadDTO);
+      payloadDTO.setInvalidCase(invalidCase);
+      EventDTO event = new EventDTO();
+      event.setPayload(payloadDTO);
 
-      EventDTO eventDTO = new EventDTO();
-      eventDTO.setType(EventTypeDTO.ADDRESS_NOT_VALID);
-      eventDTO.setSource("RH");
-      eventDTO.setDateTime(OffsetDateTime.now());
-      eventDTO.setChannel("RH");
-      eventDTO.setTransactionId(UUID.randomUUID());
-      responseManagementEvent.setEvent(eventDTO);
+      EventHeaderDTO eventHeader = new EventHeaderDTO();
+      eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+      eventHeader.setTopic(INBOUND_INVALID_CASE_TOPIC);
+      eventHeader.setSource("RH");
+      eventHeader.setDateTime(OffsetDateTime.now());
+      eventHeader.setChannel("RH");
+      eventHeader.setMessageId(UUID.randomUUID());
+      event.setHeader(eventHeader);
 
       //  When
-      pubsubHelper.sendMessage(INBOUND_INVALID_ADDRESS_TOPIC, responseManagementEvent);
+      pubsubHelper.sendMessageToSharedProject(INBOUND_INVALID_CASE_TOPIC, event);
 
       //  Then
-      ResponseManagementEvent actualResponseManagementEvent =
-          outboundCaseQueueSpy.checkExpectedMessageReceived();
+      EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
 
-      CollectionCase emittedCase = actualResponseManagementEvent.getPayload().getCollectionCase();
+      CaseUpdateDTO emittedCase = actualEvent.getPayload().getCaseUpdate();
       assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
-      assertThat(emittedCase.isInvalidAddress()).isTrue();
+      assertThat(emittedCase.isInvalid()).isTrue();
 
       assertThat(eventRepository.findAll().size()).isEqualTo(1);
-      Event event = eventRepository.findAll().get(0);
-      assertThat(event.getCaze().getId()).isEqualTo(TEST_CASE_ID);
-      assertThat(event.getEventType()).isEqualTo(EventType.ADDRESS_NOT_VALID);
+      Event databaseEvent = eventRepository.findAll().get(0);
+      assertThat(databaseEvent.getCaze().getId()).isEqualTo(TEST_CASE_ID);
+      assertThat(databaseEvent.getType()).isEqualTo(EventType.INVALID_CASE);
     }
   }
 }

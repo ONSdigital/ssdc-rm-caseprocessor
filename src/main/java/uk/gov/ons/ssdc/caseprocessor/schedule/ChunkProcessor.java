@@ -1,5 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -36,11 +38,15 @@ public class ChunkProcessor {
   @Transactional(propagation = Propagation.REQUIRES_NEW) // Start a new transaction for every chunk
   public void processChunk() {
     try (Stream<CaseToProcess> cases = caseToProcessRepository.findChunkToProcess(chunkSize)) {
+      List<CaseToProcess> caseToProcessToDelete = new LinkedList<>();
+
       cases.forEach(
           caseToProcess -> {
             caseToProcessProcessor.process(caseToProcess);
-            caseToProcessRepository.delete(caseToProcess); // Delete the case from the 'queue'
+            caseToProcessToDelete.add(caseToProcess);
           });
+
+      caseToProcessRepository.deleteAllInBatch(caseToProcessToDelete);
     }
   }
 
@@ -53,12 +59,15 @@ public class ChunkProcessor {
   public void processFulfilmentChunk() {
     try (Stream<FulfilmentToProcess> cases =
         fulfilmentToProcessRepository.findChunkToProcess(chunkSize)) {
+      List<FulfilmentToProcess> fulfilmentToProcessToDelete = new LinkedList<>();
+
       cases.forEach(
           fulfilmentToProcess -> {
             printProcessor.process(fulfilmentToProcess);
-            fulfilmentToProcessRepository.delete(
-                fulfilmentToProcess); // Delete the case from the 'queue'
+            fulfilmentToProcessToDelete.add(fulfilmentToProcess);
           });
+
+      fulfilmentToProcessRepository.deleteAllInBatch(fulfilmentToProcessToDelete);
     }
   }
 

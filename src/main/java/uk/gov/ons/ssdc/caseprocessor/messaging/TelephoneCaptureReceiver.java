@@ -1,15 +1,15 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
+import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.TelephoneCaptureDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
@@ -19,7 +19,6 @@ import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 
 @MessageEndpoint
 public class TelephoneCaptureReceiver {
-
   private final UacService uacService;
   private final CaseService caseService;
   private final EventLogger eventLogger;
@@ -34,12 +33,13 @@ public class TelephoneCaptureReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "telephoneCaptureInputChannel")
-  public void receiveMessage(Message<ResponseManagementEvent> message) {
+  @ServiceActivator(inputChannel = "telephoneCaptureInputChannel", adviceChain = "retryAdvice")
+  public void receiveMessage(Message<byte[]> message) {
+    EventDTO event = convertJsonBytesToEvent(message.getPayload());
+
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    ResponseManagementEvent telephoneCaptureEvent = message.getPayload();
-    TelephoneCaptureDTO telephoneCapturePayload =
-        telephoneCaptureEvent.getPayload().getTelephoneCapture();
+
+    TelephoneCaptureDTO telephoneCapturePayload = event.getPayload().getTelephoneCapture();
 
     Case caze = caseService.getCaseByCaseId(telephoneCapturePayload.getCaseId());
 
@@ -48,7 +48,7 @@ public class TelephoneCaptureReceiver {
 
       // If it does exist, check if it is linked to the given case
       UacQidLink existingUacQidLink = uacService.findByQid(telephoneCapturePayload.getQid());
-      if (existingUacQidLink.getCaze().getId() == telephoneCapturePayload.getCaseId()) {
+      if (existingUacQidLink.getCaze().getId().equals(telephoneCapturePayload.getCaseId())) {
 
         // If the QID is already linked to the given case this must be duplicate event, ignore
         return;
@@ -61,27 +61,16 @@ public class TelephoneCaptureReceiver {
               + " is already linked to a different case");
     }
 
-    createNewUacQidLink(caze, telephoneCapturePayload.getUac(), telephoneCapturePayload.getQid());
+    uacService.createLinkAndEmitNewUacQid(
+        caze, telephoneCapturePayload.getUac(), telephoneCapturePayload.getQid());
 
     eventLogger.logCaseEvent(
         caze,
-        telephoneCaptureEvent.getEvent().getDateTime(),
+        event.getHeader().getDateTime(),
         TELEPHONE_CAPTURE_DESCRIPTION,
-        EventType.TELEPHONE_CAPTURE_REQUESTED,
-        telephoneCaptureEvent.getEvent(),
+        EventType.TELEPHONE_CAPTURE,
+        event.getHeader(),
         telephoneCapturePayload,
         messageTimestamp);
-  }
-
-  private void createNewUacQidLink(Case caze, String uac, String qid) {
-    OffsetDateTime now = OffsetDateTime.now();
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setId(UUID.randomUUID());
-    uacQidLink.setUac(uac);
-    uacQidLink.setQid(qid);
-    uacQidLink.setCaze(caze);
-    uacQidLink.setCreatedAt(now);
-    uacQidLink.setLastUpdatedAt(now);
-    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
   }
 }

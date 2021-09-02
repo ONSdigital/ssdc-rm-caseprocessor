@@ -1,24 +1,23 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.TelephoneCaptureDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
@@ -27,7 +26,7 @@ import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 
 @ExtendWith(MockitoExtension.class)
-public class TelephoneCaptureReceiverTest {
+class TelephoneCaptureReceiverTest {
 
   @InjectMocks TelephoneCaptureReceiver underTest;
 
@@ -42,13 +41,12 @@ public class TelephoneCaptureReceiverTest {
   private static final String TELEPHONE_CAPTURE_DESCRIPTION = "Telephone capture request received";
 
   @Test
-  public void testReceiveMessageHappyPath() {
+  void testReceiveMessageHappyPath() {
     // Given
     Case testCase = new Case();
     testCase.setId(CASE_ID);
-    ResponseManagementEvent responseManagementEvent = buildTelephoneCaptureEvent();
-    Message<ResponseManagementEvent> eventMessage =
-        constructMessageWithValidTimeStamp(responseManagementEvent);
+    EventDTO event = buildTelephoneCaptureEvent();
+    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(event);
 
     when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(testCase);
     when(uacService.existsByQid(TEST_QID)).thenReturn(false);
@@ -57,33 +55,26 @@ public class TelephoneCaptureReceiverTest {
     underTest.receiveMessage(eventMessage);
 
     // Then
-    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
-    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
-    assertThat(actualUacQidLink.isActive()).isTrue();
-    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
-    assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
-    assertThat(actualUacQidLink.getCaze()).isEqualTo(testCase);
+    verify(uacService).createLinkAndEmitNewUacQid(testCase, TEST_UAC, TEST_QID);
 
     verify(eventLogger)
         .logCaseEvent(
             testCase,
-            responseManagementEvent.getEvent().getDateTime(),
+            event.getHeader().getDateTime(),
             TELEPHONE_CAPTURE_DESCRIPTION,
-            EventType.TELEPHONE_CAPTURE_REQUESTED,
-            responseManagementEvent.getEvent(),
-            responseManagementEvent.getPayload().getTelephoneCapture(),
+            EventType.TELEPHONE_CAPTURE,
+            event.getHeader(),
+            event.getPayload().getTelephoneCapture(),
             getMsgTimeStamp(eventMessage));
   }
 
   @Test
-  public void testReceiveMessageQidAlreadyLinkedToCorrectCase() {
+  void testReceiveMessageQidAlreadyLinkedToCorrectCase() {
     // Given
     Case testCase = new Case();
     testCase.setId(CASE_ID);
-    ResponseManagementEvent responseManagementEvent = buildTelephoneCaptureEvent();
-    Message<ResponseManagementEvent> eventMessage =
-        constructMessageWithValidTimeStamp(responseManagementEvent);
+    EventDTO event = buildTelephoneCaptureEvent();
+    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(event);
 
     UacQidLink existingUacQidLink = new UacQidLink();
     existingUacQidLink.setQid(TEST_QID);
@@ -98,12 +89,12 @@ public class TelephoneCaptureReceiverTest {
     underTest.receiveMessage(eventMessage);
 
     // Then
-    verify(uacService, never()).saveAndEmitUacUpdatedEvent(any());
-    verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(), any(), any());
+    verify(uacService, never()).saveAndEmitUacUpdateEvent(any());
+    verifyNoInteractions(eventLogger);
   }
 
   @Test
-  public void testReceiveMessageQidAlreadyLinkedToOtherCase() {
+  void testReceiveMessageQidAlreadyLinkedToOtherCase() {
     // Given
     Case testCase = new Case();
     testCase.setId(CASE_ID);
@@ -111,9 +102,8 @@ public class TelephoneCaptureReceiverTest {
     Case otherCase = new Case();
     otherCase.setId(UUID.randomUUID());
 
-    ResponseManagementEvent responseManagementEvent = buildTelephoneCaptureEvent();
-    Message<ResponseManagementEvent> eventMessage =
-        constructMessageWithValidTimeStamp(responseManagementEvent);
+    EventDTO event = buildTelephoneCaptureEvent();
+    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(event);
 
     UacQidLink existingUacQidLink = new UacQidLink();
     existingUacQidLink.setQid(TEST_QID);
@@ -126,22 +116,24 @@ public class TelephoneCaptureReceiverTest {
 
     // When, then throws
     assertThrows(RuntimeException.class, () -> underTest.receiveMessage(eventMessage));
+    verifyNoInteractions(eventLogger);
   }
 
-  private ResponseManagementEvent buildTelephoneCaptureEvent() {
+  private EventDTO buildTelephoneCaptureEvent() {
     TelephoneCaptureDTO telephoneCaptureDTO = new TelephoneCaptureDTO();
     telephoneCaptureDTO.setCaseId(CASE_ID);
     telephoneCaptureDTO.setQid(TEST_QID);
     telephoneCaptureDTO.setUac(TEST_UAC);
 
-    EventDTO eventDTO = new EventDTO();
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setTelephoneCapture(telephoneCaptureDTO);
 
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setEvent(eventDTO);
-    responseManagementEvent.setPayload(payloadDTO);
+    EventDTO event = new EventDTO();
+    event.setHeader(eventHeader);
+    event.setPayload(payloadDTO);
 
-    return responseManagementEvent;
+    return event;
   }
 }

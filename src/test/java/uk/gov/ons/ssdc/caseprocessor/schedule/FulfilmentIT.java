@@ -2,8 +2,8 @@ package uk.gov.ons.ssdc.caseprocessor.schedule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
@@ -18,11 +18,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.FulfilmentDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintFulfilmentDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentNextTrigger;
@@ -38,7 +37,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
-import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 
 @ContextConfiguration
 @SpringBootTest
@@ -47,7 +45,7 @@ import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 public class FulfilmentIT {
   private static final String OUTBOUND_PRINTER_SUBSCRIPTION =
       "rm-internal-print-row_print-file-service";
-  private static final String FULFILMENT_TOPIC = "event_paper-fulfilment";
+  private static final String FULFILMENT_TOPIC = "event_print-fulfilment";
 
   private static final String PACK_CODE = "test-pack-code";
   private static final String PRINT_SUPPLIER = "FOOBAR_PRINT_SUPPLIER";
@@ -70,12 +68,10 @@ public class FulfilmentIT {
   @Autowired
   private FulfilmentSurveyPrintTemplateRepository fulfilmentSurveyPrintTemplateRepository;
 
-  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
-
   @BeforeEach
   public void setUp() {
     pubsubHelper.purgeMessages(OUTBOUND_PRINTER_SUBSCRIPTION, printTopic);
-    pubsubHelper.purgeMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
+    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
@@ -83,8 +79,8 @@ public class FulfilmentIT {
   public void testFulfilmentTrigger() throws Exception {
     try (QueueSpy<PrintRow> printerQueue =
             pubsubHelper.listen(OUTBOUND_PRINTER_SUBSCRIPTION, PrintRow.class);
-        QueueSpy<ResponseManagementEvent> outboundUacQueue =
-            pubsubHelper.listen(OUTBOUND_UAC_SUBSCRIPTION, ResponseManagementEvent.class)) {
+        QueueSpy<EventDTO> outboundUacQueue =
+            pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       PrintTemplate printTemplate = new PrintTemplate();
       printTemplate.setPackCode(PACK_CODE);
@@ -105,25 +101,26 @@ public class FulfilmentIT {
       Case caze = setUpCase(collectionExercise);
 
       // When
-      FulfilmentDTO fulfilment = new FulfilmentDTO();
+      PrintFulfilmentDTO fulfilment = new PrintFulfilmentDTO();
       fulfilment.setCaseId(caze.getId());
       fulfilment.setPackCode(PACK_CODE);
 
       PayloadDTO payload = new PayloadDTO();
-      payload.setFulfilment(fulfilment);
+      payload.setPrintFulfilment(fulfilment);
 
-      ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-      responseManagementEvent.setPayload(payload);
+      EventDTO event = new EventDTO();
+      event.setPayload(payload);
 
-      EventDTO eventDTO = new EventDTO();
-      eventDTO.setType(EventTypeDTO.FULFILMENT);
-      eventDTO.setSource("RH");
-      eventDTO.setDateTime(OffsetDateTime.now());
-      eventDTO.setChannel("RH");
-      eventDTO.setTransactionId(UUID.randomUUID());
-      responseManagementEvent.setEvent(eventDTO);
+      EventHeaderDTO eventHeader = new EventHeaderDTO();
+      eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+      eventHeader.setTopic(FULFILMENT_TOPIC);
+      eventHeader.setSource("RH");
+      eventHeader.setDateTime(OffsetDateTime.now());
+      eventHeader.setChannel("RH");
+      eventHeader.setMessageId(UUID.randomUUID());
+      event.setHeader(eventHeader);
 
-      pubsubHelper.sendMessage(FULFILMENT_TOPIC, responseManagementEvent);
+      pubsubHelper.sendMessageToSharedProject(FULFILMENT_TOPIC, event);
 
       Thread.sleep(3000);
 
@@ -133,7 +130,7 @@ public class FulfilmentIT {
       fulfilmentNextTriggerRepository.saveAndFlush(fulfilmentNextTrigger);
 
       PrintRow printRow = printerQueue.getQueue().poll(20, TimeUnit.SECONDS);
-      ResponseManagementEvent rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
+      EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
       assertThat(printRow).isNotNull();
@@ -143,8 +140,8 @@ public class FulfilmentIT {
       assertThat(printRow.getRow()).startsWith("\"123\"|\"bar\"|\"");
 
       assertThat(rme).isNotNull();
-      assertThat(rme.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
-      assertThat(rme.getPayload().getUac().getCaseId()).isEqualTo(caze.getId());
+      assertThat(rme.getHeader().getTopic()).isEqualTo(uacUpdateTopic);
+      assertThat(rme.getPayload().getUacUpdate().getCaseId()).isEqualTo(caze.getId());
     }
   }
 

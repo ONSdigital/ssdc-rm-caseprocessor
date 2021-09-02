@@ -1,18 +1,21 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
+import static com.google.cloud.spring.pubsub.support.PubSubTopicUtils.toProjectTopicName;
+
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.UacDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
+import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 
 @Service
 public class UacService {
@@ -22,34 +25,37 @@ public class UacService {
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
 
+  @Value("${queueconfig.shared-pubsub-project}")
+  private String sharedPubsubProject;
+
   public UacService(UacQidLinkRepository uacQidLinkRepository, MessageSender messageSender) {
     this.messageSender = messageSender;
     this.uacQidLinkRepository = uacQidLinkRepository;
   }
 
-  public UacQidLink saveAndEmitUacUpdatedEvent(UacQidLink uacQidLink) {
-    UacQidLink savedUacQidLink = uacQidLinkRepository.saveAndFlush(uacQidLink);
+  public UacQidLink saveAndEmitUacUpdateEvent(UacQidLink uacQidLink) {
+    UacQidLink savedUacQidLink = uacQidLinkRepository.save(uacQidLink);
 
-    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.UAC_UPDATED);
+    EventHeaderDTO eventHeader = EventHelper.createEventDTO(uacUpdateTopic);
 
-    UacDTO uac = new UacDTO();
-    uac.setQuestionnaireId(savedUacQidLink.getQid());
-    uac.setUac(savedUacQidLink.getUac());
+    UacUpdateDTO uac = new UacUpdateDTO();
+    uac.setQid(savedUacQidLink.getQid());
+    uac.setUacHash(HashHelper.hash(savedUacQidLink.getUac()));
     uac.setActive(savedUacQidLink.isActive());
 
     Case caze = savedUacQidLink.getCaze();
     if (caze != null) {
       uac.setCaseId(caze.getId());
-      uac.setCollectionExerciseId(caze.getCollectionExercise().getId());
     }
 
     PayloadDTO payloadDTO = new PayloadDTO();
-    payloadDTO.setUac(uac);
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setEvent(eventDTO);
-    responseManagementEvent.setPayload(payloadDTO);
+    payloadDTO.setUacUpdate(uac);
+    EventDTO event = new EventDTO();
+    event.setHeader(eventHeader);
+    event.setPayload(payloadDTO);
 
-    messageSender.sendMessage(uacUpdateTopic, responseManagementEvent);
+    String topic = toProjectTopicName(uacUpdateTopic, sharedPubsubProject).toString();
+    messageSender.sendMessage(topic, event);
 
     return savedUacQidLink;
   }
@@ -67,5 +73,14 @@ public class UacService {
 
   public boolean existsByQid(String qid) {
     return uacQidLinkRepository.existsByQid(qid);
+  }
+
+  public void createLinkAndEmitNewUacQid(Case caze, String uac, String qid) {
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setId(UUID.randomUUID());
+    uacQidLink.setUac(uac);
+    uacQidLink.setQid(qid);
+    uacQidLink.setCaze(caze);
+    saveAndEmitUacUpdateEvent(uacQidLink);
   }
 }

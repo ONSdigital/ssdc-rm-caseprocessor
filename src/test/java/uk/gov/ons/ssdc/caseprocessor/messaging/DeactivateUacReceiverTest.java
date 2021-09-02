@@ -5,11 +5,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.ssdc.caseprocessor.model.dto.EventTypeDTO.DEACTIVATE_UAC;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -20,8 +21,8 @@ import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.DeactivateUacDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponseManagementEvent;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
@@ -35,23 +36,24 @@ public class DeactivateUacReceiverTest {
   @InjectMocks DeactivateUacReceiver underTest;
 
   @Test
-  public void testInvalidAddress() {
+  public void testDeactivateUac() {
     // Given
-    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
-    managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now().minusHours(1));
-    managementEvent.getEvent().setType(DEACTIVATE_UAC);
-    managementEvent.getEvent().setChannel("RM");
+    EventDTO managementEvent = new EventDTO();
+    managementEvent.setHeader(new EventHeaderDTO());
+    managementEvent.getHeader().setVersion(EVENT_SCHEMA_VERSION);
+    managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
+    managementEvent.getHeader().setTopic("Test topic");
+    managementEvent.getHeader().setChannel("RM");
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setDeactivateUac(new DeactivateUacDTO());
     managementEvent.getPayload().getDeactivateUac().setQid("0123456789");
 
-    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(managementEvent);
+    Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
 
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setActive(true);
     when(uacService.findByQid("0123456789")).thenReturn(uacQidLink);
-    when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
+    when(uacService.saveAndEmitUacUpdateEvent(any(UacQidLink.class))).thenReturn(uacQidLink);
 
     // When
     underTest.receiveMessage(message);
@@ -59,7 +61,7 @@ public class DeactivateUacReceiverTest {
     // Then
     ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
 
-    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkArgumentCaptor.capture());
+    verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkArgumentCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkArgumentCaptor.getValue();
     assertThat(actualUacQidLink.isActive()).isFalse();
 
@@ -68,10 +70,10 @@ public class DeactivateUacReceiverTest {
     verify(eventLogger)
         .logUacQidEvent(
             eq(uacQidLink),
-            eq(managementEvent.getEvent().getDateTime()),
+            eq(managementEvent.getHeader().getDateTime()),
             eq("Deactivate UAC"),
             eq(EventType.DEACTIVATE_UAC),
-            eq(managementEvent.getEvent()),
+            eq(managementEvent.getHeader()),
             eq(managementEvent.getPayload()),
             eq(messageDateTime));
   }
