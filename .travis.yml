@@ -13,6 +13,7 @@ env:
 before_install:
   - mvn fmt:check
   - docker login -u "${DOCKER_GCP_USERNAME}" -p "${DOCKER_GCP_PASSWORD}" "${DOCKER_GCP_REGISTRY}";
+  - git clone https://github.com/ONSdigital/ssdc-rm-common-entity-model.git && cd ssdc-rm-common-entity-model && mvn clean install && cd ..
 
 install: echo "SKIPPING DEFAULT INSTALL" # Travis has a default maven install. Don't build twice!
 
