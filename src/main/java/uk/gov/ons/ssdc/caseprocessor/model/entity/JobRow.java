@@ -20,18 +20,21 @@ import org.hibernate.annotations.TypeDefs;
 public class JobRow {
   @Id private UUID id;
 
-  @ManyToOne private Job job;
+  @ManyToOne(optional = false)
+  private Job job;
 
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
   private Map<String, String> rowData;
 
-  @Column private String[] originalRowData;
+  @Column(nullable = false)
+  private String[] originalRowData;
 
-  @Column private int originalRowLineNumber;
+  @Column(nullable = false)
+  private int originalRowLineNumber;
 
   @Enumerated(EnumType.STRING)
-  @Column
+  @Column(nullable = false)
   private JobRowStatus jobRowStatus;
 
   @Column private String validationErrorDescriptions;

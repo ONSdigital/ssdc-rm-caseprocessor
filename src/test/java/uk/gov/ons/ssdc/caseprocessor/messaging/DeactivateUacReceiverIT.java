@@ -24,6 +24,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 
@@ -42,6 +43,7 @@ public class DeactivateUacReceiverIT {
 
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
+  @Autowired private JunkDataHelper junkDataHelper;
 
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
   @Autowired private EventRepository eventRepository;
@@ -61,6 +63,7 @@ public class DeactivateUacReceiverIT {
       EventHeaderDTO eventHeader = new EventHeaderDTO();
       eventHeader.setVersion(EVENT_SCHEMA_VERSION);
       eventHeader.setTopic(deactivateUacTopic);
+      junkDataHelper.junkify(eventHeader);
       event.setHeader(eventHeader);
 
       PayloadDTO payloadDTO = new PayloadDTO();
@@ -74,6 +77,7 @@ public class DeactivateUacReceiverIT {
       uacQidLink.setQid(TEST_QID);
       uacQidLink.setUac("test_uac");
       uacQidLink.setActive(true);
+      uacQidLink.setCaze(junkDataHelper.setupJunkCase());
       uacQidLinkRepository.save(uacQidLink);
 
       // WHEN

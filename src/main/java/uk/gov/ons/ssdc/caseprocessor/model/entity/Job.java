@@ -19,30 +19,37 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class Job {
   @Id private UUID id;
 
-  @ManyToOne private CollectionExercise collectionExercise;
+  @ManyToOne(optional = false)
+  private CollectionExercise collectionExercise;
 
   @Column(columnDefinition = "timestamp with time zone")
   @CreationTimestamp
   private OffsetDateTime createdAt;
 
-  @Column private String createdBy;
+  @Column(nullable = false)
+  private String createdBy;
 
   @Column(columnDefinition = "timestamp with time zone")
   @UpdateTimestamp
   private OffsetDateTime lastUpdatedAt;
 
-  @Column private String fileName;
+  @Column(nullable = false)
+  private String fileName;
 
-  @Column private UUID fileId;
+  @Column(nullable = false)
+  private UUID fileId;
 
-  @Column private int fileRowCount;
+  @Column(nullable = false)
+  private int fileRowCount;
 
-  @Column private int stagingRowNumber;
+  @Column(nullable = false)
+  private int stagingRowNumber;
 
-  @Column private int processingRowNumber;
+  @Column(nullable = false)
+  private int processingRowNumber;
 
   @Enumerated(EnumType.STRING)
-  @Column
+  @Column(nullable = false)
   private JobStatus jobStatus;
 
   @OneToMany(mappedBy = "job")

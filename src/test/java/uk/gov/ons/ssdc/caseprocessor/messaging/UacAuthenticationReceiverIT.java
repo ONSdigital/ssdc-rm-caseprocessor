@@ -21,6 +21,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 
 @ContextConfiguration
@@ -33,6 +34,7 @@ public class UacAuthenticationReceiverIT {
 
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
+  @Autowired private JunkDataHelper junkDataHelper;
 
   @Autowired private EventRepository eventRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
@@ -48,14 +50,15 @@ public class UacAuthenticationReceiverIT {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setQid(TEST_QID);
+    uacQidLink.setUac("Junk");
+    uacQidLink.setCaze(junkDataHelper.setupJunkCase());
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
     EventDTO surveyLaunchedEvent = new EventDTO();
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(EVENT_SCHEMA_VERSION);
     eventHeader.setTopic(INBOUND_TOPIC);
-    eventHeader.setSource("Respondent Home");
-    eventHeader.setChannel("RH");
+    junkDataHelper.junkify(eventHeader);
     surveyLaunchedEvent.setHeader(eventHeader);
 
     UacAuthenticationDTO uacAuthentication = new UacAuthenticationDTO();

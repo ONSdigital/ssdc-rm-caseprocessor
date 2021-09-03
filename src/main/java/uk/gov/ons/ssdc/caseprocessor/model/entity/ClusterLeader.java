@@ -12,8 +12,9 @@ import lombok.Data;
 public class ClusterLeader {
   @Id private UUID id;
 
-  @Column private String hostName;
+  @Column(nullable = false)
+  private String hostName;
 
-  @Column(columnDefinition = "timestamp with time zone")
+  @Column(nullable = false, columnDefinition = "timestamp with time zone")
   private OffsetDateTime hostLastSeenAliveAt;
 }

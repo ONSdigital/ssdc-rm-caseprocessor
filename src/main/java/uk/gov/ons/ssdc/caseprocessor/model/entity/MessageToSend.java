@@ -13,11 +13,12 @@ import org.hibernate.annotations.Type;
 public class MessageToSend {
   @Id private UUID id;
 
-  @Column private String destinationTopic;
+  @Column(nullable = false)
+  private String destinationTopic;
 
   @Lob
   @Type(type = "org.hibernate.type.BinaryType")
-  @Column
+  @Column(nullable = false)
   private byte[] messageBody;
 
   public void setMessageBody(String messageBodyStr) {

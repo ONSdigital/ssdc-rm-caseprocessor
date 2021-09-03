@@ -16,9 +16,11 @@ import lombok.ToString;
 public class CollectionExercise {
   @Id private UUID id;
 
-  @Column private String name;
+  @Column(nullable = false)
+  private String name;
 
-  @ManyToOne private Survey survey;
+  @ManyToOne(optional = false)
+  private Survey survey;
 
   @OneToMany(mappedBy = "collectionExercise")
   private List<Case> cases;

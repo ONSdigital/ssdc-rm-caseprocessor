@@ -5,10 +5,7 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CAS
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
-import java.time.OffsetDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,14 +23,12 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ReceiptDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 
@@ -42,7 +37,6 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 public class ReceiptReceiverIT {
-  private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String TEST_QID = "123456";
   private static final UUID TEST_UACLINK_ID = UUID.randomUUID();
   private static final String INBOUND_RECEIPT_TOPIC = "event_receipt";
@@ -55,11 +49,10 @@ public class ReceiptReceiverIT {
 
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
+  @Autowired private JunkDataHelper junkDataHelper;
 
-  @Autowired private CaseRepository caseRepository;
   @Autowired private EventRepository eventRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
-  @Autowired private CollectionExerciseRepository collectionExerciseRepository;
 
   @BeforeEach
   public void setUp() {
@@ -76,21 +69,7 @@ public class ReceiptReceiverIT {
             pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
       // GIVEN
 
-      CollectionExercise collectionExercise = new CollectionExercise();
-      collectionExercise.setId(UUID.randomUUID());
-      collectionExerciseRepository.saveAndFlush(collectionExercise);
-
-      Case caze = new Case();
-      caze.setId(TEST_CASE_ID);
-      caze.setCollectionExercise(collectionExercise);
-
-      Map<String, String> sample = new HashMap<>();
-      sample.put("CanYouKickIt", "YesYouCan");
-      sample.put("Org", "Brewery");
-      caze.setReceiptReceived(false);
-      caze.setSample(sample);
-
-      caseRepository.saveAndFlush(caze);
+      Case caze = junkDataHelper.setupJunkCase();
 
       UacQidLink uacQidLink = new UacQidLink();
       uacQidLink.setId(TEST_UACLINK_ID);
@@ -110,10 +89,7 @@ public class ReceiptReceiverIT {
       EventHeaderDTO eventHeader = new EventHeaderDTO();
       eventHeader.setVersion(EVENT_SCHEMA_VERSION);
       eventHeader.setTopic(INBOUND_RECEIPT_TOPIC);
-      eventHeader.setSource("RH");
-      eventHeader.setDateTime(OffsetDateTime.now());
-      eventHeader.setChannel("RH");
-      eventHeader.setMessageId(UUID.randomUUID());
+      junkDataHelper.junkify(eventHeader);
       event.setHeader(eventHeader);
 
       pubsubHelper.sendMessageToSharedProject(INBOUND_RECEIPT_TOPIC, event);
@@ -122,8 +98,8 @@ public class ReceiptReceiverIT {
       EventDTO caseEmittedEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
 
       CaseUpdateDTO emittedCase = caseEmittedEvent.getPayload().getCaseUpdate();
-      assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
-      assertThat(emittedCase.getSample()).isEqualTo(sample);
+      assertThat(emittedCase.getCaseId()).isEqualTo(caze.getId());
+      assertThat(emittedCase.getSample()).isEqualTo(caze.getSample());
       assertThat(emittedCase.isReceiptReceived()).isTrue();
 
       EventDTO uacUpdatedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
