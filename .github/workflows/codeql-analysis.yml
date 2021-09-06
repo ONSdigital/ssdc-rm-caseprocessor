@@ -54,13 +54,9 @@ jobs:
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 https://git.io/JvXDl
 
-    # ✏️ If the Autobuild fails above, remove it and uncomment the following three lines
-    #    and modify them (or add more) to build your code if your project
-    #    uses a compiled language
-
     - run: |
        git clone https://github.com/ONSdigital/ssdc-rm-common-entity-model.git && cd ssdc-rm-common-entity-model && mvn clean install && cd ..
-       mvn clean install
+       mvn package -DskipITs -Ddockerfile.skip
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
