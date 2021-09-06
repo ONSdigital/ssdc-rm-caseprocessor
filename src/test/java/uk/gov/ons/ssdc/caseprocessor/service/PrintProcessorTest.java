@@ -14,26 +14,21 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.FileRowRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class PrintProcessorTest {
-  @Mock private MessageSender messageSender;
   @Mock private UacQidCache uacQidCache;
   @Mock private UacService uacService;
   @Mock private EventLogger eventLogger;
+  @Mock private FileRowRepository fileRowRepository;
 
   @InjectMocks PrintProcessor underTest;
-
-  @Value("${queueconfig.print-topic}")
-  private String printTopic;
 
   @Test
   public void testProcessPrintRow() {
@@ -71,13 +66,13 @@ public class PrintProcessorTest {
         printTemplate.getPackCode(),
         printTemplate.getPrintSupplier());
 
-    // Then
-    ArgumentCaptor<PrintRow> printRowArgumentCaptor = ArgumentCaptor.forClass(PrintRow.class);
-    verify(messageSender).sendMessage(eq(printTopic), printRowArgumentCaptor.capture());
-    PrintRow actualPrintRow = printRowArgumentCaptor.getValue();
-    assertThat(actualPrintRow.getPackCode()).isEqualTo("test pack code");
-    assertThat(actualPrintRow.getPrintSupplier()).isEqualTo("test print supplier");
-    assertThat(actualPrintRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
+    //    // Then
+    ArgumentCaptor<FileRow> fileRowArgumentCaptor = ArgumentCaptor.forClass(FileRow.class);
+    verify(fileRowRepository).save(fileRowArgumentCaptor.capture());
+    FileRow actualFileRow = fileRowArgumentCaptor.getValue();
+    assertThat(actualFileRow.getPackCode()).isEqualTo("test pack code");
+    assertThat(actualFileRow.getPrintSupplier()).isEqualTo("test print supplier");
+    assertThat(actualFileRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture());
@@ -126,12 +121,12 @@ public class PrintProcessorTest {
     underTest.process(fulfilmentToProcess);
 
     // Then
-    ArgumentCaptor<PrintRow> printRowArgumentCaptor = ArgumentCaptor.forClass(PrintRow.class);
-    verify(messageSender).sendMessage(eq(printTopic), printRowArgumentCaptor.capture());
-    PrintRow actualPrintRow = printRowArgumentCaptor.getValue();
-    assertThat(actualPrintRow.getPackCode()).isEqualTo("TEST_FULFILMENT_CODE");
-    assertThat(actualPrintRow.getPrintSupplier()).isEqualTo("FOOBAR_PRINT_SUPPLIER");
-    assertThat(actualPrintRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
+    ArgumentCaptor<FileRow> fileRowArgumentCaptor = ArgumentCaptor.forClass(FileRow.class);
+    verify(fileRowRepository).save(fileRowArgumentCaptor.capture());
+    FileRow actualFileRow = fileRowArgumentCaptor.getValue();
+    assertThat(actualFileRow.getPackCode()).isEqualTo("TEST_FULFILMENT_CODE");
+    assertThat(actualFileRow.getPrintSupplier()).isEqualTo("FOOBAR_PRINT_SUPPLIER");
+    assertThat(actualFileRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture());

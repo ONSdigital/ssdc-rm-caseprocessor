@@ -5,6 +5,7 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -21,15 +22,16 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintFulfilmentDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.caseprocessor.model.entity.FileRow;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentNextTrigger;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentSurveyPrintTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.PrintTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.entity.Survey;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.FileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentNextTriggerRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentSurveyPrintTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintTemplateRepository;
@@ -53,9 +55,6 @@ public class FulfilmentIT {
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
 
-  @Value("${queueconfig.print-topic}")
-  private String printTopic;
-
   @Autowired private DeleteDataHelper deleteDataHelper;
 
   @Autowired private CaseRepository caseRepository;
@@ -64,23 +63,21 @@ public class FulfilmentIT {
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private FulfilmentNextTriggerRepository fulfilmentNextTriggerRepository;
   @Autowired private PrintTemplateRepository printTemplateRepository;
+  @Autowired private FileRowRepository fileRowRepository;
 
   @Autowired
   private FulfilmentSurveyPrintTemplateRepository fulfilmentSurveyPrintTemplateRepository;
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeMessages(OUTBOUND_PRINTER_SUBSCRIPTION, printTopic);
     pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testFulfilmentTrigger() throws Exception {
-    try (QueueSpy<PrintRow> printerQueue =
-            pubsubHelper.listen(OUTBOUND_PRINTER_SUBSCRIPTION, PrintRow.class);
-        QueueSpy<EventDTO> outboundUacQueue =
-            pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+    try (QueueSpy<EventDTO> outboundUacQueue =
+        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       PrintTemplate printTemplate = new PrintTemplate();
       printTemplate.setPackCode(PACK_CODE);
@@ -129,15 +126,17 @@ public class FulfilmentIT {
       fulfilmentNextTrigger.setTriggerDateTime(OffsetDateTime.now());
       fulfilmentNextTriggerRepository.saveAndFlush(fulfilmentNextTrigger);
 
-      PrintRow printRow = printerQueue.getQueue().poll(20, TimeUnit.SECONDS);
+      //      PrintRow printRow = printerQueue.getQueue().poll(20, TimeUnit.SECONDS);
       EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
+      List<FileRow> fileRows = fileRowRepository.findAll();
+      FileRow fileRow = fileRows.get(0);
 
       // Then
-      assertThat(printRow).isNotNull();
-      assertThat(printRow.getBatchQuantity()).isEqualTo(1);
-      assertThat(printRow.getPackCode()).isEqualTo(PACK_CODE);
-      assertThat(printRow.getPrintSupplier()).isEqualTo(PRINT_SUPPLIER);
-      assertThat(printRow.getRow()).startsWith("\"123\"|\"bar\"|\"");
+      assertThat(fileRow).isNotNull();
+      assertThat(fileRow.getBatchQuantity()).isEqualTo(1);
+      assertThat(fileRow.getPackCode()).isEqualTo(PACK_CODE);
+      assertThat(fileRow.getPrintSupplier()).isEqualTo(PRINT_SUPPLIER);
+      assertThat(fileRow.getRow()).startsWith("\"123\"|\"bar\"|\"");
 
       assertThat(rme).isNotNull();
       assertThat(rme.getHeader().getTopic()).isEqualTo(uacUpdateTopic);

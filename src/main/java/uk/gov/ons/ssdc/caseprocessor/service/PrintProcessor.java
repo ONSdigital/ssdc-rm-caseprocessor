@@ -4,7 +4,6 @@ import com.opencsv.CSVWriter;
 import java.io.StringWriter;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
@@ -30,9 +29,6 @@ public class PrintProcessor {
           CSVWriter.DEFAULT_QUOTE_CHARACTER,
           CSVWriter.DEFAULT_ESCAPE_CHARACTER,
           "");
-
-  @Value("${queueconfig.print-topic}")
-  private String printTopic;
 
   public PrintProcessor(
       MessageSender messageSender,
