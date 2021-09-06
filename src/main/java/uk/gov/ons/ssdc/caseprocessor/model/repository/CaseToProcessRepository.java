@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.CaseToProcess;
+import uk.gov.ons.ssdc.common.model.entity.CaseToProcess;
 
 public interface CaseToProcessRepository extends JpaRepository<CaseToProcess, UUID> {
 

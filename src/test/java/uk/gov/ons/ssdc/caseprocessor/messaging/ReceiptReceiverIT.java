@@ -22,15 +22,16 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ReceiptDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
+import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.Event;
+import uk.gov.ons.ssdc.common.model.entity.EventType;
+import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -106,8 +107,7 @@ public class ReceiptReceiverIT {
       UacUpdateDTO emittedUac = uacUpdatedEvent.getPayload().getUacUpdate();
       assertThat(emittedUac.isActive()).isFalse();
 
-      List<uk.gov.ons.ssdc.caseprocessor.model.entity.Event> storedEvents =
-          eventRepository.findAll();
+      List<Event> storedEvents = eventRepository.findAll();
       assertThat(storedEvents.size()).isEqualTo(1);
       assertThat(storedEvents.get(0).getUacQidLink().getId()).isEqualTo(TEST_UACLINK_ID);
       assertThat(storedEvents.get(0).getType()).isEqualTo(EventType.RECEIPT);

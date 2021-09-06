@@ -12,8 +12,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.ClusterLeader;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ClusterLeaderRepository;
+import uk.gov.ons.ssdc.common.model.entity.ClusterLeader;
 
 @Component
 public class ClusterLeaderManager {

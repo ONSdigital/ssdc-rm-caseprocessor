@@ -2,9 +2,9 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import java.util.UUID;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.MessageToSend;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.MessageToSendRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper;
+import uk.gov.ons.ssdc.common.model.entity.MessageToSend;
 
 @Component
 public class MessageSender {

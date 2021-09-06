@@ -7,12 +7,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.CaseToProcess;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.FulfilmentToProcess;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseToProcessProcessor;
 import uk.gov.ons.ssdc.caseprocessor.service.PrintProcessor;
+import uk.gov.ons.ssdc.common.model.entity.CaseToProcess;
+import uk.gov.ons.ssdc.common.model.entity.FulfilmentToProcess;
 
 @Component
 public class ChunkProcessor {
