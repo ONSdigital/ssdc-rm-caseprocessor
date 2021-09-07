@@ -11,11 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.TelephoneCaptureDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
+import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.EventType;
+import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @MessageEndpoint
 public class TelephoneCaptureReceiver {
@@ -62,7 +62,11 @@ public class TelephoneCaptureReceiver {
     }
 
     uacService.createLinkAndEmitNewUacQid(
-        caze, telephoneCapturePayload.getUac(), telephoneCapturePayload.getQid());
+        caze,
+        telephoneCapturePayload.getUac(),
+        telephoneCapturePayload.getQid(),
+        event.getHeader().getCorrelationId(),
+        event.getHeader().getOriginatingUser());
 
     eventLogger.logCaseEvent(
         caze,

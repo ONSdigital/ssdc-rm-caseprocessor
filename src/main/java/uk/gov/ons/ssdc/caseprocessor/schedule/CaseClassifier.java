@@ -4,7 +4,7 @@ import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRule;
+import uk.gov.ons.ssdc.common.model.entity.ActionRule;
 
 @Component
 public class CaseClassifier {

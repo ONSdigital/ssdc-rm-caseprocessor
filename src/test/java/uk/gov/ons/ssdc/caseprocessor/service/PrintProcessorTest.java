@@ -18,20 +18,20 @@ import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.FileRowRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
+import uk.gov.ons.ssdc.common.model.entity.*;
 
 @ExtendWith(MockitoExtension.class)
-public class PrintProcessorTest {
+class PrintProcessorTest {
   @Mock private UacQidCache uacQidCache;
   @Mock private UacService uacService;
   @Mock private EventLogger eventLogger;
-  @Mock private FileRowRepository fileRowRepository;
+  @Mock private PrintFileRowRepository printFileRowRepository;
 
   @InjectMocks PrintProcessor underTest;
 
   @Test
-  public void testProcessPrintRow() {
+  void testProcessPrintRow() {
     // Given
     Case caze = new Case();
     caze.setSample(Map.of("foo", "bar"));
@@ -43,6 +43,7 @@ public class PrintProcessorTest {
     printTemplate.setPrintSupplier("test print supplier");
 
     ActionRule actionRule = new ActionRule();
+    actionRule.setId(UUID.randomUUID());
     actionRule.setType(ActionRuleType.PRINT);
     actionRule.setPrintTemplate(printTemplate);
 
@@ -64,18 +65,21 @@ public class PrintProcessorTest {
         caseToProcess.getBatchId(),
         caseToProcess.getBatchQuantity(),
         printTemplate.getPackCode(),
-        printTemplate.getPrintSupplier());
+        printTemplate.getPrintSupplier(),
+        actionRule.getId());
 
     //    // Then
-    ArgumentCaptor<FileRow> fileRowArgumentCaptor = ArgumentCaptor.forClass(FileRow.class);
-    verify(fileRowRepository).save(fileRowArgumentCaptor.capture());
-    FileRow actualFileRow = fileRowArgumentCaptor.getValue();
-    assertThat(actualFileRow.getPackCode()).isEqualTo("test pack code");
-    assertThat(actualFileRow.getPrintSupplier()).isEqualTo("test print supplier");
-    assertThat(actualFileRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
+    ArgumentCaptor<PrintFileRow> printFileRowArgumentCaptor =
+        ArgumentCaptor.forClass(PrintFileRow.class);
+    verify(printFileRowRepository).save(printFileRowArgumentCaptor.capture());
+    PrintFileRow actualPrintFileRow = printFileRowArgumentCaptor.getValue();
+    assertThat(actualPrintFileRow.getPackCode()).isEqualTo("test pack code");
+    assertThat(actualPrintFileRow.getPrintSupplier()).isEqualTo("test print supplier");
+    assertThat(actualPrintFileRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture());
+    verify(uacService)
+        .saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture(), eq(actionRule.getId()), isNull());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
@@ -94,7 +98,7 @@ public class PrintProcessorTest {
   }
 
   @Test
-  public void testProcessFulfilment() {
+  void testProcessFulfilment() {
     // Given
     PrintTemplate printTemplate = new PrintTemplate();
     printTemplate.setPackCode("TEST_FULFILMENT_CODE");
@@ -121,15 +125,18 @@ public class PrintProcessorTest {
     underTest.process(fulfilmentToProcess);
 
     // Then
-    ArgumentCaptor<FileRow> fileRowArgumentCaptor = ArgumentCaptor.forClass(FileRow.class);
-    verify(fileRowRepository).save(fileRowArgumentCaptor.capture());
-    FileRow actualFileRow = fileRowArgumentCaptor.getValue();
-    assertThat(actualFileRow.getPackCode()).isEqualTo("TEST_FULFILMENT_CODE");
-    assertThat(actualFileRow.getPrintSupplier()).isEqualTo("FOOBAR_PRINT_SUPPLIER");
-    assertThat(actualFileRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
+    ArgumentCaptor<PrintFileRow> printFileRowArgumentCaptor =
+        ArgumentCaptor.forClass(PrintFileRow.class);
+    verify(printFileRowRepository).save(printFileRowArgumentCaptor.capture());
+    PrintFileRow actualPrintFileRow = printFileRowArgumentCaptor.getValue();
+    assertThat(actualPrintFileRow.getPackCode()).isEqualTo("TEST_FULFILMENT_CODE");
+    assertThat(actualPrintFileRow.getPrintSupplier()).isEqualTo("FOOBAR_PRINT_SUPPLIER");
+    assertThat(actualPrintFileRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacService).saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture());
+    verify(uacService)
+        .saveAndEmitUacUpdateEvent(
+            uacQidLinkCaptor.capture(), eq(fulfilmentToProcess.getBatchId()), isNull());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");

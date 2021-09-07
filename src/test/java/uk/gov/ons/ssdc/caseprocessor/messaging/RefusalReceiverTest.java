@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
@@ -23,11 +25,11 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.RefusalType;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper;
+import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.EventType;
+import uk.gov.ons.ssdc.common.model.entity.RefusalType;
 
 @ExtendWith(MockitoExtension.class)
 public class RefusalReceiverTest {
@@ -51,6 +53,8 @@ public class RefusalReceiverTest {
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setCorrelationId(TEST_CORRELATION_ID);
+    eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
     eventHeader.setTopic("Test topic");
     eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
 
@@ -71,7 +75,9 @@ public class RefusalReceiverTest {
 
     // Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveCaseAndEmitCaseUpdate(caseArgumentCaptor.capture());
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdate(
+            caseArgumentCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
     Case actualCase = caseArgumentCaptor.getValue();
 
     assertThat(actualCase.getId()).isEqualTo(CASE_ID);

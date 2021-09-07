@@ -14,14 +14,14 @@ import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.utils.CaseRefGenerator;
 import uk.gov.ons.ssdc.caseprocessor.utils.RedactHelper;
+import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.common.model.entity.EventType;
 
 @MessageEndpoint
 public class SampleReceiver {
@@ -73,14 +73,14 @@ public class SampleReceiver {
     newCase.setSampleSensitive(sample.getSampleSensitive());
 
     newCase = saveNewCaseAndStampCaseRef(newCase);
-    caseService.emitCaseUpdate(newCase);
+    caseService.emitCaseUpdate(newCase, sample.getJobId(), sample.getOriginatingUser());
 
     eventLogger.logCaseEvent(
         newCase,
         OffsetDateTime.now(),
         "New case created from sample load",
         EventType.NEW_CASE,
-        createEventDTO(TOPIC_SAMPLE),
+        createEventDTO(TOPIC_SAMPLE, sample.getJobId(), sample.getOriginatingUser()),
         RedactHelper.redact(sample),
         messageTimestamp);
   }

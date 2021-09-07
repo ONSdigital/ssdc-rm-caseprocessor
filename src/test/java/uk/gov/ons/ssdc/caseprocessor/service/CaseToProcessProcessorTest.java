@@ -3,16 +3,17 @@ package uk.gov.ons.ssdc.caseprocessor.service;
 import static org.mockito.Mockito.verify;
 
 import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRule;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRuleType;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.CaseToProcess;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.PrintTemplate;
+import uk.gov.ons.ssdc.common.model.entity.ActionRule;
+import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
+import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.CaseToProcess;
+import uk.gov.ons.ssdc.common.model.entity.PrintTemplate;
 
 @ExtendWith(MockitoExtension.class)
 public class CaseToProcessProcessorTest {
@@ -34,6 +35,7 @@ public class CaseToProcessProcessorTest {
     printTemplate.setPrintSupplier("test print supplier");
 
     ActionRule actionRule = new ActionRule();
+    actionRule.setId(UUID.randomUUID());
     actionRule.setType(ActionRuleType.PRINT);
     actionRule.setPrintTemplate(printTemplate);
 
@@ -52,7 +54,8 @@ public class CaseToProcessProcessorTest {
             caseToProcess.getBatchId(),
             caseToProcess.getBatchQuantity(),
             printTemplate.getPackCode(),
-            printTemplate.getPrintSupplier());
+            printTemplate.getPrintSupplier(),
+            actionRule.getId());
   }
 
   @Test
@@ -61,6 +64,7 @@ public class CaseToProcessProcessorTest {
     Case caze = new Case();
 
     ActionRule actionRule = new ActionRule();
+    actionRule.setId(UUID.randomUUID());
     actionRule.setType(ActionRuleType.DEACTIVATE_UAC);
 
     CaseToProcess caseToProcess = new CaseToProcess();
@@ -71,6 +75,6 @@ public class CaseToProcessProcessorTest {
     underTest.process(caseToProcess);
 
     // Then
-    verify(deactivateUacProcessor).process(caze);
+    verify(deactivateUacProcessor).process(caze, actionRule.getId());
   }
 }

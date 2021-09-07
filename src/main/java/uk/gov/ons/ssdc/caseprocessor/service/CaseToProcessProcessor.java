@@ -2,9 +2,9 @@ package uk.gov.ons.ssdc.caseprocessor.service;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRuleType;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.CaseToProcess;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.PrintTemplate;
+import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
+import uk.gov.ons.ssdc.common.model.entity.CaseToProcess;
+import uk.gov.ons.ssdc.common.model.entity.PrintTemplate;
 
 @Component
 public class CaseToProcessProcessor {
@@ -28,9 +28,11 @@ public class CaseToProcessProcessor {
           caseToProcess.getBatchId(),
           caseToProcess.getBatchQuantity(),
           printTemplate.getPackCode(),
-          printTemplate.getPrintSupplier());
+          printTemplate.getPrintSupplier(),
+          caseToProcess.getActionRule().getId());
     } else if (actionRuleType == ActionRuleType.DEACTIVATE_UAC) {
-      deactivateUacProcessor.process(caseToProcess.getCaze());
+      deactivateUacProcessor.process(
+          caseToProcess.getCaze(), caseToProcess.getActionRule().getId());
     } else {
       throw new NotImplementedException("No implementation for other types of action rule yet");
     }

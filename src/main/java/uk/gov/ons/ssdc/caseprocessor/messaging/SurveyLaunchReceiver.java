@@ -10,10 +10,10 @@ import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
+import uk.gov.ons.ssdc.common.model.entity.EventType;
+import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @MessageEndpoint
 public class SurveyLaunchReceiver {
@@ -47,6 +47,9 @@ public class SurveyLaunchReceiver {
         messageTimestamp);
 
     uacQidLink.getCaze().setSurveyLaunched(true);
-    caseService.saveCaseAndEmitCaseUpdate(uacQidLink.getCaze());
+    caseService.saveCaseAndEmitCaseUpdate(
+        uacQidLink.getCaze(),
+        event.getHeader().getCorrelationId(),
+        event.getHeader().getOriginatingUser());
   }
 }

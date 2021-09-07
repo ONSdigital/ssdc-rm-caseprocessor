@@ -5,8 +5,8 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
+import uk.gov.ons.ssdc.common.model.entity.Event;
 
 @Component
 @ActiveProfiles("test")

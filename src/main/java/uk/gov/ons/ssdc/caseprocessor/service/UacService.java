@@ -11,11 +11,11 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
+import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @Service
 public class UacService {
@@ -33,10 +33,12 @@ public class UacService {
     this.uacQidLinkRepository = uacQidLinkRepository;
   }
 
-  public UacQidLink saveAndEmitUacUpdateEvent(UacQidLink uacQidLink) {
+  public UacQidLink saveAndEmitUacUpdateEvent(
+      UacQidLink uacQidLink, UUID correlationId, String originatingUser) {
     UacQidLink savedUacQidLink = uacQidLinkRepository.save(uacQidLink);
 
-    EventHeaderDTO eventHeader = EventHelper.createEventDTO(uacUpdateTopic);
+    EventHeaderDTO eventHeader =
+        EventHelper.createEventDTO(uacUpdateTopic, correlationId, originatingUser);
 
     UacUpdateDTO uac = new UacUpdateDTO();
     uac.setQid(savedUacQidLink.getQid());
@@ -75,12 +77,13 @@ public class UacService {
     return uacQidLinkRepository.existsByQid(qid);
   }
 
-  public void createLinkAndEmitNewUacQid(Case caze, String uac, String qid) {
+  public void createLinkAndEmitNewUacQid(
+      Case caze, String uac, String qid, UUID correlationId, String originatingUser) {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setUac(uac);
     uacQidLink.setQid(qid);
     uacQidLink.setCaze(caze);
-    saveAndEmitUacUpdateEvent(uacQidLink);
+    saveAndEmitUacUpdateEvent(uacQidLink, correlationId, originatingUser);
   }
 }

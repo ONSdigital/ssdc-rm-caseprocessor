@@ -5,7 +5,6 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,28 +17,27 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRule;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.ActionRuleType;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.FileRow;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.PrintTemplate;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.FileRowRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
+import uk.gov.ons.ssdc.common.model.entity.ActionRule;
+import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
+import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.common.model.entity.PrintFileRow;
+import uk.gov.ons.ssdc.common.model.entity.PrintTemplate;
+import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ContextConfiguration
 @SpringBootTest
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
-public class ActionRuleIT {
+class ActionRuleIT {
   private static final String OUTBOUND_PRINTER_SUBSCRIPTION =
       "rm-internal-print-row_print-file-service";
 
@@ -50,14 +48,13 @@ public class ActionRuleIT {
   private String uacUpdateTopic;
 
   @Autowired private DeleteDataHelper deleteDataHelper;
+  @Autowired private JunkDataHelper junkDataHelper;
 
-  @Autowired private CaseRepository caseRepository;
-  @Autowired private CollectionExerciseRepository collectionExerciseRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private PrintTemplateRepository printTemplateRepository;
   @Autowired private ActionRuleRepository actionRuleRepository;
-  @Autowired private FileRowRepository fileRowRepository;
+  @Autowired private PrintFileRowRepository printFileRowRepository;
 
   @BeforeEach
   public void setUp() {
@@ -66,26 +63,25 @@ public class ActionRuleIT {
   }
 
   @Test
-  public void testPrinterRule() throws Exception {
+  void testPrinterRule() throws Exception {
     try (QueueSpy<EventDTO> outboundUacQueue =
         pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
-      CollectionExercise collectionExercise = setUpCollectionExercise();
-      Case caze = setUpCase(collectionExercise);
+      Case caze = junkDataHelper.setupJunkCase();
       PrintTemplate printTemplate = setUpPrintTemplate();
 
       // When
-      setUpActionRule(ActionRuleType.PRINT, collectionExercise, printTemplate);
+      setUpActionRule(ActionRuleType.PRINT, caze.getCollectionExercise(), printTemplate);
       EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
-      List<FileRow> fileRows = fileRowRepository.findAll();
-      FileRow fileRow = fileRows.get(0);
+      List<PrintFileRow> printFileRows = printFileRowRepository.findAll();
+      PrintFileRow printFileRow = printFileRows.get(0);
 
       // Then
-      assertThat(fileRow).isNotNull();
-      assertThat(fileRow.getBatchQuantity()).isEqualTo(1);
-      assertThat(fileRow.getPackCode()).isEqualTo(PACK_CODE);
-      assertThat(fileRow.getPrintSupplier()).isEqualTo(PRINT_SUPPLIER);
-      assertThat(fileRow.getRow()).startsWith("\"123\"|\"bar\"|\"");
+      assertThat(printFileRow).isNotNull();
+      assertThat(printFileRow.getBatchQuantity()).isEqualTo(1);
+      assertThat(printFileRow.getPackCode()).isEqualTo(PACK_CODE);
+      assertThat(printFileRow.getPrintSupplier()).isEqualTo(PRINT_SUPPLIER);
+      assertThat(printFileRow.getRow()).startsWith("\"" + caze.getCaseRef() + "\"|\"bar\"|\"");
 
       assertThat(rme).isNotNull();
       assertThat(rme.getHeader().getTopic()).isEqualTo(uacUpdateTopic);
@@ -94,16 +90,15 @@ public class ActionRuleIT {
   }
 
   @Test
-  public void testDeactivateUacRule() throws Exception {
+  void testDeactivateUacRule() throws Exception {
     try (QueueSpy<EventDTO> outboundUacQueue =
         pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
-      CollectionExercise collectionExercise = setUpCollectionExercise();
-      Case caze = setUpCase(collectionExercise);
+      Case caze = junkDataHelper.setupJunkCase();
       UacQidLink uacQidLink = setupUacQidLink(caze);
 
       // When
-      setUpActionRule(ActionRuleType.DEACTIVATE_UAC, collectionExercise, null);
+      setUpActionRule(ActionRuleType.DEACTIVATE_UAC, caze.getCollectionExercise(), null);
       EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
@@ -115,12 +110,6 @@ public class ActionRuleIT {
 
       assertThat(uacQidLinkRepository.findByQid(uacQidLink.getQid()).get().isActive()).isFalse();
     }
-  }
-
-  private CollectionExercise setUpCollectionExercise() {
-    CollectionExercise collectionExercise = new CollectionExercise();
-    collectionExercise.setId(UUID.randomUUID());
-    return collectionExerciseRepository.saveAndFlush(collectionExercise);
   }
 
   private PrintTemplate setUpPrintTemplate() {
@@ -142,15 +131,6 @@ public class ActionRuleIT {
     actionRule.setPrintTemplate(printTemplate);
 
     return actionRuleRepository.saveAndFlush(actionRule);
-  }
-
-  private Case setUpCase(CollectionExercise collectionExercise) {
-    Case randomCase = new Case();
-    randomCase.setId(UUID.randomUUID());
-    randomCase.setCaseRef(123L);
-    randomCase.setCollectionExercise(collectionExercise);
-    randomCase.setSample(Map.of("foo", "bar"));
-    return caseRepository.saveAndFlush(randomCase);
   }
 
   private UacQidLink setupUacQidLink(Case caze) {

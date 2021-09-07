@@ -17,11 +17,13 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacAuthenticationDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
+import uk.gov.ons.ssdc.common.model.entity.Event;
+import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -33,6 +35,7 @@ public class UacAuthenticationReceiverIT {
 
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
+  @Autowired private JunkDataHelper junkDataHelper;
 
   @Autowired private EventRepository eventRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
@@ -48,14 +51,15 @@ public class UacAuthenticationReceiverIT {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setQid(TEST_QID);
+    uacQidLink.setUac("Junk");
+    uacQidLink.setCaze(junkDataHelper.setupJunkCase());
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
     EventDTO surveyLaunchedEvent = new EventDTO();
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(EVENT_SCHEMA_VERSION);
     eventHeader.setTopic(INBOUND_TOPIC);
-    eventHeader.setSource("Respondent Home");
-    eventHeader.setChannel("RH");
+    junkDataHelper.junkify(eventHeader);
     surveyLaunchedEvent.setHeader(eventHeader);
 
     UacAuthenticationDTO uacAuthentication = new UacAuthenticationDTO();
@@ -69,9 +73,9 @@ public class UacAuthenticationReceiverIT {
     Thread.sleep(2000);
 
     // THEN
-    List<uk.gov.ons.ssdc.caseprocessor.model.entity.Event> events = eventRepository.findAll();
+    List<Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);
-    uk.gov.ons.ssdc.caseprocessor.model.entity.Event event = events.get(0);
+    Event event = events.get(0);
     assertThat(event.getDescription()).isEqualTo("Respondent authenticated");
     UacQidLink actualUacQidLink = event.getUacQidLink();
     assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);

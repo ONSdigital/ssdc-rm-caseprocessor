@@ -12,9 +12,9 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
+import uk.gov.ons.ssdc.common.model.entity.Case;
 
 @Service
 public class CaseService {
@@ -32,17 +32,18 @@ public class CaseService {
     this.messageSender = messageSender;
   }
 
-  public void saveCaseAndEmitCaseUpdate(Case caze) {
+  public void saveCaseAndEmitCaseUpdate(Case caze, UUID correlationId, String originatingUser) {
     saveCase(caze);
-    emitCaseUpdate(caze);
+    emitCaseUpdate(caze, correlationId, originatingUser);
   }
 
   public void saveCase(Case caze) {
     caseRepository.saveAndFlush(caze);
   }
 
-  public void emitCaseUpdate(Case caze) {
-    EventHeaderDTO eventHeader = EventHelper.createEventDTO(caseUpdateTopic);
+  public void emitCaseUpdate(Case caze, UUID correlationId, String originatingUser) {
+    EventHeaderDTO eventHeader =
+        EventHelper.createEventDTO(caseUpdateTopic, correlationId, originatingUser);
 
     EventDTO event = prepareCaseEvent(caze, eventHeader);
 

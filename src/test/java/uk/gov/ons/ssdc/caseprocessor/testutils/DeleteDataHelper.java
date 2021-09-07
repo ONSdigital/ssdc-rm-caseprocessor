@@ -11,10 +11,10 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ClusterLeaderRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.FileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentNextTriggerRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentSurveyPrintTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
@@ -41,7 +41,7 @@ public class DeleteDataHelper {
   @Autowired private CaseToProcessRepository caseToProcessRepository;
   @Autowired private ClusterLeaderRepository clusterLeaderRepository;
 
-  @Autowired private FileRowRepository fileRowRepository;
+  @Autowired private PrintFileRowRepository printFileRowRepository;
 
   @Transactional
   public void deleteAllData() {
@@ -58,6 +58,6 @@ public class DeleteDataHelper {
     printTemplateRepository.deleteAllInBatch();
     surveyRepository.deleteAllInBatch();
     clusterLeaderRepository.deleteAllInBatch();
-    fileRowRepository.deleteAllInBatch();
+    printFileRowRepository.deleteAllInBatch();
   }
 }

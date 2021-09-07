@@ -12,9 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSampleSensitive;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.utils.RedactHelper;
+import uk.gov.ons.ssdc.common.model.entity.*;
 
 @MessageEndpoint
 public class UpdateSampleSensitiveReceiver {

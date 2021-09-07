@@ -9,9 +9,9 @@ import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.*;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.FileRowRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
+import uk.gov.ons.ssdc.common.model.entity.*;
 
 @Component
 public class PrintProcessor {
@@ -19,7 +19,7 @@ public class PrintProcessor {
   private final UacQidCache uacQidCache;
   private final UacService uacService;
   private final EventLogger eventLogger;
-  private final FileRowRepository fileRowRepository;
+  private final PrintFileRowRepository printFileRowRepository;
 
   private final StringWriter stringWriter = new StringWriter();
   private final CSVWriter csvWriter =
@@ -35,12 +35,12 @@ public class PrintProcessor {
       UacQidCache uacQidCache,
       UacService uacService,
       EventLogger eventLogger,
-      FileRowRepository fileRowRepository) {
+      PrintFileRowRepository printFileRowRepository) {
     this.messageSender = messageSender;
     this.uacQidCache = uacQidCache;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
-    this.fileRowRepository = fileRowRepository;
+    this.printFileRowRepository = printFileRowRepository;
   }
 
   public void process(FulfilmentToProcess fulfilmentToProcess) {
@@ -52,7 +52,8 @@ public class PrintProcessor {
         fulfilmentToProcess.getBatchId(),
         fulfilmentToProcess.getBatchQuantity(),
         printTemplate.getPackCode(),
-        printTemplate.getPrintSupplier());
+        printTemplate.getPrintSupplier(),
+        fulfilmentToProcess.getBatchId());
   }
 
   public void processPrintRow(
@@ -61,7 +62,8 @@ public class PrintProcessor {
       UUID batchId,
       int batchQuantity,
       String packCode,
-      String printSupplier) {
+      String printSupplier,
+      UUID correlationId) {
 
     UacQidDTO uacQidDTO = null;
     String[] rowStrings = new String[template.length];
@@ -75,14 +77,14 @@ public class PrintProcessor {
           break;
         case "__uac__":
           if (uacQidDTO == null) {
-            uacQidDTO = getUacQidForCase(caze);
+            uacQidDTO = getUacQidForCase(caze, correlationId);
           }
 
           rowStrings[i] = uacQidDTO.getUac();
           break;
         case "__qid__":
           if (uacQidDTO == null) {
-            uacQidDTO = getUacQidForCase(caze);
+            uacQidDTO = getUacQidForCase(caze, correlationId);
           }
 
           rowStrings[i] = uacQidDTO.getQid();
@@ -92,21 +94,21 @@ public class PrintProcessor {
       }
     }
 
-    FileRow fileRow = new FileRow();
-    fileRow.setRow(getCsvRow(rowStrings));
-    fileRow.setBatchId(batchId);
-    fileRow.setBatchQuantity(batchQuantity);
-    fileRow.setPackCode(packCode);
-    fileRow.setPrintSupplier(printSupplier);
+    PrintFileRow printFileRow = new PrintFileRow();
+    printFileRow.setRow(getCsvRow(rowStrings));
+    printFileRow.setBatchId(batchId);
+    printFileRow.setBatchQuantity(batchQuantity);
+    printFileRow.setPackCode(packCode);
+    printFileRow.setPrintSupplier(printSupplier);
 
-    fileRowRepository.save(fileRow);
+    printFileRowRepository.save(printFileRow);
 
     eventLogger.logCaseEvent(
         caze,
         OffsetDateTime.now(),
         String.format("Print file generated with pack code %s", packCode),
         EventType.PRINT_FILE,
-        EventHelper.getDummyEvent(),
+        EventHelper.getDummyEvent(correlationId),
         null,
         OffsetDateTime.now());
   }
@@ -119,14 +121,14 @@ public class PrintProcessor {
     return csvRow;
   }
 
-  public UacQidDTO getUacQidForCase(Case caze) {
+  public UacQidDTO getUacQidForCase(Case caze, UUID correlationId) {
     UacQidDTO uacQidDTO = uacQidCache.getUacQidPair(1);
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setQid(uacQidDTO.getQid());
     uacQidLink.setUac(uacQidDTO.getUac());
     uacQidLink.setCaze(caze);
-    uacService.saveAndEmitUacUpdateEvent(uacQidLink);
+    uacService.saveAndEmitUacUpdateEvent(uacQidLink, correlationId, null);
 
     return uacQidDTO;
   }

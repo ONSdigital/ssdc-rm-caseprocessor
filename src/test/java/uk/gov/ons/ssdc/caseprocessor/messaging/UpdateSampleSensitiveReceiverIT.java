@@ -6,7 +6,6 @@ import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,15 +23,16 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSampleSensitive;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Event;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.EventType;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.EventPoller;
 import uk.gov.ons.ssdc.caseprocessor.testutils.EventsNotFoundException;
+import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
+import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.Event;
+import uk.gov.ons.ssdc.common.model.entity.EventType;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -49,6 +49,7 @@ public class UpdateSampleSensitiveReceiverIT {
 
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
+  @Autowired private JunkDataHelper junkDataHelper;
 
   @Autowired private CaseRepository caseRepository;
   @Autowired private EventPoller eventPoller;
@@ -68,7 +69,7 @@ public class UpdateSampleSensitiveReceiverIT {
     Map<String, String> sensitiveData = new HashMap<>();
     sensitiveData.put("PHONE_NUMBER", "1111111");
     caze.setSampleSensitive(sensitiveData);
-
+    caze.setCollectionExercise(junkDataHelper.setupJunkCollex());
     caseRepository.saveAndFlush(caze);
 
     PayloadDTO payloadDTO = new PayloadDTO();
@@ -82,10 +83,7 @@ public class UpdateSampleSensitiveReceiverIT {
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(EVENT_SCHEMA_VERSION);
     eventHeader.setTopic(UPDATE_SAMPLE_SENSITIVE_TOPIC);
-    eventHeader.setSource("RH");
-    eventHeader.setDateTime(OffsetDateTime.now());
-    eventHeader.setChannel("RH");
-    eventHeader.setMessageId(UUID.randomUUID());
+    junkDataHelper.junkify(eventHeader);
     event.setHeader(eventHeader);
 
     //  When

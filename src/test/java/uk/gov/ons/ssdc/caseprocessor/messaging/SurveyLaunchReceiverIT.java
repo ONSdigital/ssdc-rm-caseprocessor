@@ -19,21 +19,21 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.SurveyLaunchDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.Case;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.UacQidLink;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
+import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.Event;
+import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 public class SurveyLaunchReceiverIT {
-  private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String TEST_QID = "1234334";
   private static final String INBOUND_TOPIC = "event_survey-launch";
 
@@ -42,8 +42,8 @@ public class SurveyLaunchReceiverIT {
 
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
+  @Autowired private JunkDataHelper junkDataHelper;
 
-  @Autowired private CaseRepository caseRepository;
   @Autowired private EventRepository eventRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
 
@@ -59,23 +59,21 @@ public class SurveyLaunchReceiverIT {
 
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
         pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
-      Case caze = new Case();
-      caze.setId(TEST_CASE_ID);
-      caze.setSurveyLaunched(false);
-      caze = caseRepository.saveAndFlush(caze);
+      Case caze = junkDataHelper.setupJunkCase();
 
       UacQidLink uacQidLink = new UacQidLink();
       uacQidLink.setId(UUID.randomUUID());
       uacQidLink.setCaze(caze);
+      uacQidLink.setUac("Junk");
       uacQidLink.setQid(TEST_QID);
+      uacQidLink.setCaze(caze);
       uacQidLinkRepository.saveAndFlush(uacQidLink);
 
       EventDTO surveyLaunchedEvent = new EventDTO();
       EventHeaderDTO eventHeader = new EventHeaderDTO();
       eventHeader.setVersion(EVENT_SCHEMA_VERSION);
       eventHeader.setTopic(INBOUND_TOPIC);
-      eventHeader.setSource("Respondent Home");
-      eventHeader.setChannel("RH");
+      junkDataHelper.junkify(eventHeader);
       surveyLaunchedEvent.setHeader(eventHeader);
 
       SurveyLaunchDTO surveyLaunch = new SurveyLaunchDTO();
@@ -90,16 +88,16 @@ public class SurveyLaunchReceiverIT {
       // THEN
       EventDTO caseUpdatedEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
 
-      assertThat(caseUpdatedEvent.getPayload().getCaseUpdate().getCaseId()).isEqualTo(TEST_CASE_ID);
+      assertThat(caseUpdatedEvent.getPayload().getCaseUpdate().getCaseId()).isEqualTo(caze.getId());
       assertThat(caseUpdatedEvent.getPayload().getCaseUpdate().isSurveyLaunched()).isTrue();
 
-      List<uk.gov.ons.ssdc.caseprocessor.model.entity.Event> events = eventRepository.findAll();
+      List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);
-      uk.gov.ons.ssdc.caseprocessor.model.entity.Event event = events.get(0);
+      Event event = events.get(0);
       assertThat(event.getDescription()).isEqualTo("Survey launched");
       UacQidLink actualUacQidLink = event.getUacQidLink();
       assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
-      assertThat(actualUacQidLink.getCaze().getId()).isEqualTo(TEST_CASE_ID);
+      assertThat(actualUacQidLink.getCaze().getId()).isEqualTo(caze.getId());
     }
   }
 }

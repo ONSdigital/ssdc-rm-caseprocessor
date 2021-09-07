@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import uk.gov.ons.ssdc.caseprocessor.model.entity.ClusterLeader;
+import uk.gov.ons.ssdc.common.model.entity.ClusterLeader;
 
 public interface ClusterLeaderRepository extends JpaRepository<ClusterLeader, UUID> {
   @Query(
