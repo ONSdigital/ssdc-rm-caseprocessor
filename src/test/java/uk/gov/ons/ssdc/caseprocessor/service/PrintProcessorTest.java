@@ -4,10 +4,13 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -71,7 +74,8 @@ public class PrintProcessorTest {
         caseToProcess.getBatchQuantity(),
         printTemplate.getPackCode(),
         printTemplate.getPrintSupplier(),
-        actionRule.getId());
+        actionRule.getId(),
+        null);
 
     // Then
     ArgumentCaptor<PrintRow> printRowArgumentCaptor = ArgumentCaptor.forClass(PrintRow.class);
@@ -90,15 +94,19 @@ public class PrintProcessorTest {
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
     assertThat(actualUacQidLink.isActive()).isTrue();
 
+    ArgumentCaptor<EventHeaderDTO> headerCaptor = ArgumentCaptor.forClass(EventHeaderDTO.class);
     verify(eventLogger)
         .logCaseEvent(
             eq(caze),
             any(OffsetDateTime.class),
             eq("Print file generated with pack code test pack code"),
             eq(EventType.PRINT_FILE),
-            any(EventHeaderDTO.class),
+            headerCaptor.capture(),
             isNull(),
             any(OffsetDateTime.class));
+
+    EventHeaderDTO actualHeader = headerCaptor.getValue();
+    Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(actionRule.getId());
   }
 
   @Test
@@ -118,6 +126,8 @@ public class PrintProcessorTest {
     fulfilmentToProcess.setCaze(caze);
     fulfilmentToProcess.setBatchId(UUID.fromString("6a127d58-c1cb-489c-a3f5-72014a0c32d6"));
     fulfilmentToProcess.setBatchQuantity(200);
+    fulfilmentToProcess.setCorrelationId(TEST_CORRELATION_ID);
+    fulfilmentToProcess.setOriginatingUser(TEST_ORIGINATING_USER);
 
     UacQidDTO uacQidDTO = new UacQidDTO();
     uacQidDTO.setUac("test uac");
@@ -139,21 +149,26 @@ public class PrintProcessorTest {
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService)
         .saveAndEmitUacUpdateEvent(
-            uacQidLinkCaptor.capture(), eq(fulfilmentToProcess.getBatchId()), isNull());
+            uacQidLinkCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
     assertThat(actualUacQidLink.isActive()).isTrue();
 
+    ArgumentCaptor<EventHeaderDTO> headerCaptor = ArgumentCaptor.forClass(EventHeaderDTO.class);
     verify(eventLogger)
         .logCaseEvent(
             eq(caze),
             any(OffsetDateTime.class),
             eq("Print file generated with pack code TEST_FULFILMENT_CODE"),
             eq(EventType.PRINT_FILE),
-            any(EventHeaderDTO.class),
+            headerCaptor.capture(),
             isNull(),
             any(OffsetDateTime.class));
+
+    EventHeaderDTO actualHeader = headerCaptor.getValue();
+    Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(TEST_CORRELATION_ID);
+    Assertions.assertThat(actualHeader.getOriginatingUser()).isEqualTo(TEST_ORIGINATING_USER);
   }
 }

@@ -54,7 +54,8 @@ public class PrintProcessor {
         fulfilmentToProcess.getBatchQuantity(),
         printTemplate.getPackCode(),
         printTemplate.getPrintSupplier(),
-        fulfilmentToProcess.getBatchId());
+        fulfilmentToProcess.getCorrelationId(),
+        fulfilmentToProcess.getOriginatingUser());
   }
 
   public void processPrintRow(
@@ -64,7 +65,8 @@ public class PrintProcessor {
       int batchQuantity,
       String packCode,
       String printSupplier,
-      UUID correlationId) {
+      UUID correlationId,
+      String originatingUser) {
 
     UacQidDTO uacQidDTO = null;
     String[] rowStrings = new String[template.length];
@@ -78,14 +80,14 @@ public class PrintProcessor {
           break;
         case "__uac__":
           if (uacQidDTO == null) {
-            uacQidDTO = getUacQidForCase(caze, correlationId);
+            uacQidDTO = getUacQidForCase(caze, correlationId, originatingUser);
           }
 
           rowStrings[i] = uacQidDTO.getUac();
           break;
         case "__qid__":
           if (uacQidDTO == null) {
-            uacQidDTO = getUacQidForCase(caze, correlationId);
+            uacQidDTO = getUacQidForCase(caze, correlationId, originatingUser);
           }
 
           rowStrings[i] = uacQidDTO.getQid();
@@ -109,7 +111,7 @@ public class PrintProcessor {
         OffsetDateTime.now(),
         String.format("Print file generated with pack code %s", packCode),
         EventType.PRINT_FILE,
-        EventHelper.getDummyEvent(correlationId),
+        EventHelper.getDummyEvent(correlationId, originatingUser),
         null,
         OffsetDateTime.now());
   }
@@ -122,14 +124,14 @@ public class PrintProcessor {
     return csvRow;
   }
 
-  public UacQidDTO getUacQidForCase(Case caze, UUID correlationId) {
+  public UacQidDTO getUacQidForCase(Case caze, UUID correlationId, String originatingUser) {
     UacQidDTO uacQidDTO = uacQidCache.getUacQidPair(1);
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setQid(uacQidDTO.getQid());
     uacQidLink.setUac(uacQidDTO.getUac());
     uacQidLink.setCaze(caze);
-    uacService.saveAndEmitUacUpdateEvent(uacQidLink, correlationId, null);
+    uacService.saveAndEmitUacUpdateEvent(uacQidLink, correlationId, originatingUser);
 
     return uacQidDTO;
   }
