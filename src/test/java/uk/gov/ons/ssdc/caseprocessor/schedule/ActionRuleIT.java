@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +17,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
@@ -28,6 +29,7 @@ import uk.gov.ons.ssdc.common.model.entity.ActionRule;
 import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.common.model.entity.PrintFileRow;
 import uk.gov.ons.ssdc.common.model.entity.PrintTemplate;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
@@ -35,7 +37,7 @@ import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 @SpringBootTest
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
-public class ActionRuleIT {
+class ActionRuleIT {
   private static final String OUTBOUND_PRINTER_SUBSCRIPTION =
       "rm-internal-print-row_print-file-service";
 
@@ -45,9 +47,6 @@ public class ActionRuleIT {
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
 
-  @Value("${queueconfig.print-topic}")
-  private String printTopic;
-
   @Autowired private DeleteDataHelper deleteDataHelper;
   @Autowired private JunkDataHelper junkDataHelper;
 
@@ -55,35 +54,34 @@ public class ActionRuleIT {
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private PrintTemplateRepository printTemplateRepository;
   @Autowired private ActionRuleRepository actionRuleRepository;
+  @Autowired private PrintFileRowRepository printFileRowRepository;
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeMessages(OUTBOUND_PRINTER_SUBSCRIPTION, printTopic);
     pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
-  public void testPrinterRule() throws Exception {
-    try (QueueSpy<PrintRow> printerQueue =
-            pubsubHelper.listen(OUTBOUND_PRINTER_SUBSCRIPTION, PrintRow.class);
-        QueueSpy<EventDTO> outboundUacQueue =
-            pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+  void testPrinterRule() throws Exception {
+    try (QueueSpy<EventDTO> outboundUacQueue =
+        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       Case caze = junkDataHelper.setupJunkCase();
       PrintTemplate printTemplate = setUpPrintTemplate();
 
       // When
       setUpActionRule(ActionRuleType.PRINT, caze.getCollectionExercise(), printTemplate);
-      PrintRow printRow = printerQueue.getQueue().poll(20, TimeUnit.SECONDS);
       EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
+      List<PrintFileRow> printFileRows = printFileRowRepository.findAll();
+      PrintFileRow printFileRow = printFileRows.get(0);
 
       // Then
-      assertThat(printRow).isNotNull();
-      assertThat(printRow.getBatchQuantity()).isEqualTo(1);
-      assertThat(printRow.getPackCode()).isEqualTo(PACK_CODE);
-      assertThat(printRow.getPrintSupplier()).isEqualTo(PRINT_SUPPLIER);
-      assertThat(printRow.getRow()).startsWith("\"" + caze.getCaseRef() + "\"|\"bar\"|\"");
+      assertThat(printFileRow).isNotNull();
+      assertThat(printFileRow.getBatchQuantity()).isEqualTo(1);
+      assertThat(printFileRow.getPackCode()).isEqualTo(PACK_CODE);
+      assertThat(printFileRow.getPrintSupplier()).isEqualTo(PRINT_SUPPLIER);
+      assertThat(printFileRow.getRow()).startsWith("\"" + caze.getCaseRef() + "\"|\"bar\"|\"");
 
       assertThat(rme).isNotNull();
       assertThat(rme.getHeader().getTopic()).isEqualTo(uacUpdateTopic);
@@ -92,7 +90,7 @@ public class ActionRuleIT {
   }
 
   @Test
-  public void testDeactivateUacRule() throws Exception {
+  void testDeactivateUacRule() throws Exception {
     try (QueueSpy<EventDTO> outboundUacQueue =
         pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given

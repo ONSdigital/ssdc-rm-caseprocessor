@@ -5,6 +5,7 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,9 +21,9 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintFulfilmentDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentNextTriggerRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentSurveyPrintTemplateRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
@@ -31,13 +32,14 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.FulfilmentNextTrigger;
 import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyPrintTemplate;
+import uk.gov.ons.ssdc.common.model.entity.PrintFileRow;
 import uk.gov.ons.ssdc.common.model.entity.PrintTemplate;
 
 @ContextConfiguration
 @SpringBootTest
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
-public class FulfilmentIT {
+class FulfilmentIT {
   private static final String OUTBOUND_PRINTER_SUBSCRIPTION =
       "rm-internal-print-row_print-file-service";
   private static final String FULFILMENT_TOPIC = "event_print-fulfilment";
@@ -48,32 +50,27 @@ public class FulfilmentIT {
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
 
-  @Value("${queueconfig.print-topic}")
-  private String printTopic;
-
   @Autowired private DeleteDataHelper deleteDataHelper;
   @Autowired private JunkDataHelper junkDataHelper;
 
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private FulfilmentNextTriggerRepository fulfilmentNextTriggerRepository;
   @Autowired private PrintTemplateRepository printTemplateRepository;
+  @Autowired private PrintFileRowRepository printFileRowRepository;
 
   @Autowired
   private FulfilmentSurveyPrintTemplateRepository fulfilmentSurveyPrintTemplateRepository;
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeMessages(OUTBOUND_PRINTER_SUBSCRIPTION, printTopic);
     pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
-  public void testFulfilmentTrigger() throws Exception {
-    try (QueueSpy<PrintRow> printerQueue =
-            pubsubHelper.listen(OUTBOUND_PRINTER_SUBSCRIPTION, PrintRow.class);
-        QueueSpy<EventDTO> outboundUacQueue =
-            pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+  void testFulfilmentTrigger() throws Exception {
+    try (QueueSpy<EventDTO> outboundUacQueue =
+        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       PrintTemplate printTemplate = new PrintTemplate();
       printTemplate.setPackCode(PACK_CODE);
@@ -116,15 +113,16 @@ public class FulfilmentIT {
       fulfilmentNextTrigger.setTriggerDateTime(OffsetDateTime.now());
       fulfilmentNextTriggerRepository.saveAndFlush(fulfilmentNextTrigger);
 
-      PrintRow printRow = printerQueue.getQueue().poll(20, TimeUnit.SECONDS);
       EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
+      List<PrintFileRow> printFileRows = printFileRowRepository.findAll();
+      PrintFileRow printFileRow = printFileRows.get(0);
 
       // Then
-      assertThat(printRow).isNotNull();
-      assertThat(printRow.getBatchQuantity()).isEqualTo(1);
-      assertThat(printRow.getPackCode()).isEqualTo(PACK_CODE);
-      assertThat(printRow.getPrintSupplier()).isEqualTo(PRINT_SUPPLIER);
-      assertThat(printRow.getRow()).startsWith("\"" + caze.getCaseRef() + "\"|\"bar\"|\"");
+      assertThat(printFileRow).isNotNull();
+      assertThat(printFileRow.getBatchQuantity()).isEqualTo(1);
+      assertThat(printFileRow.getPackCode()).isEqualTo(PACK_CODE);
+      assertThat(printFileRow.getPrintSupplier()).isEqualTo(PRINT_SUPPLIER);
+      assertThat(printFileRow.getRow()).startsWith("\"" + caze.getCaseRef() + "\"|\"bar\"|\"");
 
       assertThat(rme).isNotNull();
       assertThat(rme.getHeader().getTopic()).isEqualTo(uacUpdateTopic);

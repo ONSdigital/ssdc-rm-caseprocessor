@@ -4,13 +4,12 @@ import com.opencsv.CSVWriter;
 import java.io.StringWriter;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintRow;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 import uk.gov.ons.ssdc.common.model.entity.*;
 
@@ -20,6 +19,7 @@ public class PrintProcessor {
   private final UacQidCache uacQidCache;
   private final UacService uacService;
   private final EventLogger eventLogger;
+  private final PrintFileRowRepository printFileRowRepository;
 
   private final StringWriter stringWriter = new StringWriter();
   private final CSVWriter csvWriter =
@@ -30,18 +30,17 @@ public class PrintProcessor {
           CSVWriter.DEFAULT_ESCAPE_CHARACTER,
           "");
 
-  @Value("${queueconfig.print-topic}")
-  private String printTopic;
-
   public PrintProcessor(
       MessageSender messageSender,
       UacQidCache uacQidCache,
       UacService uacService,
-      EventLogger eventLogger) {
+      EventLogger eventLogger,
+      PrintFileRowRepository printFileRowRepository) {
     this.messageSender = messageSender;
     this.uacQidCache = uacQidCache;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
+    this.printFileRowRepository = printFileRowRepository;
   }
 
   public void process(FulfilmentToProcess fulfilmentToProcess) {
@@ -95,14 +94,14 @@ public class PrintProcessor {
       }
     }
 
-    PrintRow printRow = new PrintRow();
-    printRow.setRow(getCsvRow(rowStrings));
-    printRow.setBatchId(batchId);
-    printRow.setBatchQuantity(batchQuantity);
-    printRow.setPackCode(packCode);
-    printRow.setPrintSupplier(printSupplier);
+    PrintFileRow printFileRow = new PrintFileRow();
+    printFileRow.setRow(getCsvRow(rowStrings));
+    printFileRow.setBatchId(batchId);
+    printFileRow.setBatchQuantity(batchQuantity);
+    printFileRow.setPackCode(packCode);
+    printFileRow.setPrintSupplier(printSupplier);
 
-    messageSender.sendMessage(printTopic, printRow);
+    printFileRowRepository.save(printFileRow);
 
     eventLogger.logCaseEvent(
         caze,
