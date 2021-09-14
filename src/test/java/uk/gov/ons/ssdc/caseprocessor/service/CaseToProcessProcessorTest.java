@@ -55,7 +55,8 @@ public class CaseToProcessProcessorTest {
             caseToProcess.getBatchQuantity(),
             printTemplate.getPackCode(),
             printTemplate.getPrintSupplier(),
-            actionRule.getId());
+            actionRule.getId(),
+            null);
   }
 
   @Test
