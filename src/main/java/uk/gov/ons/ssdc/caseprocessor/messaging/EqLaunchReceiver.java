@@ -16,37 +16,36 @@ import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @MessageEndpoint
-public class SurveyLaunchReceiver {
+public class EqLaunchReceiver {
   private final UacService uacService;
   private final CaseService caseService;
   private final EventLogger eventLogger;
 
-  public SurveyLaunchReceiver(
-      UacService uacService, CaseService caseService, EventLogger eventLogger) {
+  public EqLaunchReceiver(UacService uacService, CaseService caseService, EventLogger eventLogger) {
     this.uacService = uacService;
     this.caseService = caseService;
     this.eventLogger = eventLogger;
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "surveyLaunchInputChannel", adviceChain = "retryAdvice")
+  @ServiceActivator(inputChannel = "eqLaunchInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 
-    UacQidLink uacQidLink = uacService.findByQid(event.getPayload().getSurveyLaunch().getQid());
+    UacQidLink uacQidLink = uacService.findByQid(event.getPayload().getEqLaunch().getQid());
 
     eventLogger.logUacQidEvent(
         uacQidLink,
         event.getHeader().getDateTime(),
-        "Survey launched",
-        EventType.SURVEY_LAUNCH,
+        "EQ launched",
+        EventType.EQ_LAUNCH,
         event.getHeader(),
         event.getPayload().getReceipt(),
         messageTimestamp);
 
-    uacQidLink.getCaze().setSurveyLaunched(true);
+    uacQidLink.getCaze().setEqLaunched(true);
     caseService.saveCaseAndEmitCaseUpdate(
         uacQidLink.getCaze(),
         event.getHeader().getCorrelationId(),

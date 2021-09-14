@@ -37,8 +37,8 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.invalid-case-subscription}")
   private String invalidCaseSubscription;
 
-  @Value("${queueconfig.survey-launch-subscription}")
-  private String surveyLaunchSubscription;
+  @Value("${queueconfig.eq-launch-subscription}")
+  private String eqLaunchSubscription;
 
   @Value("${queueconfig.uac-authentication-subscription}")
   private String uacAuthenticationSubscription;
@@ -82,7 +82,7 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public MessageChannel surveyLaunchInputChannel() {
+  public MessageChannel eqLaunchInputChannel() {
     return new DirectChannel();
   }
 
@@ -147,10 +147,10 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  PubSubInboundChannelAdapter surveyLaunchedInbound(
-      @Qualifier("surveyLaunchInputChannel") MessageChannel channel) {
+  PubSubInboundChannelAdapter eqLaunchedInbound(
+      @Qualifier("eqLaunchInputChannel") MessageChannel channel) {
     String subscription =
-        toProjectSubscriptionName(surveyLaunchSubscription, sharedPubsubProject).toString();
+        toProjectSubscriptionName(eqLaunchSubscription, sharedPubsubProject).toString();
     return makeAdapter(channel, subscription);
   }
 

@@ -15,10 +15,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EqLaunchDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.SurveyLaunchDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
@@ -33,9 +33,9 @@ import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 @ActiveProfiles("test")
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-public class SurveyLaunchReceiverIT {
+public class EqLaunchReceiverIT {
   private static final String TEST_QID = "1234334";
-  private static final String INBOUND_TOPIC = "event_survey-launch";
+  private static final String INBOUND_TOPIC = "event_eq-launch";
 
   @Value("${queueconfig.case-update-topic}")
   private String caseUpdateTopic;
@@ -54,7 +54,7 @@ public class SurveyLaunchReceiverIT {
   }
 
   @Test
-  public void testSurveyLaunchLogsEventSetsFlagAndEmitsCorrectCaseUpdatedEvent() throws Exception {
+  public void testEqLaunchLogsEventSetsFlagAndEmitsCorrectCaseUpdatedEvent() throws Exception {
     // GIVEN
 
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
@@ -69,32 +69,32 @@ public class SurveyLaunchReceiverIT {
       uacQidLink.setCaze(caze);
       uacQidLinkRepository.saveAndFlush(uacQidLink);
 
-      EventDTO surveyLaunchedEvent = new EventDTO();
+      EventDTO eqLaunchedEvent = new EventDTO();
       EventHeaderDTO eventHeader = new EventHeaderDTO();
       eventHeader.setVersion(EVENT_SCHEMA_VERSION);
       eventHeader.setTopic(INBOUND_TOPIC);
       junkDataHelper.junkify(eventHeader);
-      surveyLaunchedEvent.setHeader(eventHeader);
+      eqLaunchedEvent.setHeader(eventHeader);
 
-      SurveyLaunchDTO surveyLaunch = new SurveyLaunchDTO();
-      surveyLaunch.setQid(uacQidLink.getQid());
+      EqLaunchDTO EqLaunch = new EqLaunchDTO();
+      EqLaunch.setQid(uacQidLink.getQid());
       PayloadDTO payloadDTO = new PayloadDTO();
-      payloadDTO.setSurveyLaunch(surveyLaunch);
-      surveyLaunchedEvent.setPayload(payloadDTO);
+      payloadDTO.setEqLaunch(EqLaunch);
+      eqLaunchedEvent.setPayload(payloadDTO);
 
       // WHEN
-      pubsubHelper.sendMessageToSharedProject(INBOUND_TOPIC, surveyLaunchedEvent);
+      pubsubHelper.sendMessageToSharedProject(INBOUND_TOPIC, eqLaunchedEvent);
 
       // THEN
       EventDTO caseUpdatedEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
 
       assertThat(caseUpdatedEvent.getPayload().getCaseUpdate().getCaseId()).isEqualTo(caze.getId());
-      assertThat(caseUpdatedEvent.getPayload().getCaseUpdate().isSurveyLaunched()).isTrue();
+      assertThat(caseUpdatedEvent.getPayload().getCaseUpdate().isEqLaunched()).isTrue();
 
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);
       Event event = events.get(0);
-      assertThat(event.getDescription()).isEqualTo("Survey launched");
+      assertThat(event.getDescription()).isEqualTo("EQ launched");
       UacQidLink actualUacQidLink = event.getUacQidLink();
       assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
       assertThat(actualUacQidLink.getCaze().getId()).isEqualTo(caze.getId());
