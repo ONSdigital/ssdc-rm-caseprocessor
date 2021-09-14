@@ -29,7 +29,8 @@ public class CaseToProcessProcessor {
           caseToProcess.getBatchQuantity(),
           printTemplate.getPackCode(),
           printTemplate.getPrintSupplier(),
-          caseToProcess.getActionRule().getId());
+          caseToProcess.getActionRule().getId(),
+          null);
     } else if (actionRuleType == ActionRuleType.DEACTIVATE_UAC) {
       deactivateUacProcessor.process(
           caseToProcess.getCaze(), caseToProcess.getActionRule().getId());

@@ -45,11 +45,13 @@ public class EventHelperTest {
 
   @Test
   public void testGetDummyEvent() {
-    EventHeaderDTO eventHeader = EventHelper.getDummyEvent(TEST_CORRELATION_ID);
+    EventHeaderDTO eventHeader =
+        EventHelper.getDummyEvent(TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
 
     assertThat(eventHeader.getChannel()).isEqualTo("RM");
     assertThat(eventHeader.getSource()).isEqualTo("CASE_PROCESSOR");
     assertThat(eventHeader.getMessageId()).isInstanceOf(UUID.class);
     assertThat(eventHeader.getCorrelationId()).isEqualTo(TEST_CORRELATION_ID);
+    assertThat(eventHeader.getOriginatingUser()).isEqualTo(TEST_ORIGINATING_USER);
   }
 }

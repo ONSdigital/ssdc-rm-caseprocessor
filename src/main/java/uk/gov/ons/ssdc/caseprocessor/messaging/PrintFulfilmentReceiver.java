@@ -49,6 +49,8 @@ public class PrintFulfilmentReceiver {
     FulfilmentToProcess fulfilmentToProcess = new FulfilmentToProcess();
     fulfilmentToProcess.setPrintTemplate(printTemplate);
     fulfilmentToProcess.setCaze(caze);
+    fulfilmentToProcess.setCorrelationId(event.getHeader().getCorrelationId());
+    fulfilmentToProcess.setOriginatingUser(event.getHeader().getOriginatingUser());
 
     fulfilmentToProcessRepository.saveAndFlush(fulfilmentToProcess);
 

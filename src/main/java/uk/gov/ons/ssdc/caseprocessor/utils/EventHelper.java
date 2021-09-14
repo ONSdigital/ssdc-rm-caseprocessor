@@ -36,13 +36,14 @@ public class EventHelper {
     return createEventDTO(topic, EVENT_CHANNEL, EVENT_SOURCE, correlationId, originatingUser);
   }
 
-  public static EventHeaderDTO getDummyEvent(UUID correlationId) {
+  public static EventHeaderDTO getDummyEvent(UUID correlationId, String originatingUser) {
     EventHeaderDTO event = new EventHeaderDTO();
 
     event.setChannel(EVENT_CHANNEL);
     event.setSource(EVENT_SOURCE);
     event.setMessageId(UUID.randomUUID());
     event.setCorrelationId(correlationId);
+    event.setOriginatingUser(originatingUser);
 
     return event;
   }
