@@ -58,7 +58,7 @@ public class CaseService {
     caseUpdate.setSample(caze.getSample());
     caseUpdate.setReceiptReceived(caze.isReceiptReceived());
     caseUpdate.setInvalid(caze.isInvalid());
-    caseUpdate.setSurveyLaunched(caze.isSurveyLaunched());
+    caseUpdate.setEqLaunched(caze.isEqLaunched());
     if (caze.getRefusalReceived() != null) {
       caseUpdate.setRefusalReceived(RefusalTypeDTO.valueOf(caze.getRefusalReceived().name()));
     } else {

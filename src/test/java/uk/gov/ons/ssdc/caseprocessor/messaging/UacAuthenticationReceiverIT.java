@@ -55,21 +55,21 @@ public class UacAuthenticationReceiverIT {
     uacQidLink.setCaze(junkDataHelper.setupJunkCase());
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
-    EventDTO surveyLaunchedEvent = new EventDTO();
+    EventDTO eqLaunchedEvent = new EventDTO();
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(EVENT_SCHEMA_VERSION);
     eventHeader.setTopic(INBOUND_TOPIC);
     junkDataHelper.junkify(eventHeader);
-    surveyLaunchedEvent.setHeader(eventHeader);
+    eqLaunchedEvent.setHeader(eventHeader);
 
     UacAuthenticationDTO uacAuthentication = new UacAuthenticationDTO();
     uacAuthentication.setQid(uacQidLink.getQid());
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setUacAuthentication(uacAuthentication);
-    surveyLaunchedEvent.setPayload(payloadDTO);
+    eqLaunchedEvent.setPayload(payloadDTO);
 
     // WHEN
-    pubsubHelper.sendMessageToSharedProject(INBOUND_TOPIC, surveyLaunchedEvent);
+    pubsubHelper.sendMessageToSharedProject(INBOUND_TOPIC, eqLaunchedEvent);
     Thread.sleep(2000);
 
     // THEN

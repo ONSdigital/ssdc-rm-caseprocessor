@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @JsonInclude(Include.NON_NULL)
-public class SurveyLaunchDTO {
+public class EqLaunchDTO {
   private String qid;
 }
