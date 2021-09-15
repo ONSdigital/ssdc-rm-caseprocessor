@@ -2,12 +2,10 @@ version: '2.1'
 services:
   postgres:
     container_name: postgres-case-it
-    image: postgres:13
+    image: rm-postgres-case-integration-testing:latest
     command: ["-c", "shared_buffers=256MB", "-c", "max_connections=500"]
     ports:
       - "15432:5432"
-    environment:
-      - POSTGRES_PASSWORD=postgres
 
   uac-qid:
     container_name: uac-qid-case-it
