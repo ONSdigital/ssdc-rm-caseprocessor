@@ -20,10 +20,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EqLaunchDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.SurveyLaunchDTO;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 import uk.gov.ons.ssdc.common.model.entity.Case;
@@ -31,7 +31,7 @@ import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ExtendWith(MockitoExtension.class)
-public class SurveyLaunchReceiverTest {
+public class EqLaunchReceiverTest {
 
   private final UUID TEST_CASE_ID = UUID.randomUUID();
   private final String TEST_QID_ID = "1234567890123456";
@@ -40,10 +40,10 @@ public class SurveyLaunchReceiverTest {
   @Mock private EventLogger eventLogger;
   @Mock private CaseService caseService;
 
-  @InjectMocks SurveyLaunchReceiver underTest;
+  @InjectMocks EqLaunchReceiver underTest;
 
   @Test
-  public void testSurveryLaunchedEventFromRH() {
+  public void testEqLaunchedEventFromRH() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
     managementEvent.getHeader().setVersion(EVENT_SCHEMA_VERSION);
@@ -54,9 +54,9 @@ public class SurveyLaunchReceiverTest {
     managementEvent.getHeader().setChannel("RH");
     managementEvent.setPayload(new PayloadDTO());
 
-    SurveyLaunchDTO surveyLaunch = new SurveyLaunchDTO();
-    surveyLaunch.setQid(TEST_QID_ID);
-    managementEvent.getPayload().setSurveyLaunch(surveyLaunch);
+    EqLaunchDTO eqLaunch = new EqLaunchDTO();
+    eqLaunch.setQid(TEST_QID_ID);
+    managementEvent.getPayload().setEqLaunch(eqLaunch);
 
     UacQidLink expectedUacQidLink = new UacQidLink();
     expectedUacQidLink.setUac(TEST_QID_ID);
@@ -79,14 +79,14 @@ public class SurveyLaunchReceiverTest {
         .saveCaseAndEmitCaseUpdate(
             caseArgumentCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
     assertThat(caseArgumentCaptor.getValue().getId()).isEqualTo(TEST_CASE_ID);
-    assertThat(caseArgumentCaptor.getValue().isSurveyLaunched()).isTrue();
+    assertThat(caseArgumentCaptor.getValue().isEqLaunched()).isTrue();
 
     verify(eventLogger)
         .logUacQidEvent(
             eq(expectedUacQidLink),
             any(OffsetDateTime.class),
-            eq("Survey launched"),
-            eq(EventType.SURVEY_LAUNCH),
+            eq("EQ launched"),
+            eq(EventType.EQ_LAUNCH),
             eq(managementEvent.getHeader()),
             any(),
             any());

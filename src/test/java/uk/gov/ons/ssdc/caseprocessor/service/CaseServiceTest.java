@@ -43,7 +43,7 @@ public class CaseServiceTest {
     caze.setSample(Map.of("foo", "bar"));
     caze.setReceiptReceived(true);
     caze.setInvalid(true);
-    caze.setSurveyLaunched(true);
+    caze.setEqLaunched(true);
     caze.setRefusalReceived(RefusalType.HARD_REFUSAL);
 
     underTest.saveCaseAndEmitCaseUpdate(caze, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
@@ -63,7 +63,7 @@ public class CaseServiceTest {
     assertThat(actualCaseUpdate.getSample()).isEqualTo(caze.getSample());
     assertThat(actualCaseUpdate.isReceiptReceived()).isTrue();
     assertThat(actualCaseUpdate.isInvalid()).isTrue();
-    assertThat(actualCaseUpdate.isSurveyLaunched()).isTrue();
+    assertThat(actualCaseUpdate.isEqLaunched()).isTrue();
     assertThat(actualCaseUpdate.getRefusalReceived()).isEqualTo(RefusalTypeDTO.HARD_REFUSAL);
   }
 
@@ -84,7 +84,7 @@ public class CaseServiceTest {
     caze.setSample(Map.of("foo", "bar"));
     caze.setReceiptReceived(true);
     caze.setInvalid(true);
-    caze.setSurveyLaunched(true);
+    caze.setEqLaunched(true);
     caze.setRefusalReceived(RefusalType.EXTRAORDINARY_REFUSAL);
 
     underTest.emitCaseUpdate(caze, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
@@ -103,7 +103,7 @@ public class CaseServiceTest {
     assertThat(actualCaseUpdate.getSample()).isEqualTo(caze.getSample());
     assertThat(actualCaseUpdate.isReceiptReceived()).isTrue();
     assertThat(actualCaseUpdate.isInvalid()).isTrue();
-    assertThat(actualCaseUpdate.isSurveyLaunched()).isTrue();
+    assertThat(actualCaseUpdate.isEqLaunched()).isTrue();
     assertThat(actualCaseUpdate.getRefusalReceived())
         .isEqualTo(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
   }
