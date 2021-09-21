@@ -88,7 +88,7 @@ public class EqLaunchReceiverTest {
             eq("EQ launched"),
             eq(EventType.EQ_LAUNCH),
             eq(managementEvent.getHeader()),
-            any(),
+            eq(eqLaunch),
             any());
 
     verifyNoMoreInteractions(uacService);
