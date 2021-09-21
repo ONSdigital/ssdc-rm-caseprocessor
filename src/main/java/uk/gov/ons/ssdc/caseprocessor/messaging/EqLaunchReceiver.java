@@ -42,7 +42,7 @@ public class EqLaunchReceiver {
         "EQ launched",
         EventType.EQ_LAUNCH,
         event.getHeader(),
-        event.getPayload().getReceipt(),
+        event.getPayload().getEqLaunch(),
         messageTimestamp);
 
     uacQidLink.getCaze().setEqLaunched(true);
