@@ -16,6 +16,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentSurveyPrintTempl
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintTemplateRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.SmsTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 
@@ -40,8 +41,8 @@ public class DeleteDataHelper {
   @Autowired private ActionRuleRepository actionRuleRepository;
   @Autowired private CaseToProcessRepository caseToProcessRepository;
   @Autowired private ClusterLeaderRepository clusterLeaderRepository;
-
   @Autowired private PrintFileRowRepository printFileRowRepository;
+  @Autowired private SmsTemplateRepository smsTemplateRepository;
 
   @Transactional
   public void deleteAllData() {
@@ -59,5 +60,6 @@ public class DeleteDataHelper {
     surveyRepository.deleteAllInBatch();
     clusterLeaderRepository.deleteAllInBatch();
     printFileRowRepository.deleteAllInBatch();
+    smsTemplateRepository.deleteAllInBatch();
   }
 }

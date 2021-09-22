@@ -19,6 +19,7 @@ import uk.gov.ons.ssdc.common.model.entity.PrintTemplate;
 public class CaseToProcessProcessorTest {
   @Mock private PrintProcessor printProcessor;
   @Mock private DeactivateUacProcessor deactivateUacProcessor;
+  @Mock private SmsProcessor smsProcessor;
 
   @InjectMocks CaseToProcessProcessor underTest;
 
@@ -77,5 +78,25 @@ public class CaseToProcessProcessorTest {
 
     // Then
     verify(deactivateUacProcessor).process(caze, actionRule.getId());
+  }
+
+  @Test
+  public void testProcessSmsActionRule() {
+    // Given
+    Case caze = new Case();
+
+    ActionRule actionRule = new ActionRule();
+    actionRule.setId(UUID.randomUUID());
+    actionRule.setType(ActionRuleType.SMS);
+
+    CaseToProcess caseToProcess = new CaseToProcess();
+    caseToProcess.setActionRule(actionRule);
+    caseToProcess.setCaze(caze);
+
+    // When
+    underTest.process(caseToProcess);
+
+    // Then
+    verify(smsProcessor).process(caze, actionRule);
   }
 }

@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_SMS_REQUEST_SUBSCRIPTION;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 
 import java.time.OffsetDateTime;
@@ -20,6 +21,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintTemplateRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.SmsTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
@@ -31,6 +33,7 @@ import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.PrintFileRow;
 import uk.gov.ons.ssdc.common.model.entity.PrintTemplate;
+import uk.gov.ons.ssdc.common.model.entity.SmsTemplate;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ContextConfiguration
@@ -47,6 +50,9 @@ class ActionRuleIT {
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
 
+  @Value("${queueconfig.sms-request-topic}")
+  private String smsRequestTopic;
+
   @Autowired private DeleteDataHelper deleteDataHelper;
   @Autowired private JunkDataHelper junkDataHelper;
 
@@ -55,6 +61,7 @@ class ActionRuleIT {
   @Autowired private PrintTemplateRepository printTemplateRepository;
   @Autowired private ActionRuleRepository actionRuleRepository;
   @Autowired private PrintFileRowRepository printFileRowRepository;
+  @Autowired private SmsTemplateRepository smsTemplateRepository;
 
   @BeforeEach
   public void setUp() {
@@ -71,7 +78,7 @@ class ActionRuleIT {
       PrintTemplate printTemplate = setUpPrintTemplate();
 
       // When
-      setUpActionRule(ActionRuleType.PRINT, caze.getCollectionExercise(), printTemplate);
+      setUpActionRule(ActionRuleType.PRINT, caze.getCollectionExercise(), printTemplate, null);
       EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
       List<PrintFileRow> printFileRows = printFileRowRepository.findAll();
       PrintFileRow printFileRow = printFileRows.get(0);
@@ -98,7 +105,7 @@ class ActionRuleIT {
       UacQidLink uacQidLink = setupUacQidLink(caze);
 
       // When
-      setUpActionRule(ActionRuleType.DEACTIVATE_UAC, caze.getCollectionExercise(), null);
+      setUpActionRule(ActionRuleType.DEACTIVATE_UAC, caze.getCollectionExercise(), null, null);
       EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
@@ -112,6 +119,28 @@ class ActionRuleIT {
     }
   }
 
+  @Test
+  void testSmsRule() throws Exception {
+    try (QueueSpy<EventDTO> smsRequestQueue =
+        pubsubHelper.listen(OUTBOUND_SMS_REQUEST_SUBSCRIPTION, EventDTO.class)) {
+      // Given
+      Case caze = junkDataHelper.setupJunkCase();
+
+      SmsTemplate smsTemplate = setupSmsTemplate();
+
+      // When
+      setUpActionRule(ActionRuleType.SMS, caze.getCollectionExercise(), null, smsTemplate);
+      EventDTO rme = smsRequestQueue.getQueue().poll(20, TimeUnit.SECONDS);
+
+      // Then
+      assertThat(rme).isNotNull();
+      assertThat(rme.getHeader().getTopic()).isEqualTo(smsRequestTopic);
+      assertThat(rme.getPayload().getSmsRequest().getCaseId()).isEqualTo(caze.getId());
+      assertThat(rme.getPayload().getSmsRequest().getPackCode()).isEqualTo("Test pack code");
+      assertThat(rme.getPayload().getSmsRequest().getPhoneNumber()).isEqualTo("123");
+    }
+  }
+
   private PrintTemplate setUpPrintTemplate() {
     PrintTemplate printTemplate = new PrintTemplate();
     printTemplate.setTemplate(new String[] {"__caseref__", "foo", "__uac__"});
@@ -121,7 +150,10 @@ class ActionRuleIT {
   }
 
   private ActionRule setUpActionRule(
-      ActionRuleType type, CollectionExercise collectionExercise, PrintTemplate printTemplate) {
+      ActionRuleType type,
+      CollectionExercise collectionExercise,
+      PrintTemplate printTemplate,
+      SmsTemplate smsTemplate) {
     ActionRule actionRule = new ActionRule();
     actionRule.setId(UUID.randomUUID());
     actionRule.setTriggerDateTime(OffsetDateTime.now());
@@ -129,6 +161,12 @@ class ActionRuleIT {
     actionRule.setType(type);
     actionRule.setCollectionExercise(collectionExercise);
     actionRule.setPrintTemplate(printTemplate);
+    actionRule.setCreatedBy("foo@bar.com");
+
+    if (smsTemplate != null) {
+      actionRule.setSmsTemplate(smsTemplate);
+      actionRule.setPhoneNumberColumn("phoneNumber");
+    }
 
     return actionRuleRepository.saveAndFlush(actionRule);
   }
@@ -141,5 +179,13 @@ class ActionRuleIT {
     uacQidLink.setActive(true);
     uacQidLink.setCaze(caze);
     return uacQidLinkRepository.saveAndFlush(uacQidLink);
+  }
+
+  private SmsTemplate setupSmsTemplate() {
+    SmsTemplate smsTemplate = new SmsTemplate();
+    smsTemplate.setPackCode("Test pack code");
+    smsTemplate.setNotifyTemplateId(UUID.randomUUID());
+    smsTemplate.setTemplate(new String[] {"FOO", "BAR"});
+    return smsTemplateRepository.saveAndFlush(smsTemplate);
   }
 }
