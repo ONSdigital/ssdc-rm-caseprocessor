@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
@@ -18,6 +19,7 @@ import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.common.model.entity.ActionRule;
 import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.SmsTemplate;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,5 +60,15 @@ class SmsProcessorTest {
     assertThat(actualEvent.getPayload().getSmsRequest().getCaseId()).isEqualTo(caze.getId());
     assertThat(actualEvent.getPayload().getSmsRequest().getPackCode()).isEqualTo("Test pack code");
     assertThat(actualEvent.getPayload().getSmsRequest().getPhoneNumber()).isEqualTo("0987654321");
+
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(caze),
+            any(),
+            eq("SMS requested by action rule for pack code Test pack code"),
+            eq(EventType.ACTION_RULE_SMS_REQUEST),
+            any(),
+            any(),
+            any());
   }
 }
