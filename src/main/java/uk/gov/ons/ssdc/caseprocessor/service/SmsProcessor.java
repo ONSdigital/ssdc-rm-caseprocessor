@@ -34,10 +34,6 @@ public class SmsProcessor {
     String packCode = actionRule.getSmsTemplate().getPackCode();
     String phoneNumber = caze.getSampleSensitive().get(actionRule.getPhoneNumberColumn());
 
-    if (!StringUtils.hasText(phoneNumber)) {
-      throw new RuntimeException("Case must have phone number, but does not");
-    }
-
     SmsRequest smsRequest = new SmsRequest();
     smsRequest.setCaseId(caseId);
     smsRequest.setPackCode(packCode);
