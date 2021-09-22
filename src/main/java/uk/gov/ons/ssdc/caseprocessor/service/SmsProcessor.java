@@ -4,7 +4,6 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
@@ -55,8 +54,8 @@ public class SmsProcessor {
         OffsetDateTime.now(),
         String.format("SMS requested by action rule for pack code %s", packCode),
         EventType.ACTION_RULE_SMS_REQUEST,
-        EventHelper.getDummyEvent(actionRule.getId(), actionRule.getCreatedBy()),
-        null,
+        eventHeader,
+        payload,
         OffsetDateTime.now());
   }
 }
