@@ -18,7 +18,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.SmsTemplateRepository;
@@ -27,10 +29,13 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
+import uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper;
 import uk.gov.ons.ssdc.common.model.entity.ActionRule;
 import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.common.model.entity.Event;
+import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.PrintFileRow;
 import uk.gov.ons.ssdc.common.model.entity.PrintTemplate;
 import uk.gov.ons.ssdc.common.model.entity.SmsTemplate;
@@ -41,9 +46,6 @@ import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
 class ActionRuleIT {
-  private static final String OUTBOUND_PRINTER_SUBSCRIPTION =
-      "rm-internal-print-row_print-file-service";
-
   private static final String PACK_CODE = "test-pack-code";
   private static final String PRINT_SUPPLIER = "test-print-supplier";
 
@@ -62,6 +64,7 @@ class ActionRuleIT {
   @Autowired private ActionRuleRepository actionRuleRepository;
   @Autowired private PrintFileRowRepository printFileRowRepository;
   @Autowired private SmsTemplateRepository smsTemplateRepository;
+  @Autowired private EventRepository eventRepository;
 
   @BeforeEach
   public void setUp() {
@@ -138,6 +141,15 @@ class ActionRuleIT {
       assertThat(rme.getPayload().getSmsRequest().getCaseId()).isEqualTo(caze.getId());
       assertThat(rme.getPayload().getSmsRequest().getPackCode()).isEqualTo("Test pack code");
       assertThat(rme.getPayload().getSmsRequest().getPhoneNumber()).isEqualTo("123");
+
+      List<Event> events = eventRepository.findAll();
+      assertThat(events.size()).isOne();
+      Event actualEvent = events.get(0);
+      assertThat(actualEvent.getType()).isEqualTo(EventType.ACTION_RULE_SMS_REQUEST);
+      PayloadDTO payloadDTO =
+          JsonHelper.convertJsonBytesToObject(
+              actualEvent.getPayload().getBytes(), PayloadDTO.class);
+      assertThat(payloadDTO.getSmsRequest().getPhoneNumber()).isEqualTo("REDACTED");
     }
   }
 
