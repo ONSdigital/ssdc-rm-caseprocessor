@@ -5,27 +5,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.NewCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.TelephoneCaptureDTO;
 
 public class RedactHelperTest {
   @Test
   public void testRedactWorksForMap() {
     // GIVEN
-    Sample sample = new Sample();
+    NewCase newCase = new NewCase();
 
-    sample.setSampleSensitive(Map.of("PHONE_NUMBER", "999999"));
+    newCase.setSampleSensitive(Map.of("PHONE_NUMBER", "999999"));
 
     // WHEN
     // Cast is required for the test, but when we use this we only want Object anyway
-    Sample sampleDeepCopy = (Sample) RedactHelper.redact(sample);
+    NewCase newCaseDeepCopy = (NewCase) RedactHelper.redact(newCase);
 
     // THEN
-    assertThat(sampleDeepCopy.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "REDACTED"));
+    assertThat(newCaseDeepCopy.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "REDACTED"));
 
     // Extra check to make sure the original object wasn't accidentally mutated
-    assertThat(sample.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "999999"));
+    assertThat(newCase.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "999999"));
   }
 
   @Test

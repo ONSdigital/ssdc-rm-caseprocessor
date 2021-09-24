@@ -38,7 +38,7 @@ import uk.gov.ons.ssdc.common.model.entity.EventType;
 @ActiveProfiles("test")
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-public class UpdateSampleSensitiveReceiverIT {
+public class UpdateNewCaseSensitiveReceiverIT {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();

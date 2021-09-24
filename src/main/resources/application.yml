@@ -31,8 +31,8 @@ spring:
 
 queueconfig:
   telephone-capture-subscription: rm-internal-telephone-capture_case-processor
-  sample-subscription: rm-internal-sample_case-processor
   sms-fulfilment-subscription: rm-internal-sms-fulfilment_case-processor
+  new-case-subscription: event_new-case_rm-case-processor
   receipt-subscription: event_receipt_rm-case-processor
   refusal-subscription: event_refusal_rm-case-processor
   invalid-case-subscription: event_invalid-case_rm-case-processor

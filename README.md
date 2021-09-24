@@ -54,7 +54,7 @@ Example message:
 {
   "caseId": "b3d63a55-67bd-4f38-a18d-41297d699d5d",
   "collectionExerciseId": "58d971eb-c8f0-45b4-bfd8-af7b9ad8c781",
-  "sample": {
+  "newCase": {
     "foo": "bar"
   }
 }

@@ -2,7 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.TOPIC_SAMPLE;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.TOPIC_NEW_CASE;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +20,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.NewCase;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
@@ -36,7 +36,7 @@ import uk.gov.ons.ssdc.common.model.entity.EventType;
 @ActiveProfiles("test")
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-public class SampleLoadedIT {
+public class NewCaseLoadedIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
   @Value("${queueconfig.case-update-topic}")
@@ -56,7 +56,7 @@ public class SampleLoadedIT {
   }
 
   @Test
-  public void testSampleLoaded() throws InterruptedException {
+  public void testNewCaseLoaded() throws InterruptedException {
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
         pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
       CollectionExercise collectionExercise = junkDataHelper.setupJunkCollex();
@@ -68,14 +68,14 @@ public class SampleLoadedIT {
       Map<String, String> sampleSensitive = new HashMap<>();
       sample.put("The Queen's Private Telephone Number", "02071234567");
 
-      Sample sampleDto = new Sample();
-      sampleDto.setCaseId(TEST_CASE_ID);
-      sampleDto.setCollectionExerciseId(collectionExercise.getId());
-      sampleDto.setSample(sample);
-      sampleDto.setSampleSensitive(sampleSensitive);
-      sampleDto.setJobId(UUID.randomUUID());
+      NewCase newCaseDto = new NewCase();
+      newCaseDto.setCaseId(TEST_CASE_ID);
+      newCaseDto.setCollectionExerciseId(collectionExercise.getId());
+      newCaseDto.setSample(sample);
+      newCaseDto.setSampleSensitive(sampleSensitive);
+      newCaseDto.setJobId(UUID.randomUUID());
 
-      pubsubHelper.sendMessage(TOPIC_SAMPLE, sampleDto);
+      pubsubHelper.sendMessage(TOPIC_NEW_CASE, newCaseDto);
 
       //  THEN
       EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();

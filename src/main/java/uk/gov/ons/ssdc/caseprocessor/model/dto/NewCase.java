@@ -5,7 +5,7 @@ import java.util.UUID;
 import lombok.Data;
 
 @Data
-public class Sample {
+public class NewCase {
   private UUID caseId;
 
   private UUID collectionExerciseId;

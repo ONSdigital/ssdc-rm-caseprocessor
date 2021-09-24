@@ -33,7 +33,7 @@ import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
 
 @ExtendWith(MockitoExtension.class)
-public class UpdateSampleSensitiveReceiverTest {
+public class UpdateNewCaseSensitiveReceiverTest {
 
   @Mock private CaseService caseService;
   @Mock private EventLogger eventLogger;

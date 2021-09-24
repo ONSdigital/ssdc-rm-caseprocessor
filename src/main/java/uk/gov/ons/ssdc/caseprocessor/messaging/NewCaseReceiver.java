@@ -1,6 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.TOPIC_SAMPLE;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.TOPIC_NEW_CASE;
 import static uk.gov.ons.ssdc.caseprocessor.utils.EventHelper.createEventDTO;
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToObject;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
@@ -13,7 +13,7 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.Sample;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.NewCase;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
@@ -24,7 +24,7 @@ import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
 
 @MessageEndpoint
-public class SampleReceiver {
+public class NewCaseReceiver {
   private final CaseRepository caseRepository;
   private final CaseService caseService;
   private final CollectionExerciseRepository collectionExerciseRepository;
@@ -33,7 +33,7 @@ public class SampleReceiver {
   @Value("${caserefgeneratorkey}")
   private byte[] caserefgeneratorkey;
 
-  public SampleReceiver(
+  public NewCaseReceiver(
       CaseRepository caseRepository,
       CaseService caseService,
       CollectionExerciseRepository collectionExerciseRepository,
@@ -45,11 +45,11 @@ public class SampleReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "sampleInputChannel", adviceChain = "retryAdvice")
-  public void receiveSample(Message<byte[]> message) {
-    Sample sample = convertJsonBytesToObject(message.getPayload(), Sample.class);
+  @ServiceActivator(inputChannel = "newCaseInputChannel", adviceChain = "retryAdvice")
+  public void receiveNewCase(Message<byte[]> message) {
+    NewCase newCaseMessage = convertJsonBytesToObject(message.getPayload(), NewCase.class);
 
-    if (caseRepository.existsById(sample.getCaseId())) {
+    if (caseRepository.existsById(newCaseMessage.getCaseId())) {
       // Case already exists, so let's not overwrite it... swallow the message quietly
       return;
     }
@@ -57,31 +57,33 @@ public class SampleReceiver {
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 
     Optional<CollectionExercise> collexOpt =
-        collectionExerciseRepository.findById(sample.getCollectionExerciseId());
+        collectionExerciseRepository.findById(newCaseMessage.getCollectionExerciseId());
 
     if (!collexOpt.isPresent()) {
       throw new RuntimeException(
-          "Collection exercise '" + sample.getCollectionExerciseId() + "' not found");
+          "Collection exercise '" + newCaseMessage.getCollectionExerciseId() + "' not found");
     }
 
     CollectionExercise collex = collexOpt.get();
 
     Case newCase = new Case();
-    newCase.setId(sample.getCaseId());
+    newCase.setId(newCaseMessage.getCaseId());
     newCase.setCollectionExercise(collex);
-    newCase.setSample(sample.getSample());
-    newCase.setSampleSensitive(sample.getSampleSensitive());
+    newCase.setSample(newCaseMessage.getSample());
+    newCase.setSampleSensitive(newCaseMessage.getSampleSensitive());
 
     newCase = saveNewCaseAndStampCaseRef(newCase);
-    caseService.emitCaseUpdate(newCase, sample.getJobId(), sample.getOriginatingUser());
+    caseService.emitCaseUpdate(
+        newCase, newCaseMessage.getJobId(), newCaseMessage.getOriginatingUser());
 
     eventLogger.logCaseEvent(
         newCase,
         OffsetDateTime.now(),
-        "New case created from sample load",
+        "New case created from newCase message",
         EventType.NEW_CASE,
-        createEventDTO(TOPIC_SAMPLE, sample.getJobId(), sample.getOriginatingUser()),
-        RedactHelper.redact(sample),
+        createEventDTO(
+            TOPIC_NEW_CASE, newCaseMessage.getJobId(), newCaseMessage.getOriginatingUser()),
+        RedactHelper.redact(newCaseMessage),
         messageTimestamp);
   }
 
