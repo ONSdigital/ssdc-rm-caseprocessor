@@ -55,7 +55,7 @@ jobs:
     # 📚 https://git.io/JvXDl
 
     - run: |
-       git clone https://github.com/ONSdigital/ssdc-rm-common-entity-model.git && cd ssdc-rm-common-entity-model && mvn clean install && cd ..
+       git clone https://github.com/ONSdigital/ssdc-rm-ddl.git && cd ssdc-rm-ddl && mvn clean install && cd ..
        mvn package -DskipITs -Ddockerfile.skip
 
     - name: Perform CodeQL Analysis
