@@ -2,7 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.TOPIC_NEW_CASE;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.INBOUND_NEW_CASE_TOPIC;
 
 import java.util.HashMap;
 import java.util.List;
@@ -75,7 +75,7 @@ public class NewCaseLoadedIT {
       newCaseDto.setSampleSensitive(sampleSensitive);
       newCaseDto.setJobId(UUID.randomUUID());
 
-      pubsubHelper.sendMessage(TOPIC_NEW_CASE, newCaseDto);
+      pubsubHelper.sendMessageToSharedProject(INBOUND_NEW_CASE_TOPIC, newCaseDto);
 
       //  THEN
       EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();

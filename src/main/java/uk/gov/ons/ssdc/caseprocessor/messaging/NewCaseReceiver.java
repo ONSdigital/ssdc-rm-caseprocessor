@@ -1,6 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.TOPIC_NEW_CASE;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.INBOUND_NEW_CASE_TOPIC;
 import static uk.gov.ons.ssdc.caseprocessor.utils.EventHelper.createEventDTO;
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToObject;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
@@ -82,7 +82,7 @@ public class NewCaseReceiver {
         "New case created from newCase message",
         EventType.NEW_CASE,
         createEventDTO(
-            TOPIC_NEW_CASE, newCaseMessage.getJobId(), newCaseMessage.getOriginatingUser()),
+            INBOUND_NEW_CASE_TOPIC, newCaseMessage.getJobId(), newCaseMessage.getOriginatingUser()),
         RedactHelper.redact(newCaseMessage),
         messageTimestamp);
   }
