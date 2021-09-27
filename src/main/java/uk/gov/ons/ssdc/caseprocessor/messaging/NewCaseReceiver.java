@@ -82,7 +82,7 @@ public class NewCaseReceiver {
     eventLogger.logCaseEvent(
         newCase,
         event.getHeader().getDateTime(),
-        "New case created from newCase message",
+        "New case created",
         EventType.NEW_CASE,
         event.getHeader(),
         RedactHelper.redact(newCasePayload),
