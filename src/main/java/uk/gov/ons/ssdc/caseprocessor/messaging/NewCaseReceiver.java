@@ -47,7 +47,7 @@ public class NewCaseReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "newCaseInputChannel", adviceChain = "retryAdvice")
   public void receiveNewCase(Message<byte[]> message) {
-    NewCase newCaseMessage = convertJsonBytesToObject(message.getPayload(), NewCase.class);
+    EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
     if (caseRepository.existsById(newCaseMessage.getCaseId())) {
       // Case already exists, so let's not overwrite it... swallow the message quietly
