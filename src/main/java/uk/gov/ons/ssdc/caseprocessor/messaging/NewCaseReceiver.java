@@ -2,7 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.INBOUND_NEW_CASE_TOPIC;
 import static uk.gov.ons.ssdc.caseprocessor.utils.EventHelper.createEventDTO;
-import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToObject;
+import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
@@ -13,6 +13,7 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.NewCase;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
@@ -49,7 +50,9 @@ public class NewCaseReceiver {
   public void receiveNewCase(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
-    if (caseRepository.existsById(newCaseMessage.getCaseId())) {
+    NewCase newCasePayload = event.getPayload().getNewCase();
+
+    if (caseRepository.existsById(newCasePayload.getCaseId())) {
       // Case already exists, so let's not overwrite it... swallow the message quietly
       return;
     }
@@ -57,33 +60,32 @@ public class NewCaseReceiver {
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 
     Optional<CollectionExercise> collexOpt =
-        collectionExerciseRepository.findById(newCaseMessage.getCollectionExerciseId());
+        collectionExerciseRepository.findById(newCasePayload.getCollectionExerciseId());
 
     if (!collexOpt.isPresent()) {
       throw new RuntimeException(
-          "Collection exercise '" + newCaseMessage.getCollectionExerciseId() + "' not found");
+          "Collection exercise '" + newCasePayload.getCollectionExerciseId() + "' not found");
     }
 
     CollectionExercise collex = collexOpt.get();
 
     Case newCase = new Case();
-    newCase.setId(newCaseMessage.getCaseId());
+    newCase.setId(newCasePayload.getCaseId());
     newCase.setCollectionExercise(collex);
-    newCase.setSample(newCaseMessage.getSample());
-    newCase.setSampleSensitive(newCaseMessage.getSampleSensitive());
+    newCase.setSample(newCasePayload.getSample());
+    newCase.setSampleSensitive(newCasePayload.getSampleSensitive());
 
     newCase = saveNewCaseAndStampCaseRef(newCase);
     caseService.emitCaseUpdate(
-        newCase, newCaseMessage.getJobId(), newCaseMessage.getOriginatingUser());
+        newCase, newCasePayload.getJobId(), newCasePayload.getOriginatingUser());
 
     eventLogger.logCaseEvent(
         newCase,
-        OffsetDateTime.now(),
+        event.getHeader().getDateTime(),
         "New case created from newCase message",
         EventType.NEW_CASE,
-         event.getHeader()
-            INBOUND_NEW_CASE_TOPIC, newCaseMessage.getJobId(), newCaseMessage.getOriginatingUser()),
-        RedactHelper.redact(newCaseMessage),
+        event.getHeader(),
+        RedactHelper.redact(newCasePayload),
         messageTimestamp);
   }
 
