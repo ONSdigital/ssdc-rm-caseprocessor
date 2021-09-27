@@ -81,7 +81,7 @@ public class NewCaseReceiver {
         OffsetDateTime.now(),
         "New case created from newCase message",
         EventType.NEW_CASE,
-        createEventDTO(
+         event.getHeader()
             INBOUND_NEW_CASE_TOPIC, newCaseMessage.getJobId(), newCaseMessage.getOriginatingUser()),
         RedactHelper.redact(newCaseMessage),
         messageTimestamp);
