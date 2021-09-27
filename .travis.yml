@@ -18,7 +18,10 @@ before_install:
 
 install: echo "SKIPPING DEFAULT INSTALL" # Travis has a default maven install. Don't build twice!
 
-script: travis_wait mvn verify jacoco:report
+script:
+  - docker-compose -f ./src/test/resources/docker-compose.yml up
+  - docker logs uac-qid-case-it
+  - docker logs postgres-case-it
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
