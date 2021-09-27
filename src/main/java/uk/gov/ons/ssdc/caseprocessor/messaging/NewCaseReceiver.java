@@ -83,7 +83,7 @@ public class NewCaseReceiver {
         "New case created",
         EventType.NEW_CASE,
         event.getHeader(),
-        RedactHelper.redact(newCasePayload),
+        newCasePayload,
         messageTimestamp);
   }
 
