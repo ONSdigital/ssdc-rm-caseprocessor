@@ -17,7 +17,6 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-case-it:5432/postgres?sslmode=disable
       - SPRING_PROFILES_ACTIVE=dev
-    restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8164/actuator/health"]
       interval: 30s
