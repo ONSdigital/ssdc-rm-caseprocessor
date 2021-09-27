@@ -1,7 +1,5 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.INBOUND_NEW_CASE_TOPIC;
-import static uk.gov.ons.ssdc.caseprocessor.utils.EventHelper.createEventDTO;
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
@@ -77,7 +75,7 @@ public class NewCaseReceiver {
 
     newCase = saveNewCaseAndStampCaseRef(newCase);
     caseService.emitCaseUpdate(
-        newCase, newCasePayload.getJobId(), newCasePayload.getOriginatingUser());
+        newCase, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
 
     eventLogger.logCaseEvent(
         newCase,

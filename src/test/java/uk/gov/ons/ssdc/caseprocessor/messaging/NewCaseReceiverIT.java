@@ -1,8 +1,9 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.NEW_CASE_TOPIC;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.INBOUND_NEW_CASE_TOPIC;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +21,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.NewCase;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
@@ -36,7 +39,7 @@ import uk.gov.ons.ssdc.common.model.entity.EventType;
 @ActiveProfiles("test")
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-public class NewCaseLoadedIT {
+public class NewCaseReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
   @Value("${queueconfig.case-update-topic}")
@@ -59,6 +62,15 @@ public class NewCaseLoadedIT {
   public void testNewCaseLoaded() throws InterruptedException {
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
         pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
+
+      // GIVEN
+      EventDTO event = new EventDTO();
+      EventHeaderDTO eventHeader = new EventHeaderDTO();
+      eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+      eventHeader.setTopic(NEW_CASE_TOPIC);
+      junkDataHelper.junkify(eventHeader);
+      event.setHeader(eventHeader);
+
       CollectionExercise collectionExercise = junkDataHelper.setupJunkCollex();
 
       Map<String, String> sample = new HashMap<>();
@@ -66,16 +78,18 @@ public class NewCaseLoadedIT {
       sample.put("Org", "Brewery");
 
       Map<String, String> sampleSensitive = new HashMap<>();
-      sample.put("The Queen's Private Telephone Number", "02071234567");
+      sampleSensitive.put("Telephone", "02071234567");
 
-      NewCase newCaseDto = new NewCase();
-      newCaseDto.setCaseId(TEST_CASE_ID);
-      newCaseDto.setCollectionExerciseId(collectionExercise.getId());
-      newCaseDto.setSample(sample);
-      newCaseDto.setSampleSensitive(sampleSensitive);
-      newCaseDto.setJobId(UUID.randomUUID());
+      PayloadDTO payloadDTO = new PayloadDTO();
+      NewCase newCase = new NewCase();
+      newCase.setCaseId(TEST_CASE_ID);
+      newCase.setCollectionExerciseId(collectionExercise.getId());
+      newCase.setSample(sample);
+      newCase.setSampleSensitive(sampleSensitive);
+      payloadDTO.setNewCase(newCase);
+      event.setPayload(payloadDTO);
 
-      pubsubHelper.sendMessageToSharedProject(INBOUND_NEW_CASE_TOPIC, newCaseDto);
+      pubsubHelper.sendMessageToSharedProject(NEW_CASE_TOPIC, event);
 
       //  THEN
       EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
@@ -93,6 +107,7 @@ public class NewCaseLoadedIT {
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);
       assertThat(events.get(0).getType()).isEqualTo(EventType.NEW_CASE);
+      assertThat(events.get(0).getPayload()).contains("{\"Telephone\": \"REDACTED\"}");
     }
   }
 }
