@@ -48,6 +48,7 @@ import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 class ActionRuleIT {
   private static final String PACK_CODE = "test-pack-code";
   private static final String PRINT_SUPPLIER = "test-print-supplier";
+  private static final String CREATED_BY_USER = "test@ons.gov.uk";
 
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
@@ -173,7 +174,7 @@ class ActionRuleIT {
     actionRule.setType(type);
     actionRule.setCollectionExercise(collectionExercise);
     actionRule.setPrintTemplate(printTemplate);
-    actionRule.setCreatedBy("foo@bar.com");
+    actionRule.setCreatedBy(CREATED_BY_USER);
 
     if (smsTemplate != null) {
       actionRule.setSmsTemplate(smsTemplate);
