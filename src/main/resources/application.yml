@@ -41,7 +41,7 @@ queueconfig:
   print-fulfilment-subscription: event_print-fulfilment_rm-case-processor
   deactivate-uac-subscription: event_deactivate-uac_rm-case-processor
   update-sample-sensitive-subscription: event_update-sample-sensitive_rm-case-processor
-  print-topic: rm-internal-print-row
+  sms-request-topic: rm-internal-sms-request
   case-update-topic: event_case-update
   uac-update-topic: event_uac-update
   deactivate-uac-topic: event_deactivate-uac

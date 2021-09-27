@@ -18,7 +18,9 @@ public class RedactHelper {
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
 
   private static final ThingToRedact[] THINGS_TO_REDACT = {
-    new ThingToRedact("getSampleSensitive", Map.class), new ThingToRedact("setUac", String.class)
+    new ThingToRedact("getSampleSensitive", Map.class),
+    new ThingToRedact("setUac", String.class),
+    new ThingToRedact("setPhoneNumber", String.class)
   };
 
   public static Object redact(Object rootObjectToRedact) {
