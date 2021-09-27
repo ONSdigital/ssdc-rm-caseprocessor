@@ -38,11 +38,10 @@ import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
 class ActionRuleIT {
-  private static final String OUTBOUND_PRINTER_SUBSCRIPTION =
-      "rm-internal-print-row_print-file-service";
 
   private static final String PACK_CODE = "test-pack-code";
   private static final String PRINT_SUPPLIER = "test-print-supplier";
+  private static final String CREATED_BY_USER = "test@ons.gov.uk";
 
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
@@ -129,6 +128,7 @@ class ActionRuleIT {
     actionRule.setType(type);
     actionRule.setCollectionExercise(collectionExercise);
     actionRule.setPrintTemplate(printTemplate);
+    actionRule.setCreatedBy(CREATED_BY_USER);
 
     return actionRuleRepository.saveAndFlush(actionRule);
   }
