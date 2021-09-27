@@ -47,7 +47,6 @@ public class NewCaseReceiverTest {
 
   private final UUID TEST_CASE_ID = UUID.randomUUID();
   private final UUID TEST_CASE_COLLECTION_EXERCISE_ID = UUID.randomUUID();
-  private final UUID TEST_JOB_ID = UUID.randomUUID();
   private static final byte[] caserefgeneratorkey =
       new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
 
