@@ -20,7 +20,7 @@ install: echo "SKIPPING DEFAULT INSTALL" # Travis has a default maven install. D
 
 script:
   - docker-compose -f ./src/test/resources/docker-compose.yml up
-  - docker logs uac-qid
+  - docker logs uac-qid-case-it
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
