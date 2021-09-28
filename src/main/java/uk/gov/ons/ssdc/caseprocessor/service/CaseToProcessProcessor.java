@@ -11,31 +11,41 @@ public class CaseToProcessProcessor {
 
   private final PrintProcessor printProcessor;
   private final DeactivateUacProcessor deactivateUacProcessor;
+  private final SmsProcessor smsProcessor;
 
   public CaseToProcessProcessor(
-      PrintProcessor printProcessor, DeactivateUacProcessor deactivateUacProcessor) {
+      PrintProcessor printProcessor,
+      DeactivateUacProcessor deactivateUacProcessor,
+      SmsProcessor smsProcessor) {
     this.printProcessor = printProcessor;
     this.deactivateUacProcessor = deactivateUacProcessor;
+    this.smsProcessor = smsProcessor;
   }
 
   public void process(CaseToProcess caseToProcess) {
     ActionRuleType actionRuleType = caseToProcess.getActionRule().getType();
-    if (actionRuleType == ActionRuleType.PRINT) {
-      PrintTemplate printTemplate = caseToProcess.getActionRule().getPrintTemplate();
-      printProcessor.processPrintRow(
-          printTemplate.getTemplate(),
-          caseToProcess.getCaze(),
-          caseToProcess.getBatchId(),
-          caseToProcess.getBatchQuantity(),
-          printTemplate.getPackCode(),
-          printTemplate.getPrintSupplier(),
-          caseToProcess.getActionRule().getId(),
-          null);
-    } else if (actionRuleType == ActionRuleType.DEACTIVATE_UAC) {
-      deactivateUacProcessor.process(
-          caseToProcess.getCaze(), caseToProcess.getActionRule().getId());
-    } else {
-      throw new NotImplementedException("No implementation for other types of action rule yet");
+    switch (actionRuleType) {
+      case PRINT:
+        PrintTemplate printTemplate = caseToProcess.getActionRule().getPrintTemplate();
+        printProcessor.processPrintRow(
+            printTemplate.getTemplate(),
+            caseToProcess.getCaze(),
+            caseToProcess.getBatchId(),
+            caseToProcess.getBatchQuantity(),
+            printTemplate.getPackCode(),
+            printTemplate.getPrintSupplier(),
+            caseToProcess.getActionRule().getId(),
+            null);
+        break;
+      case DEACTIVATE_UAC:
+        deactivateUacProcessor.process(
+            caseToProcess.getCaze(), caseToProcess.getActionRule().getId());
+        break;
+      case SMS:
+        smsProcessor.process(caseToProcess.getCaze(), caseToProcess.getActionRule());
+        break;
+      default:
+        throw new NotImplementedException("No implementation for other types of action rule yet");
     }
   }
 }
