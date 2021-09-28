@@ -1,9 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
-import java.time.OffsetDateTime;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -34,8 +32,6 @@ public class ReceiptReceiver {
   public void receiveMessage(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
-    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-
     UacQidLink uacQidLink = uacService.findByQid(event.getPayload().getReceipt().getQid());
 
     if (uacQidLink.isActive()) {
@@ -54,13 +50,6 @@ public class ReceiptReceiver {
       }
     }
 
-    eventLogger.logUacQidEvent(
-        uacQidLink,
-        event.getHeader().getDateTime(),
-        "Receipt received",
-        EventType.RECEIPT,
-        event.getHeader(),
-        event.getPayload(),
-        messageTimestamp);
+    eventLogger.logUacQidEvent(uacQidLink, "Receipt received", EventType.RECEIPT, event, message);
   }
 }

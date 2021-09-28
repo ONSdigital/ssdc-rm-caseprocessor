@@ -1,9 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
-import java.time.OffsetDateTime;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
@@ -54,8 +52,6 @@ public class NewCaseReceiver {
       return;
     }
 
-    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-
     Optional<CollectionExercise> collexOpt =
         collectionExerciseRepository.findById(newCasePayload.getCollectionExerciseId());
 
@@ -76,14 +72,7 @@ public class NewCaseReceiver {
     caseService.emitCaseUpdate(
         newCase, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
 
-    eventLogger.logCaseEvent(
-        newCase,
-        event.getHeader().getDateTime(),
-        "New case created",
-        EventType.NEW_CASE,
-        event.getHeader(),
-        newCasePayload,
-        messageTimestamp);
+    eventLogger.logCaseEvent(newCase, "New case created", EventType.NEW_CASE, event, message);
   }
 
   private Case saveNewCaseAndStampCaseRef(Case caze) {

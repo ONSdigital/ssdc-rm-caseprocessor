@@ -1,9 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
-import java.time.OffsetDateTime;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -31,20 +29,11 @@ public class InvalidCaseReceiver {
 
     Case caze = caseService.getCaseByCaseId(event.getPayload().getInvalidCase().getCaseId());
 
-    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-
     caze.setInvalid(true);
 
     caseService.saveCaseAndEmitCaseUpdate(
         caze, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
 
-    eventLogger.logCaseEvent(
-        caze,
-        event.getHeader().getDateTime(),
-        "Invalid case",
-        EventType.INVALID_CASE,
-        event.getHeader(),
-        event.getPayload(),
-        messageTimestamp);
+    eventLogger.logCaseEvent(caze, "Invalid case", EventType.INVALID_CASE, event, message);
   }
 }

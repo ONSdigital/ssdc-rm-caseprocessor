@@ -1,9 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
-import java.time.OffsetDateTime;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -33,19 +31,11 @@ public class RefusalReceiver {
 
     RefusalDTO refusal = event.getPayload().getRefusal();
     Case refusedCase = caseService.getCaseByCaseId(refusal.getCaseId());
-    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     refusedCase.setRefusalReceived(RefusalType.valueOf(refusal.getType().name()));
 
     caseService.saveCaseAndEmitCaseUpdate(
         refusedCase, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
 
-    eventLogger.logCaseEvent(
-        refusedCase,
-        event.getHeader().getDateTime(),
-        "Refusal Received",
-        EventType.REFUSAL,
-        event.getHeader(),
-        event.getPayload(),
-        messageTimestamp);
+    eventLogger.logCaseEvent(refusedCase, "Refusal Received", EventType.REFUSAL, event, message);
   }
 }

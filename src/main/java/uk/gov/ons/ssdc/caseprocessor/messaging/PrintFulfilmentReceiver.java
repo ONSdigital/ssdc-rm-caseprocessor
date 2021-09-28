@@ -1,9 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
-import java.time.OffsetDateTime;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -44,8 +42,6 @@ public class PrintFulfilmentReceiver {
     PrintTemplate printTemplate =
         getAllowedPrintTemplate(event.getPayload().getPrintFulfilment().getPackCode(), caze);
 
-    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-
     FulfilmentToProcess fulfilmentToProcess = new FulfilmentToProcess();
     fulfilmentToProcess.setPrintTemplate(printTemplate);
     fulfilmentToProcess.setCaze(caze);
@@ -55,13 +51,7 @@ public class PrintFulfilmentReceiver {
     fulfilmentToProcessRepository.saveAndFlush(fulfilmentToProcess);
 
     eventLogger.logCaseEvent(
-        caze,
-        event.getHeader().getDateTime(),
-        "Print fulfilment requested",
-        EventType.PRINT_FULFILMENT,
-        event.getHeader(),
-        event.getPayload(),
-        messageTimestamp);
+        caze, "Print fulfilment requested", EventType.PRINT_FULFILMENT, event, message);
   }
 
   private PrintTemplate getAllowedPrintTemplate(String packCode, Case caze) {

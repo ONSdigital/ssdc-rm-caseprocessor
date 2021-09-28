@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
@@ -26,7 +26,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
-import uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.RefusalType;
@@ -61,8 +60,7 @@ public class RefusalReceiverTest {
     EventDTO event = new EventDTO();
     event.setPayload(payloadDTO);
     event.setHeader(eventHeader);
-    Message<byte[]> message = constructMessageWithValidTimeStamp(event);
-    OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
+    Message<byte[]> message = constructMessage(event);
 
     Case caze = new Case();
     caze.setId(CASE_ID);
@@ -85,12 +83,6 @@ public class RefusalReceiverTest {
 
     verify(eventLogger)
         .logCaseEvent(
-            eq(caze),
-            eq(event.getHeader().getDateTime()),
-            eq("Refusal Received"),
-            eq(EventType.REFUSAL),
-            eq(event.getHeader()),
-            eq(event.getPayload()),
-            eq(expectedDateTime));
+            eq(caze), eq("Refusal Received"), eq(EventType.REFUSAL), eq(event), eq(message));
   }
 }

@@ -51,11 +51,9 @@ public class SmsProcessor {
 
     eventLogger.logCaseEvent(
         caze,
-        OffsetDateTime.now(),
         String.format("SMS requested by action rule for pack code %s", packCode),
         EventType.ACTION_RULE_SMS_REQUEST,
-        eventHeader,
-        payload,
+        event,
         OffsetDateTime.now());
   }
 }

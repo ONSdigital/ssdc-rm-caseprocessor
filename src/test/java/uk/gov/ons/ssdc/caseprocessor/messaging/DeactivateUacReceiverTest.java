@@ -6,11 +6,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -53,7 +52,7 @@ public class DeactivateUacReceiverTest {
     managementEvent.getPayload().setDeactivateUac(new DeactivateUacDTO());
     managementEvent.getPayload().getDeactivateUac().setQid("0123456789");
 
-    Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
+    Message<byte[]> message = constructMessage(managementEvent);
 
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setActive(true);
@@ -73,16 +72,12 @@ public class DeactivateUacReceiverTest {
     UacQidLink actualUacQidLink = uacQidLinkArgumentCaptor.getValue();
     assertThat(actualUacQidLink.isActive()).isFalse();
 
-    OffsetDateTime messageDateTime = getMsgTimeStamp(message);
-
     verify(eventLogger)
         .logUacQidEvent(
             eq(uacQidLink),
-            eq(managementEvent.getHeader().getDateTime()),
             eq("Deactivate UAC"),
             eq(EventType.DEACTIVATE_UAC),
-            eq(managementEvent.getHeader()),
-            eq(managementEvent.getPayload()),
-            eq(messageDateTime));
+            eq(managementEvent),
+            eq(message));
   }
 }

@@ -5,11 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -51,7 +50,7 @@ public class InvalidCaseReceiverTest {
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setInvalidCase(new InvalidCase());
     managementEvent.getPayload().getInvalidCase().setCaseId(UUID.randomUUID());
-    Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
+    Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
     Case expectedCase = new Case();
@@ -70,16 +69,12 @@ public class InvalidCaseReceiverTest {
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.isInvalid()).isTrue();
 
-    OffsetDateTime messageDateTime = getMsgTimeStamp(message);
-
     verify(eventLogger)
         .logCaseEvent(
             eq(expectedCase),
-            eq(managementEvent.getHeader().getDateTime()),
             eq("Invalid case"),
             eq(EventType.INVALID_CASE),
-            eq(managementEvent.getHeader()),
-            eq(managementEvent.getPayload()),
-            eq(messageDateTime));
+            eq(managementEvent),
+            eq(message));
   }
 }
