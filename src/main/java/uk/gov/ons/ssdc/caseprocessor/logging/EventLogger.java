@@ -1,6 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.logging;
 
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.utils.MessageDateHelper.getMessageTimeStamp;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -56,7 +56,7 @@ public class EventLogger {
       EventDTO event,
       Message<byte[]> message) {
 
-    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
+    OffsetDateTime messageTimestamp = getMessageTimeStamp(message);
 
     logCaseEvent(caze, eventDescription, eventType, event, messageTimestamp);
   }
@@ -71,7 +71,7 @@ public class EventLogger {
     EventHeaderDTO eventHeader = event.getHeader();
     OffsetDateTime eventDate = eventHeader.getDateTime();
     Object eventPayload = event.getPayload();
-    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
+    OffsetDateTime messageTimestamp = getMessageTimeStamp(message);
 
     Event loggedEvent =
         buildEvent(
