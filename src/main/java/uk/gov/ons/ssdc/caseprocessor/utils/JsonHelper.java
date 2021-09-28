@@ -18,14 +18,6 @@ public class JsonHelper {
     }
   }
 
-  public static <T> T convertJsonBytesToObject(byte[] bytes, Class<T> clazz) {
-    try {
-      return objectMapper.readValue(bytes, clazz);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   public static EventDTO convertJsonBytesToEvent(byte[] bytes) {
     EventDTO event;
     try {
