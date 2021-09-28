@@ -1,6 +1,5 @@
 package uk.gov.ons.ssdc.caseprocessor.testutils;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
