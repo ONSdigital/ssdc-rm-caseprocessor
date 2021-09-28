@@ -22,8 +22,8 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.shared-pubsub-project}")
   private String sharedPubsubProject;
 
-  @Value("${queueconfig.sample-subscription}")
-  private String sampleSubscription;
+  @Value("${queueconfig.new-case-subscription}")
+  private String newCaseSubscription;
 
   @Value("${queueconfig.print-fulfilment-subscription}")
   private String printFulfilmentSubscription;
@@ -62,7 +62,7 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public MessageChannel sampleInputChannel() {
+  public MessageChannel newCaseInputChannel() {
     return new DirectChannel();
   }
 
@@ -117,9 +117,11 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public PubSubInboundChannelAdapter inboundSamples(
-      @Qualifier("sampleInputChannel") MessageChannel channel) {
-    return makeAdapter(channel, sampleSubscription);
+  public PubSubInboundChannelAdapter newCaseInbound(
+      @Qualifier("newCaseInputChannel") MessageChannel channel) {
+    String subscription =
+        toProjectSubscriptionName(newCaseSubscription, sharedPubsubProject).toString();
+    return makeAdapter(channel, subscription);
   }
 
   @Bean

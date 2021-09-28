@@ -6,14 +6,14 @@ bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' '$PUBSUB_SETUP_HOS
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/our-project/topics/rm-internal-telephone-capture
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/our-project/subscriptions/rm-internal-telephone-capture_case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/our-project/topics/rm-internal-telephone-capture"}'
 
-curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/our-project/topics/rm-internal-sample
-curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/our-project/subscriptions/rm-internal-sample_case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/our-project/topics/rm-internal-sample"}'
-
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/our-project/topics/rm-internal-sms-request
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/our-project/subscriptions/rm-internal-sms-request-enriched_notify-service -H 'Content-Type: application/json' -d '{"topic": "projects/our-project/topics/rm-internal-sms-request"}'
 
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/our-project/topics/rm-internal-sms-fulfilment
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/our-project/subscriptions/rm-internal-sms-fulfilment_case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/our-project/topics/rm-internal-sms-fulfilment"}'
+
+curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/shared-project/topics/event_new-case
+curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/shared-project/subscriptions/event_new-case_rm-case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/shared-project/topics/event_new-case"}'
 
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/shared-project/topics/event_receipt
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/shared-project/subscriptions/event_receipt_rm-case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/shared-project/topics/event_receipt"}'

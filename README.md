@@ -43,23 +43,6 @@ SPRING_CLOUD_GCP_PUBSUB_PROJECT-ID=<GCP Project>
 QUEUECONFIG_SHARED-PUBSUB-PROJECT=<GCP Project>
 ```
 
-## Internal Events
-
-### Sample Load
-Topic: `rm-internal-sample_case-processor`
-
-Example message:
-
-```json
-{
-  "caseId": "b3d63a55-67bd-4f38-a18d-41297d699d5d",
-  "collectionExerciseId": "58d971eb-c8f0-45b4-bfd8-af7b9ad8c781",
-  "sample": {
-    "foo": "bar"
-  }
-}
-```
-
 ### Enriched SMS Fulfilment
 Topic: `rm-internal-sms-fulfilment_case-processor`
 

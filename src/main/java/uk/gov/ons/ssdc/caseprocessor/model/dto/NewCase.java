@@ -5,7 +5,7 @@ import java.util.UUID;
 import lombok.Data;
 
 @Data
-public class Sample {
+public class NewCase {
   private UUID caseId;
 
   private UUID collectionExerciseId;
@@ -13,7 +13,4 @@ public class Sample {
   private Map<String, String> sample;
 
   private Map<String, String> sampleSensitive;
-
-  private UUID jobId;
-  private String originatingUser;
 }
