@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -64,11 +65,9 @@ class SmsProcessorTest {
     verify(eventLogger)
         .logCaseEvent(
             eq(caze),
-            any(),
             eq("SMS requested by action rule for pack code Test pack code"),
             eq(EventType.ACTION_RULE_SMS_REQUEST),
             any(),
-            any(),
-            any());
+            any(OffsetDateTime.class));
   }
 }

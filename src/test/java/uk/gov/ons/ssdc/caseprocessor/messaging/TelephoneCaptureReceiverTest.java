@@ -3,11 +3,10 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -48,7 +47,7 @@ class TelephoneCaptureReceiverTest {
     Case testCase = new Case();
     testCase.setId(CASE_ID);
     EventDTO event = buildTelephoneCaptureEvent();
-    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(event);
+    Message<byte[]> eventMessage = constructMessage(event);
 
     when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(testCase);
     when(uacService.existsByQid(TEST_QID)).thenReturn(false);
@@ -64,12 +63,10 @@ class TelephoneCaptureReceiverTest {
     verify(eventLogger)
         .logCaseEvent(
             testCase,
-            event.getHeader().getDateTime(),
             TELEPHONE_CAPTURE_DESCRIPTION,
             EventType.TELEPHONE_CAPTURE,
-            event.getHeader(),
-            event.getPayload().getTelephoneCapture(),
-            getMsgTimeStamp(eventMessage));
+            event,
+            eventMessage);
   }
 
   @Test
@@ -78,7 +75,7 @@ class TelephoneCaptureReceiverTest {
     Case testCase = new Case();
     testCase.setId(CASE_ID);
     EventDTO event = buildTelephoneCaptureEvent();
-    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(event);
+    Message<byte[]> eventMessage = constructMessage(event);
 
     UacQidLink existingUacQidLink = new UacQidLink();
     existingUacQidLink.setQid(TEST_QID);
@@ -107,7 +104,7 @@ class TelephoneCaptureReceiverTest {
     otherCase.setId(UUID.randomUUID());
 
     EventDTO event = buildTelephoneCaptureEvent();
-    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(event);
+    Message<byte[]> eventMessage = constructMessage(event);
 
     UacQidLink existingUacQidLink = new UacQidLink();
     existingUacQidLink.setQid(TEST_QID);

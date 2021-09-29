@@ -107,11 +107,9 @@ public class PrintProcessor {
 
     eventLogger.logCaseEvent(
         caze,
-        OffsetDateTime.now(),
         String.format("Print file generated with pack code %s", packCode),
         EventType.PRINT_FILE,
         EventHelper.getDummyEvent(correlationId, originatingUser),
-        null,
         OffsetDateTime.now());
   }
 

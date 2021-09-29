@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
@@ -90,18 +91,16 @@ class PrintProcessorTest {
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
     assertThat(actualUacQidLink.isActive()).isTrue();
 
-    ArgumentCaptor<EventHeaderDTO> headerCaptor = ArgumentCaptor.forClass(EventHeaderDTO.class);
+    ArgumentCaptor<EventDTO> eventCaptor = ArgumentCaptor.forClass(EventDTO.class);
     verify(eventLogger)
         .logCaseEvent(
             eq(caze),
-            any(OffsetDateTime.class),
             eq("Print file generated with pack code test pack code"),
             eq(EventType.PRINT_FILE),
-            headerCaptor.capture(),
-            isNull(),
+            eventCaptor.capture(),
             any(OffsetDateTime.class));
 
-    EventHeaderDTO actualHeader = headerCaptor.getValue();
+    EventHeaderDTO actualHeader = eventCaptor.getValue().getHeader();
     Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(actionRule.getId());
   }
 
@@ -153,18 +152,16 @@ class PrintProcessorTest {
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
     assertThat(actualUacQidLink.isActive()).isTrue();
 
-    ArgumentCaptor<EventHeaderDTO> headerCaptor = ArgumentCaptor.forClass(EventHeaderDTO.class);
+    ArgumentCaptor<EventDTO> eventCaptor = ArgumentCaptor.forClass(EventDTO.class);
     verify(eventLogger)
         .logCaseEvent(
             eq(caze),
-            any(OffsetDateTime.class),
             eq("Print file generated with pack code TEST_FULFILMENT_CODE"),
             eq(EventType.PRINT_FILE),
-            headerCaptor.capture(),
-            isNull(),
+            eventCaptor.capture(),
             any(OffsetDateTime.class));
 
-    EventHeaderDTO actualHeader = headerCaptor.getValue();
+    EventHeaderDTO actualHeader = eventCaptor.getValue().getHeader();
     Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(TEST_CORRELATION_ID);
     Assertions.assertThat(actualHeader.getOriginatingUser()).isEqualTo(TEST_ORIGINATING_USER);
   }

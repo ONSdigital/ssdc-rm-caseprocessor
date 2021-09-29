@@ -6,9 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -28,7 +27,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSampleSensitive;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
-import uk.gov.ons.ssdc.caseprocessor.utils.RedactHelper;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
 
@@ -55,7 +53,7 @@ public class UpdateNewCaseSensitiveReceiverTest {
         .getPayload()
         .getUpdateSampleSensitive()
         .setSampleSensitive(Map.of("PHONE_NUMBER", "9999999"));
-    Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
+    Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
     Case expectedCase = new Case();
@@ -74,17 +72,13 @@ public class UpdateNewCaseSensitiveReceiverTest {
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "9999999"));
 
-    OffsetDateTime messageDateTime = getMsgTimeStamp(message);
-
     verify(eventLogger)
         .logCaseEvent(
             eq(expectedCase),
-            eq(managementEvent.getHeader().getDateTime()),
             eq("Sensitive data updated"),
             eq(EventType.UPDATE_SAMPLE_SENSITIVE),
-            eq(managementEvent.getHeader()),
-            eq(RedactHelper.redact(managementEvent.getPayload())),
-            eq(messageDateTime));
+            eq(managementEvent),
+            eq(message));
   }
 
   @Test
@@ -102,7 +96,7 @@ public class UpdateNewCaseSensitiveReceiverTest {
         .getPayload()
         .getUpdateSampleSensitive()
         .setSampleSensitive(Map.of("UPRN", "9999999"));
-    Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
+    Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
     Case expectedCase = new Case();

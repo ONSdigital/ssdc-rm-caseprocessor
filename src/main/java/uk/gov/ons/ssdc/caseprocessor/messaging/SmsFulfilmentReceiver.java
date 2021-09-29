@@ -1,9 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
-import java.time.OffsetDateTime;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -36,7 +34,6 @@ public class SmsFulfilmentReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "smsFulfilmentInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
-    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
     EnrichedSmsFulfilment smsFulfilment = event.getPayload().getEnrichedSmsFulfilment();
 
@@ -69,12 +66,6 @@ public class SmsFulfilmentReceiver {
     }
 
     eventLogger.logCaseEvent(
-        caze,
-        event.getHeader().getDateTime(),
-        SMS_FULFILMENT_DESCRIPTION,
-        EventType.SMS_FULFILMENT,
-        event.getHeader(),
-        smsFulfilment,
-        messageTimestamp);
+        caze, SMS_FULFILMENT_DESCRIPTION, EventType.SMS_FULFILMENT, event, message);
   }
 }

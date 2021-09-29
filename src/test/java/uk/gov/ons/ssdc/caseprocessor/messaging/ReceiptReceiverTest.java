@@ -3,7 +3,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
@@ -25,7 +25,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ReceiptDTO;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
-import uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
@@ -58,8 +57,7 @@ public class ReceiptReceiverTest {
     eventHeader.setTopic("Test topic");
     eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     event.setHeader(eventHeader);
-    Message<byte[]> message = constructMessageWithValidTimeStamp(event);
-    OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
+    Message<byte[]> message = constructMessage(event);
 
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setActive(true);
@@ -80,12 +78,10 @@ public class ReceiptReceiverTest {
     verify(eventLogger)
         .logUacQidEvent(
             eq(actualUacQidLink),
-            any(),
             eq("Receipt received"),
             eq(EventType.RECEIPT),
-            eq(event.getHeader()),
-            eq(event.getPayload()),
-            eq(expectedDateTime));
+            eq(event),
+            eq(message));
   }
 
   @Test
@@ -103,8 +99,7 @@ public class ReceiptReceiverTest {
     eventHeader.setTopic("Test topic");
     eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     event.setHeader(eventHeader);
-    Message<byte[]> message = constructMessageWithValidTimeStamp(event);
-    OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
+    Message<byte[]> message = constructMessage(event);
 
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setActive(false);
@@ -118,13 +113,7 @@ public class ReceiptReceiverTest {
 
     verify(eventLogger)
         .logUacQidEvent(
-            eq(uacQidLink),
-            any(),
-            eq("Receipt received"),
-            eq(EventType.RECEIPT),
-            eq(event.getHeader()),
-            eq(event.getPayload()),
-            eq(expectedDateTime));
+            eq(uacQidLink), eq("Receipt received"), eq(EventType.RECEIPT), eq(event), eq(message));
 
     verifyNoMoreInteractions(uacService);
     verifyNoInteractions(caseService);
@@ -147,8 +136,7 @@ public class ReceiptReceiverTest {
     eventHeader.setTopic("Test topic");
     eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     event.setHeader(eventHeader);
-    Message<byte[]> message = constructMessageWithValidTimeStamp(event);
-    OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
+    Message<byte[]> message = constructMessage(event);
 
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setActive(true);
@@ -181,11 +169,9 @@ public class ReceiptReceiverTest {
     verify(eventLogger)
         .logUacQidEvent(
             eq(actualUacQidLink),
-            eq(event.getHeader().getDateTime()),
             eq("Receipt received"),
             eq(EventType.RECEIPT),
-            eq(event.getHeader()),
-            eq(event.getPayload()),
-            eq(expectedDateTime));
+            eq(event),
+            eq(message));
   }
 }

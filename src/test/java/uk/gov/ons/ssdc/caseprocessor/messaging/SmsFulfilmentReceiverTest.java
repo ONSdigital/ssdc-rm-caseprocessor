@@ -7,11 +7,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -53,7 +52,7 @@ class SmsFulfilmentReceiverTest {
     Case testCase = new Case();
     testCase.setId(CASE_ID);
     EventDTO event = buildEnrichedSmsFulfilmentEventWithUacQid();
-    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(event);
+    Message<byte[]> eventMessage = constructMessage(event);
 
     when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(testCase);
     when(uacService.existsByQid(TEST_QID)).thenReturn(false);
@@ -67,13 +66,7 @@ class SmsFulfilmentReceiverTest {
             testCase, TEST_UAC, TEST_QID, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
     verify(eventLogger)
         .logCaseEvent(
-            testCase,
-            event.getHeader().getDateTime(),
-            SMS_FULFILMENT_DESCRIPTION,
-            EventType.SMS_FULFILMENT,
-            event.getHeader(),
-            event.getPayload().getEnrichedSmsFulfilment(),
-            getMsgTimeStamp(eventMessage));
+            testCase, SMS_FULFILMENT_DESCRIPTION, EventType.SMS_FULFILMENT, event, eventMessage);
   }
 
   @Test
@@ -82,7 +75,7 @@ class SmsFulfilmentReceiverTest {
     Case testCase = new Case();
     testCase.setId(CASE_ID);
     EventDTO event = buildEnrichedSmsFulfilmentEvent();
-    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(event);
+    Message<byte[]> eventMessage = constructMessage(event);
 
     when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(testCase);
 
@@ -93,13 +86,7 @@ class SmsFulfilmentReceiverTest {
     verifyNoInteractions(uacService);
     verify(eventLogger)
         .logCaseEvent(
-            testCase,
-            event.getHeader().getDateTime(),
-            SMS_FULFILMENT_DESCRIPTION,
-            EventType.SMS_FULFILMENT,
-            event.getHeader(),
-            event.getPayload().getEnrichedSmsFulfilment(),
-            getMsgTimeStamp(eventMessage));
+            testCase, SMS_FULFILMENT_DESCRIPTION, EventType.SMS_FULFILMENT, event, eventMessage);
   }
 
   @Test
@@ -108,7 +95,7 @@ class SmsFulfilmentReceiverTest {
     Case testCase = new Case();
     testCase.setId(CASE_ID);
     EventDTO event = buildEnrichedSmsFulfilmentEventWithUacQid();
-    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(event);
+    Message<byte[]> eventMessage = constructMessage(event);
 
     UacQidLink existingUacQidLink = new UacQidLink();
     existingUacQidLink.setQid(TEST_QID);
@@ -137,7 +124,7 @@ class SmsFulfilmentReceiverTest {
     otherCase.setId(UUID.randomUUID());
 
     EventDTO event = buildEnrichedSmsFulfilmentEventWithUacQid();
-    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(event);
+    Message<byte[]> eventMessage = constructMessage(event);
 
     UacQidLink existingUacQidLink = new UacQidLink();
     existingUacQidLink.setQid(TEST_QID);

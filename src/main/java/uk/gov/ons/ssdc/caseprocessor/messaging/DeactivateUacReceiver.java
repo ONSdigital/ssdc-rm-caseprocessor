@@ -1,9 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
-import java.time.OffsetDateTime;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -31,7 +29,6 @@ public class DeactivateUacReceiver {
 
     UacQidLink uacQidLink = uacService.findByQid(event.getPayload().getDeactivateUac().getQid());
 
-    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     uacQidLink.setActive(false);
     uacQidLink =
         uacService.saveAndEmitUacUpdateEvent(
@@ -40,12 +37,6 @@ public class DeactivateUacReceiver {
             event.getHeader().getOriginatingUser());
 
     eventLogger.logUacQidEvent(
-        uacQidLink,
-        event.getHeader().getDateTime(),
-        "Deactivate UAC",
-        EventType.DEACTIVATE_UAC,
-        event.getHeader(),
-        event.getPayload(),
-        messageTimestamp);
+        uacQidLink, "Deactivate UAC", EventType.DEACTIVATE_UAC, event, message);
   }
 }

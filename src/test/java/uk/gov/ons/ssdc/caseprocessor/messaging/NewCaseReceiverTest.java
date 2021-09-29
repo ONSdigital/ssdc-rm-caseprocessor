@@ -10,11 +10,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -85,7 +84,7 @@ public class NewCaseReceiverTest {
     event.setHeader(eventHeader);
     event.setPayload(payloadDTO);
 
-    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(event);
+    Message<byte[]> eventMessage = constructMessage(event);
 
     when(caseRepository.existsById(TEST_CASE_ID)).thenReturn(false);
 
@@ -116,14 +115,7 @@ public class NewCaseReceiverTest {
     assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID);
 
     verify(eventLogger)
-        .logCaseEvent(
-            actualCase,
-            event.getHeader().getDateTime(),
-            "New case created",
-            EventType.NEW_CASE,
-            event.getHeader(),
-            newCase,
-            getMsgTimeStamp(eventMessage));
+        .logCaseEvent(actualCase, "New case created", EventType.NEW_CASE, event, eventMessage);
   }
 
   @Test
@@ -171,7 +163,7 @@ public class NewCaseReceiverTest {
     event.setHeader(eventHeader);
     event.setPayload(payloadDTO);
 
-    Message<byte[]> eventMessage = constructMessageWithValidTimeStamp(event);
+    Message<byte[]> eventMessage = constructMessage(event);
 
     when(caseRepository.existsById(TEST_CASE_ID)).thenReturn(false);
     when(collectionExerciseRepository.findById(TEST_CASE_COLLECTION_EXERCISE_ID))
