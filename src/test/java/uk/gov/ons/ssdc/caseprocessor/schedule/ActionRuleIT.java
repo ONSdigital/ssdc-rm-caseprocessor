@@ -5,7 +5,9 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_SMS
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
@@ -142,6 +144,8 @@ class ActionRuleIT {
       assertThat(rme.getPayload().getSmsRequest().getCaseId()).isEqualTo(caze.getId());
       assertThat(rme.getPayload().getSmsRequest().getPackCode()).isEqualTo("Test pack code");
       assertThat(rme.getPayload().getSmsRequest().getPhoneNumber()).isEqualTo("123");
+      assertThat(rme.getPayload().getSmsRequest().getUacMetadata())
+          .containsEntry("Wave of Contact", "1");
 
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isOne();
@@ -175,6 +179,10 @@ class ActionRuleIT {
     actionRule.setCollectionExercise(collectionExercise);
     actionRule.setPrintTemplate(printTemplate);
     actionRule.setCreatedBy(CREATED_BY_USER);
+
+    Map<String, String> testUacMetadata = new HashMap<>();
+    testUacMetadata.put("Wave of Contact", "1");
+    actionRule.setUacMetadata(testUacMetadata);
 
     if (smsTemplate != null) {
       actionRule.setSmsTemplate(smsTemplate);

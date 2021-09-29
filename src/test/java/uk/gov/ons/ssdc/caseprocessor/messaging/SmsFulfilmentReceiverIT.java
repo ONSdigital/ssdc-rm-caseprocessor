@@ -5,7 +5,9 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.SMS_FULFILMENT_TOPIC;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,6 +72,10 @@ class SmsFulfilmentReceiverIT {
     enrichedSmsFulfilment.setQid(smsUacQid.getQid());
     enrichedSmsFulfilment.setCaseId(testCase.getId());
     enrichedSmsFulfilment.setPackCode(PACK_CODE);
+
+    Map<String, String> uacMetadataMap = new HashMap<>();
+    uacMetadataMap.put("Wave of Contact Number", "1");
+    enrichedSmsFulfilment.setUacMetadata(uacMetadataMap);
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setEnrichedSmsFulfilment(enrichedSmsFulfilment);

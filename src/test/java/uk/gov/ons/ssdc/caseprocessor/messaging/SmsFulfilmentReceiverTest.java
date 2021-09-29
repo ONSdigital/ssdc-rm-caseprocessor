@@ -13,6 +13,8 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINA
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -164,6 +166,10 @@ class SmsFulfilmentReceiverTest {
     EnrichedSmsFulfilment enrichedSmsFulfilment = new EnrichedSmsFulfilment();
     enrichedSmsFulfilment.setCaseId(CASE_ID);
     enrichedSmsFulfilment.setPackCode(PACK_CODE);
+
+    Map<String, String> testUacMetadata = new HashMap<>();
+    testUacMetadata.put("Wave of Contact", "1");
+    enrichedSmsFulfilment.setUacMetadata(testUacMetadata);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(EVENT_SCHEMA_VERSION);
