@@ -11,21 +11,17 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
-import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @MessageEndpoint
 public class ReceiptReceiver {
   private final UacService uacService;
-  private final CaseService caseService;
   private final EventLogger eventLogger;
 
-  public ReceiptReceiver(UacService uacService, CaseService caseService, EventLogger eventLogger) {
+  public ReceiptReceiver(UacService uacService, EventLogger eventLogger) {
     this.uacService = uacService;
-    this.caseService = caseService;
     this.eventLogger = eventLogger;
   }
 
@@ -40,18 +36,13 @@ public class ReceiptReceiver {
 
     if (uacQidLink.isActive()) {
       uacQidLink.setActive(false);
+      uacQidLink.setReceiptReceived(true);
+
       uacQidLink =
           uacService.saveAndEmitUacUpdateEvent(
               uacQidLink,
               event.getHeader().getCorrelationId(),
               event.getHeader().getOriginatingUser());
-
-      if (uacQidLink.getCaze() != null) {
-        Case caze = uacQidLink.getCaze();
-        caze.setReceiptReceived(true);
-        caseService.saveCaseAndEmitCaseUpdate(
-            caze, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
-      }
     }
 
     eventLogger.logUacQidEvent(

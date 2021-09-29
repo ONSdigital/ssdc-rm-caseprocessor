@@ -23,10 +23,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ReceiptDTO;
-import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 import uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper;
-import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
@@ -36,7 +34,6 @@ public class ReceiptReceiverTest {
   private static final UUID CASE_ID = UUID.randomUUID();
 
   @Mock private UacService uacService;
-  @Mock private CaseService caseService;
   @Mock private EventLogger eventLogger;
 
   @InjectMocks ReceiptReceiver underTest;
@@ -127,7 +124,6 @@ public class ReceiptReceiverTest {
             eq(expectedDateTime));
 
     verifyNoMoreInteractions(uacService);
-    verifyNoInteractions(caseService);
   }
 
   @Test
@@ -152,10 +148,6 @@ public class ReceiptReceiverTest {
 
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setActive(true);
-    Case caze = new Case();
-    caze.setId(CASE_ID);
-    caze.setReceiptReceived(false);
-    uacQidLink.setCaze(caze);
 
     when(uacService.findByQid(any())).thenReturn(uacQidLink);
     when(uacService.saveAndEmitUacUpdateEvent(any(UacQidLink.class), any(UUID.class), anyString()))
@@ -169,14 +161,7 @@ public class ReceiptReceiverTest {
             uacQidLinkCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.isActive()).isFalse();
-
-    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService)
-        .saveCaseAndEmitCaseUpdate(
-            caseArgumentCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
-    Case actualCase = caseArgumentCaptor.getValue();
-    assertThat(actualCase.getId()).isEqualTo(caze.getId());
-    assertThat(actualCase.isReceiptReceived()).isTrue();
+    assertThat(actualUacQidLink.isReceiptReceived()).isTrue();
 
     verify(eventLogger)
         .logUacQidEvent(
