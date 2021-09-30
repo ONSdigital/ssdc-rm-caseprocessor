@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.assertj.core.api.Assertions;
@@ -104,6 +106,9 @@ public class UacServiceTest {
 
     String qid = "TEST_QID";
     String uac = "TEST_UAC";
+    Map<String, String> uacMetadata = new HashMap<>();
+    uacMetadata.put("TEST_UAC_METADATA", "TEST");
+
     Case testCase = new Case();
     testCase.setId(UUID.randomUUID());
     UacQidLink expectedSavedUacQidLink = new UacQidLink();
@@ -116,13 +121,14 @@ public class UacServiceTest {
 
     // When
     underTest.createLinkAndEmitNewUacQid(
-        testCase, uac, qid, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
+        testCase, uac, qid, uacMetadata, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
 
     // Then
     UacQidLink actualSavedUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualSavedUacQidLink.isActive()).isTrue();
     assertThat(actualSavedUacQidLink.getQid()).isEqualTo(qid);
     assertThat(actualSavedUacQidLink.getUac()).isEqualTo(uac);
+    assertThat(actualSavedUacQidLink.getUacMetadata()).isEqualTo(uacMetadata);
     assertThat(actualSavedUacQidLink.getCaze()).isEqualTo(testCase);
 
     ArgumentCaptor<EventDTO> eventArgumentCaptor = ArgumentCaptor.forClass(EventDTO.class);
