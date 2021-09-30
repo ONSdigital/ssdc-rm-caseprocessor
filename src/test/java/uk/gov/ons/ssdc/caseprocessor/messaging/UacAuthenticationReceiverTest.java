@@ -1,11 +1,10 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
@@ -54,7 +53,7 @@ public class UacAuthenticationReceiverTest {
 
     UacQidLink expectedUacQidLink = new UacQidLink();
     expectedUacQidLink.setUac(TEST_QID_ID);
-    Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
+    Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
     when(uacService.findByQid(TEST_QID_ID)).thenReturn(expectedUacQidLink);
@@ -71,12 +70,10 @@ public class UacAuthenticationReceiverTest {
         .verify(eventLogger)
         .logUacQidEvent(
             eq(expectedUacQidLink),
-            any(OffsetDateTime.class),
             eq("Respondent authenticated"),
             eq(EventType.UAC_AUTHENTICATION),
-            eq(managementEvent.getHeader()),
-            eq(uacAuthentication),
-            any());
+            eq(managementEvent),
+            eq(message));
 
     verifyNoMoreInteractions(uacService);
     verifyNoMoreInteractions(eventLogger);

@@ -1,9 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
-import java.time.OffsetDateTime;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -32,18 +30,9 @@ public class EqLaunchReceiver {
   public void receiveMessage(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
-    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-
     UacQidLink uacQidLink = uacService.findByQid(event.getPayload().getEqLaunch().getQid());
 
-    eventLogger.logUacQidEvent(
-        uacQidLink,
-        event.getHeader().getDateTime(),
-        "EQ launched",
-        EventType.EQ_LAUNCH,
-        event.getHeader(),
-        event.getPayload().getEqLaunch(),
-        messageTimestamp);
+    eventLogger.logUacQidEvent(uacQidLink, "EQ launched", EventType.EQ_LAUNCH, event, message);
 
     uacQidLink.getCaze().setEqLaunched(true);
     caseService.saveCaseAndEmitCaseUpdate(

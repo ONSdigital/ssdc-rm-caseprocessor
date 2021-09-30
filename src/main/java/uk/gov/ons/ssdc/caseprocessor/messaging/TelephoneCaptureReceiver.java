@@ -1,9 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
-import java.time.OffsetDateTime;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -37,8 +35,6 @@ public class TelephoneCaptureReceiver {
   public void receiveMessage(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
-    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-
     TelephoneCaptureDTO telephoneCapturePayload = event.getPayload().getTelephoneCapture();
 
     Case caze = caseService.getCaseByCaseId(telephoneCapturePayload.getCaseId());
@@ -70,12 +66,6 @@ public class TelephoneCaptureReceiver {
         event.getHeader().getOriginatingUser());
 
     eventLogger.logCaseEvent(
-        caze,
-        event.getHeader().getDateTime(),
-        TELEPHONE_CAPTURE_DESCRIPTION,
-        EventType.TELEPHONE_CAPTURE,
-        event.getHeader(),
-        telephoneCapturePayload,
-        messageTimestamp);
+        caze, TELEPHONE_CAPTURE_DESCRIPTION, EventType.TELEPHONE_CAPTURE, event, message);
   }
 }
