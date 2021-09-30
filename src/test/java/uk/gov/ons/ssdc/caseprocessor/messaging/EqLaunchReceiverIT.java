@@ -55,7 +55,7 @@ public class EqLaunchReceiverIT {
   }
 
   @Test
-  public void testEqLaunchLogsEventSetsFlagAndEmitsCorrectCaseUpdatedEvent() throws Exception {
+  public void testEqLaunchLogsEventSetsFlagAndEmitsCorrectUACUpdatedEvent() throws Exception {
     // GIVEN
 
     try (QueueSpy<EventDTO> outboundUacQueueSpy =

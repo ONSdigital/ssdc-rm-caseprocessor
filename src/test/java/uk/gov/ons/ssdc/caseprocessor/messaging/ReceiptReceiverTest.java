@@ -31,7 +31,6 @@ import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 @ExtendWith(MockitoExtension.class)
 public class ReceiptReceiverTest {
   private static final String QUESTIONNAIRE_ID = "12345";
-  private static final UUID CASE_ID = UUID.randomUUID();
 
   @Mock private UacService uacService;
   @Mock private EventLogger eventLogger;
@@ -127,7 +126,7 @@ public class ReceiptReceiverTest {
   }
 
   @Test
-  public void testUnlinkedUacQidReceiptsUacQidAndCase() {
+  public void testUnlinkedUacQidReceiptsUacQid() {
     ReceiptDTO receiptDTO = new ReceiptDTO();
     receiptDTO.setQid(QUESTIONNAIRE_ID);
 

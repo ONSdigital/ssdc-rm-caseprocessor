@@ -11,7 +11,6 @@ import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,8 +29,6 @@ import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ExtendWith(MockitoExtension.class)
 public class EqLaunchReceiverTest {
-
-  private final UUID TEST_CASE_ID = UUID.randomUUID();
   private final String TEST_QID_ID = "1234567890123456";
 
   @Mock private UacService uacService;
