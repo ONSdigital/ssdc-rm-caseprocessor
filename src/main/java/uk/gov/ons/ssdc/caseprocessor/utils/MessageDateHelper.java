@@ -5,14 +5,14 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import org.springframework.messaging.Message;
 
-public class MsgDateHelper {
-  public static OffsetDateTime getMsgTimeStamp(Message<?> msg) {
+public class MessageDateHelper {
+  public static OffsetDateTime getMessageTimeStamp(Message<?> message) {
 
-    if (msg.getHeaders().getTimestamp() == null) {
+    if (message.getHeaders().getTimestamp() == null) {
       throw new RuntimeException("Message Headers missing Timestamp");
     }
 
     return OffsetDateTime.ofInstant(
-        Instant.ofEpochMilli(msg.getHeaders().getTimestamp()), ZoneId.of("UTC"));
+        Instant.ofEpochMilli(message.getHeaders().getTimestamp()), ZoneId.of("UTC"));
   }
 }

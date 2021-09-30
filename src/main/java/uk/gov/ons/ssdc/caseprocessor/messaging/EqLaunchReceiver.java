@@ -10,6 +10,7 @@ import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
@@ -28,20 +29,13 @@ public class EqLaunchReceiver {
   @ServiceActivator(inputChannel = "eqLaunchInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
-    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-
     UacQidLink uacQidLink = uacService.findByQid(event.getPayload().getEqLaunch().getQid());
+
+    eventLogger.logUacQidEvent(uacQidLink, "EQ launched", EventType.EQ_LAUNCH, event, message);
+
     uacQidLink.setEqLaunched(true);
     uacService.saveAndEmitUacUpdateEvent(
-        uacQidLink, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
+            uacQidLink, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
 
-    eventLogger.logUacQidEvent(
-        uacQidLink,
-        event.getHeader().getDateTime(),
-        "EQ launched",
-        EventType.EQ_LAUNCH,
-        event.getHeader(),
-        event.getPayload().getEqLaunch(),
-        messageTimestamp);
   }
 }

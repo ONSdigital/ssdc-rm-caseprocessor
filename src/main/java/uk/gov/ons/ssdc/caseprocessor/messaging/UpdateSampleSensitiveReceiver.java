@@ -1,9 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
-import java.time.OffsetDateTime;
 import java.util.Map;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -13,7 +11,6 @@ import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSampleSensitive;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
-import uk.gov.ons.ssdc.caseprocessor.utils.RedactHelper;
 import uk.gov.ons.ssdc.common.model.entity.*;
 
 @MessageEndpoint
@@ -31,7 +28,6 @@ public class UpdateSampleSensitiveReceiver {
   public void receiveMessage(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
-    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     UpdateSampleSensitive updateSampleSensitive = event.getPayload().getUpdateSampleSensitive();
 
     Case caze = caseService.getCaseByCaseId(updateSampleSensitive.getCaseId());
@@ -48,12 +44,6 @@ public class UpdateSampleSensitiveReceiver {
     caseService.saveCase(caze);
 
     eventLogger.logCaseEvent(
-        caze,
-        event.getHeader().getDateTime(),
-        "Sensitive data updated",
-        EventType.UPDATE_SAMPLE_SENSITIVE,
-        event.getHeader(),
-        RedactHelper.redact(event.getPayload()),
-        messageTimestamp);
+        caze, "Sensitive data updated", EventType.UPDATE_SAMPLE_SENSITIVE, event, message);
   }
 }

@@ -5,9 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -58,7 +57,7 @@ public class PrintFulfilmentReceiverTest {
     managementEvent.getPayload().setPrintFulfilment(new PrintFulfilmentDTO());
     managementEvent.getPayload().getPrintFulfilment().setCaseId(UUID.randomUUID());
     managementEvent.getPayload().getPrintFulfilment().setPackCode("TEST_FULFILMENT_CODE");
-    Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
+    Message<byte[]> message = constructMessage(managementEvent);
 
     PrintTemplate printTemplate = new PrintTemplate();
     printTemplate.setPackCode("TEST_FULFILMENT_CODE");
@@ -87,16 +86,12 @@ public class PrintFulfilmentReceiverTest {
     assertThat(fulfilmentToProcess.getPrintTemplate()).isEqualTo(printTemplate);
     assertThat(fulfilmentToProcess.getCaze()).isEqualTo(expectedCase);
 
-    OffsetDateTime messageDateTime = getMsgTimeStamp(message);
-
     verify(eventLogger)
         .logCaseEvent(
             eq(expectedCase),
-            eq(managementEvent.getHeader().getDateTime()),
             eq("Print fulfilment requested"),
             eq(EventType.PRINT_FULFILMENT),
-            eq(managementEvent.getHeader()),
-            eq(managementEvent.getPayload()),
-            eq(messageDateTime));
+            eq(managementEvent),
+            eq(message));
   }
 }

@@ -1,8 +1,12 @@
 package uk.gov.ons.ssdc.caseprocessor.logging;
 
+import static uk.gov.ons.ssdc.caseprocessor.utils.MessageDateHelper.getMessageTimeStamp;
+
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper;
@@ -23,18 +27,21 @@ public class EventLogger {
 
   public void logCaseEvent(
       Case caze,
-      OffsetDateTime eventDate,
       String eventDescription,
       EventType eventType,
-      EventHeaderDTO event,
-      Object eventPayload,
+      EventDTO event,
       OffsetDateTime messageTimestamp) {
+
+    EventHeaderDTO eventHeader = event.getHeader();
+    OffsetDateTime eventDate = eventHeader.getDateTime();
+    Object eventPayload = event.getPayload();
+
     Event loggedEvent =
         buildEvent(
             eventDate,
             eventDescription,
             eventType,
-            event,
+            eventHeader,
             RedactHelper.redact(eventPayload),
             messageTimestamp);
     loggedEvent.setCaze(caze);
@@ -42,20 +49,36 @@ public class EventLogger {
     eventRepository.save(loggedEvent);
   }
 
-  public void logUacQidEvent(
-      UacQidLink uacQidLink,
-      OffsetDateTime eventDate,
+  public void logCaseEvent(
+      Case caze,
       String eventDescription,
       EventType eventType,
-      EventHeaderDTO event,
-      Object eventPayload,
-      OffsetDateTime messageTimestamp) {
+      EventDTO event,
+      Message<byte[]> message) {
+
+    OffsetDateTime messageTimestamp = getMessageTimeStamp(message);
+
+    logCaseEvent(caze, eventDescription, eventType, event, messageTimestamp);
+  }
+
+  public void logUacQidEvent(
+      UacQidLink uacQidLink,
+      String eventDescription,
+      EventType eventType,
+      EventDTO event,
+      Message<byte[]> message) {
+
+    EventHeaderDTO eventHeader = event.getHeader();
+    OffsetDateTime eventDate = eventHeader.getDateTime();
+    Object eventPayload = event.getPayload();
+    OffsetDateTime messageTimestamp = getMessageTimeStamp(message);
+
     Event loggedEvent =
         buildEvent(
             eventDate,
             eventDescription,
             eventType,
-            event,
+            eventHeader,
             RedactHelper.redact(eventPayload),
             messageTimestamp);
     loggedEvent.setUacQidLink(uacQidLink);
@@ -67,7 +90,7 @@ public class EventLogger {
       OffsetDateTime eventDate,
       String eventDescription,
       EventType eventType,
-      EventHeaderDTO event,
+      EventHeaderDTO eventHeader,
       Object eventPayload,
       OffsetDateTime messageTimestamp) {
     Event loggedEvent = new Event();
@@ -77,12 +100,12 @@ public class EventLogger {
     loggedEvent.setProcessedAt(OffsetDateTime.now());
     loggedEvent.setDescription(eventDescription);
     loggedEvent.setType(eventType);
-    loggedEvent.setChannel(event.getChannel());
-    loggedEvent.setSource(event.getSource());
-    loggedEvent.setMessageId(event.getMessageId());
+    loggedEvent.setChannel(eventHeader.getChannel());
+    loggedEvent.setSource(eventHeader.getSource());
+    loggedEvent.setMessageId(eventHeader.getMessageId());
     loggedEvent.setMessageTimestamp(messageTimestamp);
-    loggedEvent.setCreatedBy(event.getOriginatingUser());
-    loggedEvent.setCorrelationId(event.getCorrelationId());
+    loggedEvent.setCreatedBy(eventHeader.getOriginatingUser());
+    loggedEvent.setCorrelationId(eventHeader.getCorrelationId());
 
     loggedEvent.setPayload(JsonHelper.convertObjectToJson(eventPayload));
 

@@ -4,6 +4,7 @@ import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 
 public class EventHelper {
@@ -36,14 +37,18 @@ public class EventHelper {
     return createEventDTO(topic, EVENT_CHANNEL, EVENT_SOURCE, correlationId, originatingUser);
   }
 
-  public static EventHeaderDTO getDummyEvent(UUID correlationId, String originatingUser) {
-    EventHeaderDTO event = new EventHeaderDTO();
+  public static EventDTO getDummyEvent(UUID correlationId, String originatingUser) {
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
 
-    event.setChannel(EVENT_CHANNEL);
-    event.setSource(EVENT_SOURCE);
-    event.setMessageId(UUID.randomUUID());
-    event.setCorrelationId(correlationId);
-    event.setOriginatingUser(originatingUser);
+    eventHeader.setChannel(EVENT_CHANNEL);
+    eventHeader.setSource(EVENT_SOURCE);
+    eventHeader.setMessageId(UUID.randomUUID());
+    eventHeader.setCorrelationId(correlationId);
+    eventHeader.setOriginatingUser(originatingUser);
+    eventHeader.setDateTime(OffsetDateTime.now());
+
+    EventDTO event = new EventDTO();
+    event.setHeader(eventHeader);
 
     return event;
   }

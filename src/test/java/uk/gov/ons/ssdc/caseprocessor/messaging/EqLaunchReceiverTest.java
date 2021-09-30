@@ -1,16 +1,16 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -77,15 +77,12 @@ public class EqLaunchReceiverTest {
     verify(eventLogger)
         .logUacQidEvent(
             eq(expectedUacQidLink),
-            any(OffsetDateTime.class),
             eq("EQ launched"),
             eq(EventType.EQ_LAUNCH),
-            eq(managementEvent.getHeader()),
-            eq(eqLaunch),
-            any());
+            eq(managementEvent),
+            eq(message));
 
     verifyNoMoreInteractions(uacService);
-
     verifyNoMoreInteractions(eventLogger);
   }
 }

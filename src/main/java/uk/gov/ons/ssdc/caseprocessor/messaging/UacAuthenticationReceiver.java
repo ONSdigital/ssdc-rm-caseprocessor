@@ -1,9 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
-import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
-import java.time.OffsetDateTime;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -29,18 +27,10 @@ public class UacAuthenticationReceiver {
   public void receiveMessage(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
-    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-
     UacQidLink uacQidLink =
         uacService.findByQid(event.getPayload().getUacAuthentication().getQid());
 
     eventLogger.logUacQidEvent(
-        uacQidLink,
-        event.getHeader().getDateTime(),
-        "Respondent authenticated",
-        EventType.UAC_AUTHENTICATION,
-        event.getHeader(),
-        event.getPayload().getUacAuthentication(),
-        messageTimestamp);
+        uacQidLink, "Respondent authenticated", EventType.UAC_AUTHENTICATION, event, message);
   }
 }
