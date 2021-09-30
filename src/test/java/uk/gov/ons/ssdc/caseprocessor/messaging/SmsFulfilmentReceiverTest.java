@@ -13,7 +13,6 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINA
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 import static uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper.getMsgTimeStamp;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;

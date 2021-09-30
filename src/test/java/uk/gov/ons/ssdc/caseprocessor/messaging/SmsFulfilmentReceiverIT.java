@@ -5,12 +5,8 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.SMS_FULFILMENT_TOPIC;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import org.assertj.core.api.AssertionsForClassTypes;
-import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,8 +23,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
@@ -36,8 +30,6 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.Event;
-import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ContextConfiguration
