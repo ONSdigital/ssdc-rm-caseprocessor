@@ -24,17 +24,14 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ReceiptDTO;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
-import uk.gov.ons.ssdc.caseprocessor.utils.MsgDateHelper;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ExtendWith(MockitoExtension.class)
 public class ReceiptReceiverTest {
   private static final String QUESTIONNAIRE_ID = "12345";
-  private static final UUID CASE_ID = UUID.randomUUID();
 
   @Mock private UacService uacService;
-  @Mock private CaseService caseService;
   @Mock private EventLogger eventLogger;
 
   @InjectMocks ReceiptReceiver underTest;

@@ -10,7 +10,6 @@ import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -54,7 +53,7 @@ public class EqLaunchReceiverTest {
 
     UacQidLink expectedUacQidLink = new UacQidLink();
     expectedUacQidLink.setQid(TEST_QID_ID);
-    Message<byte[]> message = constructMessageWithValidTimeStamp(managementEvent);
+    Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
     when(uacService.findByQid(TEST_QID_ID)).thenReturn(expectedUacQidLink);
