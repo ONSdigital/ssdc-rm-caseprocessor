@@ -59,7 +59,7 @@ class TelephoneCaptureReceiverTest {
     // Then
     verify(uacService)
         .createLinkAndEmitNewUacQid(
-            testCase, TEST_UAC, TEST_QID, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
+            testCase, TEST_UAC, TEST_QID, null, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
 
     verify(eventLogger)
         .logCaseEvent(
