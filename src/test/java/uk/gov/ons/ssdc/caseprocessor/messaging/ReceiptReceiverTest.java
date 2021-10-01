@@ -81,7 +81,7 @@ public class ReceiptReceiverTest {
   }
 
   @Test
-  public void testUnlinkedUacQidReceiptWhereInactive() {
+  public void testUnlinkedUacQidReceiptWherePreviouslyReceipted() {
     ReceiptDTO receiptDTO = new ReceiptDTO();
     receiptDTO.setQid(QUESTIONNAIRE_ID);
 
@@ -98,7 +98,8 @@ public class ReceiptReceiverTest {
     Message<byte[]> message = constructMessage(event);
 
     UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setActive(false);
+    uacQidLink.setActive(true);
+    uacQidLink.setReceiptReceived(true);
 
     when(uacService.findByQid(any())).thenReturn(uacQidLink);
 
