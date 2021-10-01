@@ -30,7 +30,7 @@ public class ReceiptReceiver {
 
     UacQidLink uacQidLink = uacService.findByQid(event.getPayload().getReceipt().getQid());
 
-    if (uacQidLink.isActive()) {
+    if (!uacQidLink.isReceiptReceived()) {
       uacQidLink.setActive(false);
       uacQidLink.setReceiptReceived(true);
 
