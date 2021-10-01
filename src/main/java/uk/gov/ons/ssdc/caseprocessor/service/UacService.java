@@ -2,7 +2,6 @@ package uk.gov.ons.ssdc.caseprocessor.service;
 
 import static com.google.cloud.spring.pubsub.support.PubSubTopicUtils.toProjectTopicName;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
@@ -82,7 +81,7 @@ public class UacService {
       Case caze,
       String uac,
       String qid,
-      Map<String, String> uacMetadata,
+      Object uacMetadata,
       UUID correlationId,
       String originatingUser) {
     UacQidLink uacQidLink = new UacQidLink();
