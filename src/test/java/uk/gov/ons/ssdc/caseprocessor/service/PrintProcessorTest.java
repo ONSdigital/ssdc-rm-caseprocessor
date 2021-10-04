@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_UAC_METADATA;
 
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -50,6 +51,7 @@ class PrintProcessorTest {
     actionRule.setId(UUID.randomUUID());
     actionRule.setType(ActionRuleType.PRINT);
     actionRule.setPrintTemplate(printTemplate);
+    actionRule.setUacMetadata(TEST_UAC_METADATA);
 
     CaseToProcess caseToProcess = new CaseToProcess();
     caseToProcess.setActionRule(actionRule);
@@ -91,6 +93,7 @@ class PrintProcessorTest {
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
     assertThat(actualUacQidLink.isActive()).isTrue();
+    assertThat(actualUacQidLink.getUacMetadata()).isEqualTo(TEST_UAC_METADATA);
 
     ArgumentCaptor<EventDTO> eventCaptor = ArgumentCaptor.forClass(EventDTO.class);
     verify(eventLogger)
@@ -124,6 +127,7 @@ class PrintProcessorTest {
     fulfilmentToProcess.setBatchQuantity(200);
     fulfilmentToProcess.setCorrelationId(TEST_CORRELATION_ID);
     fulfilmentToProcess.setOriginatingUser(TEST_ORIGINATING_USER);
+    fulfilmentToProcess.setUacMetadata(TEST_UAC_METADATA);
 
     UacQidDTO uacQidDTO = new UacQidDTO();
     uacQidDTO.setUac("test uac");
@@ -152,6 +156,7 @@ class PrintProcessorTest {
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
     assertThat(actualUacQidLink.isActive()).isTrue();
+    assertThat(actualUacQidLink.getUacMetadata()).isEqualTo(TEST_UAC_METADATA);
 
     ArgumentCaptor<EventDTO> eventCaptor = ArgumentCaptor.forClass(EventDTO.class);
     verify(eventLogger)
