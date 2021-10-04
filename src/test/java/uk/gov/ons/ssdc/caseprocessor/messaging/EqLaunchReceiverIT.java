@@ -1,7 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.util.List;
@@ -19,6 +19,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EqLaunchDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
@@ -37,8 +38,8 @@ public class EqLaunchReceiverIT {
   private static final String TEST_QID = "1234334";
   private static final String INBOUND_TOPIC = "event_eq-launch";
 
-  @Value("${queueconfig.case-update-topic}")
-  private String caseUpdateTopic;
+  @Value("${queueconfig.uac-update-topic}")
+  private String uacUpdateTopic;
 
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
@@ -49,16 +50,16 @@ public class EqLaunchReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
+    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
-  public void testEqLaunchLogsEventSetsFlagAndEmitsCorrectCaseUpdatedEvent() throws Exception {
+  public void testEqLaunchLogsEventSetsFlagAndEmitsCorrectUACUpdatedEvent() throws Exception {
     // GIVEN
 
-    try (QueueSpy<EventDTO> outboundCaseQueueSpy =
-        pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
+    try (QueueSpy<EventDTO> outboundUacQueueSpy =
+        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       Case caze = junkDataHelper.setupJunkCase();
 
       UacQidLink uacQidLink = new UacQidLink();
@@ -67,6 +68,7 @@ public class EqLaunchReceiverIT {
       uacQidLink.setUac("Junk");
       uacQidLink.setQid(TEST_QID);
       uacQidLink.setCaze(caze);
+      uacQidLink.setEqLaunched(false);
       uacQidLinkRepository.saveAndFlush(uacQidLink);
 
       EventDTO eqLaunchedEvent = new EventDTO();
@@ -86,10 +88,9 @@ public class EqLaunchReceiverIT {
       pubsubHelper.sendMessageToSharedProject(INBOUND_TOPIC, eqLaunchedEvent);
 
       // THEN
-      EventDTO caseUpdatedEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
-
-      assertThat(caseUpdatedEvent.getPayload().getCaseUpdate().getCaseId()).isEqualTo(caze.getId());
-      assertThat(caseUpdatedEvent.getPayload().getCaseUpdate().isEqLaunched()).isTrue();
+      EventDTO uacUpdatedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
+      UacUpdateDTO emittedUac = uacUpdatedEvent.getPayload().getUacUpdate();
+      assertThat(emittedUac.isEqLaunched()).isTrue();
 
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);

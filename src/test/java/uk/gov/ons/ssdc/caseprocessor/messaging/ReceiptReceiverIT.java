@@ -1,7 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
@@ -16,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
@@ -42,9 +40,6 @@ public class ReceiptReceiverIT {
   private static final UUID TEST_UACLINK_ID = UUID.randomUUID();
   private static final String INBOUND_RECEIPT_TOPIC = "event_receipt";
 
-  @Value("${queueconfig.case-update-topic}")
-  private String caseUpdateTopic;
-
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
 
@@ -57,7 +52,6 @@ public class ReceiptReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
     pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
@@ -65,9 +59,7 @@ public class ReceiptReceiverIT {
   @Test
   public void testReceipt() throws Exception {
     try (QueueSpy<EventDTO> outboundUacQueueSpy =
-            pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class);
-        QueueSpy<EventDTO> outboundCaseQueueSpy =
-            pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // GIVEN
 
       Case caze = junkDataHelper.setupJunkCase();
@@ -78,6 +70,8 @@ public class ReceiptReceiverIT {
       uacQidLink.setUac("abc");
       uacQidLink.setCaze(caze);
       uacQidLink.setActive(true);
+      uacQidLink.setReceiptReceived(false);
+      uacQidLink.setEqLaunched(false);
       uacQidLinkRepository.saveAndFlush(uacQidLink);
 
       ReceiptDTO receiptDTO = new ReceiptDTO();
@@ -96,16 +90,10 @@ public class ReceiptReceiverIT {
       pubsubHelper.sendMessageToSharedProject(INBOUND_RECEIPT_TOPIC, event);
 
       //  THEN
-      EventDTO caseEmittedEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
-
-      CaseUpdateDTO emittedCase = caseEmittedEvent.getPayload().getCaseUpdate();
-      assertThat(emittedCase.getCaseId()).isEqualTo(caze.getId());
-      assertThat(emittedCase.getSample()).isEqualTo(caze.getSample());
-      assertThat(emittedCase.isReceiptReceived()).isTrue();
-
       EventDTO uacUpdatedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
       UacUpdateDTO emittedUac = uacUpdatedEvent.getPayload().getUacUpdate();
       assertThat(emittedUac.isActive()).isFalse();
+      assertThat(emittedUac.isReceiptReceived()).isTrue();
 
       List<Event> storedEvents = eventRepository.findAll();
       assertThat(storedEvents.size()).isEqualTo(1);

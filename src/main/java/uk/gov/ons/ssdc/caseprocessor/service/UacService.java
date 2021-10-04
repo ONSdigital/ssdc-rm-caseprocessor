@@ -44,6 +44,8 @@ public class UacService {
     uac.setQid(savedUacQidLink.getQid());
     uac.setUacHash(HashHelper.hash(savedUacQidLink.getUac()));
     uac.setActive(savedUacQidLink.isActive());
+    uac.setReceiptReceived(savedUacQidLink.isReceiptReceived());
+    uac.setEqLaunched(savedUacQidLink.isEqLaunched());
 
     Case caze = savedUacQidLink.getCaze();
     if (caze != null) {
