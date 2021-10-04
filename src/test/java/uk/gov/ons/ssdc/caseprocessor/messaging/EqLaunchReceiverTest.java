@@ -10,7 +10,6 @@ import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -23,21 +22,16 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EqLaunchDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
-import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ExtendWith(MockitoExtension.class)
 public class EqLaunchReceiverTest {
-
-  private final UUID TEST_CASE_ID = UUID.randomUUID();
   private final String TEST_QID_ID = "1234567890123456";
 
   @Mock private UacService uacService;
   @Mock private EventLogger eventLogger;
-  @Mock private CaseService caseService;
 
   @InjectMocks EqLaunchReceiver underTest;
 
@@ -58,10 +52,7 @@ public class EqLaunchReceiverTest {
     managementEvent.getPayload().setEqLaunch(eqLaunch);
 
     UacQidLink expectedUacQidLink = new UacQidLink();
-    expectedUacQidLink.setUac(TEST_QID_ID);
-    Case caze = new Case();
-    caze.setId(TEST_CASE_ID);
-    expectedUacQidLink.setCaze(caze);
+    expectedUacQidLink.setQid(TEST_QID_ID);
     Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
@@ -73,12 +64,14 @@ public class EqLaunchReceiverTest {
     // then
     verify(uacService).findByQid(TEST_QID_ID);
 
-    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService)
-        .saveCaseAndEmitCaseUpdate(
-            caseArgumentCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
-    assertThat(caseArgumentCaptor.getValue().getId()).isEqualTo(TEST_CASE_ID);
-    assertThat(caseArgumentCaptor.getValue().isEqLaunched()).isTrue();
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacService)
+        .saveAndEmitUacUpdateEvent(
+            uacQidLinkCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
+
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID_ID);
+    assertThat(actualUacQidLink.isEqLaunched()).isTrue();
 
     verify(eventLogger)
         .logUacQidEvent(
@@ -89,7 +82,6 @@ public class EqLaunchReceiverTest {
             eq(message));
 
     verifyNoMoreInteractions(uacService);
-    verifyNoMoreInteractions(caseService);
     verifyNoMoreInteractions(eventLogger);
   }
 }
