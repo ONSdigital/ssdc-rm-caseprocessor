@@ -71,7 +71,8 @@ class PrintProcessorTest {
         printTemplate.getPackCode(),
         printTemplate.getPrintSupplier(),
         actionRule.getId(),
-        null);
+        null,
+        actionRule.getUacMetadata());
 
     //    // Then
     ArgumentCaptor<PrintFileRow> printFileRowArgumentCaptor =

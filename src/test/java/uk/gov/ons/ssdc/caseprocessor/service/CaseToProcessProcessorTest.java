@@ -57,7 +57,8 @@ public class CaseToProcessProcessorTest {
             printTemplate.getPackCode(),
             printTemplate.getPrintSupplier(),
             actionRule.getId(),
-            null);
+            null,
+            actionRule.getUacMetadata());
   }
 
   @Test
