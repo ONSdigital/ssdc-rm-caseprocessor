@@ -17,5 +17,4 @@ public class TestConstants {
   public static final UUID TEST_CORRELATION_ID = UUID.randomUUID();
   public static final String TEST_ORIGINATING_USER = "foo@bar.com";
   public static final Map<String, String> TEST_UAC_METADATA = Map.of("TEST_UAC_METADATA", "TEST");
-
 }
