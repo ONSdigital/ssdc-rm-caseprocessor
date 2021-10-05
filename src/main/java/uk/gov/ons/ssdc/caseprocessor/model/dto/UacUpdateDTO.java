@@ -12,4 +12,6 @@ public class UacUpdateDTO {
   private boolean active;
   private String qid;
   private UUID caseId;
+  private boolean receiptReceived;
+  private boolean eqLaunched;
 }

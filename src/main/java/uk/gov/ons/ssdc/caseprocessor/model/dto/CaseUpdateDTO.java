@@ -7,9 +7,7 @@ import lombok.Data;
 @Data
 public class CaseUpdateDTO {
   private UUID caseId;
-  private boolean receiptReceived;
   private boolean invalid;
-  private boolean eqLaunched;
   private RefusalTypeDTO refusalReceived;
   private Map<String, String> sample;
 }
