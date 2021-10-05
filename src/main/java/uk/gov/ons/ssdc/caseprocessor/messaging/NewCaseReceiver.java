@@ -2,6 +2,8 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
@@ -18,6 +20,7 @@ import uk.gov.ons.ssdc.caseprocessor.utils.CaseRefGenerator;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
+import uk.gov.ons.ssdc.common.validation.ColumnValidator;
 
 @MessageEndpoint
 public class NewCaseReceiver {
@@ -61,6 +64,20 @@ public class NewCaseReceiver {
     }
 
     CollectionExercise collex = collexOpt.get();
+
+    ColumnValidator[] columnValidators = collex.getSurvey().getSampleValidationRules();
+
+    Map<String, String> sampleRow = new HashMap<>();
+    sampleRow.putAll(newCasePayload.getSample());
+    sampleRow.putAll(newCasePayload.getSampleSensitive());
+
+    for (ColumnValidator columnValidator : columnValidators) {
+      Optional<String> columnValidationErrors =
+          columnValidator.validateRow(sampleRow);
+      if (columnValidationErrors.isPresent()) {
+        throw new RuntimeException(columnValidationErrors.get());
+      }
+    }
 
     Case newCase = new Case();
     newCase.setId(newCasePayload.getCaseId());
