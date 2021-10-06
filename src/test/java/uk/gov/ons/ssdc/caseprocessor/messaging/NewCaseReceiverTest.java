@@ -75,7 +75,7 @@ public class NewCaseReceiverTest {
     newCase.setSample(sample);
 
     Map<String, String> sampleSensitive = new HashMap<>();
-    sample.put("Telephone", "02071234567");
+    sampleSensitive.put("Telephone", "02071234567");
     newCase.setSampleSensitive(sampleSensitive);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
@@ -197,8 +197,12 @@ public class NewCaseReceiverTest {
 
     Map<String, String> sample = new HashMap<>();
     sample.put("ADDRESS_LINE1", "123 Fake Street");
-    sample.put("POSTCODE", "INVALID LENGTH POSTCODE");
+    sample.put("POSTCODE", "INVALID POSTCODE");
     newCase.setSample(sample);
+
+    Map<String, String> sampleSensitive = new HashMap<>();
+    sampleSensitive.put("Telephone", "020712345");
+    newCase.setSampleSensitive(sampleSensitive);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(EVENT_SCHEMA_VERSION);
@@ -219,19 +223,17 @@ public class NewCaseReceiverTest {
     survey.setId(UUID.randomUUID());
     survey.setSampleValidationRules(
         new ColumnValidator[] {
-          new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
-          new ColumnValidator(
-              "POSTCODE", false, new Rule[] {new MandatoryRule(), new LengthRule(8)})
+            new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
+            new ColumnValidator("POSTCODE", false, new Rule[] {new MandatoryRule(), new LengthRule(8)}),
+            new ColumnValidator("Telephone", true, new Rule[] {new MandatoryRule()})
         });
 
     CollectionExercise collex = new CollectionExercise();
     collex.setSurvey(survey);
     Optional<CollectionExercise> collexOpt = Optional.of(collex);
-
+    
     when(collectionExerciseRepository.findById(TEST_CASE_COLLECTION_EXERCISE_ID))
         .thenReturn(collexOpt);
-
-    when(caseRepository.existsById(TEST_CASE_ID)).thenReturn(false);
 
     assertThrows(RuntimeException.class, () -> underTest.receiveNewCase(eventMessage));
     verifyNoInteractions(eventLogger);
