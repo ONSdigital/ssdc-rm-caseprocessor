@@ -83,7 +83,7 @@ public class UacService {
       Case caze,
       String uac,
       String qid,
-      Object uacMetadata,
+      Object metadata,
       UUID correlationId,
       String originatingUser) {
     UacQidLink uacQidLink = new UacQidLink();
