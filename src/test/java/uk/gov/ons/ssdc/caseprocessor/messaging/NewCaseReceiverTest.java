@@ -223,15 +223,16 @@ public class NewCaseReceiverTest {
     survey.setId(UUID.randomUUID());
     survey.setSampleValidationRules(
         new ColumnValidator[] {
-            new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
-            new ColumnValidator("POSTCODE", false, new Rule[] {new MandatoryRule(), new LengthRule(8)}),
-            new ColumnValidator("Telephone", true, new Rule[] {new MandatoryRule()})
+          new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
+          new ColumnValidator(
+              "POSTCODE", false, new Rule[] {new MandatoryRule(), new LengthRule(8)}),
+          new ColumnValidator("Telephone", true, new Rule[] {new MandatoryRule()})
         });
 
     CollectionExercise collex = new CollectionExercise();
     collex.setSurvey(survey);
     Optional<CollectionExercise> collexOpt = Optional.of(collex);
-    
+
     when(collectionExerciseRepository.findById(TEST_CASE_COLLECTION_EXERCISE_ID))
         .thenReturn(collexOpt);
 

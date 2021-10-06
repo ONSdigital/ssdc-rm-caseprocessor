@@ -72,8 +72,7 @@ public class NewCaseReceiver {
     sampleRow.putAll(newCasePayload.getSampleSensitive());
 
     for (ColumnValidator columnValidator : columnValidators) {
-      Optional<String> columnValidationErrors =
-          columnValidator.validateRow(sampleRow);
+      Optional<String> columnValidationErrors = columnValidator.validateRow(sampleRow);
       if (columnValidationErrors.isPresent()) {
         throw new RuntimeException(columnValidationErrors.get());
       }
