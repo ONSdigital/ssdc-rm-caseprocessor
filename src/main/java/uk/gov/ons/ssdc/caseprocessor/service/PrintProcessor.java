@@ -130,7 +130,7 @@ public class PrintProcessor {
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setQid(uacQidDTO.getQid());
     uacQidLink.setUac(uacQidDTO.getUac());
-    uacQidLink.setUacMetadata(uacMetadata);
+    uacQidLink.setMetadata(metadata);
     uacQidLink.setCaze(caze);
     uacService.saveAndEmitUacUpdateEvent(uacQidLink, correlationId, originatingUser);
 
