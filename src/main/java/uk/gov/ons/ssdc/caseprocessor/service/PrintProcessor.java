@@ -124,7 +124,7 @@ public class PrintProcessor {
   }
 
   public UacQidDTO getUacQidForCase(
-      Case caze, UUID correlationId, String originatingUser, Object uacMetadata) {
+      Case caze, UUID correlationId, String originatingUser, Object metadata) {
     UacQidDTO uacQidDTO = uacQidCache.getUacQidPair(1);
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
