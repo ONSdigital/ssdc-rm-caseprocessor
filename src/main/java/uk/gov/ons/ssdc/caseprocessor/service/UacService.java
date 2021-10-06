@@ -90,7 +90,7 @@ public class UacService {
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setUac(uac);
     uacQidLink.setQid(qid);
-    uacQidLink.setUacMetadata(uacMetadata);
+    uacQidLink.setMetadata(metadata);
     uacQidLink.setCaze(caze);
     saveAndEmitUacUpdateEvent(uacQidLink, correlationId, originatingUser);
   }
