@@ -104,6 +104,6 @@ class SmsFulfilmentReceiverIT {
     List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
     assertThat(uacQidLinks.size()).isEqualTo(1);
     assertThat(uacQidLinks.get(0).getCaze().getId()).isEqualTo(testCase.getId());
-    assertThat(uacQidLinks.get(0).getUacMetadata()).isEqualTo(TEST_UAC_METADATA);
+    assertThat(uacQidLinks.get(0).getMetadata()).isEqualTo(TEST_UAC_METADATA);
   }
 }

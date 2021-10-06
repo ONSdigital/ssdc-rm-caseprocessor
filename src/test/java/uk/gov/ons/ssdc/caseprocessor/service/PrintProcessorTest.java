@@ -93,7 +93,7 @@ class PrintProcessorTest {
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
     assertThat(actualUacQidLink.isActive()).isTrue();
-    assertThat(actualUacQidLink.getUacMetadata()).isEqualTo(TEST_UAC_METADATA);
+    assertThat(actualUacQidLink.getMetadata()).isEqualTo(TEST_UAC_METADATA);
 
     ArgumentCaptor<EventDTO> eventCaptor = ArgumentCaptor.forClass(EventDTO.class);
     verify(eventLogger)
@@ -156,7 +156,7 @@ class PrintProcessorTest {
     assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
     assertThat(actualUacQidLink.isActive()).isTrue();
-    assertThat(actualUacQidLink.getUacMetadata()).isEqualTo(TEST_UAC_METADATA);
+    assertThat(actualUacQidLink.getMetadata()).isEqualTo(TEST_UAC_METADATA);
 
     ArgumentCaptor<EventDTO> eventCaptor = ArgumentCaptor.forClass(EventDTO.class);
     verify(eventLogger)
