@@ -42,6 +42,7 @@ import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.Survey;
 import uk.gov.ons.ssdc.common.validation.ColumnValidator;
+import uk.gov.ons.ssdc.common.validation.LengthRule;
 import uk.gov.ons.ssdc.common.validation.MandatoryRule;
 import uk.gov.ons.ssdc.common.validation.Rule;
 
@@ -96,9 +97,9 @@ public class NewCaseReceiverTest {
     survey.setId(UUID.randomUUID());
     survey.setSampleValidationRules(
         new ColumnValidator[] {
-            new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
-            new ColumnValidator("POSTCODE", false, new Rule[] {new MandatoryRule()}),
-            new ColumnValidator("Telephone", true, new Rule[] {new MandatoryRule()})
+          new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
+          new ColumnValidator("POSTCODE", false, new Rule[] {new MandatoryRule()}),
+          new ColumnValidator("Telephone", true, new Rule[] {new MandatoryRule()})
         });
 
     CollectionExercise collex = new CollectionExercise();
@@ -182,6 +183,55 @@ public class NewCaseReceiverTest {
     when(caseRepository.existsById(TEST_CASE_ID)).thenReturn(false);
     when(collectionExerciseRepository.findById(TEST_CASE_COLLECTION_EXERCISE_ID))
         .thenReturn(Optional.empty());
+
+    assertThrows(RuntimeException.class, () -> underTest.receiveNewCase(eventMessage));
+    verifyNoInteractions(eventLogger);
+  }
+
+  @Test
+  public void testNewCaseReceiverCaseFailsValidation() {
+    // Given
+    NewCase newCase = new NewCase();
+    newCase.setCaseId(TEST_CASE_ID);
+    newCase.setCollectionExerciseId(TEST_CASE_COLLECTION_EXERCISE_ID);
+
+    Map<String, String> sample = new HashMap<>();
+    sample.put("ADDRESS_LINE1", "123 Fake Street");
+    sample.put("POSTCODE", "INVALID LENGTH POSTCODE");
+    newCase.setSample(sample);
+
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setCorrelationId(TEST_CORRELATION_ID);
+    eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setNewCase(newCase);
+
+    EventDTO event = new EventDTO();
+    event.setHeader(eventHeader);
+    event.setPayload(payloadDTO);
+
+    Message<byte[]> eventMessage = constructMessage(event);
+
+    when(caseRepository.existsById(TEST_CASE_ID)).thenReturn(false);
+
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+    survey.setSampleValidationRules(
+        new ColumnValidator[] {
+          new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
+          new ColumnValidator(
+              "POSTCODE", false, new Rule[] {new MandatoryRule(), new LengthRule(8)})
+        });
+
+    CollectionExercise collex = new CollectionExercise();
+    collex.setSurvey(survey);
+    Optional<CollectionExercise> collexOpt = Optional.of(collex);
+
+    when(collectionExerciseRepository.findById(TEST_CASE_COLLECTION_EXERCISE_ID))
+        .thenReturn(collexOpt);
+
+    when(caseRepository.existsById(TEST_CASE_ID)).thenReturn(false);
 
     assertThrows(RuntimeException.class, () -> underTest.receiveNewCase(eventMessage));
     verifyNoInteractions(eventLogger);
