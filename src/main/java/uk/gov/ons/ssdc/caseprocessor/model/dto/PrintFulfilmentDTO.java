@@ -7,4 +7,5 @@ import lombok.Data;
 public class PrintFulfilmentDTO {
   private UUID caseId;
   private String packCode;
+  private Object uacMetadata;
 }

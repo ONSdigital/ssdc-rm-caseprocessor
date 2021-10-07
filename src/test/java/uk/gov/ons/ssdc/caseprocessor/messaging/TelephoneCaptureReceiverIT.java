@@ -23,12 +23,14 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.TelephoneCaptureDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -44,6 +46,8 @@ class TelephoneCaptureReceiverIT {
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
   @Autowired private JunkDataHelper junkDataHelper;
+
+  @Autowired private UacQidLinkRepository uacQidLinkRepository;
 
   @Autowired private UacQidServiceClient uacQidServiceClient;
 
@@ -91,5 +95,10 @@ class TelephoneCaptureReceiverIT {
           .isEqualTo(HashHelper.hash(telephoneCaptureUacQid.getUac()));
       assertThat(uacUpdatedEvent.getQid()).isEqualTo(telephoneCaptureUacQid.getQid());
     }
+
+    List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
+    assertThat(uacQidLinks.size()).isEqualTo(1);
+    assertThat(uacQidLinks.get(0).getCaze().getId()).isEqualTo(testCase.getId());
+    assertThat(uacQidLinks.get(0).getMetadata()).isNull();
   }
 }
