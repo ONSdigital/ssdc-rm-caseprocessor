@@ -61,6 +61,7 @@ public class TelephoneCaptureReceiver {
         caze,
         telephoneCapturePayload.getUac(),
         telephoneCapturePayload.getQid(),
+        telephoneCapturePayload.getUacMetadata(),
         event.getHeader().getCorrelationId(),
         event.getHeader().getOriginatingUser());
 

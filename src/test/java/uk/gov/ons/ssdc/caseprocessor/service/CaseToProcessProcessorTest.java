@@ -24,7 +24,7 @@ public class CaseToProcessProcessorTest {
   @InjectMocks CaseToProcessProcessor underTest;
 
   @Test
-  public void testProccessPrintActionRule() {
+  public void testProcessPrintActionRule() {
     // Given
     Case caze = new Case();
     caze.setSample(Map.of("foo", "bar"));
@@ -57,7 +57,8 @@ public class CaseToProcessProcessorTest {
             printTemplate.getPackCode(),
             printTemplate.getPrintSupplier(),
             actionRule.getId(),
-            null);
+            null,
+            actionRule.getUacMetadata());
   }
 
   @Test

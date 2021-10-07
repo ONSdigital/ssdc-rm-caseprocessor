@@ -80,11 +80,17 @@ public class UacService {
   }
 
   public void createLinkAndEmitNewUacQid(
-      Case caze, String uac, String qid, UUID correlationId, String originatingUser) {
+      Case caze,
+      String uac,
+      String qid,
+      Object metadata,
+      UUID correlationId,
+      String originatingUser) {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setUac(uac);
     uacQidLink.setQid(qid);
+    uacQidLink.setMetadata(metadata);
     uacQidLink.setCaze(caze);
     saveAndEmitUacUpdateEvent(uacQidLink, correlationId, originatingUser);
   }

@@ -12,6 +12,7 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELA
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,7 @@ class SmsFulfilmentReceiverTest {
   private static final String TEST_QID = "TEST_QID";
   private static final String TEST_UAC = "TEST_UAC";
   private static final String PACK_CODE = "TEST_SMS";
+  private static final Map<String, String> TEST_UAC_METADATA = Map.of("TEST_UAC_METADATA", "TEST");
 
   private static final String SMS_FULFILMENT_DESCRIPTION = "SMS fulfilment request received";
 
@@ -63,7 +65,12 @@ class SmsFulfilmentReceiverTest {
     // Then
     verify(uacService)
         .createLinkAndEmitNewUacQid(
-            testCase, TEST_UAC, TEST_QID, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
+            testCase,
+            TEST_UAC,
+            TEST_QID,
+            TEST_UAC_METADATA,
+            TEST_CORRELATION_ID,
+            TEST_ORIGINATING_USER);
     verify(eventLogger)
         .logCaseEvent(
             testCase, SMS_FULFILMENT_DESCRIPTION, EventType.SMS_FULFILMENT, event, eventMessage);
@@ -151,6 +158,7 @@ class SmsFulfilmentReceiverTest {
     EnrichedSmsFulfilment enrichedSmsFulfilment = new EnrichedSmsFulfilment();
     enrichedSmsFulfilment.setCaseId(CASE_ID);
     enrichedSmsFulfilment.setPackCode(PACK_CODE);
+    enrichedSmsFulfilment.setUacMetadata(TEST_UAC_METADATA);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(EVENT_SCHEMA_VERSION);

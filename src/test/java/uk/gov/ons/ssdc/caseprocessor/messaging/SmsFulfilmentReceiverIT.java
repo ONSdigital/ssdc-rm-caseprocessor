@@ -6,7 +6,7 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.SMS_FULFILME
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,12 +23,14 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -36,8 +38,8 @@ import uk.gov.ons.ssdc.common.model.entity.Case;
 @ExtendWith(SpringExtension.class)
 class SmsFulfilmentReceiverIT {
 
-  private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String PACK_CODE = "TEST_SMS";
+  private static final Map<String, String> TEST_UAC_METADATA = Map.of("TEST_UAC_METADATA", "TEST");
 
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
@@ -45,6 +47,8 @@ class SmsFulfilmentReceiverIT {
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
   @Autowired private JunkDataHelper junkDataHelper;
+
+  @Autowired private UacQidLinkRepository uacQidLinkRepository;
 
   @Autowired private UacQidServiceClient uacQidServiceClient;
 
@@ -70,6 +74,7 @@ class SmsFulfilmentReceiverIT {
     enrichedSmsFulfilment.setQid(smsUacQid.getQid());
     enrichedSmsFulfilment.setCaseId(testCase.getId());
     enrichedSmsFulfilment.setPackCode(PACK_CODE);
+    enrichedSmsFulfilment.setUacMetadata(TEST_UAC_METADATA);
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setEnrichedSmsFulfilment(enrichedSmsFulfilment);
@@ -95,5 +100,10 @@ class SmsFulfilmentReceiverIT {
       assertThat(uacUpdatedEvent.getUacHash()).isEqualTo(HashHelper.hash(smsUacQid.getUac()));
       assertThat(uacUpdatedEvent.getQid()).isEqualTo(smsUacQid.getQid());
     }
+
+    List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
+    assertThat(uacQidLinks.size()).isEqualTo(1);
+    assertThat(uacQidLinks.get(0).getCaze().getId()).isEqualTo(testCase.getId());
+    assertThat(uacQidLinks.get(0).getMetadata()).isEqualTo(TEST_UAC_METADATA);
   }
 }
