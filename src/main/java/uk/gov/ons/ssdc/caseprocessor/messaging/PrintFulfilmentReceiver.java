@@ -47,6 +47,7 @@ public class PrintFulfilmentReceiver {
     fulfilmentToProcess.setCaze(caze);
     fulfilmentToProcess.setCorrelationId(event.getHeader().getCorrelationId());
     fulfilmentToProcess.setOriginatingUser(event.getHeader().getOriginatingUser());
+    fulfilmentToProcess.setUacMetadata(event.getPayload().getPrintFulfilment().getUacMetadata());
 
     fulfilmentToProcessRepository.saveAndFlush(fulfilmentToProcess);
 

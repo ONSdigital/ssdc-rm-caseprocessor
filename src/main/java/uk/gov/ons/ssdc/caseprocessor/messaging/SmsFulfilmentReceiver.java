@@ -61,6 +61,7 @@ public class SmsFulfilmentReceiver {
           caze,
           smsFulfilment.getUac(),
           smsFulfilment.getQid(),
+          smsFulfilment.getUacMetadata(),
           event.getHeader().getCorrelationId(),
           event.getHeader().getOriginatingUser());
     }

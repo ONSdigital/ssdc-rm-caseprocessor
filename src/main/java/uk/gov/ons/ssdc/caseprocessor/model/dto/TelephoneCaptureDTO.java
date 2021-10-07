@@ -13,4 +13,6 @@ public class TelephoneCaptureDTO {
   private String uac;
 
   private String qid;
+
+  private Object uacMetadata;
 }
