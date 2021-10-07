@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_UAC_METADATA;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
@@ -57,6 +58,7 @@ public class PrintFulfilmentReceiverTest {
     managementEvent.getPayload().setPrintFulfilment(new PrintFulfilmentDTO());
     managementEvent.getPayload().getPrintFulfilment().setCaseId(UUID.randomUUID());
     managementEvent.getPayload().getPrintFulfilment().setPackCode("TEST_FULFILMENT_CODE");
+    managementEvent.getPayload().getPrintFulfilment().setUacMetadata(TEST_UAC_METADATA);
     Message<byte[]> message = constructMessage(managementEvent);
 
     PrintTemplate printTemplate = new PrintTemplate();
@@ -85,6 +87,7 @@ public class PrintFulfilmentReceiverTest {
     FulfilmentToProcess fulfilmentToProcess = fulfilmentToProcessArgCapt.getValue();
     assertThat(fulfilmentToProcess.getPrintTemplate()).isEqualTo(printTemplate);
     assertThat(fulfilmentToProcess.getCaze()).isEqualTo(expectedCase);
+    assertThat(fulfilmentToProcess.getUacMetadata()).isEqualTo(TEST_UAC_METADATA);
 
     verify(eventLogger)
         .logCaseEvent(

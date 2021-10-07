@@ -54,7 +54,8 @@ public class PrintProcessor {
         printTemplate.getPackCode(),
         printTemplate.getPrintSupplier(),
         fulfilmentToProcess.getCorrelationId(),
-        fulfilmentToProcess.getOriginatingUser());
+        fulfilmentToProcess.getOriginatingUser(),
+        fulfilmentToProcess.getUacMetadata());
   }
 
   public void processPrintRow(
@@ -65,7 +66,8 @@ public class PrintProcessor {
       String packCode,
       String printSupplier,
       UUID correlationId,
-      String originatingUser) {
+      String originatingUser,
+      Object uacMetadata) {
 
     UacQidDTO uacQidDTO = null;
     String[] rowStrings = new String[template.length];
@@ -79,14 +81,14 @@ public class PrintProcessor {
           break;
         case "__uac__":
           if (uacQidDTO == null) {
-            uacQidDTO = getUacQidForCase(caze, correlationId, originatingUser);
+            uacQidDTO = getUacQidForCase(caze, correlationId, originatingUser, uacMetadata);
           }
 
           rowStrings[i] = uacQidDTO.getUac();
           break;
         case "__qid__":
           if (uacQidDTO == null) {
-            uacQidDTO = getUacQidForCase(caze, correlationId, originatingUser);
+            uacQidDTO = getUacQidForCase(caze, correlationId, originatingUser, uacMetadata);
           }
 
           rowStrings[i] = uacQidDTO.getQid();
@@ -121,12 +123,14 @@ public class PrintProcessor {
     return csvRow;
   }
 
-  public UacQidDTO getUacQidForCase(Case caze, UUID correlationId, String originatingUser) {
+  public UacQidDTO getUacQidForCase(
+      Case caze, UUID correlationId, String originatingUser, Object metadata) {
     UacQidDTO uacQidDTO = uacQidCache.getUacQidPair(1);
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setQid(uacQidDTO.getQid());
     uacQidLink.setUac(uacQidDTO.getUac());
+    uacQidLink.setMetadata(metadata);
     uacQidLink.setCaze(caze);
     uacService.saveAndEmitUacUpdateEvent(uacQidLink, correlationId, originatingUser);
 
