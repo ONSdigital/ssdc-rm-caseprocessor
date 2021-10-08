@@ -74,7 +74,7 @@ public class NewCaseReceiverIT {
       CollectionExercise collectionExercise = junkDataHelper.setupJunkCollex();
 
       Map<String, String> sample = new HashMap<>();
-      sample.put("CanYouKickIt", "YesYouCan");
+      sample.put("Junk", "YesYouCan");
       sample.put("Org", "Brewery");
 
       Map<String, String> sampleSensitive = new HashMap<>();
