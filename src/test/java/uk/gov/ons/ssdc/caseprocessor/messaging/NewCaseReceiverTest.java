@@ -40,6 +40,11 @@ import uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
+import uk.gov.ons.ssdc.common.model.entity.Survey;
+import uk.gov.ons.ssdc.common.validation.ColumnValidator;
+import uk.gov.ons.ssdc.common.validation.LengthRule;
+import uk.gov.ons.ssdc.common.validation.MandatoryRule;
+import uk.gov.ons.ssdc.common.validation.Rule;
 
 @ExtendWith(MockitoExtension.class)
 public class NewCaseReceiverTest {
@@ -70,7 +75,7 @@ public class NewCaseReceiverTest {
     newCase.setSample(sample);
 
     Map<String, String> sampleSensitive = new HashMap<>();
-    sample.put("Telephone", "02071234567");
+    sampleSensitive.put("Telephone", "02071234567");
     newCase.setSampleSensitive(sampleSensitive);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
@@ -88,7 +93,17 @@ public class NewCaseReceiverTest {
 
     when(caseRepository.existsById(TEST_CASE_ID)).thenReturn(false);
 
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+    survey.setSampleValidationRules(
+        new ColumnValidator[] {
+          new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
+          new ColumnValidator("POSTCODE", false, new Rule[] {new MandatoryRule()}),
+          new ColumnValidator("Telephone", true, new Rule[] {new MandatoryRule()})
+        });
+
     CollectionExercise collex = new CollectionExercise();
+    collex.setSurvey(survey);
     Optional<CollectionExercise> collexOpt = Optional.of(collex);
     when(collectionExerciseRepository.findById(TEST_CASE_COLLECTION_EXERCISE_ID))
         .thenReturn(collexOpt);
@@ -168,6 +183,58 @@ public class NewCaseReceiverTest {
     when(caseRepository.existsById(TEST_CASE_ID)).thenReturn(false);
     when(collectionExerciseRepository.findById(TEST_CASE_COLLECTION_EXERCISE_ID))
         .thenReturn(Optional.empty());
+
+    assertThrows(RuntimeException.class, () -> underTest.receiveNewCase(eventMessage));
+    verifyNoInteractions(eventLogger);
+  }
+
+  @Test
+  public void testNewCaseReceiverCaseFailsValidation() {
+    // Given
+    NewCase newCase = new NewCase();
+    newCase.setCaseId(TEST_CASE_ID);
+    newCase.setCollectionExerciseId(TEST_CASE_COLLECTION_EXERCISE_ID);
+
+    Map<String, String> sample = new HashMap<>();
+    sample.put("ADDRESS_LINE1", "123 Fake Street");
+    sample.put("POSTCODE", "INVALID POSTCODE");
+    newCase.setSample(sample);
+
+    Map<String, String> sampleSensitive = new HashMap<>();
+    sampleSensitive.put("Telephone", "020712345");
+    newCase.setSampleSensitive(sampleSensitive);
+
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setCorrelationId(TEST_CORRELATION_ID);
+    eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setNewCase(newCase);
+
+    EventDTO event = new EventDTO();
+    event.setHeader(eventHeader);
+    event.setPayload(payloadDTO);
+
+    Message<byte[]> eventMessage = constructMessage(event);
+
+    when(caseRepository.existsById(TEST_CASE_ID)).thenReturn(false);
+
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+    survey.setSampleValidationRules(
+        new ColumnValidator[] {
+          new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
+          new ColumnValidator(
+              "POSTCODE", false, new Rule[] {new MandatoryRule(), new LengthRule(8)}),
+          new ColumnValidator("Telephone", true, new Rule[] {new MandatoryRule()})
+        });
+
+    CollectionExercise collex = new CollectionExercise();
+    collex.setSurvey(survey);
+    Optional<CollectionExercise> collexOpt = Optional.of(collex);
+
+    when(collectionExerciseRepository.findById(TEST_CASE_COLLECTION_EXERCISE_ID))
+        .thenReturn(collexOpt);
 
     assertThrows(RuntimeException.class, () -> underTest.receiveNewCase(eventMessage));
     verifyNoInteractions(eventLogger);

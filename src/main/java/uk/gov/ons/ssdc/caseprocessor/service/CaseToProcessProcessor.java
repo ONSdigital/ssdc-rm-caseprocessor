@@ -35,7 +35,8 @@ public class CaseToProcessProcessor {
             printTemplate.getPackCode(),
             printTemplate.getPrintSupplier(),
             caseToProcess.getActionRule().getId(),
-            null);
+            null,
+            caseToProcess.getActionRule().getUacMetadata());
         break;
       case DEACTIVATE_UAC:
         deactivateUacProcessor.process(

@@ -6,6 +6,7 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +50,7 @@ class ActionRuleIT {
   private static final String PACK_CODE = "test-pack-code";
   private static final String PRINT_SUPPLIER = "test-print-supplier";
   private static final String CREATED_BY_USER = "test@ons.gov.uk";
+  private static final Map<String, String> TEST_UAC_METADATA = Map.of("TEST_UAC_METADATA", "TEST");
 
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
@@ -142,6 +144,7 @@ class ActionRuleIT {
       assertThat(rme.getPayload().getSmsRequest().getCaseId()).isEqualTo(caze.getId());
       assertThat(rme.getPayload().getSmsRequest().getPackCode()).isEqualTo("Test pack code");
       assertThat(rme.getPayload().getSmsRequest().getPhoneNumber()).isEqualTo("123");
+      assertThat(rme.getPayload().getSmsRequest().getUacMetadata()).isEqualTo(TEST_UAC_METADATA);
 
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isOne();
@@ -175,6 +178,7 @@ class ActionRuleIT {
     actionRule.setCollectionExercise(collectionExercise);
     actionRule.setPrintTemplate(printTemplate);
     actionRule.setCreatedBy(CREATED_BY_USER);
+    actionRule.setUacMetadata(TEST_UAC_METADATA);
 
     if (smsTemplate != null) {
       actionRule.setSmsTemplate(smsTemplate);
