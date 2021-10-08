@@ -67,10 +67,6 @@ public class NewCaseReceiver {
 
     ColumnValidator[] columnValidators = collex.getSurvey().getSampleValidationRules();
 
-    Map<String, String> sampleRow = new HashMap<>();
-    sampleRow.putAll(newCasePayload.getSample());
-    sampleRow.putAll(newCasePayload.getSampleSensitive());
-
     for (ColumnValidator columnValidator : columnValidators) {
       Optional<String> columnValidationErrors;
 
