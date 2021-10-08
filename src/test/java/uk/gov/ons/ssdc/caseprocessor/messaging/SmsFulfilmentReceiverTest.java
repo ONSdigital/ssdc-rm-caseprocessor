@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import java.util.Map;
 import java.util.UUID;
@@ -161,7 +161,7 @@ class SmsFulfilmentReceiverTest {
     enrichedSmsFulfilment.setUacMetadata(TEST_UAC_METADATA);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
-    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     eventHeader.setCorrelationId(TEST_CORRELATION_ID);
     eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
     PayloadDTO payloadDTO = new PayloadDTO();
