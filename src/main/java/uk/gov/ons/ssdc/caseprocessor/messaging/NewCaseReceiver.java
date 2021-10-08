@@ -18,6 +18,7 @@ import uk.gov.ons.ssdc.caseprocessor.utils.CaseRefGenerator;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
+import uk.gov.ons.ssdc.common.validation.ColumnValidator;
 
 @MessageEndpoint
 public class NewCaseReceiver {
@@ -61,6 +62,22 @@ public class NewCaseReceiver {
     }
 
     CollectionExercise collex = collexOpt.get();
+
+    ColumnValidator[] columnValidators = collex.getSurvey().getSampleValidationRules();
+
+    for (ColumnValidator columnValidator : columnValidators) {
+      Optional<String> columnValidationErrors;
+
+      if (columnValidator.isSensitive()) {
+        columnValidationErrors = columnValidator.validateRow(newCasePayload.getSampleSensitive());
+      } else {
+        columnValidationErrors = columnValidator.validateRow(newCasePayload.getSample());
+      }
+
+      if (columnValidationErrors.isPresent()) {
+        throw new RuntimeException(columnValidationErrors.get());
+      }
+    }
 
     Case newCase = new Case();
     newCase.setId(newCasePayload.getCaseId());
