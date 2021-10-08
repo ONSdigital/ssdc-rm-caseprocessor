@@ -55,6 +55,7 @@ jobs:
     # 📚 https://git.io/JvXDl
 
     - run: |
+       git clone https://github.com/ONSdigital/ssdc-shared-sample-validation.git && cd ssdc-shared-sample-validation && mvn clean install && cd ..
        git clone https://github.com/ONSdigital/ssdc-rm-ddl.git && cd ssdc-rm-ddl/ssdc-rm-common-entity-model && mvn clean install && cd ../..
        mvn package -DskipITs -Ddockerfile.skip
 
