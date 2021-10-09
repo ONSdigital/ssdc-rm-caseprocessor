@@ -259,7 +259,7 @@ public class NewCaseReceiverTest {
     newCase.setSample(sample);
 
     Map<String, String> sampleSensitive = new HashMap<>();
-    sampleSensitive.put("EmailAdddress", "foo@bar.baz");
+    sampleSensitive.put("EmailAddress", "foo@bar.baz");
     newCase.setSampleSensitive(sampleSensitive);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
