@@ -55,6 +55,8 @@ public class CaseService {
     PayloadDTO payloadDTO = new PayloadDTO();
     CaseUpdateDTO caseUpdate = new CaseUpdateDTO();
     caseUpdate.setCaseId(caze.getId());
+    caseUpdate.setCollectionExerciseId(caze.getCollectionExercise().getId());
+    caseUpdate.setSurveyId(caze.getCollectionExercise().getSurvey().getId());
     caseUpdate.setSample(caze.getSample());
     caseUpdate.setInvalid(caze.isInvalid());
     if (caze.getRefusalReceived() != null) {
