@@ -96,6 +96,10 @@ public class NewCaseReceiverIT {
 
       CaseUpdateDTO emittedCase = actualEvent.getPayload().getCaseUpdate();
       Assertions.assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
+      Assertions.assertThat(emittedCase.getCollectionExerciseId())
+          .isEqualTo(collectionExercise.getId());
+      Assertions.assertThat(emittedCase.getSurveyId())
+          .isEqualTo(collectionExercise.getSurvey().getId());
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
 

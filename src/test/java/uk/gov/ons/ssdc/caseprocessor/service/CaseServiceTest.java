@@ -24,7 +24,9 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.RefusalType;
+import uk.gov.ons.ssdc.common.model.entity.Survey;
 
 @ExtendWith(MockitoExtension.class)
 public class CaseServiceTest {
@@ -38,8 +40,15 @@ public class CaseServiceTest {
     ReflectionTestUtils.setField(underTest, "caseUpdateTopic", "Test topic");
     ReflectionTestUtils.setField(underTest, "sharedPubsubProject", "Test project");
 
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+    CollectionExercise collex = new CollectionExercise();
+    collex.setId(UUID.randomUUID());
+    collex.setSurvey(survey);
+
     Case caze = new Case();
     caze.setId(UUID.randomUUID());
+    caze.setCollectionExercise(collex);
     caze.setSample(Map.of("foo", "bar"));
     caze.setInvalid(true);
     caze.setRefusalReceived(RefusalType.HARD_REFUSAL);
@@ -58,6 +67,8 @@ public class CaseServiceTest {
 
     CaseUpdateDTO actualCaseUpdate = actualEvent.getPayload().getCaseUpdate();
     assertThat(actualCaseUpdate.getCaseId()).isEqualTo(caze.getId());
+    assertThat(actualCaseUpdate.getCollectionExerciseId()).isEqualTo(collex.getId());
+    assertThat(actualCaseUpdate.getSurveyId()).isEqualTo(survey.getId());
     assertThat(actualCaseUpdate.getSample()).isEqualTo(caze.getSample());
     assertThat(actualCaseUpdate.isInvalid()).isTrue();
     assertThat(actualCaseUpdate.getRefusalReceived()).isEqualTo(RefusalTypeDTO.HARD_REFUSAL);
@@ -75,8 +86,15 @@ public class CaseServiceTest {
     ReflectionTestUtils.setField(underTest, "caseUpdateTopic", "Test topic");
     ReflectionTestUtils.setField(underTest, "sharedPubsubProject", "Test project");
 
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+    CollectionExercise collex = new CollectionExercise();
+    collex.setId(UUID.randomUUID());
+    collex.setSurvey(survey);
+
     Case caze = new Case();
     caze.setId(UUID.randomUUID());
+    caze.setCollectionExercise(collex);
     caze.setSample(Map.of("foo", "bar"));
     caze.setInvalid(true);
     caze.setRefusalReceived(RefusalType.EXTRAORDINARY_REFUSAL);
@@ -94,6 +112,8 @@ public class CaseServiceTest {
 
     CaseUpdateDTO actualCaseUpdate = actualEvent.getPayload().getCaseUpdate();
     assertThat(actualCaseUpdate.getCaseId()).isEqualTo(caze.getId());
+    assertThat(actualCaseUpdate.getCollectionExerciseId()).isEqualTo(collex.getId());
+    assertThat(actualCaseUpdate.getSurveyId()).isEqualTo(survey.getId());
     assertThat(actualCaseUpdate.getSample()).isEqualTo(caze.getSample());
     assertThat(actualCaseUpdate.isInvalid()).isTrue();
     assertThat(actualCaseUpdate.getRefusalReceived())
