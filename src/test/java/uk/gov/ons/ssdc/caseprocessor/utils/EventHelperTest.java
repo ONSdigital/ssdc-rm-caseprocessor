@@ -3,7 +3,7 @@ package uk.gov.ons.ssdc.caseprocessor.utils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -17,7 +17,7 @@ public class EventHelperTest {
     EventHeaderDTO eventHeader =
         EventHelper.createEventDTO("TOPIC", TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
 
-    assertThat(eventHeader.getVersion()).isEqualTo(EVENT_SCHEMA_VERSION);
+    assertThat(eventHeader.getVersion()).isEqualTo(OUTBOUND_EVENT_SCHEMA_VERSION);
     assertThat(eventHeader.getCorrelationId()).isEqualTo(TEST_CORRELATION_ID);
     assertThat(eventHeader.getOriginatingUser()).isEqualTo(TEST_ORIGINATING_USER);
     assertThat(eventHeader.getTopic()).isEqualTo("TOPIC");
@@ -33,7 +33,7 @@ public class EventHelperTest {
         EventHelper.createEventDTO(
             "TOPIC", "CHANNEL", "SOURCE", TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
 
-    assertThat(eventHeader.getVersion()).isEqualTo(EVENT_SCHEMA_VERSION);
+    assertThat(eventHeader.getVersion()).isEqualTo(OUTBOUND_EVENT_SCHEMA_VERSION);
     assertThat(eventHeader.getCorrelationId()).isEqualTo(TEST_CORRELATION_ID);
     assertThat(eventHeader.getOriginatingUser()).isEqualTo(TEST_ORIGINATING_USER);
     assertThat(eventHeader.getChannel()).isEqualTo("CHANNEL");

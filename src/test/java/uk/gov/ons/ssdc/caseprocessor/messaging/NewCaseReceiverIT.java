@@ -3,7 +3,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.NEW_CASE_TOPIC;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import java.util.HashMap;
 import java.util.List;
@@ -66,7 +66,7 @@ public class NewCaseReceiverIT {
       // GIVEN
       EventDTO event = new EventDTO();
       EventHeaderDTO eventHeader = new EventHeaderDTO();
-      eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+      eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
       eventHeader.setTopic(NEW_CASE_TOPIC);
       junkDataHelper.junkify(eventHeader);
       event.setHeader(eventHeader);
@@ -96,6 +96,10 @@ public class NewCaseReceiverIT {
 
       CaseUpdateDTO emittedCase = actualEvent.getPayload().getCaseUpdate();
       Assertions.assertThat(emittedCase.getCaseId()).isEqualTo(TEST_CASE_ID);
+      Assertions.assertThat(emittedCase.getCollectionExerciseId())
+          .isEqualTo(collectionExercise.getId());
+      Assertions.assertThat(emittedCase.getSurveyId())
+          .isEqualTo(collectionExercise.getSurvey().getId());
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
 
