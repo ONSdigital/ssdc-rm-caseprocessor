@@ -45,6 +45,7 @@ public class UpdateSampleSensitiveReceiver {
         continue;
       }
 
+      // Finally, validate the updated value according to the rules for the column
       for (ColumnValidator columnValidator :
           caze.getCollectionExercise().getSurvey().getSampleValidationRules()) {
         validateNewSensitiveValue(entry, columnValidator);
