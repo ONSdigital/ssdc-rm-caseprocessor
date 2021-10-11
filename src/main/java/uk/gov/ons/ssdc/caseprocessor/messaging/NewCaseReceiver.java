@@ -2,7 +2,10 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -77,6 +80,16 @@ public class NewCaseReceiver {
       if (columnValidationErrors.isPresent()) {
         throw new RuntimeException(columnValidationErrors.get());
       }
+    }
+
+    Set<String> sensitiveColumns =
+        Arrays.stream(columnValidators)
+            .filter(columnValidator -> columnValidator.isSensitive())
+            .map(columnValidator -> columnValidator.getColumnName())
+            .collect(Collectors.toSet());
+    if (!sensitiveColumns.containsAll(newCasePayload.getSampleSensitive().keySet())) {
+      throw new RuntimeException(
+          "Attempt to send sensitive data to RM which was not part of defined sample");
     }
 
     Case newCase = new Case();
