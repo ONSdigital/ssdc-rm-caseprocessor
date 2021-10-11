@@ -112,6 +112,8 @@ public class CaseServiceTest {
 
     CaseUpdateDTO actualCaseUpdate = actualEvent.getPayload().getCaseUpdate();
     assertThat(actualCaseUpdate.getCaseId()).isEqualTo(caze.getId());
+    assertThat(actualCaseUpdate.getCollectionExerciseId()).isEqualTo(collex.getId());
+    assertThat(actualCaseUpdate.getSurveyId()).isEqualTo(survey.getId());
     assertThat(actualCaseUpdate.getSample()).isEqualTo(caze.getSample());
     assertThat(actualCaseUpdate.isInvalid()).isTrue();
     assertThat(actualCaseUpdate.getRefusalReceived())
