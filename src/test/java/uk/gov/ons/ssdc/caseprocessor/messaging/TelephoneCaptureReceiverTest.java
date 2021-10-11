@@ -6,7 +6,7 @@ import static org.mockito.Mockito.*;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -127,7 +127,7 @@ class TelephoneCaptureReceiverTest {
     telephoneCaptureDTO.setUac(TEST_UAC);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
-    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     eventHeader.setCorrelationId(TEST_CORRELATION_ID);
     eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
     PayloadDTO payloadDTO = new PayloadDTO();
