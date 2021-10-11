@@ -6,7 +6,7 @@ import static org.mockito.Mockito.*;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -47,7 +47,7 @@ public class ReceiptReceiverTest {
     event.setPayload(payloadDTO);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
-    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     eventHeader.setCorrelationId(TEST_CORRELATION_ID);
     eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
     eventHeader.setTopic("Test topic");
@@ -91,7 +91,7 @@ public class ReceiptReceiverTest {
     event.setPayload(payloadDTO);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
-    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     eventHeader.setTopic("Test topic");
     eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
     event.setHeader(eventHeader);
@@ -126,7 +126,7 @@ public class ReceiptReceiverTest {
     event.setPayload(payloadDTO);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
-    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     eventHeader.setCorrelationId(TEST_CORRELATION_ID);
     eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
     eventHeader.setTopic("Test topic");

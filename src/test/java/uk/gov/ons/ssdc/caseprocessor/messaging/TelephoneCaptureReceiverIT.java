@@ -3,7 +3,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TELEPHONE_CAPTURE_TOPIC;
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import java.util.List;
 import java.util.UUID;
@@ -75,7 +75,7 @@ class TelephoneCaptureReceiverIT {
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setTelephoneCapture(telephoneCaptureDTO);
     EventHeaderDTO eventHeader = new EventHeaderDTO();
-    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     eventHeader.setTopic(TELEPHONE_CAPTURE_TOPIC);
     junkDataHelper.junkify(eventHeader);
     EventDTO event = new EventDTO();
