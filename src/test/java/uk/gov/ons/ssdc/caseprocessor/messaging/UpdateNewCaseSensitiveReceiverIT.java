@@ -2,7 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -81,7 +81,7 @@ public class UpdateNewCaseSensitiveReceiverIT {
     event.setPayload(payloadDTO);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
-    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     eventHeader.setTopic(UPDATE_SAMPLE_SENSITIVE_TOPIC);
     junkDataHelper.junkify(eventHeader);
     event.setHeader(eventHeader);

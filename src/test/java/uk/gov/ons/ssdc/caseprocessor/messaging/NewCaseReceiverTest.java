@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,7 +79,7 @@ public class NewCaseReceiverTest {
     newCase.setSampleSensitive(sampleSensitive);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
-    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     eventHeader.setCorrelationId(TEST_CORRELATION_ID);
     eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
     PayloadDTO payloadDTO = new PayloadDTO();
@@ -140,7 +140,7 @@ public class NewCaseReceiverTest {
     newCase.setCaseId(TEST_CASE_ID);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
-    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setNewCase(newCase);
 
@@ -170,7 +170,7 @@ public class NewCaseReceiverTest {
     newCase.setCollectionExerciseId(TEST_CASE_COLLECTION_EXERCISE_ID);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
-    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setNewCase(newCase);
 
@@ -205,7 +205,7 @@ public class NewCaseReceiverTest {
     newCase.setSampleSensitive(sampleSensitive);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
-    eventHeader.setVersion(EVENT_SCHEMA_VERSION);
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     eventHeader.setCorrelationId(TEST_CORRELATION_ID);
     eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
     PayloadDTO payloadDTO = new PayloadDTO();

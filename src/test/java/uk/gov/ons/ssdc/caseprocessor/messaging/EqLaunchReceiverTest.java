@@ -6,7 +6,7 @@ import static org.mockito.Mockito.*;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.EVENT_SCHEMA_VERSION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -39,7 +39,7 @@ public class EqLaunchReceiverTest {
   public void testEqLaunchedEventFromRH() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
-    managementEvent.getHeader().setVersion(EVENT_SCHEMA_VERSION);
+    managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     managementEvent.getHeader().setCorrelationId(TEST_CORRELATION_ID);
     managementEvent.getHeader().setOriginatingUser(TEST_ORIGINATING_USER);
     managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
