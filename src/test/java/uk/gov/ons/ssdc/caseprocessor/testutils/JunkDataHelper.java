@@ -50,6 +50,7 @@ public class JunkDataHelper {
           new ColumnValidator("SensitiveJunk", true, new Rule[] {new MandatoryRule()})
         });
     junkSurvey.setSampleSeparator('j');
+    junkSurvey.setSampleDefinitionUrl("http://junk");
     surveyRepository.saveAndFlush(junkSurvey);
 
     CollectionExercise junkCollectionExercise = new CollectionExercise();
