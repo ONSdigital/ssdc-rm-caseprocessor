@@ -55,6 +55,10 @@ public class JunkDataHelper {
     junkCollectionExercise.setId(UUID.randomUUID());
     junkCollectionExercise.setName("Junk collex");
     junkCollectionExercise.setSurvey(junkSurvey);
+    junkCollectionExercise.setReference("MVP012021");
+    junkCollectionExercise.setStartDate(OffsetDateTime.now());
+    junkCollectionExercise.setEndDate(OffsetDateTime.now().plusDays(2));
+    junkCollectionExercise.setMetadata(null);
     collectionExerciseRepository.saveAndFlush(junkCollectionExercise);
 
     return junkCollectionExercise;
