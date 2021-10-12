@@ -78,7 +78,7 @@ public class NewCaseReceiverIT {
       sample.put("Org", "Brewery");
 
       Map<String, String> sampleSensitive = new HashMap<>();
-      sampleSensitive.put("Telephone", "02071234567");
+      sampleSensitive.put("SensitiveJunk", "02071234567");
 
       PayloadDTO payloadDTO = new PayloadDTO();
       NewCase newCase = new NewCase();
@@ -111,7 +111,7 @@ public class NewCaseReceiverIT {
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);
       assertThat(events.get(0).getType()).isEqualTo(EventType.NEW_CASE);
-      assertThat(events.get(0).getPayload()).contains("{\"Telephone\": \"REDACTED\"}");
+      assertThat(events.get(0).getPayload()).contains("{\"SensitiveJunk\": \"REDACTED\"}");
     }
   }
 }
