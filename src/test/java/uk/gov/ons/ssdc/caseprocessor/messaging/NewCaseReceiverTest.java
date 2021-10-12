@@ -164,6 +164,8 @@ public class NewCaseReceiverTest {
 
   @Test
   public void testNewCaseReceiverCollectionExerciseNotFound() {
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
+
     // Given
     NewCase newCase = new NewCase();
     newCase.setCaseId(TEST_CASE_ID);
@@ -190,6 +192,8 @@ public class NewCaseReceiverTest {
 
   @Test
   public void testNewCaseReceiverCaseFailsValidation() {
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
+
     // Given
     NewCase newCase = new NewCase();
     newCase.setCaseId(TEST_CASE_ID);
@@ -202,6 +206,60 @@ public class NewCaseReceiverTest {
 
     Map<String, String> sampleSensitive = new HashMap<>();
     sampleSensitive.put("Telephone", "020712345");
+    newCase.setSampleSensitive(sampleSensitive);
+
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
+    eventHeader.setCorrelationId(TEST_CORRELATION_ID);
+    eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setNewCase(newCase);
+
+    EventDTO event = new EventDTO();
+    event.setHeader(eventHeader);
+    event.setPayload(payloadDTO);
+
+    Message<byte[]> eventMessage = constructMessage(event);
+
+    when(caseRepository.existsById(TEST_CASE_ID)).thenReturn(false);
+
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+    survey.setSampleValidationRules(
+        new ColumnValidator[] {
+          new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
+          new ColumnValidator(
+              "POSTCODE", false, new Rule[] {new MandatoryRule(), new LengthRule(8)}),
+          new ColumnValidator("Telephone", true, new Rule[] {new MandatoryRule()})
+        });
+
+    CollectionExercise collex = new CollectionExercise();
+    collex.setSurvey(survey);
+    Optional<CollectionExercise> collexOpt = Optional.of(collex);
+
+    when(collectionExerciseRepository.findById(TEST_CASE_COLLECTION_EXERCISE_ID))
+        .thenReturn(collexOpt);
+
+    assertThrows(RuntimeException.class, () -> underTest.receiveNewCase(eventMessage));
+    verifyNoInteractions(eventLogger);
+  }
+
+  @Test
+  public void testNewCaseReceiverCaseFailsValidationBecauseOfUndefinedSensitiveData() {
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
+
+    // Given
+    NewCase newCase = new NewCase();
+    newCase.setCaseId(TEST_CASE_ID);
+    newCase.setCollectionExerciseId(TEST_CASE_COLLECTION_EXERCISE_ID);
+
+    Map<String, String> sample = new HashMap<>();
+    sample.put("ADDRESS_LINE1", "123 Fake Street");
+    sample.put("POSTCODE", "abc123");
+    newCase.setSample(sample);
+
+    Map<String, String> sampleSensitive = new HashMap<>();
+    sampleSensitive.put("EmailAddress", "foo@bar.baz");
     newCase.setSampleSensitive(sampleSensitive);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
