@@ -5,7 +5,7 @@ services:
     image: eu.gcr.io/ssdc-rm-ci/rm/ssdc-rm-dev-common-postgres:latest
     command: ["-c", "shared_buffers=256MB", "-c", "max_connections=500"]
     ports:
-      - "15432:5432"
+      - "16432:5432"
 
   uac-qid-case-it:
     container_name: uac-qid-case-it
@@ -45,3 +45,8 @@ services:
     depends_on:
       uac-qid-case-it:
         condition: service_healthy
+
+networks:
+  default:
+    external:
+      name: ssdcrmdockerdev_default
