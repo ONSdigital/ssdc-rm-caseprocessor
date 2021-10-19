@@ -19,7 +19,7 @@ public class CaseClassifierTest {
     // Given
     JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
 
-    CaseClassifier underTest = new CaseClassifier(jdbcTemplate);
+    CaseClassifier underTest = new CaseClassifier(jdbcTemplate, null);
     String classifiers = "foo IN ('bar')";
     CollectionExercise collectionExercise = new CollectionExercise();
     collectionExercise.setId(UUID.randomUUID());

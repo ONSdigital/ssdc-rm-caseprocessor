@@ -52,8 +52,10 @@ queueconfig:
   case-update-topic: event_case-update
   uac-update-topic: event_uac-update
   deactivate-uac-topic: event_deactivate-uac
+  ras-rm-case-notification-topic: case-notification
   publishtimeout: 30  # In seconds
   shared-pubsub-project: REPLACEME
+  ras-rm-pubsub-project: REPLACEME
 
 healthcheck:
   frequency: 15000 #milliseconds
@@ -88,3 +90,17 @@ uacservice:
   uacqid-cache-min: 500
   uacqid-fetch-count: 1000
   uacqid-get-timeout: 60   #seconds
+
+ras-rm-sample-service:
+  connection:
+    scheme: http
+    host: localhost
+    port: 8125
+
+ras-rm-party-service:
+  connection:
+    scheme: http
+    host: localhost
+    port: 8081
+    username: admin
+    password: secret
