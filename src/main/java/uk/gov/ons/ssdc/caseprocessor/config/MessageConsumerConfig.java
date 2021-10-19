@@ -198,8 +198,7 @@ public class MessageConsumerConfig {
   PubSubInboundChannelAdapter updateSampleInbound(
       @Qualifier("updateSampleInputChannel") MessageChannel channel) {
     String subscription =
-        toProjectSubscriptionName(updateSampleSubscription, sharedPubsubProject)
-            .toString();
+        toProjectSubscriptionName(updateSampleSubscription, sharedPubsubProject).toString();
     return makeAdapter(channel, subscription);
   }
 

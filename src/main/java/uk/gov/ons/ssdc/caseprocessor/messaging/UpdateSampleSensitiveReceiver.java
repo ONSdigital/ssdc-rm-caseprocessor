@@ -4,7 +4,6 @@ import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToE
 
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -49,7 +48,8 @@ public class UpdateSampleSensitiveReceiver {
       // Finally, validate the updated value according to the rules for the column
       for (ColumnValidator columnValidator :
           caze.getCollectionExercise().getSurvey().getSampleValidationRules()) {
-        SampleValidateHelper.validateNewValue(entry, columnValidator, EventType.UPDATE_SAMPLE_SENSITIVE);
+        SampleValidateHelper.validateNewValue(
+            entry, columnValidator, EventType.UPDATE_SAMPLE_SENSITIVE);
       }
     }
 

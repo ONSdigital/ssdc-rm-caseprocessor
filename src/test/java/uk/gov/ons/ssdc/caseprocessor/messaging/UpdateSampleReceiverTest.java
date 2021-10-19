@@ -3,7 +3,6 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,7 +26,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSample;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSampleSensitive;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
@@ -56,10 +54,7 @@ public class UpdateSampleReceiverTest {
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setUpdateSample(new UpdateSample());
     managementEvent.getPayload().getUpdateSample().setCaseId(UUID.randomUUID());
-    managementEvent
-        .getPayload()
-        .getUpdateSample()
-        .setSample(Map.of("firstName", "Updated"));
+    managementEvent.getPayload().getUpdateSample().setSample(Map.of("testSampleField", "Updated"));
     Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
@@ -67,7 +62,7 @@ public class UpdateSampleReceiverTest {
     survey.setId(UUID.randomUUID());
     survey.setSampleValidationRules(
         new ColumnValidator[] {
-          new ColumnValidator("firstName", true, new Rule[] {new LengthRule(30)})
+          new ColumnValidator("testSampleField", true, new Rule[] {new LengthRule(30)})
         });
     CollectionExercise collex = new CollectionExercise();
     collex.setId(UUID.randomUUID());
@@ -76,7 +71,7 @@ public class UpdateSampleReceiverTest {
     Case expectedCase = new Case();
     expectedCase.setCollectionExercise(collex);
     Map<String, String> sampleData = new HashMap<>();
-    sampleData.put("firstName", "Test");
+    sampleData.put("testSampleField", "Test");
     expectedCase.setSample(sampleData);
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
@@ -88,58 +83,11 @@ public class UpdateSampleReceiverTest {
 
     verify(caseService).saveCase(caseArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
-    assertThat(actualCase.getSample()).isEqualTo(Map.of("firstName", "Updated"));
+    assertThat(actualCase.getSample()).isEqualTo(Map.of("testSampleField", "Updated"));
 
     verify(eventLogger)
         .logCaseEvent(
-            expectedCase,
-            "Sample data updated",
-            EventType.UPDATE_SAMPLE,
-            managementEvent,
-            message);
-  }
-
-  @Test
-  public void testUpdateSampleReceiverBlankingIsNotAllowed() {
-    EventDTO managementEvent = new EventDTO();
-    managementEvent.setHeader(new EventHeaderDTO());
-    managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
-    managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
-    managementEvent.getHeader().setTopic("Test topic");
-    managementEvent.getHeader().setChannel("CC");
-    managementEvent.setPayload(new PayloadDTO());
-    managementEvent.getPayload().setUpdateSample(new UpdateSample());
-    managementEvent.getPayload().getUpdateSample().setCaseId(UUID.randomUUID());
-    managementEvent
-        .getPayload()
-        .getUpdateSample()
-        .setSample(Map.of("firstName", ""));
-    Message<byte[]> message = constructMessage(managementEvent);
-
-    // Given
-    Survey survey = new Survey();
-    survey.setId(UUID.randomUUID());
-    survey.setSampleValidationRules(
-        new ColumnValidator[] {
-          new ColumnValidator("firstName", true, new Rule[] {new LengthRule(30)})
-        });
-    CollectionExercise collex = new CollectionExercise();
-    collex.setId(UUID.randomUUID());
-    collex.setSurvey(survey);
-
-    Case expectedCase = new Case();
-    expectedCase.setCollectionExercise(collex);
-    Map<String, String> existingSampleData = new HashMap<>();
-    existingSampleData.put("firstName", "Test");
-    expectedCase.setSample(existingSampleData);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
-
-    // When, then throws
-    RuntimeException thrown = assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
-    assertThat(thrown.getMessage()).isEqualTo("Cannot update sample data to blank (firstName)");
-
-    verify(caseService, never()).saveCase(any());
-    verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(Message.class));
+            expectedCase, "Sample data updated", EventType.UPDATE_SAMPLE, managementEvent, message);
   }
 
   @Test
@@ -153,21 +101,19 @@ public class UpdateSampleReceiverTest {
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setUpdateSample(new UpdateSample());
     managementEvent.getPayload().getUpdateSample().setCaseId(UUID.randomUUID());
-    managementEvent
-        .getPayload()
-        .getUpdateSample()
-        .setSample(Map.of("UPRN", "9999999"));
+    managementEvent.getPayload().getUpdateSample().setSample(Map.of("UPRN", "9999999"));
     Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
     Case expectedCase = new Case();
     Map<String, String> existingSampleData = new HashMap<>();
-    existingSampleData.put("firstName", "Test");
+    existingSampleData.put("testSampleField", "Test");
     expectedCase.setSample(existingSampleData);
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
-    RuntimeException thrown = assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+    RuntimeException thrown =
+        assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
     assertThat(thrown.getMessage()).isEqualTo("Key (UPRN) does not match an existing entry!");
 
     verify(caseService, never()).saveCase(any());
@@ -185,10 +131,7 @@ public class UpdateSampleReceiverTest {
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setUpdateSample(new UpdateSample());
     managementEvent.getPayload().getUpdateSample().setCaseId(UUID.randomUUID());
-    managementEvent
-        .getPayload()
-        .getUpdateSample()
-        .setSample(Map.of("firstName", "Testing"));
+    managementEvent.getPayload().getUpdateSample().setSample(Map.of("testSampleField", "Testing"));
     Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
@@ -196,7 +139,7 @@ public class UpdateSampleReceiverTest {
     survey.setId(UUID.randomUUID());
     survey.setSampleValidationRules(
         new ColumnValidator[] {
-          new ColumnValidator("firstName", true, new Rule[] {new LengthRule(4)})
+          new ColumnValidator("testSampleField", true, new Rule[] {new LengthRule(4)})
         });
     CollectionExercise collex = new CollectionExercise();
     collex.setId(UUID.randomUUID());
@@ -205,7 +148,7 @@ public class UpdateSampleReceiverTest {
     Case expectedCase = new Case();
     expectedCase.setCollectionExercise(collex);
     Map<String, String> existingSampleData = new HashMap<>();
-    existingSampleData.put("firstName", "Test");
+    existingSampleData.put("testSampleField", "Test");
     expectedCase.setSample(existingSampleData);
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 

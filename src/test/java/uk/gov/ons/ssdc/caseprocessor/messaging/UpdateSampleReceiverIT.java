@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -23,7 +22,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSample;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSampleSensitive;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.EventPoller;
@@ -45,9 +43,6 @@ public class UpdateSampleReceiverIT {
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
   private static final String UPDATE_SAMPLE_TOPIC = "event_update-sample";
 
-  @Value("${queueconfig.case-update-topic}")
-  private String caseUpdateTopic;
-
   @Autowired private PubsubHelper pubsubHelper;
   @Autowired private DeleteDataHelper deleteDataHelper;
   @Autowired private JunkDataHelper junkDataHelper;
@@ -57,7 +52,7 @@ public class UpdateSampleReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
+    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, UPDATE_SAMPLE_TOPIC);
     deleteDataHelper.deleteAllData();
   }
 
@@ -68,15 +63,15 @@ public class UpdateSampleReceiverIT {
     Case caze = new Case();
     caze.setId(TEST_CASE_ID);
     Map<String, String> sampleData = new HashMap<>();
-    sampleData.put("firstName", "Test");
-    caze.setSampleSensitive(sampleData);
+    sampleData.put("testSampleField", "Test");
+    caze.setSample(sampleData);
     caze.setCollectionExercise(junkDataHelper.setupJunkCollex());
     caseRepository.saveAndFlush(caze);
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setUpdateSample(new UpdateSample());
     payloadDTO.getUpdateSample().setCaseId(TEST_CASE_ID);
-    payloadDTO.getUpdateSample().setSample(Map.of("firstName", "Updated"));
+    payloadDTO.getUpdateSample().setSample(Map.of("testSampleField", "Updated"));
 
     EventDTO event = new EventDTO();
     event.setPayload(payloadDTO);
@@ -94,7 +89,7 @@ public class UpdateSampleReceiverIT {
 
     //  Then
     Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
-    assertThat(actualCase.getSampleSensitive()).isEqualTo(Map.of("firstname", "Updated"));
+    assertThat(actualCase.getSample()).isEqualTo(Map.of("testSampleField", "Updated"));
 
     assertThat(databaseEvents.size()).isEqualTo(1);
     Event databaseEvent = databaseEvents.get(0);
@@ -103,6 +98,6 @@ public class UpdateSampleReceiverIT {
 
     PayloadDTO actualPayload = objectMapper.readValue(databaseEvent.getPayload(), PayloadDTO.class);
     assertThat(actualPayload.getUpdateSample().getSample())
-        .isEqualTo(Map.of("firstName", "Updated"));
+        .isEqualTo(Map.of("testSampleField", "Updated"));
   }
 }
