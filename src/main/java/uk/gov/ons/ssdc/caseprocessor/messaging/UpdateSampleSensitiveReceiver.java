@@ -36,8 +36,12 @@ public class UpdateSampleSensitiveReceiver {
     Case caze = caseService.getCaseByCaseId(updateSampleSensitive.getCaseId());
 
     for (Map.Entry<String, String> entry : updateSampleSensitive.getSampleSensitive().entrySet()) {
+
       // First, validate that only sensitive data that is defined is being attempted to be updated
       validateOnlySensitiveDataBeingUpdated(caze, entry);
+
+      // Update the case object, we must then error out before saving if it fails validation
+      caze.getSampleSensitive().put(entry.getKey(), entry.getValue());
 
       // Second, if the data is not being blanked, validate it according to rules
       if (entry.getValue().length() == 0) {
@@ -45,7 +49,7 @@ public class UpdateSampleSensitiveReceiver {
         continue;
       }
 
-      // Finally, validate the updated value according to the rules for the column
+      // Validate the updated value according to the rules for the column
       for (ColumnValidator columnValidator :
           caze.getCollectionExercise().getSurvey().getSampleValidationRules()) {
         validateNewSensitiveValue(entry, columnValidator);
@@ -65,16 +69,13 @@ public class UpdateSampleSensitiveReceiver {
 
       Optional<String> validationErrors = columnValidator.validateRow(validateThis);
       if (validationErrors.isPresent()) {
-        throw new RuntimeException(
-            "Sensitive data update failed validation: " + validationErrors.get());
+        throw new RuntimeException("Sensitive data update failed validation");
       }
     }
   }
 
   private void validateOnlySensitiveDataBeingUpdated(Case caze, Entry<String, String> entry) {
-    if (caze.getSampleSensitive().containsKey(entry.getKey())) {
-      caze.getSampleSensitive().put(entry.getKey(), entry.getValue());
-    } else {
+    if (!caze.getSampleSensitive().containsKey(entry.getKey())) {
       throw new RuntimeException("Key (" + entry.getKey() + ") does not match an existing entry!");
     }
   }

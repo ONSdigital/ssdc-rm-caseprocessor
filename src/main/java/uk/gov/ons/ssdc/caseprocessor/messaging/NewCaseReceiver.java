@@ -78,7 +78,7 @@ public class NewCaseReceiver {
       }
 
       if (columnValidationErrors.isPresent()) {
-        throw new RuntimeException(columnValidationErrors.get());
+        throw new RuntimeException("New Case failed validation");
       }
     }
 

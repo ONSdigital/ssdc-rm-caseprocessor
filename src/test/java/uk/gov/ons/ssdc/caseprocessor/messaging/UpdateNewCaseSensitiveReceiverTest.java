@@ -37,7 +37,7 @@ import uk.gov.ons.ssdc.common.validation.LengthRule;
 import uk.gov.ons.ssdc.common.validation.Rule;
 
 @ExtendWith(MockitoExtension.class)
-public class UpdateNewCaseSensitiveReceiverTest {
+class UpdateNewCaseSensitiveReceiverTest {
 
   @Mock private CaseService caseService;
   @Mock private EventLogger eventLogger;
@@ -45,7 +45,7 @@ public class UpdateNewCaseSensitiveReceiverTest {
   @InjectMocks UpdateSampleSensitiveReceiver underTest;
 
   @Test
-  public void testUpdateSampleSensitiveReceiver() {
+  void testUpdateSampleSensitiveReceiver() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
     managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
@@ -99,7 +99,7 @@ public class UpdateNewCaseSensitiveReceiverTest {
   }
 
   @Test
-  public void testUpdateSampleSensitiveReceiverBlankingIsAllowed() {
+  void testUpdateSampleSensitiveReceiverBlankingIsAllowed() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
     managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
@@ -153,7 +153,7 @@ public class UpdateNewCaseSensitiveReceiverTest {
   }
 
   @Test
-  public void testMessageKeyDoesNotMatchExistingEntry() {
+  void testMessageKeyDoesNotMatchExistingEntry() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
     managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
@@ -184,7 +184,7 @@ public class UpdateNewCaseSensitiveReceiverTest {
   }
 
   @Test
-  public void testUpdateSampleSensitiveReceiverFailsValidation() {
+  void testUpdateSampleSensitiveReceiverFailsValidation() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
     managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
