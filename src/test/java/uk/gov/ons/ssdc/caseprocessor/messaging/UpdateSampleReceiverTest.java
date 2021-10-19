@@ -1,0 +1,218 @@
+package uk.gov.ons.ssdc.caseprocessor.messaging;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.Message;
+import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSample;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSampleSensitive;
+import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
+import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.common.model.entity.EventType;
+import uk.gov.ons.ssdc.common.model.entity.Survey;
+import uk.gov.ons.ssdc.common.validation.ColumnValidator;
+import uk.gov.ons.ssdc.common.validation.LengthRule;
+import uk.gov.ons.ssdc.common.validation.Rule;
+
+@ExtendWith(MockitoExtension.class)
+public class UpdateSampleReceiverTest {
+
+  @Mock private CaseService caseService;
+  @Mock private EventLogger eventLogger;
+
+  @InjectMocks UpdateSampleReceiver underTest;
+
+  @Test
+  public void testUpdateSampleReceiver() {
+    EventDTO managementEvent = new EventDTO();
+    managementEvent.setHeader(new EventHeaderDTO());
+    managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
+    managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
+    managementEvent.getHeader().setTopic("Test topic");
+    managementEvent.getHeader().setChannel("CC");
+    managementEvent.setPayload(new PayloadDTO());
+    managementEvent.getPayload().setUpdateSample(new UpdateSample());
+    managementEvent.getPayload().getUpdateSample().setCaseId(UUID.randomUUID());
+    managementEvent
+        .getPayload()
+        .getUpdateSample()
+        .setSample(Map.of("firstName", "Updated"));
+    Message<byte[]> message = constructMessage(managementEvent);
+
+    // Given
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+    survey.setSampleValidationRules(
+        new ColumnValidator[] {
+          new ColumnValidator("firstName", true, new Rule[] {new LengthRule(30)})
+        });
+    CollectionExercise collex = new CollectionExercise();
+    collex.setId(UUID.randomUUID());
+    collex.setSurvey(survey);
+
+    Case expectedCase = new Case();
+    expectedCase.setCollectionExercise(collex);
+    Map<String, String> sampleData = new HashMap<>();
+    sampleData.put("firstName", "Test");
+    expectedCase.setSample(sampleData);
+    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+
+    // when
+    underTest.receiveMessage(message);
+
+    // then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+
+    verify(caseService).saveCase(caseArgumentCaptor.capture());
+    Case actualCase = caseArgumentCaptor.getValue();
+    assertThat(actualCase.getSample()).isEqualTo(Map.of("firstName", "Updated"));
+
+    verify(eventLogger)
+        .logCaseEvent(
+            expectedCase,
+            "Sample data updated",
+            EventType.UPDATE_SAMPLE,
+            managementEvent,
+            message);
+  }
+
+  @Test
+  public void testUpdateSampleReceiverBlankingIsNotAllowed() {
+    EventDTO managementEvent = new EventDTO();
+    managementEvent.setHeader(new EventHeaderDTO());
+    managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
+    managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
+    managementEvent.getHeader().setTopic("Test topic");
+    managementEvent.getHeader().setChannel("CC");
+    managementEvent.setPayload(new PayloadDTO());
+    managementEvent.getPayload().setUpdateSample(new UpdateSample());
+    managementEvent.getPayload().getUpdateSample().setCaseId(UUID.randomUUID());
+    managementEvent
+        .getPayload()
+        .getUpdateSample()
+        .setSample(Map.of("firstName", ""));
+    Message<byte[]> message = constructMessage(managementEvent);
+
+    // Given
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+    survey.setSampleValidationRules(
+        new ColumnValidator[] {
+          new ColumnValidator("firstName", true, new Rule[] {new LengthRule(30)})
+        });
+    CollectionExercise collex = new CollectionExercise();
+    collex.setId(UUID.randomUUID());
+    collex.setSurvey(survey);
+
+    Case expectedCase = new Case();
+    expectedCase.setCollectionExercise(collex);
+    Map<String, String> existingSampleData = new HashMap<>();
+    existingSampleData.put("firstName", "Test");
+    expectedCase.setSample(existingSampleData);
+    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+
+    // When, then throws
+    RuntimeException thrown = assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+    assertThat(thrown.getMessage()).isEqualTo("Cannot update sample data to blank (firstName)");
+
+    verify(caseService, never()).saveCase(any());
+    verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(Message.class));
+  }
+
+  @Test
+  public void testMessageKeyDoesNotMatchExistingEntry() {
+    EventDTO managementEvent = new EventDTO();
+    managementEvent.setHeader(new EventHeaderDTO());
+    managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
+    managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
+    managementEvent.getHeader().setTopic("Test topic");
+    managementEvent.getHeader().setChannel("CC");
+    managementEvent.setPayload(new PayloadDTO());
+    managementEvent.getPayload().setUpdateSample(new UpdateSample());
+    managementEvent.getPayload().getUpdateSample().setCaseId(UUID.randomUUID());
+    managementEvent
+        .getPayload()
+        .getUpdateSample()
+        .setSample(Map.of("UPRN", "9999999"));
+    Message<byte[]> message = constructMessage(managementEvent);
+
+    // Given
+    Case expectedCase = new Case();
+    Map<String, String> existingSampleData = new HashMap<>();
+    existingSampleData.put("firstName", "Test");
+    expectedCase.setSample(existingSampleData);
+    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+
+    // When, then throws
+    RuntimeException thrown = assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+    assertThat(thrown.getMessage()).isEqualTo("Key (UPRN) does not match an existing entry!");
+
+    verify(caseService, never()).saveCase(any());
+    verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(Message.class));
+  }
+
+  @Test
+  public void testUpdateSampleReceiverFailsValidation() {
+    EventDTO managementEvent = new EventDTO();
+    managementEvent.setHeader(new EventHeaderDTO());
+    managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
+    managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
+    managementEvent.getHeader().setTopic("Test topic");
+    managementEvent.getHeader().setChannel("CC");
+    managementEvent.setPayload(new PayloadDTO());
+    managementEvent.getPayload().setUpdateSample(new UpdateSample());
+    managementEvent.getPayload().getUpdateSample().setCaseId(UUID.randomUUID());
+    managementEvent
+        .getPayload()
+        .getUpdateSample()
+        .setSample(Map.of("firstName", "Testing"));
+    Message<byte[]> message = constructMessage(managementEvent);
+
+    // Given
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+    survey.setSampleValidationRules(
+        new ColumnValidator[] {
+          new ColumnValidator("firstName", true, new Rule[] {new LengthRule(4)})
+        });
+    CollectionExercise collex = new CollectionExercise();
+    collex.setId(UUID.randomUUID());
+    collex.setSurvey(survey);
+
+    Case expectedCase = new Case();
+    expectedCase.setCollectionExercise(collex);
+    Map<String, String> existingSampleData = new HashMap<>();
+    existingSampleData.put("firstName", "Test");
+    expectedCase.setSample(existingSampleData);
+    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+
+    // When, then throws
+    assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+
+    verify(caseService, never()).saveCase(any());
+    verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(Message.class));
+  }
+}

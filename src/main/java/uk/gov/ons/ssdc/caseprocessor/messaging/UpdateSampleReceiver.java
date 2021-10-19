@@ -13,6 +13,7 @@ import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSample;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
+import uk.gov.ons.ssdc.caseprocessor.utils.SampleValidateHelper;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.validation.ColumnValidator;
@@ -37,58 +38,30 @@ public class UpdateSampleReceiver {
 
     Case caze = caseService.getCaseByCaseId(updateSample.getCaseId());
 
-    for (Entry<String, String> entry : updateSample.getSample().entrySet()) {
-      // First, validate that only non-sensitive data that is defined is being attempted to be updated
-      validateOnlyNonSensitiveDataBeingUpdated(caze, entry);
+    for (Map.Entry<String, String> entry : updateSample.getSample().entrySet()) {
+      // First, validate that only sample data that is defined is being attempted to be updated
+      validateOnlySampleDataBeingUpdated(caze, entry);
 
       // Second, do not allow the data to be blanked
       if (entry.getValue().length() == 0) {
         throw new RuntimeException(
-            "Cannot update non-sensitive sample data to blank (" + entry.getKey() + ")");
+            "Cannot update sample data to blank (" + entry.getKey() + ")");
       }
 
       // Finally, validate the updated value according to the rules for the column
       for (ColumnValidator columnValidator :
           caze.getCollectionExercise().getSurvey().getSampleValidationRules()) {
-        validateNewValue(entry, columnValidator, "Non-sensitive");
+        SampleValidateHelper.validateNewValue(entry, columnValidator, EventType.UPDATE_SAMPLE);
       }
     }
 
     caseService.saveCase(caze);
 
     eventLogger.logCaseEvent(
-        caze, "Non-sensitive sample data updated", EventType.UPDATE_SAMPLE_SENSITIVE, event,
-        message);  // TODO: Add new type for UPDATE_SAMPLE
+        caze, "Sample data updated", EventType.UPDATE_SAMPLE, event, message);
   }
 
-
-  // TODO: Move this so it's generic?
-  private void validateNewValue(
-      Entry<String, String> entry, ColumnValidator columnValidator,
-      String sampleDataType) {
-    if (columnValidator.getColumnName().equals(entry.getKey())) {
-      Map<String, String> validateThis = Map.of(entry.getKey(), entry.getValue());
-
-      Optional<String> validationErrors = columnValidator.validateRow(validateThis);
-      if (validationErrors.isPresent()) {
-        throw new RuntimeException(
-            sampleDataType + " data update failed validation: " + validationErrors.get());
-      }
-    }
-  }
-
-//  private void validateOnlyNonSensitiveDataBeingUpdated(Case caze, Entry<String, String> entry) {
-//    if (caze.getSampleSensitive().containsKey(entry.getKey())) {
-//      throw new RuntimeException(
-//          "Attempt to update sensitive sample data for key ("
-//              + entry.getKey()
-//              + ") using non-sensitive sample update message!");
-//    } else {
-//      caze.getSample().put(entry.getKey(), entry.getValue());
-//    }
-//  }
-
-  private void validateOnlyNonSensitiveDataBeingUpdated(Case caze, Entry<String, String> entry) {
+  private void validateOnlySampleDataBeingUpdated(Case caze, Entry<String, String> entry) {
     if (caze.getSample().containsKey(entry.getKey())) {
       caze.getSample().put(entry.getKey(), entry.getValue());
     } else {
