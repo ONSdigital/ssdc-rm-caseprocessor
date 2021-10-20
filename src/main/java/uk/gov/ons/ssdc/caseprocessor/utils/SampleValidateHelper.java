@@ -15,7 +15,7 @@ public class SampleValidateHelper {
 
       Optional<String> validationErrors = columnValidator.validateRow(validateThis);
       if (validationErrors.isPresent()) {
-        throw new RuntimeException(eventType + " data update failed validation");
+        throw new RuntimeException(eventType + " failed validation");
       }
     }
   }

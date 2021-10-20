@@ -41,6 +41,8 @@ public class UpdateSampleReceiver {
       // Validate that only sample data that is defined is being attempted to be updated
       validateOnlySampleDataBeingUpdated(caze, entry);
 
+      caze.getSample().put(entry.getKey(), entry.getValue());
+
       // Validate the updated value according to the rules for the column
       for (ColumnValidator columnValidator :
           caze.getCollectionExercise().getSurvey().getSampleValidationRules()) {
@@ -54,9 +56,7 @@ public class UpdateSampleReceiver {
   }
 
   private void validateOnlySampleDataBeingUpdated(Case caze, Entry<String, String> entry) {
-    if (caze.getSample().containsKey(entry.getKey())) {
-      caze.getSample().put(entry.getKey(), entry.getValue());
-    } else {
+    if (!caze.getSample().containsKey(entry.getKey())) {
       throw new RuntimeException("Key (" + entry.getKey() + ") does not match an existing entry!");
     }
   }

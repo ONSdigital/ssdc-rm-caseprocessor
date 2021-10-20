@@ -45,6 +45,6 @@ public class SampleValidateHelperTest {
 
     // Then
     assertThat(thrown.getMessage())
-        .isEqualTo(EventType.UPDATE_SAMPLE_SENSITIVE + " data update failed validation");
+        .isEqualTo(EventType.UPDATE_SAMPLE_SENSITIVE + " failed validation");
   }
 }
