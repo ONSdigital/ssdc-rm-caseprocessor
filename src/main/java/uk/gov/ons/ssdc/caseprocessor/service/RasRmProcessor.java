@@ -33,7 +33,7 @@ public class RasRmProcessor {
   @Value("${queueconfig.ras-rm-case-notification-topic}")
   private String rasRmCaseNotificationTopic;
 
-  @Value("${queueconfig.ras-rm-pubsub-project")
+  @Value("${queueconfig.ras-rm-pubsub-project}")
   private String rasRmPubsubProject;
 
   public RasRmProcessor(
@@ -102,7 +102,6 @@ public class RasRmProcessor {
       }
     }
 
-    // TODO: this can fail if RU ref already in Party Service... in which case we need to get ID
     PartyResponseDTO party =
         rasRmPartyServiceClient.createParty(
             ruRef, caseToProcess.getBatchId(), attributesExcludingPointlessIntegers);
@@ -116,8 +115,8 @@ public class RasRmProcessor {
     sampleUnitParentDTO.setSampleUnitType(
         "B"); // Hard-coded to be B = business. No need for any other value
     sampleUnitParentDTO.setPartyId(party.getId());
-    sampleUnitParentDTO.setCollectionInstrumentId(rasRmCollectionExerciseId);
-    sampleUnitParentDTO.setCollectionExerciseId(rasRmCollectionInstrumentId);
+    sampleUnitParentDTO.setCollectionInstrumentId(rasRmCollectionInstrumentId);
+    sampleUnitParentDTO.setCollectionExerciseId(rasRmCollectionExerciseId);
 
     String topic = toProjectTopicName(rasRmCaseNotificationTopic, rasRmPubsubProject).toString();
 
