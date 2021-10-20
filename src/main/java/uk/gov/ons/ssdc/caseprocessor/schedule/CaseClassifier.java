@@ -23,7 +23,7 @@ public class CaseClassifier {
   public void enqueueCasesForActionRule(ActionRule actionRule) {
     UUID batchId;
 
-    if (actionRule.getType() == ActionRuleType.SHARE_WITH_RASRM) {
+    if (actionRule.getType() == ActionRuleType.RASRM_MAIN_PRINT_SELECTION) {
       int caseCount =
           jdbcTemplate.queryForObject(
               "SELECT COUNT(*) FROM casev3.cases "

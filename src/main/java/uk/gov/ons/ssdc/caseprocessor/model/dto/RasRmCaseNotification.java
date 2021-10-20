@@ -4,7 +4,7 @@ import java.util.UUID;
 import lombok.Data;
 
 @Data
-public class SampleUnitParentDTO {
+public class RasRmCaseNotification {
   private UUID id;
   private boolean activeEnrolment;
   private String sampleUnitRef;

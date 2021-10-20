@@ -47,7 +47,7 @@ public class CaseToProcessProcessor {
       case SMS:
         smsProcessor.process(caseToProcess.getCaze(), caseToProcess.getActionRule());
         break;
-      case SHARE_WITH_RASRM:
+      case RASRM_MAIN_PRINT_SELECTION:
         rasRmProcessor.process(caseToProcess);
         break;
       default:

@@ -13,7 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PartyDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.PartyResponseDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.RasRmPartyResponseDTO;
 
 @Component
 public class RasRmPartyServiceClient {
@@ -33,7 +33,7 @@ public class RasRmPartyServiceClient {
   @Value("${ras-rm-party-service.connection.password}")
   private String password;
 
-  public PartyResponseDTO createParty(
+  public RasRmPartyResponseDTO createParty(
       String sampleUnitRef, UUID sampleSummaryId, Map<String, String> attributes) {
     PartyDTO partyDTO = new PartyDTO();
     partyDTO.setSampleUnitRef(sampleUnitRef);
@@ -47,7 +47,7 @@ public class RasRmPartyServiceClient {
     HttpEntity<PartyDTO> entity = new HttpEntity<>(partyDTO, createHeaders(username, password));
 
     return restTemplate
-        .exchange(uriComponents.toUri(), HttpMethod.POST, entity, PartyResponseDTO.class)
+        .exchange(uriComponents.toUri(), HttpMethod.POST, entity, RasRmPartyResponseDTO.class)
         .getBody();
   }
 

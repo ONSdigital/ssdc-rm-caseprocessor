@@ -4,7 +4,7 @@ import java.util.UUID;
 import lombok.Data;
 
 @Data
-public class PartyResponseDTO {
+public class RasRmPartyResponseDTO {
   private UUID id;
-  private UUID sampleSummaryId;
+  private RasRmPartyAssociationDTO[] associations;
 }
