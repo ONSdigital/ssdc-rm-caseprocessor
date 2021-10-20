@@ -30,6 +30,8 @@ public class CaseClassifier {
                   + buildWhereClause(
                       actionRule.getCollectionExercise().getId(), actionRule.getClassifiers()),
               Integer.class);
+
+      // TODO: has been hard-coded to 1 collection instrument, for now
       batchId = rasRmSampleServiceClient.createSampleSummary(caseCount, 1).getId();
     } else {
       batchId = UUID.randomUUID();
