@@ -12,10 +12,10 @@ import uk.gov.ons.ssdc.common.validation.ColumnValidator;
 import uk.gov.ons.ssdc.common.validation.LengthRule;
 import uk.gov.ons.ssdc.common.validation.Rule;
 
-public class SampleValidateHelperTest {
+class SampleValidateHelperTest {
 
   @Test
-  public void testValidateNewValue() {
+  void testValidateNewValue() {
     // Given
     Entry<String, String> sampleUpdateData = Map.entry("testSampleField", "Test");
     ColumnValidator columnValidator =
@@ -29,7 +29,7 @@ public class SampleValidateHelperTest {
   }
 
   @Test
-  public void testValidateNewValueError() {
+  void testValidateNewValueError() {
     // Given
     Entry<String, String> sampleUpdateData = Map.entry("testSampleField", "Test");
     ColumnValidator columnValidator =
