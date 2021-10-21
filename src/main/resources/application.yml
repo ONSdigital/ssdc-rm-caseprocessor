@@ -91,12 +91,6 @@ uacservice:
   uacqid-fetch-count: 1000
   uacqid-get-timeout: 60   #seconds
 
-ras-rm-sample-service:
-  connection:
-    scheme: http
-    host: localhost
-    port: 8125
-
 ras-rm-party-service:
   connection:
     scheme: http

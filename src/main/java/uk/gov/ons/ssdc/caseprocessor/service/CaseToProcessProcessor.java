@@ -11,17 +11,14 @@ public class CaseToProcessProcessor {
   private final PrintProcessor printProcessor;
   private final DeactivateUacProcessor deactivateUacProcessor;
   private final SmsProcessor smsProcessor;
-  private final RasRmProcessor rasRmProcessor;
 
   public CaseToProcessProcessor(
       PrintProcessor printProcessor,
       DeactivateUacProcessor deactivateUacProcessor,
-      SmsProcessor smsProcessor,
-      RasRmProcessor rasRmProcessor) {
+      SmsProcessor smsProcessor) {
     this.printProcessor = printProcessor;
     this.deactivateUacProcessor = deactivateUacProcessor;
     this.smsProcessor = smsProcessor;
-    this.rasRmProcessor = rasRmProcessor;
   }
 
   public void process(CaseToProcess caseToProcess) {
@@ -46,9 +43,6 @@ public class CaseToProcessProcessor {
         break;
       case SMS:
         smsProcessor.process(caseToProcess.getCaze(), caseToProcess.getActionRule());
-        break;
-      case RASRM_MAIN_PRINT_SELECTION:
-        rasRmProcessor.process(caseToProcess);
         break;
       default:
         throw new NotImplementedException("No implementation for other types of action rule yet");

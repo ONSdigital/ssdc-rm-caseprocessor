@@ -101,6 +101,7 @@ public class NewCaseReceiverTest {
           new ColumnValidator("POSTCODE", false, new Rule[] {new MandatoryRule()}),
           new ColumnValidator("Telephone", true, new Rule[] {new MandatoryRule()})
         });
+    survey.setSampleDefinitionUrl("testDefinition");
 
     CollectionExercise collex = new CollectionExercise();
     collex.setSurvey(survey);
