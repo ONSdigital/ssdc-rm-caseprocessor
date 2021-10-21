@@ -33,8 +33,7 @@ public class RasRmCaseNotificationEnrichmentService {
   private String rasRmPubsubProject;
 
   public RasRmCaseNotificationEnrichmentService(
-      RasRmPartyServiceClient rasRmPartyServiceClient,
-      MessageSender messageSender) {
+      RasRmPartyServiceClient rasRmPartyServiceClient, MessageSender messageSender) {
     this.rasRmPartyServiceClient = rasRmPartyServiceClient;
     this.messageSender = messageSender;
   }
@@ -97,6 +96,7 @@ public class RasRmCaseNotificationEnrichmentService {
 
     Map<String, String> enrichedSample = new HashMap<>(sample);
     enrichedSample.put("activeEnrolment", Boolean.toString(activeEnrolment));
+    enrichedSample.put("partyId", party.getId().toString());
     return enrichedSample;
   }
 

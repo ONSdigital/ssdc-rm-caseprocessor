@@ -98,3 +98,9 @@ ras-rm-party-service:
     port: 8081
     username: admin
     password: secret
+
+ras-rm-case-service:
+  connection:
+    scheme: http
+    host: localhost
+    port: 8171

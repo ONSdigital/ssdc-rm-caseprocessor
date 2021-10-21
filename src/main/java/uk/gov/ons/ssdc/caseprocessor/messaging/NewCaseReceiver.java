@@ -99,7 +99,7 @@ public class NewCaseReceiver {
 
     Map<String, String> sample = newCasePayload.getSample();
 
-    if (collex.getSurvey().getSampleDefinitionUrl().endsWith("ras-rm-business.json")) {
+    if (collex.getSurvey().getSampleDefinitionUrl().endsWith("business.json")) {
       sample =
           rasRmNewBusinessCaseEnricher.notifyRasRmAndEnrichSample(sample, collex.getMetadata());
     }
