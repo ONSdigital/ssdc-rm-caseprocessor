@@ -1,5 +1,18 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_UAC_METADATA;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -22,20 +35,6 @@ import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyExportFileTemplate;
 import uk.gov.ons.ssdc.common.model.entity.FulfilmentToProcess;
 import uk.gov.ons.ssdc.common.model.entity.Survey;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_UAC_METADATA;
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
-
 @ExtendWith(MockitoExtension.class)
 class ExportFileFulfilmentReceiverTest {
   @Mock private CaseService caseService;
@@ -46,7 +45,7 @@ class ExportFileFulfilmentReceiverTest {
 
   @InjectMocks private PrintFulfilmentReceiver underTest;
 
-  private final static String PACK_CODE = "PACK_CODE";
+  private static final String PACK_CODE = "PACK_CODE";
 
   @Test
   void testReceiveMessage() {

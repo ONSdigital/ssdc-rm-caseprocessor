@@ -1,5 +1,14 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_SMS_REQUEST_SUBSCRIPTION;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,16 +41,6 @@ import uk.gov.ons.ssdc.common.model.entity.ExportFileRow;
 import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
 import uk.gov.ons.ssdc.common.model.entity.SmsTemplate;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
-
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_SMS_REQUEST_SUBSCRIPTION;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 
 @ContextConfiguration
 @SpringBootTest

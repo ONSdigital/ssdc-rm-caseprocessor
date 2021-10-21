@@ -18,7 +18,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.integration.support.DefaultErrorMessageStrategy;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
@@ -34,13 +33,12 @@ class ExportFileProcessorTest {
   @Mock private EventLogger eventLogger;
   @Mock private ExportFileRowRepository exportFileRowRepository;
 
-  @InjectMocks
-  ExportFileProcessor underTest;
+  @InjectMocks ExportFileProcessor underTest;
 
-  private final static String PACK_CODE = "test pack code";
-  private final static String UAC = "test UAC";
-  private final static String QID = "test QID";
-  private final static String EXPORT_FILE_DESTINATION = "test export file destination";
+  private static final String PACK_CODE = "test pack code";
+  private static final String UAC = "test UAC";
+  private static final String QID = "test QID";
+  private static final String EXPORT_FILE_DESTINATION = "test export file destination";
 
   @Test
   void testProcessExportFileRow() {

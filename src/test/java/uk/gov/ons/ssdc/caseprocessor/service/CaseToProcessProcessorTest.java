@@ -1,5 +1,9 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
+import static org.mockito.Mockito.verify;
+
+import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,11 +14,6 @@ import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CaseToProcess;
 import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
-
-import java.util.Map;
-import java.util.UUID;
-
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class CaseToProcessProcessorTest {
