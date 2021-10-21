@@ -40,7 +40,7 @@ import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyExportFileTemplate;
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
 class FulfilmentIT {
-  private static final String FULFILMENT_TOPIC = "event_export-file-fulfilment";
+  private static final String FULFILMENT_TOPIC = "event_print-fulfilment";
 
   private static final String PACK_CODE = "test-pack-code";
   private static final String EXPORT_FILE_DESTINATION = "FOOBAR_EXPORT_FILE_DESTINATION";
