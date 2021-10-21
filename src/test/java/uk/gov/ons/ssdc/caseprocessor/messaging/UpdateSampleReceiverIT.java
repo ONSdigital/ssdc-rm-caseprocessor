@@ -65,6 +65,7 @@ public class UpdateSampleReceiverIT {
     Map<String, String> sampleData = new HashMap<>();
     sampleData.put("testSampleField", "Test");
     caze.setSample(sampleData);
+    caze.setSampleSensitive(new HashMap<>());
     caze.setCollectionExercise(junkDataHelper.setupJunkCollex());
     caseRepository.saveAndFlush(caze);
 

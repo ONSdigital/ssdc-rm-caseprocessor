@@ -3,10 +3,13 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
@@ -44,13 +47,67 @@ public class UpdateSampleReceiverTest {
   @InjectMocks UpdateSampleReceiver underTest;
 
   @Test
-  public void testUpdateSampleReceiver() {
+  void testUpdateSampleReceiverCreatesNewSampleData() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
     managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
     managementEvent.getHeader().setTopic("Test topic");
     managementEvent.getHeader().setChannel("CC");
+    managementEvent.getHeader().setCorrelationId(TEST_CORRELATION_ID);
+    managementEvent.getHeader().setOriginatingUser(TEST_ORIGINATING_USER);
+    managementEvent.setPayload(new PayloadDTO());
+    managementEvent.getPayload().setUpdateSample(new UpdateSample());
+    managementEvent.getPayload().getUpdateSample().setCaseId(UUID.randomUUID());
+    managementEvent.getPayload().getUpdateSample().setSample(Map.of("newSampleData", "New"));
+    Message<byte[]> message = constructMessage(managementEvent);
+
+    // Given
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+    survey.setSampleValidationRules(
+        new ColumnValidator[] {
+          new ColumnValidator("newSampleData", true, new Rule[] {new LengthRule(30)})
+        });
+    CollectionExercise collex = new CollectionExercise();
+    collex.setId(UUID.randomUUID());
+    collex.setSurvey(survey);
+
+    Case expectedCase = new Case();
+    expectedCase.setCollectionExercise(collex);
+    expectedCase.setSample(new HashMap<>());
+    ;
+    expectedCase.setSampleSensitive(new HashMap<>());
+
+    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+
+    // when
+    underTest.receiveMessage(message);
+
+    // then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdate(
+            caseArgumentCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
+    Case actualCase = caseArgumentCaptor.getValue();
+    assertThat(actualCase.getSample()).isEqualTo(Map.of("newSampleData", "New"));
+
+    verify(eventLogger)
+        .logCaseEvent(
+            expectedCase, "Sample data updated", EventType.UPDATE_SAMPLE, managementEvent, message);
+  }
+
+  @Test
+  void testUpdateSampleReceiverUpdatesExistingSampleData() {
+    EventDTO managementEvent = new EventDTO();
+    managementEvent.setHeader(new EventHeaderDTO());
+    managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
+    managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
+    managementEvent.getHeader().setTopic("Test topic");
+    managementEvent.getHeader().setChannel("CC");
+    managementEvent.getHeader().setCorrelationId(TEST_CORRELATION_ID);
+    managementEvent.getHeader().setOriginatingUser(TEST_ORIGINATING_USER);
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setUpdateSample(new UpdateSample());
     managementEvent.getPayload().getUpdateSample().setCaseId(UUID.randomUUID());
@@ -73,6 +130,8 @@ public class UpdateSampleReceiverTest {
     Map<String, String> sampleData = new HashMap<>();
     sampleData.put("testSampleField", "Test");
     expectedCase.setSample(sampleData);
+    expectedCase.setSampleSensitive(new HashMap<>());
+
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // when
@@ -81,7 +140,9 @@ public class UpdateSampleReceiverTest {
     // then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
 
-    verify(caseService).saveCase(caseArgumentCaptor.capture());
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdate(
+            caseArgumentCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.getSample()).isEqualTo(Map.of("testSampleField", "Updated"));
 
@@ -91,7 +152,7 @@ public class UpdateSampleReceiverTest {
   }
 
   @Test
-  public void testMessageKeyDoesNotMatchExistingEntry() {
+  void testCannotUseUpdateSampleMessageKeyOnExistingSensitiveKey() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
     managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
@@ -101,27 +162,29 @@ public class UpdateSampleReceiverTest {
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setUpdateSample(new UpdateSample());
     managementEvent.getPayload().getUpdateSample().setCaseId(UUID.randomUUID());
-    managementEvent.getPayload().getUpdateSample().setSample(Map.of("UPRN", "9999999"));
+    managementEvent.getPayload().getUpdateSample().setSample(Map.of("mobileNumber", "999999999"));
     Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
     Case expectedCase = new Case();
-    Map<String, String> existingSampleData = new HashMap<>();
-    existingSampleData.put("testSampleField", "Test");
-    expectedCase.setSample(existingSampleData);
+    Map<String, String> existingSensitiveSampleData = new HashMap<>();
+    existingSensitiveSampleData.put("mobileNumber", "111111111");
+    expectedCase.setSampleSensitive(existingSensitiveSampleData);
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
     RuntimeException thrown =
         assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
-    assertThat(thrown.getMessage()).isEqualTo("Key (UPRN) does not match an existing entry!");
+    assertThat(thrown.getMessage())
+        .isEqualTo(
+            "Key (mobileNumber) is sensitive and cannot be used for non-sensitive UPDATE_SAMPLE events!");
 
-    verify(caseService, never()).saveCase(any());
+    verify(caseService, never()).saveCaseAndEmitCaseUpdate(any(), any(), any());
     verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(Message.class));
   }
 
   @Test
-  public void testUpdateSampleReceiverFailsValidation() {
+  void testUpdateSampleReceiverFailsValidation() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
     managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
