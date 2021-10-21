@@ -13,14 +13,14 @@ import uk.gov.ons.ssdc.common.model.entity.ActionRule;
 import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 
-public class ActionRuleProcessorTest {
+class ActionRuleProcessorTest {
   private final ActionRuleRepository actionRuleRepository = mock(ActionRuleRepository.class);
   private final CaseClassifier caseClassifier = mock(CaseClassifier.class);
 
   @Test
-  public void testExecuteClassifiers() {
+  void testExecuteClassifiers() {
     // Given
-    ActionRule actionRule = setUpActionRule(ActionRuleType.PRINT);
+    ActionRule actionRule = setUpActionRule(ActionRuleType.EXPORT_FILE);
 
     // when
     ActionRuleProcessor underTest = new ActionRuleProcessor(caseClassifier, actionRuleRepository);

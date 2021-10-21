@@ -25,7 +25,7 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.new-case-subscription}")
   private String newCaseSubscription;
 
-  @Value("${queueconfig.print-fulfilment-subscription}")
+  @Value("${queueconfig.-fulfilment-subscription}")
   private String printFulfilmentSubscription;
 
   @Value("${queueconfig.receipt-subscription}")

@@ -5,17 +5,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleSurveyPrintTemplateRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleSurveyExportFileTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ClusterLeaderRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentNextTriggerRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentSurveyPrintTemplateRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentSurveyExportFileTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintTemplateRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.SmsTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
@@ -30,18 +30,18 @@ public class DeleteDataHelper {
   @Autowired private EventRepository eventRepository;
   @Autowired private FulfilmentNextTriggerRepository fulfilmentNextTriggerRepository;
   @Autowired private FulfilmentToProcessRepository fulfilmentToProcessRepository;
-  @Autowired private PrintTemplateRepository printTemplateRepository;
+  @Autowired private ExportFileTemplateRepository exportFileTemplateRepository;
 
   @Autowired
-  private FulfilmentSurveyPrintTemplateRepository fulfilmentSurveyPrintTemplateRepository;
+  private FulfilmentSurveyExportFileTemplateRepository fulfilmentSurveyExportFileTemplateRepository;
 
   @Autowired
-  private ActionRuleSurveyPrintTemplateRepository actionRuleSurveyPrintTemplateRepository;
+  private ActionRuleSurveyExportFileTemplateRepository actionRuleSurveyExportFileTemplateRepository;
 
   @Autowired private ActionRuleRepository actionRuleRepository;
   @Autowired private CaseToProcessRepository caseToProcessRepository;
   @Autowired private ClusterLeaderRepository clusterLeaderRepository;
-  @Autowired private PrintFileRowRepository printFileRowRepository;
+  @Autowired private ExportFileRowRepository exportFileRowRepository;
   @Autowired private SmsTemplateRepository smsTemplateRepository;
 
   @Transactional
@@ -54,12 +54,12 @@ public class DeleteDataHelper {
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
     collectionExerciseRepository.deleteAllInBatch();
-    fulfilmentSurveyPrintTemplateRepository.deleteAllInBatch();
-    actionRuleSurveyPrintTemplateRepository.deleteAllInBatch();
-    printTemplateRepository.deleteAllInBatch();
+    fulfilmentSurveyExportFileTemplateRepository.deleteAllInBatch();
+    actionRuleSurveyExportFileTemplateRepository.deleteAllInBatch();
+    exportFileTemplateRepository.deleteAllInBatch();
     surveyRepository.deleteAllInBatch();
     clusterLeaderRepository.deleteAllInBatch();
-    printFileRowRepository.deleteAllInBatch();
+    exportFileRowRepository.deleteAllInBatch();
     smsTemplateRepository.deleteAllInBatch();
   }
 }

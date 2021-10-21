@@ -33,7 +33,7 @@ public class FulfilmentProcessor {
           jdbcTemplate.update(
               "UPDATE casev3.fulfilment_to_process "
                   + "SET batch_quantity = (SELECT COUNT(*) FROM casev3.fulfilment_to_process "
-                  + "WHERE print_template_pack_code = ?), batch_id = ? WHERE print_template_pack_code = ?",
+                  + "WHERE export_file_template_pack_code = ?), batch_id = ? WHERE export_file_template_pack_code = ?",
               packCode,
               batchId,
               packCode);

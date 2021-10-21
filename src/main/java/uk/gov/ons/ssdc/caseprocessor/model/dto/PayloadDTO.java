@@ -12,7 +12,7 @@ public class PayloadDTO {
   private CaseUpdateDTO caseUpdate;
   private UacUpdateDTO uacUpdate;
   private InvalidCase invalidCase;
-  private PrintFulfilmentDTO printFulfilment;
+  private ExportFileFulfilmentDTO exportFileFulfilment;
   private TelephoneCaptureDTO telephoneCapture;
   private DeactivateUacDTO deactivateUac;
   private UpdateSampleSensitive updateSampleSensitive;

@@ -16,7 +16,7 @@ So, we have surveys, which have many collection exercises. A collection exercise
 
 The case processor schedules action rules to be triggered at a specific date & time.
 
-The case processor is responsible for creating the content of the CSV print file which will be used to print letters, according to a flexible template. The print files can contain case refs, UACs, QIDs and any attribute of the sample.
+The case processor is responsible for creating the content of the CSV export file which will be used to export case data for purposed such as printing letters, according to a flexible template. The export files can contain case refs, UACs, QIDs and any attribute of the sample.
 
 ## Building
 To run all the tests and build the image
@@ -81,10 +81,10 @@ values ('f2af7113-eb93-4946-930d-3775e81a2666',    -- action rule ID
         'left(sample ->> ''REGION'',1) = ''W''',   -- classifier (e.g. only Wales region cases)
         'f',                                       -- always false, meaning not triggered
         'REMINDER_ONE',                            -- pack code
-        'PPO',                                     -- print supplier
+        'PPO',                                     -- export file destination name
         '["BOAT_NAME","MARINA_BERTH","__uac__"]',  -- CSV file template
         '20210528T08:00:00.000',                   -- date/time to trigger acton rule
-        'PRINT',                                   -- type of action rule
+        'EXPORT_FILE',                             -- type of action rule
         '0184cb41-0529-40ff-a2b7-08770249b95c');   -- collection exercise ID
 ```
 

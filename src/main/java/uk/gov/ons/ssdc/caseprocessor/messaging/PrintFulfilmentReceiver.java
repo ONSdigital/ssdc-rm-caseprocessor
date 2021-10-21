@@ -37,17 +37,17 @@ public class PrintFulfilmentReceiver {
   public void receiveMessage(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
-    Case caze = caseService.getCaseByCaseId(event.getPayload().getPrintFulfilment().getCaseId());
+    Case caze = caseService.getCaseByCaseId(event.getPayload().getExportFileFulfilment().getCaseId());
 
     PrintTemplate printTemplate =
-        getAllowedPrintTemplate(event.getPayload().getPrintFulfilment().getPackCode(), caze);
+        getAllowedPrintTemplate(event.getPayload().getExportFileFulfilment().getPackCode(), caze);
 
     FulfilmentToProcess fulfilmentToProcess = new FulfilmentToProcess();
     fulfilmentToProcess.setPrintTemplate(printTemplate);
     fulfilmentToProcess.setCaze(caze);
     fulfilmentToProcess.setCorrelationId(event.getHeader().getCorrelationId());
     fulfilmentToProcess.setOriginatingUser(event.getHeader().getOriginatingUser());
-    fulfilmentToProcess.setUacMetadata(event.getPayload().getPrintFulfilment().getUacMetadata());
+    fulfilmentToProcess.setUacMetadata(event.getPayload().getExportFileFulfilment().getUacMetadata());
 
     fulfilmentToProcessRepository.saveAndFlush(fulfilmentToProcess);
 
