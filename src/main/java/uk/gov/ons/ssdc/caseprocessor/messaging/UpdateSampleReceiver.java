@@ -41,13 +41,13 @@ public class UpdateSampleReceiver {
       // Validate that only sample data that is defined is being attempted to be updated
       validateOnlySampleDataBeingUpdated(caze, entry);
 
-      caze.getSample().put(entry.getKey(), entry.getValue());
-
       // Validate the updated value according to the rules for the column
       for (ColumnValidator columnValidator :
           caze.getCollectionExercise().getSurvey().getSampleValidationRules()) {
         SampleValidateHelper.validateNewValue(entry, columnValidator, EventType.UPDATE_SAMPLE);
       }
+
+      caze.getSample().put(entry.getKey(), entry.getValue());
     }
 
     caseService.saveCase(caze);
