@@ -76,7 +76,6 @@ public class UpdateSampleReceiverTest {
     Case expectedCase = new Case();
     expectedCase.setCollectionExercise(collex);
     expectedCase.setSample(new HashMap<>());
-    ;
     expectedCase.setSampleSensitive(new HashMap<>());
 
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);

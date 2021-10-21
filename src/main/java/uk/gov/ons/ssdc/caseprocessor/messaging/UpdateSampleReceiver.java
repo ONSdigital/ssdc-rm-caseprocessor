@@ -58,7 +58,8 @@ public class UpdateSampleReceiver {
 
   private void validateOnlyNonSensitiveSampleDataBeingUpdated(
       Case caze, Entry<String, String> entry) {
-    if (caze.getSampleSensitive().containsKey(entry.getKey())) {
+    if (caze.getSampleSensitive() != null
+        && caze.getSampleSensitive().containsKey(entry.getKey())) {
       throw new RuntimeException(
           "Key ("
               + entry.getKey()
