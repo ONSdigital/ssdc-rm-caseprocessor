@@ -34,7 +34,7 @@ public class RasRmPartyServiceClient {
   private String password;
 
   public RasRmPartyResponseDTO createParty(
-      String sampleUnitRef, UUID sampleSummaryId, Map<String, String> attributes) {
+      String sampleUnitRef, UUID sampleSummaryId, Map<String, Object> attributes) {
     PartyDTO partyDTO = new PartyDTO();
     partyDTO.setSampleUnitRef(sampleUnitRef);
     partyDTO.setSampleUnitType("B"); // Hard-coded to be B = business. No need for any other value

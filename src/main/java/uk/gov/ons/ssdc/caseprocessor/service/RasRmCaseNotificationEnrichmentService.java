@@ -17,15 +17,14 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.RasRmPartyResponseDTO;
 
 @Component
 public class RasRmCaseNotificationEnrichmentService {
+  private static final Set<String> MANDATORY_COLLEX_METADATA =
+      Set.of("rasRmSampleSummaryId", "rasRmCollectionExerciseId", "rasRmCollectionInstrumentId");
   private static final String[] MANDATORY_SAMPLE_COLUMNS = {"ruref", "runame1"};
-
-  // TODO: Maybe do something different with these... if they turn out not to be pointless
-  private static final Set<String> POINTLESS_INTEGER_COLUMNS =
+  private static final Set<String> INTEGER_PARTY_ATTRIBUTES =
       Set.of("froempment", "frotover", "cell_no");
 
   private final RasRmPartyServiceClient rasRmPartyServiceClient;
   private final MessageSender messageSender;
-  private final PrintProcessor printProcessor;
 
   @Value("${queueconfig.ras-rm-case-notification-topic}")
   private String rasRmCaseNotificationTopic;
@@ -35,11 +34,9 @@ public class RasRmCaseNotificationEnrichmentService {
 
   public RasRmCaseNotificationEnrichmentService(
       RasRmPartyServiceClient rasRmPartyServiceClient,
-      MessageSender messageSender,
-      PrintProcessor printProcessor) {
+      MessageSender messageSender) {
     this.rasRmPartyServiceClient = rasRmPartyServiceClient;
     this.messageSender = messageSender;
-    this.printProcessor = printProcessor;
   }
 
   public Map<String, String> notifyRasRmAndEnrichSample(
@@ -56,6 +53,11 @@ public class RasRmCaseNotificationEnrichmentService {
     }
 
     Map metadata = (Map) metadataObject;
+
+    if (!metadata.keySet().containsAll(MANDATORY_COLLEX_METADATA)) {
+      throw new RuntimeException("Metadata does not contain mandatory values");
+    }
+
     UUID rasRmSampleSummaryId = UUID.fromString((String) metadata.get("rasRmSampleSummaryId"));
     UUID rasRmCollectionExerciseId =
         UUID.fromString((String) metadata.get("rasRmCollectionExerciseId"));
@@ -71,12 +73,10 @@ public class RasRmCaseNotificationEnrichmentService {
 
     String ruRef = sample.get("ruref");
 
-    Map<String, String> attributesExcludingPointlessIntegers =
-        getAttributesExcludingPointlessIntegers(sample);
+    Map<String, Object> partyAttributes = covertIntegerPartyAttributes(sample);
 
     RasRmPartyResponseDTO party =
-        rasRmPartyServiceClient.createParty(
-            ruRef, rasRmSampleSummaryId, attributesExcludingPointlessIntegers);
+        rasRmPartyServiceClient.createParty(ruRef, rasRmSampleSummaryId, partyAttributes);
 
     boolean activeEnrolment =
         Arrays.stream(party.getAssociations())
@@ -100,14 +100,15 @@ public class RasRmCaseNotificationEnrichmentService {
     return enrichedSample;
   }
 
-  private Map<String, String> getAttributesExcludingPointlessIntegers(Map<String, String> sample) {
-    // TODO: Maybe do something different with these... if they turn out not to be pointless
-    Map<String, String> attributesExcludingPointlessIntegers = new HashMap<>();
+  private Map<String, Object> covertIntegerPartyAttributes(Map<String, String> sample) {
+    Map<String, Object> partyAttributes = new HashMap<>();
     for (String key : sample.keySet()) {
-      if (!POINTLESS_INTEGER_COLUMNS.contains(key)) {
-        attributesExcludingPointlessIntegers.put(key, sample.get(key));
+      if (INTEGER_PARTY_ATTRIBUTES.contains(key)) {
+        partyAttributes.put(key, Integer.valueOf(sample.get(key)));
+      } else {
+        partyAttributes.put(key, sample.get(key));
       }
     }
-    return attributesExcludingPointlessIntegers;
+    return partyAttributes;
   }
 }

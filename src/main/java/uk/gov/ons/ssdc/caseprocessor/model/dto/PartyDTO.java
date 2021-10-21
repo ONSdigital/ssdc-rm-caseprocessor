@@ -9,5 +9,5 @@ public class PartyDTO {
   private String sampleUnitRef;
   private String sampleUnitType;
   private UUID sampleSummaryId;
-  private Map<String, String> attributes;
+  private Map<String, Object> attributes;
 }
