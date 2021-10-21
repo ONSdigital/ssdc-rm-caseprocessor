@@ -88,14 +88,14 @@ class ExportFileProcessorTest {
     ExportFileRow actualExportFileRow = exportFileRowArgumentCaptor.getValue();
     assertThat(actualExportFileRow.getPackCode()).isEqualTo(PACK_CODE);
     assertThat(actualExportFileRow.getExportFileDestination()).isEqualTo(EXPORT_FILE_DESTINATION);
-    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
+    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\"|\"" + UAC + "\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService)
         .saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture(), eq(actionRule.getId()), isNull());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getUac()).isEqualTo(UAC);
-    assertThat(actualUacQidLink.getQid()).isEqualTo(UAC);
+    assertThat(actualUacQidLink.getQid()).isEqualTo(QID);
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
     assertThat(actualUacQidLink.isActive()).isTrue();
     assertThat(actualUacQidLink.getMetadata()).isEqualTo(TEST_UAC_METADATA);
@@ -150,7 +150,7 @@ class ExportFileProcessorTest {
     ExportFileRow actualExportFileRow = exportFileRowArgumentCaptor.getValue();
     assertThat(actualExportFileRow.getPackCode()).isEqualTo(PACK_CODE);
     assertThat(actualExportFileRow.getExportFileDestination()).isEqualTo(EXPORT_FILE_DESTINATION);
-    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
+    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\"|\"" + UAC + "\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService)

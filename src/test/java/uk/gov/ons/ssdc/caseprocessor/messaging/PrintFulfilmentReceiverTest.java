@@ -36,7 +36,7 @@ import uk.gov.ons.ssdc.common.model.entity.FulfilmentToProcess;
 import uk.gov.ons.ssdc.common.model.entity.Survey;
 
 @ExtendWith(MockitoExtension.class)
-class ExportFileFulfilmentReceiverTest {
+class PrintFulfilmentReceiverTest {
   @Mock private CaseService caseService;
 
   @Mock private EventLogger eventLogger;
@@ -94,8 +94,8 @@ class ExportFileFulfilmentReceiverTest {
     verify(eventLogger)
         .logCaseEvent(
             eq(expectedCase),
-            eq("Export file fulfilment requested"),
-            eq(EventType.EXPORT_FILE_FULFILMENT),
+            eq("Print fulfilment requested"),
+            eq(EventType.PRINT_FULFILMENT),
             eq(managementEvent),
             eq(message));
   }
