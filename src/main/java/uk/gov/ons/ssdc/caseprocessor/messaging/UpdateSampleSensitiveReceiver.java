@@ -36,21 +36,23 @@ public class UpdateSampleSensitiveReceiver {
     Case caze = caseService.getCaseByCaseId(updateSampleSensitive.getCaseId());
 
     for (Map.Entry<String, String> entry : updateSampleSensitive.getSampleSensitive().entrySet()) {
+
       // First, validate that only sensitive data that is defined is being attempted to be updated
       validateOnlySensitiveDataBeingUpdated(caze, entry);
 
-      // Second, if the data is not being blanked, validate it according to rules
-      if (entry.getValue().length() == 0) {
-        // Blanking out the sensitive PII data is allowed, for GDPR reasons
-        continue;
+      // Blanking out the sensitive PII data is allowed, for GDPR reasons
+      if (entry.getValue().length() != 0) {
+
+        // If the data is not being blanked, validate it according to rules
+        for (ColumnValidator columnValidator :
+            caze.getCollectionExercise().getSurvey().getSampleValidationRules()) {
+          SampleValidateHelper.validateNewValue(
+              entry, columnValidator, EventType.UPDATE_SAMPLE_SENSITIVE);
+        }
       }
 
-      // Finally, validate the updated value according to the rules for the column
-      for (ColumnValidator columnValidator :
-          caze.getCollectionExercise().getSurvey().getSampleValidationRules()) {
-        SampleValidateHelper.validateNewValue(
-            entry, columnValidator, EventType.UPDATE_SAMPLE_SENSITIVE);
-      }
+      // Finally, update the cases sample sensitive blob with the validated value
+      caze.getSampleSensitive().put(entry.getKey(), entry.getValue());
     }
 
     caseService.saveCase(caze);
@@ -60,9 +62,7 @@ public class UpdateSampleSensitiveReceiver {
   }
 
   private void validateOnlySensitiveDataBeingUpdated(Case caze, Entry<String, String> entry) {
-    if (caze.getSampleSensitive().containsKey(entry.getKey())) {
-      caze.getSampleSensitive().put(entry.getKey(), entry.getValue());
-    } else {
+    if (!caze.getSampleSensitive().containsKey(entry.getKey())) {
       throw new RuntimeException("Key (" + entry.getKey() + ") does not match an existing entry!");
     }
   }
