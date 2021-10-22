@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import uk.gov.ons.ssdc.common.model.entity.ActionRule;
 import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.common.model.entity.Survey;
 
 public class CaseClassifierTest {
 
@@ -19,10 +20,13 @@ public class CaseClassifierTest {
     // Given
     JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
 
-    CaseClassifier underTest = new CaseClassifier(jdbcTemplate);
+    CaseClassifier underTest = new CaseClassifier(jdbcTemplate, null);
     String classifiers = "foo IN ('bar')";
+    Survey survey = new Survey();
+    survey.setSampleDefinitionUrl("testDefinition");
     CollectionExercise collectionExercise = new CollectionExercise();
     collectionExercise.setId(UUID.randomUUID());
+    collectionExercise.setSurvey(survey);
     ActionRule actionRule = new ActionRule();
     actionRule.setId(UUID.randomUUID());
     actionRule.setCollectionExercise(collectionExercise);

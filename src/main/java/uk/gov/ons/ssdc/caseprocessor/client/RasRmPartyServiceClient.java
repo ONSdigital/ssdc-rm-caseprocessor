@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.PartyDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.RasRmPartyDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.RasRmPartyLinkDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RasRmPartyResponseDTO;
 
 @Component
@@ -35,7 +36,7 @@ public class RasRmPartyServiceClient {
 
   public RasRmPartyResponseDTO createParty(
       String sampleUnitRef, UUID sampleSummaryId, Map<String, Object> attributes) {
-    PartyDTO partyDTO = new PartyDTO();
+    RasRmPartyDTO partyDTO = new RasRmPartyDTO();
     partyDTO.setSampleUnitRef(sampleUnitRef);
     partyDTO.setSampleUnitType("B"); // Hard-coded to be B = business. No need for any other value
     partyDTO.setSampleSummaryId(sampleSummaryId);
@@ -44,11 +45,37 @@ public class RasRmPartyServiceClient {
     RestTemplate restTemplate = new RestTemplate();
     UriComponents uriComponents = createUriComponents("party-api/v1/parties");
 
-    HttpEntity<PartyDTO> entity = new HttpEntity<>(partyDTO, createHeaders(username, password));
+    HttpEntity<RasRmPartyDTO> entity =
+        new HttpEntity<>(partyDTO, createHeaders(username, password));
 
     return restTemplate
         .exchange(uriComponents.toUri(), HttpMethod.POST, entity, RasRmPartyResponseDTO.class)
         .getBody();
+  }
+
+  public void linkSampleSummaryToCollex(UUID sampleSummaryId, UUID rasRmCollectionExerciseId) {
+    RasRmPartyLinkDTO rasRmPartyLinkDTO = new RasRmPartyLinkDTO();
+    rasRmPartyLinkDTO.setCollectionExerciseId(rasRmCollectionExerciseId);
+
+    RestTemplate restTemplate = new RestTemplate();
+    UriComponents uriComponents =
+        createUriComponents(
+            "party-api/v1/businesses/sample/link/{sampleSummaryId}", sampleSummaryId);
+
+    HttpEntity<RasRmPartyLinkDTO> entity =
+        new HttpEntity<>(rasRmPartyLinkDTO, createHeaders(username, password));
+
+    restTemplate.exchange(uriComponents.toUri(), HttpMethod.PUT, entity, Void.class);
+  }
+
+  private UriComponents createUriComponents(String path, UUID sampleSummaryId) {
+    return UriComponentsBuilder.newInstance()
+        .scheme(scheme)
+        .host(host)
+        .port(port)
+        .path(path)
+        .buildAndExpand(sampleSummaryId)
+        .encode();
   }
 
   private UriComponents createUriComponents(String path) {

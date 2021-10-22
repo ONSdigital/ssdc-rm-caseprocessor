@@ -5,7 +5,7 @@ import java.util.UUID;
 import lombok.Data;
 
 @Data
-public class PartyDTO {
+public class RasRmPartyDTO {
   private String sampleUnitRef;
   private String sampleUnitType;
   private UUID sampleSummaryId;
