@@ -49,6 +49,9 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.deactivate-uac-subscription}")
   private String deactivateUacSubscription;
 
+  @Value("${queueconfig.update-sample-subscription}")
+  private String updateSampleSubscription;
+
   @Value("${queueconfig.update-sample-sensitive-subscription}")
   private String updateSampleSensitiveSubscription;
 
@@ -103,6 +106,11 @@ public class MessageConsumerConfig {
 
   @Bean
   public MessageChannel deactivateUacInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel updateSampleInputChannel() {
     return new DirectChannel();
   }
 
@@ -183,6 +191,14 @@ public class MessageConsumerConfig {
       @Qualifier("deactivateUacInputChannel") MessageChannel channel) {
     String subscription =
         toProjectSubscriptionName(deactivateUacSubscription, sharedPubsubProject).toString();
+    return makeAdapter(channel, subscription);
+  }
+
+  @Bean
+  PubSubInboundChannelAdapter updateSampleInbound(
+      @Qualifier("updateSampleInputChannel") MessageChannel channel) {
+    String subscription =
+        toProjectSubscriptionName(updateSampleSubscription, sharedPubsubProject).toString();
     return makeAdapter(channel, subscription);
   }
 

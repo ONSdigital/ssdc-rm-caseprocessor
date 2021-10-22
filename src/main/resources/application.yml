@@ -47,6 +47,7 @@ queueconfig:
   uac-authentication-subscription: event_uac-authentication_rm-case-processor
   print-fulfilment-subscription: event_print-fulfilment_rm-case-processor
   deactivate-uac-subscription: event_deactivate-uac_rm-case-processor
+  update-sample-subscription: event_update-sample_rm-case-processor
   update-sample-sensitive-subscription: event_update-sample-sensitive_rm-case-processor
   sms-request-topic: rm-internal-sms-request
   case-update-topic: event_case-update
