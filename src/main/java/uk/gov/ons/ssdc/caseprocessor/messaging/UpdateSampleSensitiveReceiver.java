@@ -40,21 +40,19 @@ public class UpdateSampleSensitiveReceiver {
       // First, validate that only sensitive data that is defined is being attempted to be updated
       validateOnlySensitiveDataBeingUpdated(caze, entry);
 
-      // Update the case object, we must then error out before saving if it fails validation
+      // Blanking out the sensitive PII data is allowed, for GDPR reasons
+      if (entry.getValue().length() != 0) {
+
+        // If the data is not being blanked, validate it according to rules
+        for (ColumnValidator columnValidator :
+            caze.getCollectionExercise().getSurvey().getSampleValidationRules()) {
+          SampleValidateHelper.validateNewValue(
+              entry, columnValidator, EventType.UPDATE_SAMPLE_SENSITIVE);
+        }
+      }
+
+      // Finally, update the cases sample sensitive blob with the validated value
       caze.getSampleSensitive().put(entry.getKey(), entry.getValue());
-
-      // Second, if the data is not being blanked, validate it according to rules
-      if (entry.getValue().length() == 0) {
-        // Blanking out the sensitive PII data is allowed, for GDPR reasons
-        continue;
-      }
-
-      // Finally, validate the updated value according to the rules for the column
-      for (ColumnValidator columnValidator :
-          caze.getCollectionExercise().getSurvey().getSampleValidationRules()) {
-        SampleValidateHelper.validateNewValue(
-            entry, columnValidator, EventType.UPDATE_SAMPLE_SENSITIVE);
-      }
     }
 
     caseService.saveCase(caze);
