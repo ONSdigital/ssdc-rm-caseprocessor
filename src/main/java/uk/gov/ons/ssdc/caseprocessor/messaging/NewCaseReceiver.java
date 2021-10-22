@@ -79,7 +79,9 @@ public class NewCaseReceiver {
 
       if (columnValidationErrors.isPresent()) {
         throw new RuntimeException(
-            "New case event failed validation for column name: " + columnValidator.getColumnName());
+            String.format(
+                "New case event failed validation on column \"%s\"",
+                columnValidator.getColumnName()));
       }
     }
 
