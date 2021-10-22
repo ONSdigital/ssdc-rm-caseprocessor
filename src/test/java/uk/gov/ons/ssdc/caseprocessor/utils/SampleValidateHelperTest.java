@@ -45,6 +45,6 @@ class SampleValidateHelperTest {
 
     // Then
     assertThat(thrown.getMessage())
-        .isEqualTo(EventType.UPDATE_SAMPLE_SENSITIVE + " failed validation");
+        .isEqualTo("UPDATE_SAMPLE_SENSITIVE failed validation for column name: testSampleField");
   }
 }

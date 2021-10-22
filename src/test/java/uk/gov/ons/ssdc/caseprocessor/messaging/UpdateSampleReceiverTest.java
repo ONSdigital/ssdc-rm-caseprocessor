@@ -67,7 +67,7 @@ public class UpdateSampleReceiverTest {
     survey.setId(UUID.randomUUID());
     survey.setSampleValidationRules(
         new ColumnValidator[] {
-          new ColumnValidator("newSampleData", true, new Rule[] {new LengthRule(30)})
+          new ColumnValidator("newSampleData", false, new Rule[] {new LengthRule(30)})
         });
     CollectionExercise collex = new CollectionExercise();
     collex.setId(UUID.randomUUID());
@@ -75,7 +75,7 @@ public class UpdateSampleReceiverTest {
 
     Case expectedCase = new Case();
     expectedCase.setCollectionExercise(collex);
-    expectedCase.setSample(new HashMap<>());
+    expectedCase.setSample(new HashMap<>()); // No sample data
     expectedCase.setSampleSensitive(new HashMap<>());
 
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
@@ -118,7 +118,7 @@ public class UpdateSampleReceiverTest {
     survey.setId(UUID.randomUUID());
     survey.setSampleValidationRules(
         new ColumnValidator[] {
-          new ColumnValidator("testSampleField", true, new Rule[] {new LengthRule(30)})
+          new ColumnValidator("testSampleField", false, new Rule[] {new LengthRule(30)})
         });
     CollectionExercise collex = new CollectionExercise();
     collex.setId(UUID.randomUUID());
@@ -215,7 +215,10 @@ public class UpdateSampleReceiverTest {
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
-    assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+    RuntimeException thrown =
+        assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+    assertThat(thrown.getMessage())
+        .isEqualTo("UPDATE_SAMPLE failed validation for column name: testSampleField");
 
     verify(caseService, never()).saveCase(any());
     verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(Message.class));
