@@ -109,6 +109,7 @@ public class RasRmCaseNotificationEnrichmentService {
         partyAttributes.put(key, sample.get(key));
       }
     }
+
     return partyAttributes;
   }
 }
