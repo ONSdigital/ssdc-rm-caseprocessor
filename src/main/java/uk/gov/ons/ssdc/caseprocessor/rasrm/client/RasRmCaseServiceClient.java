@@ -1,4 +1,4 @@
-package uk.gov.ons.ssdc.caseprocessor.client;
+package uk.gov.ons.ssdc.caseprocessor.rasrm.client;
 
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.RasRmCaseIacResponseDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.RasRmCaseResponseDTO;
+import uk.gov.ons.ssdc.caseprocessor.rasrm.model.dto.RasRmCaseIacResponseDTO;
+import uk.gov.ons.ssdc.caseprocessor.rasrm.model.dto.RasRmCaseResponseDTO;
 
 @Component
 public class RasRmCaseServiceClient {

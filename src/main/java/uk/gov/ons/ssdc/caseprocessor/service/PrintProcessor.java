@@ -3,17 +3,13 @@ package uk.gov.ons.ssdc.caseprocessor.service;
 import com.opencsv.CSVWriter;
 import java.io.StringWriter;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
-import uk.gov.ons.ssdc.caseprocessor.client.RasRmCaseServiceClient;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.RasRmCaseIacResponseDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.RasRmCaseResponseDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
+import uk.gov.ons.ssdc.caseprocessor.rasrm.service.RasRmCaseIacService;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 import uk.gov.ons.ssdc.common.model.entity.*;
 
@@ -23,7 +19,7 @@ public class PrintProcessor {
   private final UacService uacService;
   private final EventLogger eventLogger;
   private final PrintFileRowRepository printFileRowRepository;
-  private final RasRmCaseServiceClient rasRmCaseServiceClient;
+  private final RasRmCaseIacService rasRmCaseIacService;
 
   private final StringWriter stringWriter = new StringWriter();
   private final CSVWriter csvWriter =
@@ -39,12 +35,12 @@ public class PrintProcessor {
       UacService uacService,
       EventLogger eventLogger,
       PrintFileRowRepository printFileRowRepository,
-      RasRmCaseServiceClient rasRmCaseServiceClient) {
+      RasRmCaseIacService rasRmCaseIacService) {
     this.uacQidCache = uacQidCache;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.printFileRowRepository = printFileRowRepository;
-    this.rasRmCaseServiceClient = rasRmCaseServiceClient;
+    this.rasRmCaseIacService = rasRmCaseIacService;
   }
 
   public void process(FulfilmentToProcess fulfilmentToProcess) {
@@ -98,7 +94,7 @@ public class PrintProcessor {
           rowStrings[i] = uacQidDTO.getQid();
           break;
         case "__ras_rm_iac__":
-          rowStrings[i] = getRasRmIac(caze);
+          rowStrings[i] = rasRmCaseIacService.getRasRmIac(caze);
           break;
         default:
           rowStrings[i] = caze.getSample().get(templateItem);
@@ -142,56 +138,5 @@ public class PrintProcessor {
     uacService.saveAndEmitUacUpdateEvent(uacQidLink, correlationId, originatingUser);
 
     return uacQidDTO;
-  }
-
-  private String getRasRmIac(Case caze) {
-    Object metadataObject = caze.getCollectionExercise().getMetadata();
-
-    if (metadataObject == null) {
-      throw new RuntimeException(
-          "Unexpected null metadata. Metadata is required for RAS-RM business.");
-    }
-
-    if (!(metadataObject instanceof Map)) {
-      throw new RuntimeException(
-          "Unexpected metadata type. Wanted Map but got "
-              + metadataObject.getClass().getSimpleName());
-    }
-
-    Map metadata = (Map) metadataObject;
-
-    if (!metadata.keySet().contains("rasRmCollectionExerciseId")) {
-      throw new RuntimeException("Metadata does not contain mandatory rasRmCollectionExerciseId");
-    }
-
-    UUID rasRmCollectionExerciseId =
-        UUID.fromString((String) metadata.get("rasRmCollectionExerciseId"));
-
-    UUID partyId = UUID.fromString(caze.getSample().get("partyId"));
-    RasRmCaseResponseDTO[] cases = rasRmCaseServiceClient.getCases(partyId);
-
-    RasRmCaseResponseDTO rasRmCaseResponse =
-        Arrays.stream(cases)
-            .filter(
-                rasRmCase ->
-                    rasRmCase
-                        .getCaseGroup()
-                        .getCollectionExerciseId()
-                        .equals(rasRmCollectionExerciseId))
-            .findAny()
-            .orElseThrow(
-                () ->
-                    new RuntimeException(
-                        "Case does not belong to our collection exercise in RAS RM"));
-
-    UUID rasRmCaseId = rasRmCaseResponse.getId();
-
-    RasRmCaseIacResponseDTO[] rasRmIacs = rasRmCaseServiceClient.getIacs(rasRmCaseId);
-
-    if (rasRmIacs.length == 0) {
-      throw new RuntimeException("RAS RM has not made any IAC available for our case");
-    }
-
-    return rasRmIacs[0].getIac();
   }
 }

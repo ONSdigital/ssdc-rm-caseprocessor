@@ -1,4 +1,4 @@
-package uk.gov.ons.ssdc.caseprocessor.service;
+package uk.gov.ons.ssdc.caseprocessor.rasrm.service;
 
 import static com.google.cloud.spring.pubsub.support.PubSubTopicUtils.toProjectTopicName;
 
@@ -10,10 +10,10 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import uk.gov.ons.ssdc.caseprocessor.client.RasRmPartyServiceClient;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.RasRmCaseNotification;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.RasRmPartyResponseDTO;
+import uk.gov.ons.ssdc.caseprocessor.rasrm.client.RasRmPartyServiceClient;
+import uk.gov.ons.ssdc.caseprocessor.rasrm.model.dto.RasRmCaseNotification;
+import uk.gov.ons.ssdc.caseprocessor.rasrm.model.dto.RasRmPartyResponseDTO;
 
 @Component
 public class RasRmCaseNotificationEnrichmentService {

@@ -1,4 +1,4 @@
-package uk.gov.ons.ssdc.caseprocessor.model.dto;
+package uk.gov.ons.ssdc.caseprocessor.rasrm.model.dto;
 
 import lombok.Data;
 

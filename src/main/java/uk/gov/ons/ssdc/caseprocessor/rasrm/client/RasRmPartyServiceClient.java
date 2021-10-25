@@ -1,4 +1,4 @@
-package uk.gov.ons.ssdc.caseprocessor.client;
+package uk.gov.ons.ssdc.caseprocessor.rasrm.client;
 
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.RasRmPartyDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.RasRmPartyLinkDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.RasRmPartyResponseDTO;
+import uk.gov.ons.ssdc.caseprocessor.rasrm.model.dto.RasRmPartyDTO;
+import uk.gov.ons.ssdc.caseprocessor.rasrm.model.dto.RasRmPartyLinkDTO;
+import uk.gov.ons.ssdc.caseprocessor.rasrm.model.dto.RasRmPartyResponseDTO;
 
 @Component
 public class RasRmPartyServiceClient {
