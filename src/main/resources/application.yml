@@ -88,4 +88,4 @@ uacservice:
 
   uacqid-cache-min: 500
   uacqid-fetch-count: 1000
-  uacqid-get-timeout: 60   #seconds
+  uacqid-get-timeout: 60   #seconds not minutes
