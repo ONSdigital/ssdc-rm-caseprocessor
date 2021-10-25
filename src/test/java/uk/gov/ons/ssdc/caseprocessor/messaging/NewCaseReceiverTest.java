@@ -130,7 +130,7 @@ public class NewCaseReceiverTest {
     assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID);
 
     verify(eventLogger)
-        .logCaseEvent(actualCase, "New case created", EventType.NEW_CASE, event, eventMessage);
+        .logCaseEvent(actualCase, "Hughs case created", EventType.NEW_CASE, event, eventMessage);
   }
 
   @Test
