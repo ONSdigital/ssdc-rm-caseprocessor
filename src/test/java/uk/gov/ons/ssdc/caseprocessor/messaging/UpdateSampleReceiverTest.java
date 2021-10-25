@@ -8,6 +8,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
@@ -26,7 +28,7 @@ import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSampleSensitive;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UpdateSample;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
@@ -37,28 +39,27 @@ import uk.gov.ons.ssdc.common.validation.LengthRule;
 import uk.gov.ons.ssdc.common.validation.Rule;
 
 @ExtendWith(MockitoExtension.class)
-class UpdateNewCaseSensitiveReceiverTest {
+public class UpdateSampleReceiverTest {
 
   @Mock private CaseService caseService;
   @Mock private EventLogger eventLogger;
 
-  @InjectMocks UpdateSampleSensitiveReceiver underTest;
+  @InjectMocks UpdateSampleReceiver underTest;
 
   @Test
-  void testUpdateSampleSensitiveReceiver() {
+  void testUpdateSampleReceiverCreatesNewSampleData() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
     managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
     managementEvent.getHeader().setTopic("Test topic");
     managementEvent.getHeader().setChannel("CC");
+    managementEvent.getHeader().setCorrelationId(TEST_CORRELATION_ID);
+    managementEvent.getHeader().setOriginatingUser(TEST_ORIGINATING_USER);
     managementEvent.setPayload(new PayloadDTO());
-    managementEvent.getPayload().setUpdateSampleSensitive(new UpdateSampleSensitive());
-    managementEvent.getPayload().getUpdateSampleSensitive().setCaseId(UUID.randomUUID());
-    managementEvent
-        .getPayload()
-        .getUpdateSampleSensitive()
-        .setSampleSensitive(Map.of("PHONE_NUMBER", "9999999"));
+    managementEvent.getPayload().setUpdateSample(new UpdateSample());
+    managementEvent.getPayload().getUpdateSample().setCaseId(UUID.randomUUID());
+    managementEvent.getPayload().getUpdateSample().setSample(Map.of("newSampleData", "New"));
     Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
@@ -66,7 +67,7 @@ class UpdateNewCaseSensitiveReceiverTest {
     survey.setId(UUID.randomUUID());
     survey.setSampleValidationRules(
         new ColumnValidator[] {
-          new ColumnValidator("PHONE_NUMBER", true, new Rule[] {new LengthRule(30)})
+          new ColumnValidator("newSampleData", false, new Rule[] {new LengthRule(30)})
         });
     CollectionExercise collex = new CollectionExercise();
     collex.setId(UUID.randomUUID());
@@ -74,9 +75,9 @@ class UpdateNewCaseSensitiveReceiverTest {
 
     Case expectedCase = new Case();
     expectedCase.setCollectionExercise(collex);
-    Map<String, String> sensitiveData = new HashMap<>();
-    sensitiveData.put("PHONE_NUMBER", "1111111");
-    expectedCase.setSampleSensitive(sensitiveData);
+    expectedCase.setSample(new HashMap<>()); // No sample data
+    expectedCase.setSampleSensitive(new HashMap<>());
+
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // when
@@ -85,34 +86,31 @@ class UpdateNewCaseSensitiveReceiverTest {
     // then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
 
-    verify(caseService).saveCase(caseArgumentCaptor.capture());
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdate(
+            caseArgumentCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
     Case actualCase = caseArgumentCaptor.getValue();
-    assertThat(actualCase.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "9999999"));
+    assertThat(actualCase.getSample()).isEqualTo(Map.of("newSampleData", "New"));
 
     verify(eventLogger)
         .logCaseEvent(
-            eq(expectedCase),
-            eq("Sensitive data updated"),
-            eq(EventType.UPDATE_SAMPLE_SENSITIVE),
-            eq(managementEvent),
-            eq(message));
+            expectedCase, "Sample data updated", EventType.UPDATE_SAMPLE, managementEvent, message);
   }
 
   @Test
-  void testUpdateSampleSensitiveReceiverBlankingIsAllowed() {
+  void testUpdateSampleReceiverUpdatesExistingSampleData() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
     managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
     managementEvent.getHeader().setTopic("Test topic");
     managementEvent.getHeader().setChannel("CC");
+    managementEvent.getHeader().setCorrelationId(TEST_CORRELATION_ID);
+    managementEvent.getHeader().setOriginatingUser(TEST_ORIGINATING_USER);
     managementEvent.setPayload(new PayloadDTO());
-    managementEvent.getPayload().setUpdateSampleSensitive(new UpdateSampleSensitive());
-    managementEvent.getPayload().getUpdateSampleSensitive().setCaseId(UUID.randomUUID());
-    managementEvent
-        .getPayload()
-        .getUpdateSampleSensitive()
-        .setSampleSensitive(Map.of("PHONE_NUMBER", ""));
+    managementEvent.getPayload().setUpdateSample(new UpdateSample());
+    managementEvent.getPayload().getUpdateSample().setCaseId(UUID.randomUUID());
+    managementEvent.getPayload().getUpdateSample().setSample(Map.of("testSampleField", "Updated"));
     Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
@@ -120,7 +118,7 @@ class UpdateNewCaseSensitiveReceiverTest {
     survey.setId(UUID.randomUUID());
     survey.setSampleValidationRules(
         new ColumnValidator[] {
-          new ColumnValidator("PHONE_NUMBER", true, new Rule[] {new LengthRule(30)})
+          new ColumnValidator("testSampleField", false, new Rule[] {new LengthRule(30)})
         });
     CollectionExercise collex = new CollectionExercise();
     collex.setId(UUID.randomUUID());
@@ -128,9 +126,11 @@ class UpdateNewCaseSensitiveReceiverTest {
 
     Case expectedCase = new Case();
     expectedCase.setCollectionExercise(collex);
-    Map<String, String> sensitiveData = new HashMap<>();
-    sensitiveData.put("PHONE_NUMBER", "1111111");
-    expectedCase.setSampleSensitive(sensitiveData);
+    Map<String, String> sampleData = new HashMap<>();
+    sampleData.put("testSampleField", "Test");
+    expectedCase.setSample(sampleData);
+    expectedCase.setSampleSensitive(new HashMap<>());
+
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // when
@@ -139,21 +139,19 @@ class UpdateNewCaseSensitiveReceiverTest {
     // then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
 
-    verify(caseService).saveCase(caseArgumentCaptor.capture());
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdate(
+            caseArgumentCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
     Case actualCase = caseArgumentCaptor.getValue();
-    assertThat(actualCase.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", ""));
+    assertThat(actualCase.getSample()).isEqualTo(Map.of("testSampleField", "Updated"));
 
     verify(eventLogger)
         .logCaseEvent(
-            eq(expectedCase),
-            eq("Sensitive data updated"),
-            eq(EventType.UPDATE_SAMPLE_SENSITIVE),
-            eq(managementEvent),
-            eq(message));
+            expectedCase, "Sample data updated", EventType.UPDATE_SAMPLE, managementEvent, message);
   }
 
   @Test
-  void testMessageKeyDoesNotMatchExistingEntry() {
+  void testCannotUseUpdateSampleMessageKeyOnExistingSensitiveKey() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
     managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
@@ -161,30 +159,31 @@ class UpdateNewCaseSensitiveReceiverTest {
     managementEvent.getHeader().setTopic("Test topic");
     managementEvent.getHeader().setChannel("CC");
     managementEvent.setPayload(new PayloadDTO());
-    managementEvent.getPayload().setUpdateSampleSensitive(new UpdateSampleSensitive());
-    managementEvent.getPayload().getUpdateSampleSensitive().setCaseId(UUID.randomUUID());
-    managementEvent
-        .getPayload()
-        .getUpdateSampleSensitive()
-        .setSampleSensitive(Map.of("UPRN", "9999999"));
+    managementEvent.getPayload().setUpdateSample(new UpdateSample());
+    managementEvent.getPayload().getUpdateSample().setCaseId(UUID.randomUUID());
+    managementEvent.getPayload().getUpdateSample().setSample(Map.of("mobileNumber", "999999999"));
     Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
     Case expectedCase = new Case();
-    Map<String, String> sensitiveData = new HashMap<>();
-    sensitiveData.put("PHONE_NUMBER", "1111111");
-    expectedCase.setSampleSensitive(sensitiveData);
+    Map<String, String> existingSensitiveSampleData = new HashMap<>();
+    existingSensitiveSampleData.put("mobileNumber", "111111111");
+    expectedCase.setSampleSensitive(existingSensitiveSampleData);
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
-    assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+    RuntimeException thrown =
+        assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+    assertThat(thrown.getMessage())
+        .isEqualTo(
+            "Key (mobileNumber) is sensitive and cannot be used for non-sensitive UPDATE_SAMPLE events!");
 
-    verify(caseService, never()).saveCase(any());
+    verify(caseService, never()).saveCaseAndEmitCaseUpdate(any(), any(), any());
     verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(Message.class));
   }
 
   @Test
-  void testUpdateSampleSensitiveReceiverFailsValidation() {
+  void testUpdateSampleReceiverFailsValidation() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
     managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
@@ -192,12 +191,9 @@ class UpdateNewCaseSensitiveReceiverTest {
     managementEvent.getHeader().setTopic("Test topic");
     managementEvent.getHeader().setChannel("CC");
     managementEvent.setPayload(new PayloadDTO());
-    managementEvent.getPayload().setUpdateSampleSensitive(new UpdateSampleSensitive());
-    managementEvent.getPayload().getUpdateSampleSensitive().setCaseId(UUID.randomUUID());
-    managementEvent
-        .getPayload()
-        .getUpdateSampleSensitive()
-        .setSampleSensitive(Map.of("PHONE_NUMBER", "123456789"));
+    managementEvent.getPayload().setUpdateSample(new UpdateSample());
+    managementEvent.getPayload().getUpdateSample().setCaseId(UUID.randomUUID());
+    managementEvent.getPayload().getUpdateSample().setSample(Map.of("testSampleField", "Testing"));
     Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
@@ -205,7 +201,7 @@ class UpdateNewCaseSensitiveReceiverTest {
     survey.setId(UUID.randomUUID());
     survey.setSampleValidationRules(
         new ColumnValidator[] {
-          new ColumnValidator("PHONE_NUMBER", true, new Rule[] {new LengthRule(3)})
+          new ColumnValidator("testSampleField", true, new Rule[] {new LengthRule(4)})
         });
     CollectionExercise collex = new CollectionExercise();
     collex.setId(UUID.randomUUID());
@@ -213,13 +209,16 @@ class UpdateNewCaseSensitiveReceiverTest {
 
     Case expectedCase = new Case();
     expectedCase.setCollectionExercise(collex);
-    Map<String, String> sensitiveData = new HashMap<>();
-    sensitiveData.put("PHONE_NUMBER", "123");
-    expectedCase.setSampleSensitive(sensitiveData);
+    Map<String, String> existingSampleData = new HashMap<>();
+    existingSampleData.put("testSampleField", "Test");
+    expectedCase.setSample(existingSampleData);
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
-    assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+    RuntimeException thrown =
+        assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+    assertThat(thrown.getMessage())
+        .isEqualTo("UPDATE_SAMPLE failed validation for column name: testSampleField");
 
     verify(caseService, never()).saveCase(any());
     verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(Message.class));
