@@ -38,8 +38,8 @@ public class UpdateSampleReceiver {
     Case caze = caseService.getCaseByCaseId(updateSample.getCaseId());
 
     for (Map.Entry<String, String> entry : updateSample.getSample().entrySet()) {
-      // Validate that only non-sensitive sample data is being attempted to be updated
-      validateOnlyNonSensitiveSampleDataBeingUpdated(caze, entry);
+      // Validate that only existing sample data is being attempted to be updated
+      validateOnlyExistingSampleDataBeingUpdated(caze, entry);
 
       // Validate the updated value according to the rules for the column
       for (ColumnValidator columnValidator :
@@ -56,16 +56,10 @@ public class UpdateSampleReceiver {
     eventLogger.logCaseEvent(caze, "Sample data updated", EventType.UPDATE_SAMPLE, event, message);
   }
 
-  private void validateOnlyNonSensitiveSampleDataBeingUpdated(
-      Case caze, Entry<String, String> entry) {
-    if (caze.getSampleSensitive() != null
-        && caze.getSampleSensitive().containsKey(entry.getKey())) {
+  private void validateOnlyExistingSampleDataBeingUpdated(Case caze, Entry<String, String> entry) {
+    if (!caze.getSample().containsKey(entry.getKey())) {
       throw new RuntimeException(
-          "Key ("
-              + entry.getKey()
-              + ") is sensitive and cannot be used for non-sensitive "
-              + EventType.UPDATE_SAMPLE
-              + " events!");
+          "Key (" + entry.getKey() + ") does not match existing sample data");
     }
   }
 }
