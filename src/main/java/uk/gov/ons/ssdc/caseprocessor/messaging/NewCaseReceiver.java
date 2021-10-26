@@ -105,7 +105,7 @@ public class NewCaseReceiver {
     caseService.emitCaseUpdate(
         newCase, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
 
-    eventLogger.logCaseEvent(newCase, "Hughs case created", EventType.NEW_CASE, event, message);
+    eventLogger.logCaseEvent(newCase, "New case created", EventType.NEW_CASE, event, message);
   }
 
   private Case saveNewCaseAndStampCaseRef(Case caze) {
