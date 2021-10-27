@@ -109,16 +109,6 @@ public class NewCaseReceiver {
       }
     }
 
-    Set<String> sensitiveColumns =
-        Arrays.stream(columnValidators)
-            .filter(columnValidator -> columnValidator.isSensitive())
-            .map(columnValidator -> columnValidator.getColumnName())
-            .collect(Collectors.toSet());
-    if (!sensitiveColumns.containsAll(newCasePayload.getSampleSensitive().keySet())) {
-      throw new RuntimeException(
-          "Attempt to send sensitive data to RM which was not part of defined sample");
-    }
-
     Map<String, String> sample = newCasePayload.getSample();
 
     if (collex.getSurvey().getSampleDefinitionUrl().endsWith("business.json")) {
