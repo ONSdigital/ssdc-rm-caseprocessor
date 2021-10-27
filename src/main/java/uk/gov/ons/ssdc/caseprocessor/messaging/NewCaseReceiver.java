@@ -68,6 +68,25 @@ public class NewCaseReceiver {
 
     ColumnValidator[] columnValidators = collex.getSurvey().getSampleValidationRules();
 
+    Set<String> nonSensitiveColumns =
+        Arrays.stream(columnValidators)
+            .filter(columnValidator -> !columnValidator.isSensitive())
+            .map(ColumnValidator::getColumnName)
+            .collect(Collectors.toSet());
+    if (!nonSensitiveColumns.containsAll(newCasePayload.getSample().keySet())) {
+      throw new RuntimeException("Attempt to send data to RM which was not part of defined sample");
+    }
+
+    Set<String> sensitiveColumns =
+        Arrays.stream(columnValidators)
+            .filter(ColumnValidator::isSensitive)
+            .map(ColumnValidator::getColumnName)
+            .collect(Collectors.toSet());
+    if (!sensitiveColumns.containsAll(newCasePayload.getSampleSensitive().keySet())) {
+      throw new RuntimeException(
+          "Attempt to send sensitive data to RM which was not part of defined sample");
+    }
+
     for (ColumnValidator columnValidator : columnValidators) {
       Optional<String> columnValidationErrors;
 
@@ -83,16 +102,6 @@ public class NewCaseReceiver {
                 "New case event failed validation on column \"%s\"",
                 columnValidator.getColumnName()));
       }
-    }
-
-    Set<String> sensitiveColumns =
-        Arrays.stream(columnValidators)
-            .filter(columnValidator -> columnValidator.isSensitive())
-            .map(columnValidator -> columnValidator.getColumnName())
-            .collect(Collectors.toSet());
-    if (!sensitiveColumns.containsAll(newCasePayload.getSampleSensitive().keySet())) {
-      throw new RuntimeException(
-          "Attempt to send sensitive data to RM which was not part of defined sample");
     }
 
     Case newCase = new Case();
