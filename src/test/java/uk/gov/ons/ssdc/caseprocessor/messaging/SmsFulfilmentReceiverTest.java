@@ -1,5 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -143,7 +144,10 @@ class SmsFulfilmentReceiverTest {
     when(uacService.findByQid(TEST_QID)).thenReturn(existingUacQidLink);
 
     // When, then throws
-    assertThrows(RuntimeException.class, () -> underTest.receiveMessage(eventMessage));
+    RuntimeException thrown =
+        assertThrows(RuntimeException.class, () -> underTest.receiveMessage(eventMessage));
+    assertThat(thrown.getMessage())
+        .isEqualTo("SMS fulfilment QID TEST_QID is already linked to a different case");
     verifyNoInteractions(eventLogger);
   }
 
