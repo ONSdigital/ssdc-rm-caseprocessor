@@ -19,8 +19,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ExportFileFulfilmentDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintFulfilmentDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentNextTriggerRepository;
@@ -86,12 +86,12 @@ class FulfilmentIT {
       fulfilmentSurveyExportFileTemplateRepository.saveAndFlush(fulfilmentSurveyExportFileTemplate);
 
       // When
-      ExportFileFulfilmentDTO fulfilment = new ExportFileFulfilmentDTO();
+      PrintFulfilmentDTO fulfilment = new PrintFulfilmentDTO();
       fulfilment.setCaseId(caze.getId());
       fulfilment.setPackCode(PACK_CODE);
 
       PayloadDTO payload = new PayloadDTO();
-      payload.setExportFileFulfilment(fulfilment);
+      payload.setPrintFulfilment(fulfilment);
 
       EventDTO event = new EventDTO();
       event.setPayload(payload);

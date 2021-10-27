@@ -23,8 +23,8 @@ import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ExportFileFulfilmentDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PrintFulfilmentDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.common.model.entity.Case;
@@ -57,10 +57,10 @@ class PrintFulfilmentReceiverTest {
     managementEvent.getHeader().setTopic("Test topic");
     managementEvent.getHeader().setChannel("CC");
     managementEvent.setPayload(new PayloadDTO());
-    managementEvent.getPayload().setExportFileFulfilment(new ExportFileFulfilmentDTO());
-    managementEvent.getPayload().getExportFileFulfilment().setCaseId(UUID.randomUUID());
-    managementEvent.getPayload().getExportFileFulfilment().setPackCode(PACK_CODE);
-    managementEvent.getPayload().getExportFileFulfilment().setUacMetadata(TEST_UAC_METADATA);
+    managementEvent.getPayload().setPrintFulfilment(new PrintFulfilmentDTO());
+    managementEvent.getPayload().getPrintFulfilment().setCaseId(UUID.randomUUID());
+    managementEvent.getPayload().getPrintFulfilment().setPackCode(PACK_CODE);
+    managementEvent.getPayload().getPrintFulfilment().setUacMetadata(TEST_UAC_METADATA);
     Message<byte[]> message = constructMessage(managementEvent);
 
     ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
