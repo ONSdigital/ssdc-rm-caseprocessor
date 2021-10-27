@@ -75,7 +75,6 @@ public class NewCaseReceiverIT {
 
       Map<String, String> sample = new HashMap<>();
       sample.put("Junk", "YesYouCan");
-      sample.put("Org", "Brewery");
 
       Map<String, String> sampleSensitive = new HashMap<>();
       sampleSensitive.put("SensitiveJunk", "02071234567");
