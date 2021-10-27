@@ -186,7 +186,10 @@ public class NewCaseReceiverTest {
     when(collectionExerciseRepository.findById(TEST_CASE_COLLECTION_EXERCISE_ID))
         .thenReturn(Optional.empty());
 
-    assertThrows(RuntimeException.class, () -> underTest.receiveNewCase(eventMessage));
+    RuntimeException thrownException =
+        assertThrows(RuntimeException.class, () -> underTest.receiveNewCase(eventMessage));
+    assertThat(thrownException.getMessage())
+        .isEqualTo("Collection exercise '" + TEST_CASE_COLLECTION_EXERCISE_ID + "' not found");
     verifyNoInteractions(eventLogger);
   }
 
@@ -240,7 +243,10 @@ public class NewCaseReceiverTest {
     when(collectionExerciseRepository.findById(TEST_CASE_COLLECTION_EXERCISE_ID))
         .thenReturn(collexOpt);
 
-    assertThrows(RuntimeException.class, () -> underTest.receiveNewCase(eventMessage));
+    RuntimeException thrownException =
+        assertThrows(RuntimeException.class, () -> underTest.receiveNewCase(eventMessage));
+    assertThat(thrownException.getMessage())
+        .isEqualTo("New case event failed validation on column \"POSTCODE\"");
     verifyNoInteractions(eventLogger);
   }
 
@@ -294,7 +300,68 @@ public class NewCaseReceiverTest {
     when(collectionExerciseRepository.findById(TEST_CASE_COLLECTION_EXERCISE_ID))
         .thenReturn(collexOpt);
 
-    assertThrows(RuntimeException.class, () -> underTest.receiveNewCase(eventMessage));
+    RuntimeException thrownException =
+        assertThrows(RuntimeException.class, () -> underTest.receiveNewCase(eventMessage));
+    assertThat(thrownException.getMessage())
+        .isEqualTo("Attempt to send sensitive data to RM which was not part of defined sample");
+    verifyNoInteractions(eventLogger);
+  }
+
+  @Test
+  public void testNewCaseReceiverCaseFailsValidationBecauseOfUndefinedSampleData() {
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
+
+    // Given
+    NewCase newCase = new NewCase();
+    newCase.setCaseId(TEST_CASE_ID);
+    newCase.setCollectionExerciseId(TEST_CASE_COLLECTION_EXERCISE_ID);
+
+    Map<String, String> sample = new HashMap<>();
+    sample.put("ADDRESS_LINE1", "123 Fake Street");
+    sample.put("POSTCODE", "abc123");
+    sample.put("SNEAKY_EXTRA_DATA", "this should not be included");
+    newCase.setSample(sample);
+
+    Map<String, String> sampleSensitive = new HashMap<>();
+    sampleSensitive.put("Telephone", "123");
+    newCase.setSampleSensitive(sampleSensitive);
+
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
+    eventHeader.setCorrelationId(TEST_CORRELATION_ID);
+    eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setNewCase(newCase);
+
+    EventDTO event = new EventDTO();
+    event.setHeader(eventHeader);
+    event.setPayload(payloadDTO);
+
+    Message<byte[]> eventMessage = constructMessage(event);
+
+    when(caseRepository.existsById(TEST_CASE_ID)).thenReturn(false);
+
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+    survey.setSampleValidationRules(
+        new ColumnValidator[] {
+          new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
+          new ColumnValidator(
+              "POSTCODE", false, new Rule[] {new MandatoryRule(), new LengthRule(8)}),
+          new ColumnValidator("Telephone", true, new Rule[] {new MandatoryRule()})
+        });
+
+    CollectionExercise collex = new CollectionExercise();
+    collex.setSurvey(survey);
+    Optional<CollectionExercise> collexOpt = Optional.of(collex);
+
+    when(collectionExerciseRepository.findById(TEST_CASE_COLLECTION_EXERCISE_ID))
+        .thenReturn(collexOpt);
+
+    RuntimeException thrownException =
+        assertThrows(RuntimeException.class, () -> underTest.receiveNewCase(eventMessage));
+    assertThat(thrownException.getMessage())
+        .isEqualTo("Attempt to send data to RM which was not part of defined sample");
     verifyNoInteractions(eventLogger);
   }
 }
