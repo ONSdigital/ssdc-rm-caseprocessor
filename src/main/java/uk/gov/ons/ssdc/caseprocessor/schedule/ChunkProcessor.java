@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseToProcessProcessor;
-import uk.gov.ons.ssdc.caseprocessor.service.PrintProcessor;
+import uk.gov.ons.ssdc.caseprocessor.service.ExportFileProcessor;
 import uk.gov.ons.ssdc.common.model.entity.CaseToProcess;
 import uk.gov.ons.ssdc.common.model.entity.FulfilmentToProcess;
 
@@ -19,7 +19,7 @@ public class ChunkProcessor {
   private final CaseToProcessRepository caseToProcessRepository;
   private final CaseToProcessProcessor caseToProcessProcessor;
   private final FulfilmentToProcessRepository fulfilmentToProcessRepository;
-  private final PrintProcessor printProcessor;
+  private final ExportFileProcessor exportFileProcessor;
 
   @Value("${scheduler.chunksize}")
   private int chunkSize;
@@ -28,11 +28,11 @@ public class ChunkProcessor {
       CaseToProcessRepository caseToProcessRepository,
       CaseToProcessProcessor caseToProcessProcessor,
       FulfilmentToProcessRepository fulfilmentToProcessRepository,
-      PrintProcessor printProcessor) {
+      ExportFileProcessor exportFileProcessor) {
     this.caseToProcessRepository = caseToProcessRepository;
     this.caseToProcessProcessor = caseToProcessProcessor;
     this.fulfilmentToProcessRepository = fulfilmentToProcessRepository;
-    this.printProcessor = printProcessor;
+    this.exportFileProcessor = exportFileProcessor;
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW) // Start a new transaction for every chunk
@@ -63,7 +63,7 @@ public class ChunkProcessor {
 
       cases.forEach(
           fulfilmentToProcess -> {
-            printProcessor.process(fulfilmentToProcess);
+            exportFileProcessor.process(fulfilmentToProcess);
             fulfilmentToProcessToDelete.add(fulfilmentToProcess);
           });
 

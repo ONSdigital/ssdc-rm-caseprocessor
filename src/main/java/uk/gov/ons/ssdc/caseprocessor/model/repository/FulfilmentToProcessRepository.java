@@ -16,6 +16,6 @@ public interface FulfilmentToProcessRepository extends JpaRepository<FulfilmentT
       nativeQuery = true)
   Stream<FulfilmentToProcess> findChunkToProcess(@Param("limit") int limit);
 
-  @Query("SELECT DISTINCT f.printTemplate.packCode FROM FulfilmentToProcess f")
+  @Query("SELECT DISTINCT f.exportFileTemplate.packCode FROM FulfilmentToProcess f")
   List<String> findDistinctPackCode();
 }

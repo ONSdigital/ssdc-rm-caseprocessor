@@ -23,34 +23,39 @@ import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
 import uk.gov.ons.ssdc.common.model.entity.*;
 
 @ExtendWith(MockitoExtension.class)
-class PrintProcessorTest {
+class ExportFileProcessorTest {
   @Mock private UacQidCache uacQidCache;
   @Mock private UacService uacService;
   @Mock private EventLogger eventLogger;
-  @Mock private PrintFileRowRepository printFileRowRepository;
+  @Mock private ExportFileRowRepository exportFileRowRepository;
 
-  @InjectMocks PrintProcessor underTest;
+  @InjectMocks ExportFileProcessor underTest;
+
+  private static final String PACK_CODE = "test pack code";
+  private static final String UAC = "test UAC";
+  private static final String QID = "test QID";
+  private static final String EXPORT_FILE_DESTINATION = "test export file destination";
 
   @Test
-  void testProcessPrintRow() {
+  void testProcessExportFileRow() {
     // Given
     Case caze = new Case();
     caze.setSample(Map.of("foo", "bar"));
     caze.setCaseRef(123L);
 
-    PrintTemplate printTemplate = new PrintTemplate();
-    printTemplate.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
-    printTemplate.setPackCode("test pack code");
-    printTemplate.setPrintSupplier("test print supplier");
+    ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
+    exportFileTemplate.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
+    exportFileTemplate.setPackCode(PACK_CODE);
+    exportFileTemplate.setExportFileDestination(EXPORT_FILE_DESTINATION);
 
     ActionRule actionRule = new ActionRule();
     actionRule.setId(UUID.randomUUID());
-    actionRule.setType(ActionRuleType.PRINT);
-    actionRule.setPrintTemplate(printTemplate);
+    actionRule.setType(ActionRuleType.EXPORT_FILE);
+    actionRule.setExportFileTemplate(exportFileTemplate);
     actionRule.setUacMetadata(TEST_UAC_METADATA);
 
     CaseToProcess caseToProcess = new CaseToProcess();
@@ -59,38 +64,38 @@ class PrintProcessorTest {
     caseToProcess.setBatchId(UUID.fromString("6a127d58-c1cb-489c-a3f5-72014a0c32d6"));
 
     UacQidDTO uacQidDTO = new UacQidDTO();
-    uacQidDTO.setUac("test uac");
-    uacQidDTO.setQid("test qid");
+    uacQidDTO.setUac(UAC);
+    uacQidDTO.setQid(QID);
 
     when(uacQidCache.getUacQidPair(anyInt())).thenReturn(uacQidDTO);
 
     // When
-    underTest.processPrintRow(
-        printTemplate.getTemplate(),
+    underTest.processExportFileRow(
+        exportFileTemplate.getTemplate(),
         caze,
         caseToProcess.getBatchId(),
         caseToProcess.getBatchQuantity(),
-        printTemplate.getPackCode(),
-        printTemplate.getPrintSupplier(),
+        exportFileTemplate.getPackCode(),
+        exportFileTemplate.getExportFileDestination(),
         actionRule.getId(),
         null,
         actionRule.getUacMetadata());
 
     //    // Then
-    ArgumentCaptor<PrintFileRow> printFileRowArgumentCaptor =
-        ArgumentCaptor.forClass(PrintFileRow.class);
-    verify(printFileRowRepository).save(printFileRowArgumentCaptor.capture());
-    PrintFileRow actualPrintFileRow = printFileRowArgumentCaptor.getValue();
-    assertThat(actualPrintFileRow.getPackCode()).isEqualTo("test pack code");
-    assertThat(actualPrintFileRow.getPrintSupplier()).isEqualTo("test print supplier");
-    assertThat(actualPrintFileRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
+    ArgumentCaptor<ExportFileRow> exportFileRowArgumentCaptor =
+        ArgumentCaptor.forClass(ExportFileRow.class);
+    verify(exportFileRowRepository).save(exportFileRowArgumentCaptor.capture());
+    ExportFileRow actualExportFileRow = exportFileRowArgumentCaptor.getValue();
+    assertThat(actualExportFileRow.getPackCode()).isEqualTo(PACK_CODE);
+    assertThat(actualExportFileRow.getExportFileDestination()).isEqualTo(EXPORT_FILE_DESTINATION);
+    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\"|\"" + UAC + "\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService)
         .saveAndEmitUacUpdateEvent(uacQidLinkCaptor.capture(), eq(actionRule.getId()), isNull());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
-    assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
-    assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
+    assertThat(actualUacQidLink.getUac()).isEqualTo(UAC);
+    assertThat(actualUacQidLink.getQid()).isEqualTo(QID);
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
     assertThat(actualUacQidLink.isActive()).isTrue();
     assertThat(actualUacQidLink.getMetadata()).isEqualTo(TEST_UAC_METADATA);
@@ -99,8 +104,8 @@ class PrintProcessorTest {
     verify(eventLogger)
         .logCaseEvent(
             eq(caze),
-            eq("Print file generated with pack code test pack code"),
-            eq(EventType.PRINT_FILE),
+            eq("Export file generated with pack code " + PACK_CODE),
+            eq(EventType.EXPORT_FILE),
             eventCaptor.capture(),
             any(OffsetDateTime.class));
 
@@ -111,17 +116,17 @@ class PrintProcessorTest {
   @Test
   void testProcessFulfilment() {
     // Given
-    PrintTemplate printTemplate = new PrintTemplate();
-    printTemplate.setPackCode("TEST_FULFILMENT_CODE");
-    printTemplate.setPrintSupplier("FOOBAR_PRINT_SUPPLIER");
-    printTemplate.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
+    ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
+    exportFileTemplate.setPackCode(PACK_CODE);
+    exportFileTemplate.setExportFileDestination(EXPORT_FILE_DESTINATION);
+    exportFileTemplate.setTemplate(new String[] {"__caseref__", "__uac__", "foo"});
 
     Case caze = new Case();
     caze.setSample(Map.of("foo", "bar"));
     caze.setCaseRef(123L);
 
     FulfilmentToProcess fulfilmentToProcess = new FulfilmentToProcess();
-    fulfilmentToProcess.setPrintTemplate(printTemplate);
+    fulfilmentToProcess.setExportFileTemplate(exportFileTemplate);
     fulfilmentToProcess.setCaze(caze);
     fulfilmentToProcess.setBatchId(UUID.fromString("6a127d58-c1cb-489c-a3f5-72014a0c32d6"));
     fulfilmentToProcess.setBatchQuantity(200);
@@ -130,8 +135,8 @@ class PrintProcessorTest {
     fulfilmentToProcess.setUacMetadata(TEST_UAC_METADATA);
 
     UacQidDTO uacQidDTO = new UacQidDTO();
-    uacQidDTO.setUac("test uac");
-    uacQidDTO.setQid("test qid");
+    uacQidDTO.setUac(UAC);
+    uacQidDTO.setQid(QID);
 
     when(uacQidCache.getUacQidPair(anyInt())).thenReturn(uacQidDTO);
 
@@ -139,21 +144,21 @@ class PrintProcessorTest {
     underTest.process(fulfilmentToProcess);
 
     // Then
-    ArgumentCaptor<PrintFileRow> printFileRowArgumentCaptor =
-        ArgumentCaptor.forClass(PrintFileRow.class);
-    verify(printFileRowRepository).save(printFileRowArgumentCaptor.capture());
-    PrintFileRow actualPrintFileRow = printFileRowArgumentCaptor.getValue();
-    assertThat(actualPrintFileRow.getPackCode()).isEqualTo("TEST_FULFILMENT_CODE");
-    assertThat(actualPrintFileRow.getPrintSupplier()).isEqualTo("FOOBAR_PRINT_SUPPLIER");
-    assertThat(actualPrintFileRow.getRow()).isEqualTo("\"123\"|\"test uac\"|\"bar\"");
+    ArgumentCaptor<ExportFileRow> exportFileRowArgumentCaptor =
+        ArgumentCaptor.forClass(ExportFileRow.class);
+    verify(exportFileRowRepository).save(exportFileRowArgumentCaptor.capture());
+    ExportFileRow actualExportFileRow = exportFileRowArgumentCaptor.getValue();
+    assertThat(actualExportFileRow.getPackCode()).isEqualTo(PACK_CODE);
+    assertThat(actualExportFileRow.getExportFileDestination()).isEqualTo(EXPORT_FILE_DESTINATION);
+    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\"|\"" + UAC + "\"|\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService)
         .saveAndEmitUacUpdateEvent(
             uacQidLinkCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
-    assertThat(actualUacQidLink.getUac()).isEqualTo("test uac");
-    assertThat(actualUacQidLink.getQid()).isEqualTo("test qid");
+    assertThat(actualUacQidLink.getUac()).isEqualTo(UAC);
+    assertThat(actualUacQidLink.getQid()).isEqualTo(QID);
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
     assertThat(actualUacQidLink.isActive()).isTrue();
     assertThat(actualUacQidLink.getMetadata()).isEqualTo(TEST_UAC_METADATA);
@@ -162,8 +167,8 @@ class PrintProcessorTest {
     verify(eventLogger)
         .logCaseEvent(
             eq(caze),
-            eq("Print file generated with pack code TEST_FULFILMENT_CODE"),
-            eq(EventType.PRINT_FILE),
+            eq("Export file generated with pack code " + PACK_CODE),
+            eq(EventType.EXPORT_FILE),
             eventCaptor.capture(),
             any(OffsetDateTime.class));
 
