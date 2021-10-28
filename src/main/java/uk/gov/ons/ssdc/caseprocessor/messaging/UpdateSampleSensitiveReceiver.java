@@ -55,7 +55,8 @@ public class UpdateSampleSensitiveReceiver {
       caze.getSampleSensitive().put(entry.getKey(), entry.getValue());
     }
 
-    caseService.saveCase(caze);
+    caseService.saveCaseAndEmitCaseUpdate(
+        caze, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
 
     eventLogger.logCaseEvent(
         caze, "Sensitive data updated", EventType.UPDATE_SAMPLE_SENSITIVE, event, message);
