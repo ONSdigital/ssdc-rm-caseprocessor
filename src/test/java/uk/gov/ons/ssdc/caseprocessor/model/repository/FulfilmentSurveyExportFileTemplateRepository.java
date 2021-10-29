@@ -4,9 +4,9 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.ons.ssdc.common.model.entity.ActionRuleSurveyPrintTemplate;
+import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyExportFileTemplate;
 
 @Component
 @ActiveProfiles("test")
-public interface ActionRuleSurveyPrintTemplateRepository
-    extends JpaRepository<ActionRuleSurveyPrintTemplate, UUID> {}
+public interface FulfilmentSurveyExportFileTemplateRepository
+    extends JpaRepository<FulfilmentSurveyExportFileTemplate, UUID> {}

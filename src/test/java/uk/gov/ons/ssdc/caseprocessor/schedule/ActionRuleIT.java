@@ -22,8 +22,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintTemplateRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.SmsTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
@@ -37,8 +37,8 @@ import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.Event;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.model.entity.PrintFileRow;
-import uk.gov.ons.ssdc.common.model.entity.PrintTemplate;
+import uk.gov.ons.ssdc.common.model.entity.ExportFileRow;
+import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
 import uk.gov.ons.ssdc.common.model.entity.SmsTemplate;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
@@ -48,7 +48,7 @@ import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 @ExtendWith(SpringExtension.class)
 class ActionRuleIT {
   private static final String PACK_CODE = "test-pack-code";
-  private static final String PRINT_SUPPLIER = "test-print-supplier";
+  private static final String EXPORT_FILE_DESTINATION = "test-export-file-destination";
   private static final String CREATED_BY_USER = "test@ons.gov.uk";
   private static final Map<String, String> TEST_UAC_METADATA = Map.of("TEST_UAC_METADATA", "TEST");
 
@@ -63,9 +63,9 @@ class ActionRuleIT {
 
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
   @Autowired private PubsubHelper pubsubHelper;
-  @Autowired private PrintTemplateRepository printTemplateRepository;
+  @Autowired private ExportFileTemplateRepository exportFileTemplateRepository;
   @Autowired private ActionRuleRepository actionRuleRepository;
-  @Autowired private PrintFileRowRepository printFileRowRepository;
+  @Autowired private ExportFileRowRepository exportFileRowRepository;
   @Autowired private SmsTemplateRepository smsTemplateRepository;
   @Autowired private EventRepository eventRepository;
 
@@ -76,25 +76,26 @@ class ActionRuleIT {
   }
 
   @Test
-  void testPrinterRule() throws Exception {
+  void testExportFileRule() throws Exception {
     try (QueueSpy<EventDTO> outboundUacQueue =
         pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       Case caze = junkDataHelper.setupJunkCase();
-      PrintTemplate printTemplate = setUpPrintTemplate();
+      ExportFileTemplate exportFileTemplate = setUpExportFileTemplate();
 
       // When
-      setUpActionRule(ActionRuleType.PRINT, caze.getCollectionExercise(), printTemplate, null);
+      setUpActionRule(
+          ActionRuleType.EXPORT_FILE, caze.getCollectionExercise(), exportFileTemplate, null);
       EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
-      List<PrintFileRow> printFileRows = printFileRowRepository.findAll();
-      PrintFileRow printFileRow = printFileRows.get(0);
+      List<ExportFileRow> exportFileRows = exportFileRowRepository.findAll();
+      ExportFileRow exportFileRow = exportFileRows.get(0);
 
       // Then
-      assertThat(printFileRow).isNotNull();
-      assertThat(printFileRow.getBatchQuantity()).isEqualTo(1);
-      assertThat(printFileRow.getPackCode()).isEqualTo(PACK_CODE);
-      assertThat(printFileRow.getPrintSupplier()).isEqualTo(PRINT_SUPPLIER);
-      assertThat(printFileRow.getRow()).startsWith("\"" + caze.getCaseRef() + "\"|\"bar\"|\"");
+      assertThat(exportFileRow).isNotNull();
+      assertThat(exportFileRow.getBatchQuantity()).isEqualTo(1);
+      assertThat(exportFileRow.getPackCode()).isEqualTo(PACK_CODE);
+      assertThat(exportFileRow.getExportFileDestination()).isEqualTo(EXPORT_FILE_DESTINATION);
+      assertThat(exportFileRow.getRow()).startsWith("\"" + caze.getCaseRef() + "\"|\"bar\"|\"");
 
       assertThat(rme).isNotNull();
       assertThat(rme.getHeader().getTopic()).isEqualTo(uacUpdateTopic);
@@ -157,18 +158,18 @@ class ActionRuleIT {
     }
   }
 
-  private PrintTemplate setUpPrintTemplate() {
-    PrintTemplate printTemplate = new PrintTemplate();
-    printTemplate.setTemplate(new String[] {"__caseref__", "foo", "__uac__"});
-    printTemplate.setPackCode(PACK_CODE);
-    printTemplate.setPrintSupplier(PRINT_SUPPLIER);
-    return printTemplateRepository.saveAndFlush(printTemplate);
+  private ExportFileTemplate setUpExportFileTemplate() {
+    ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
+    exportFileTemplate.setTemplate(new String[] {"__caseref__", "foo", "__uac__"});
+    exportFileTemplate.setPackCode(PACK_CODE);
+    exportFileTemplate.setExportFileDestination(EXPORT_FILE_DESTINATION);
+    return exportFileTemplateRepository.saveAndFlush(exportFileTemplate);
   }
 
   private ActionRule setUpActionRule(
       ActionRuleType type,
       CollectionExercise collectionExercise,
-      PrintTemplate printTemplate,
+      ExportFileTemplate exportFileTemplate,
       SmsTemplate smsTemplate) {
     ActionRule actionRule = new ActionRule();
     actionRule.setId(UUID.randomUUID());
@@ -176,7 +177,7 @@ class ActionRuleIT {
     actionRule.setHasTriggered(false);
     actionRule.setType(type);
     actionRule.setCollectionExercise(collectionExercise);
-    actionRule.setPrintTemplate(printTemplate);
+    actionRule.setExportFileTemplate(exportFileTemplate);
     actionRule.setCreatedBy(CREATED_BY_USER);
     actionRule.setUacMetadata(TEST_UAC_METADATA);
 

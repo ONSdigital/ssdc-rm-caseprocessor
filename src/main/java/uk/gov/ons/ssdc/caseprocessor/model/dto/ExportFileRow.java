@@ -4,10 +4,10 @@ import java.util.UUID;
 import lombok.Data;
 
 @Data
-public class PrintRow {
+public class ExportFileRow {
   private String row;
   private UUID batchId;
   private int batchQuantity;
-  private String printSupplier;
+  private String exportFileDestination;
   private String packCode;
 }

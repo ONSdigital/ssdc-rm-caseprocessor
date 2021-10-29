@@ -12,9 +12,9 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessReposit
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyPrintTemplate;
+import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
+import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyExportFileTemplate;
 import uk.gov.ons.ssdc.common.model.entity.FulfilmentToProcess;
-import uk.gov.ons.ssdc.common.model.entity.PrintTemplate;
 import uk.gov.ons.ssdc.common.model.entity.Survey;
 
 @MessageEndpoint
@@ -39,11 +39,11 @@ public class PrintFulfilmentReceiver {
 
     Case caze = caseService.getCaseByCaseId(event.getPayload().getPrintFulfilment().getCaseId());
 
-    PrintTemplate printTemplate =
+    ExportFileTemplate exportFileTemplate =
         getAllowedPrintTemplate(event.getPayload().getPrintFulfilment().getPackCode(), caze);
 
     FulfilmentToProcess fulfilmentToProcess = new FulfilmentToProcess();
-    fulfilmentToProcess.setPrintTemplate(printTemplate);
+    fulfilmentToProcess.setExportFileTemplate(exportFileTemplate);
     fulfilmentToProcess.setCaze(caze);
     fulfilmentToProcess.setCorrelationId(event.getHeader().getCorrelationId());
     fulfilmentToProcess.setOriginatingUser(event.getHeader().getOriginatingUser());
@@ -55,13 +55,16 @@ public class PrintFulfilmentReceiver {
         caze, "Print fulfilment requested", EventType.PRINT_FULFILMENT, event, message);
   }
 
-  private PrintTemplate getAllowedPrintTemplate(String packCode, Case caze) {
+  private ExportFileTemplate getAllowedPrintTemplate(String packCode, Case caze) {
     Survey survey = caze.getCollectionExercise().getSurvey();
 
-    for (FulfilmentSurveyPrintTemplate fulfilmentSurveyPrintTemplate :
-        survey.getFulfilmentPrintTemplates()) {
-      if (fulfilmentSurveyPrintTemplate.getPrintTemplate().getPackCode().equals(packCode)) {
-        return fulfilmentSurveyPrintTemplate.getPrintTemplate();
+    for (FulfilmentSurveyExportFileTemplate fulfilmentSurveyExportFileTemplate :
+        survey.getFulfilmentExportFileTemplates()) {
+      if (fulfilmentSurveyExportFileTemplate
+          .getExportFileTemplate()
+          .getPackCode()
+          .equals(packCode)) {
+        return fulfilmentSurveyExportFileTemplate.getExportFileTemplate();
       }
     }
 

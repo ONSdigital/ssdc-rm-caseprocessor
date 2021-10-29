@@ -8,6 +8,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
@@ -37,7 +39,7 @@ import uk.gov.ons.ssdc.common.validation.LengthRule;
 import uk.gov.ons.ssdc.common.validation.Rule;
 
 @ExtendWith(MockitoExtension.class)
-class UpdateNewCaseSensitiveReceiverTest {
+class UpdateSampleSensitiveReceiverTest {
 
   @Mock private CaseService caseService;
   @Mock private EventLogger eventLogger;
@@ -52,6 +54,8 @@ class UpdateNewCaseSensitiveReceiverTest {
     managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
     managementEvent.getHeader().setTopic("Test topic");
     managementEvent.getHeader().setChannel("CC");
+    managementEvent.getHeader().setCorrelationId(TEST_CORRELATION_ID);
+    managementEvent.getHeader().setOriginatingUser(TEST_ORIGINATING_USER);
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setUpdateSampleSensitive(new UpdateSampleSensitive());
     managementEvent.getPayload().getUpdateSampleSensitive().setCaseId(UUID.randomUUID());
@@ -85,7 +89,9 @@ class UpdateNewCaseSensitiveReceiverTest {
     // then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
 
-    verify(caseService).saveCase(caseArgumentCaptor.capture());
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdate(
+            caseArgumentCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "9999999"));
 
@@ -106,6 +112,8 @@ class UpdateNewCaseSensitiveReceiverTest {
     managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
     managementEvent.getHeader().setTopic("Test topic");
     managementEvent.getHeader().setChannel("CC");
+    managementEvent.getHeader().setCorrelationId(TEST_CORRELATION_ID);
+    managementEvent.getHeader().setOriginatingUser(TEST_ORIGINATING_USER);
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setUpdateSampleSensitive(new UpdateSampleSensitive());
     managementEvent.getPayload().getUpdateSampleSensitive().setCaseId(UUID.randomUUID());
@@ -139,7 +147,9 @@ class UpdateNewCaseSensitiveReceiverTest {
     // then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
 
-    verify(caseService).saveCase(caseArgumentCaptor.capture());
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdate(
+            caseArgumentCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", ""));
 

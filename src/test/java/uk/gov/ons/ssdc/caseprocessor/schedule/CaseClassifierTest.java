@@ -13,10 +13,10 @@ import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.Survey;
 
-public class CaseClassifierTest {
+class CaseClassifierTest {
 
   @Test
-  public void testEnqueueCasesForActionRulePrinter() {
+  void testEnqueueCasesForActionRuleExportFile() {
     // Given
     JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
 
@@ -31,7 +31,7 @@ public class CaseClassifierTest {
     actionRule.setId(UUID.randomUUID());
     actionRule.setCollectionExercise(collectionExercise);
     actionRule.setClassifiers(classifiers);
-    actionRule.setType(ActionRuleType.PRINT);
+    actionRule.setType(ActionRuleType.EXPORT_FILE);
 
     // When
     underTest.enqueueCasesForActionRule(actionRule);

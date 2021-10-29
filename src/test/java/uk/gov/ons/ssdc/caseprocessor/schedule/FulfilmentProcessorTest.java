@@ -16,14 +16,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class FulfilmentProcessorTest {
+class FulfilmentProcessorTest {
   @Mock private JdbcTemplate jdbcTemplate;
   @Mock private FulfilmentToProcessRepository fulfilmentToProcessRepository;
 
   @InjectMocks private FulfilmentProcessor underTest;
 
   @Test
-  public void testHappyPath() {
+  void testHappyPath() {
     // Given
     when(fulfilmentToProcessRepository.findDistinctPackCode())
         .thenReturn(List.of("TEST_PACK_CODE"));
@@ -35,7 +35,7 @@ public class FulfilmentProcessorTest {
     String expectedSql =
         "UPDATE casev3.fulfilment_to_process "
             + "SET batch_quantity = (SELECT COUNT(*) FROM casev3.fulfilment_to_process "
-            + "WHERE print_template_pack_code = ?), batch_id = ? WHERE print_template_pack_code = ?";
+            + "WHERE export_file_template_pack_code = ?), batch_id = ? WHERE export_file_template_pack_code = ?";
     verify(jdbcTemplate)
         .update(eq(expectedSql), eq("TEST_PACK_CODE"), any(UUID.class), eq("TEST_PACK_CODE"));
   }

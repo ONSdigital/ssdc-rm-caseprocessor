@@ -4,19 +4,20 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.common.model.entity.CaseToProcess;
-import uk.gov.ons.ssdc.common.model.entity.PrintTemplate;
+import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
 
 @Component
 public class CaseToProcessProcessor {
-  private final PrintProcessor printProcessor;
+
+  private final ExportFileProcessor exportFileProcessor;
   private final DeactivateUacProcessor deactivateUacProcessor;
   private final SmsProcessor smsProcessor;
 
   public CaseToProcessProcessor(
-      PrintProcessor printProcessor,
+      ExportFileProcessor exportFileProcessor,
       DeactivateUacProcessor deactivateUacProcessor,
       SmsProcessor smsProcessor) {
-    this.printProcessor = printProcessor;
+    this.exportFileProcessor = exportFileProcessor;
     this.deactivateUacProcessor = deactivateUacProcessor;
     this.smsProcessor = smsProcessor;
   }
@@ -24,15 +25,16 @@ public class CaseToProcessProcessor {
   public void process(CaseToProcess caseToProcess) {
     ActionRuleType actionRuleType = caseToProcess.getActionRule().getType();
     switch (actionRuleType) {
-      case PRINT:
-        PrintTemplate printTemplate = caseToProcess.getActionRule().getPrintTemplate();
-        printProcessor.processPrintRow(
-            printTemplate.getTemplate(),
+      case EXPORT_FILE:
+        ExportFileTemplate exportFileTemplate =
+            caseToProcess.getActionRule().getExportFileTemplate();
+        exportFileProcessor.processExportFileRow(
+            exportFileTemplate.getTemplate(),
             caseToProcess.getCaze(),
             caseToProcess.getBatchId(),
             caseToProcess.getBatchQuantity(),
-            printTemplate.getPackCode(),
-            printTemplate.getPrintSupplier(),
+            exportFileTemplate.getPackCode(),
+            exportFileTemplate.getExportFileDestination(),
             caseToProcess.getActionRule().getId(),
             null,
             caseToProcess.getActionRule().getUacMetadata());

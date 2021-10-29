@@ -8,17 +8,17 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.PrintFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.rasrm.service.RasRmCaseIacService;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 import uk.gov.ons.ssdc.common.model.entity.*;
 
 @Component
-public class PrintProcessor {
+public class ExportFileProcessor {
   private final UacQidCache uacQidCache;
   private final UacService uacService;
   private final EventLogger eventLogger;
-  private final PrintFileRowRepository printFileRowRepository;
+  private final ExportFileRowRepository exportFileRowRepository;
   private final RasRmCaseIacService rasRmCaseIacService;
 
   private final StringWriter stringWriter = new StringWriter();
@@ -30,41 +30,41 @@ public class PrintProcessor {
           CSVWriter.DEFAULT_ESCAPE_CHARACTER,
           "");
 
-  public PrintProcessor(
+  public ExportFileProcessor(
       UacQidCache uacQidCache,
       UacService uacService,
       EventLogger eventLogger,
-      PrintFileRowRepository printFileRowRepository,
+      ExportFileRowRepository exportFileRowRepository,
       RasRmCaseIacService rasRmCaseIacService) {
     this.uacQidCache = uacQidCache;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
-    this.printFileRowRepository = printFileRowRepository;
+    this.exportFileRowRepository = exportFileRowRepository;
     this.rasRmCaseIacService = rasRmCaseIacService;
   }
 
   public void process(FulfilmentToProcess fulfilmentToProcess) {
-    PrintTemplate printTemplate = fulfilmentToProcess.getPrintTemplate();
+    ExportFileTemplate exportFileTemplate = fulfilmentToProcess.getExportFileTemplate();
 
-    processPrintRow(
-        printTemplate.getTemplate(),
+    processExportFileRow(
+        exportFileTemplate.getTemplate(),
         fulfilmentToProcess.getCaze(),
         fulfilmentToProcess.getBatchId(),
         fulfilmentToProcess.getBatchQuantity(),
-        printTemplate.getPackCode(),
-        printTemplate.getPrintSupplier(),
+        exportFileTemplate.getPackCode(),
+        exportFileTemplate.getExportFileDestination(),
         fulfilmentToProcess.getCorrelationId(),
         fulfilmentToProcess.getOriginatingUser(),
         fulfilmentToProcess.getUacMetadata());
   }
 
-  public void processPrintRow(
+  public void processExportFileRow(
       String[] template,
       Case caze,
       UUID batchId,
       int batchQuantity,
       String packCode,
-      String printSupplier,
+      String exportFileDestination,
       UUID correlationId,
       String originatingUser,
       Object uacMetadata) {
@@ -101,19 +101,19 @@ public class PrintProcessor {
       }
     }
 
-    PrintFileRow printFileRow = new PrintFileRow();
-    printFileRow.setRow(getCsvRow(rowStrings));
-    printFileRow.setBatchId(batchId);
-    printFileRow.setBatchQuantity(batchQuantity);
-    printFileRow.setPackCode(packCode);
-    printFileRow.setPrintSupplier(printSupplier);
+    ExportFileRow exportFileRow = new ExportFileRow();
+    exportFileRow.setRow(getCsvRow(rowStrings));
+    exportFileRow.setBatchId(batchId);
+    exportFileRow.setBatchQuantity(batchQuantity);
+    exportFileRow.setPackCode(packCode);
+    exportFileRow.setExportFileDestination(exportFileDestination);
 
-    printFileRowRepository.save(printFileRow);
+    exportFileRowRepository.save(exportFileRow);
 
     eventLogger.logCaseEvent(
         caze,
-        String.format("Print file generated with pack code %s", packCode),
-        EventType.PRINT_FILE,
+        String.format("Export file generated with pack code %s", packCode),
+        EventType.EXPORT_FILE,
         EventHelper.getDummyEvent(correlationId, originatingUser),
         OffsetDateTime.now());
   }

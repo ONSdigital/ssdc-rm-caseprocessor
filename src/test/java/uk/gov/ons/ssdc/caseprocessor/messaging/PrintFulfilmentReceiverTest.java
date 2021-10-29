@@ -30,13 +30,13 @@ import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyPrintTemplate;
+import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
+import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyExportFileTemplate;
 import uk.gov.ons.ssdc.common.model.entity.FulfilmentToProcess;
-import uk.gov.ons.ssdc.common.model.entity.PrintTemplate;
 import uk.gov.ons.ssdc.common.model.entity.Survey;
 
 @ExtendWith(MockitoExtension.class)
-public class PrintFulfilmentReceiverTest {
+class PrintFulfilmentReceiverTest {
   @Mock private CaseService caseService;
 
   @Mock private EventLogger eventLogger;
@@ -45,8 +45,10 @@ public class PrintFulfilmentReceiverTest {
 
   @InjectMocks private PrintFulfilmentReceiver underTest;
 
+  private static final String PACK_CODE = "PACK_CODE";
+
   @Test
-  public void testReceiveMessage() {
+  void testReceiveMessage() {
     // Given
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
@@ -57,16 +59,16 @@ public class PrintFulfilmentReceiverTest {
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setPrintFulfilment(new PrintFulfilmentDTO());
     managementEvent.getPayload().getPrintFulfilment().setCaseId(UUID.randomUUID());
-    managementEvent.getPayload().getPrintFulfilment().setPackCode("TEST_FULFILMENT_CODE");
+    managementEvent.getPayload().getPrintFulfilment().setPackCode(PACK_CODE);
     managementEvent.getPayload().getPrintFulfilment().setUacMetadata(TEST_UAC_METADATA);
     Message<byte[]> message = constructMessage(managementEvent);
 
-    PrintTemplate printTemplate = new PrintTemplate();
-    printTemplate.setPackCode("TEST_FULFILMENT_CODE");
+    ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
+    exportFileTemplate.setPackCode(PACK_CODE);
 
-    FulfilmentSurveyPrintTemplate fulfilmentSurveyPrintTemplate =
-        new FulfilmentSurveyPrintTemplate();
-    fulfilmentSurveyPrintTemplate.setPrintTemplate(printTemplate);
+    FulfilmentSurveyExportFileTemplate fulfilmentSurveyExportFileTemplate =
+        new FulfilmentSurveyExportFileTemplate();
+    fulfilmentSurveyExportFileTemplate.setExportFileTemplate(exportFileTemplate);
 
     Case expectedCase = new Case();
     expectedCase.setCollectionExercise(new CollectionExercise());
@@ -74,7 +76,7 @@ public class PrintFulfilmentReceiverTest {
     expectedCase
         .getCollectionExercise()
         .getSurvey()
-        .setFulfilmentPrintTemplates(List.of(fulfilmentSurveyPrintTemplate));
+        .setFulfilmentExportFileTemplates(List.of(fulfilmentSurveyExportFileTemplate));
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // When
@@ -85,7 +87,7 @@ public class PrintFulfilmentReceiverTest {
         ArgumentCaptor.forClass(FulfilmentToProcess.class);
     verify(fulfilmentToProcessRepository).saveAndFlush(fulfilmentToProcessArgCapt.capture());
     FulfilmentToProcess fulfilmentToProcess = fulfilmentToProcessArgCapt.getValue();
-    assertThat(fulfilmentToProcess.getPrintTemplate()).isEqualTo(printTemplate);
+    assertThat(fulfilmentToProcess.getExportFileTemplate()).isEqualTo(exportFileTemplate);
     assertThat(fulfilmentToProcess.getCaze()).isEqualTo(expectedCase);
     assertThat(fulfilmentToProcess.getUacMetadata()).isEqualTo(TEST_UAC_METADATA);
 
