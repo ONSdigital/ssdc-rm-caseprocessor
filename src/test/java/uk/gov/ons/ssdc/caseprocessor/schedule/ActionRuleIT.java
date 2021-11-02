@@ -163,6 +163,7 @@ class ActionRuleIT {
     exportFileTemplate.setTemplate(new String[] {"__caseref__", "foo", "__uac__"});
     exportFileTemplate.setPackCode(PACK_CODE);
     exportFileTemplate.setExportFileDestination(EXPORT_FILE_DESTINATION);
+    exportFileTemplate.setDescription("Test description");
     return exportFileTemplateRepository.saveAndFlush(exportFileTemplate);
   }
 
@@ -204,6 +205,7 @@ class ActionRuleIT {
     smsTemplate.setPackCode("Test pack code");
     smsTemplate.setNotifyTemplateId(UUID.randomUUID());
     smsTemplate.setTemplate(new String[] {"FOO", "BAR"});
+    smsTemplate.setDescription("Test description");
     return smsTemplateRepository.saveAndFlush(smsTemplate);
   }
 }
