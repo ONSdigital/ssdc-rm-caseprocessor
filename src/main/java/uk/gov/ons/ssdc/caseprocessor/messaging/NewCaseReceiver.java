@@ -1,5 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
+import static uk.gov.ons.ssdc.caseprocessor.rasrm.constants.RasRmConstants.BUSINESS_SAMPLE_DEFINITION_URL_SUFFIX;
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 
 import java.util.Arrays;
@@ -111,7 +112,10 @@ public class NewCaseReceiver {
 
     Map<String, String> sample = newCasePayload.getSample();
 
-    if (collex.getSurvey().getSampleDefinitionUrl().endsWith("business.json")) {
+    if (collex
+        .getSurvey()
+        .getSampleDefinitionUrl()
+        .endsWith(BUSINESS_SAMPLE_DEFINITION_URL_SUFFIX)) {
       sample =
           rasRmNewBusinessCaseEnricher.notifyRasRmAndEnrichSample(sample, collex.getMetadata());
     }

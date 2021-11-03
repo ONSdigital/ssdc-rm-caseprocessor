@@ -1,5 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.rasrm.client;
 
+import static uk.gov.ons.ssdc.caseprocessor.rasrm.constants.RasRmConstants.BUSINESS_SAMPLE_UNIT_TYPE;
+
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.UUID;
@@ -38,7 +40,7 @@ public class RasRmPartyServiceClient {
       String sampleUnitRef, UUID sampleSummaryId, Map<String, Object> attributes) {
     RasRmPartyDTO partyDTO = new RasRmPartyDTO();
     partyDTO.setSampleUnitRef(sampleUnitRef);
-    partyDTO.setSampleUnitType("B"); // Hard-coded to be B = business. No need for any other value
+    partyDTO.setSampleUnitType(BUSINESS_SAMPLE_UNIT_TYPE);
     partyDTO.setSampleSummaryId(sampleSummaryId);
     partyDTO.setAttributes(attributes);
 

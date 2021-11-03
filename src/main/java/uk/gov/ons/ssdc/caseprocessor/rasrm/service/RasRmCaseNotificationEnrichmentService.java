@@ -1,6 +1,8 @@
 package uk.gov.ons.ssdc.caseprocessor.rasrm.service;
 
 import static com.google.cloud.spring.pubsub.support.PubSubTopicUtils.toProjectTopicName;
+import static uk.gov.ons.ssdc.caseprocessor.rasrm.constants.RasRmConstants.BUSINESS_RESPONDENT_STATUS_ACTIVE;
+import static uk.gov.ons.ssdc.caseprocessor.rasrm.constants.RasRmConstants.BUSINESS_SAMPLE_UNIT_TYPE;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -79,13 +81,17 @@ public class RasRmCaseNotificationEnrichmentService {
 
     boolean activeEnrolment =
         Arrays.stream(party.getAssociations())
-            .anyMatch(enrolment -> enrolment.getBusinessRespondentStatus().equals("ACTIVE"));
+            .anyMatch(
+                enrolment ->
+                    enrolment
+                        .getBusinessRespondentStatus()
+                        .equals(BUSINESS_RESPONDENT_STATUS_ACTIVE));
 
     RasRmCaseNotification caseNotification = new RasRmCaseNotification();
     caseNotification.setId(rasRmSampleSummaryId);
     caseNotification.setActiveEnrolment(activeEnrolment);
     caseNotification.setSampleUnitRef(ruRef);
-    caseNotification.setSampleUnitType("B"); // B = business. No need for any other value
+    caseNotification.setSampleUnitType(BUSINESS_SAMPLE_UNIT_TYPE);
     caseNotification.setPartyId(party.getId());
     caseNotification.setCollectionInstrumentId(rasRmCollectionInstrumentId);
     caseNotification.setCollectionExerciseId(rasRmCollectionExerciseId);
