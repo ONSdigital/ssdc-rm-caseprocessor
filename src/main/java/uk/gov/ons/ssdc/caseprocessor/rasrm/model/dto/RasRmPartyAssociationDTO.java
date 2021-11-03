@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class RasRmPartyAssociationDTO {
-  private String businessRespondentStatus; // TODO: could be an enum, but we only check one status
+  private String businessRespondentStatus; // Do not use enum because of unexpected values
 }
