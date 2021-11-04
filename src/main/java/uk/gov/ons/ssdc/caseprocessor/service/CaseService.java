@@ -14,6 +14,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.RefusalTypeDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
+import uk.gov.ons.ssdc.caseprocessor.utils.RedactHelper;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 
 @Service
@@ -58,12 +59,20 @@ public class CaseService {
     caseUpdate.setCollectionExerciseId(caze.getCollectionExercise().getId());
     caseUpdate.setSurveyId(caze.getCollectionExercise().getSurvey().getId());
     caseUpdate.setSample(caze.getSample());
+
     caseUpdate.setInvalid(caze.isInvalid());
     if (caze.getRefusalReceived() != null) {
       caseUpdate.setRefusalReceived(RefusalTypeDTO.valueOf(caze.getRefusalReceived().name()));
     } else {
       caseUpdate.setRefusalReceived(null);
     }
+    caseUpdate.setSampleSensitive(caze.getSampleSensitive());
+
+    // Due to time taken only run this is there's sampleSensitive data on the case
+    if (caseUpdate.getSampleSensitive() != null) {
+      caseUpdate = (CaseUpdateDTO) RedactHelper.redact(caseUpdate);
+    }
+
     payloadDTO.setCaseUpdate(caseUpdate);
     EventDTO event = new EventDTO();
     event.setHeader(eventHeader);

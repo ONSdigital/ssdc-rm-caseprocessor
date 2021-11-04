@@ -12,4 +12,5 @@ public class CaseUpdateDTO {
   private boolean invalid;
   private RefusalTypeDTO refusalReceived;
   private Map<String, String> sample;
+  private Map<String, String> sampleSensitive;
 }
