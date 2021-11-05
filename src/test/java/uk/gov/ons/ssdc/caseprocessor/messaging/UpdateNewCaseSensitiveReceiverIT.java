@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
@@ -29,6 +30,7 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.EventPoller;
 import uk.gov.ons.ssdc.caseprocessor.testutils.EventsNotFoundException;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
+import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.Event;
@@ -39,7 +41,6 @@ import uk.gov.ons.ssdc.common.model.entity.EventType;
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 public class UpdateNewCaseSensitiveReceiverIT {
-
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
   private static final String UPDATE_SAMPLE_SENSITIVE_TOPIC = "event_update-sample-sensitive";
@@ -61,47 +62,58 @@ public class UpdateNewCaseSensitiveReceiverIT {
   }
 
   @Test
-  public void testUpdateSampleSensitive() throws JsonProcessingException, EventsNotFoundException {
+  public void testUpdateSampleSensitive()
+      throws JsonProcessingException, EventsNotFoundException, InterruptedException {
     // GIVEN
+    //
+    try (QueueSpy<EventDTO> outboundCaseQueueSpy =
+        pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
+      Case caze = new Case();
+      caze.setId(TEST_CASE_ID);
+      Map<String, String> sensitiveData = new HashMap<>();
+      sensitiveData.put("PHONE_NUMBER", "1111111");
+      caze.setSampleSensitive(sensitiveData);
+      caze.setCollectionExercise(junkDataHelper.setupJunkCollex());
+      caseRepository.saveAndFlush(caze);
 
-    Case caze = new Case();
-    caze.setId(TEST_CASE_ID);
-    Map<String, String> sensitiveData = new HashMap<>();
-    sensitiveData.put("PHONE_NUMBER", "1111111");
-    caze.setSampleSensitive(sensitiveData);
-    caze.setCollectionExercise(junkDataHelper.setupJunkCollex());
-    caseRepository.saveAndFlush(caze);
+      PayloadDTO payloadDTO = new PayloadDTO();
+      payloadDTO.setUpdateSampleSensitive(new UpdateSampleSensitive());
+      payloadDTO.getUpdateSampleSensitive().setCaseId(TEST_CASE_ID);
+      payloadDTO.getUpdateSampleSensitive().setSampleSensitive(Map.of("PHONE_NUMBER", "9999999"));
 
-    PayloadDTO payloadDTO = new PayloadDTO();
-    payloadDTO.setUpdateSampleSensitive(new UpdateSampleSensitive());
-    payloadDTO.getUpdateSampleSensitive().setCaseId(TEST_CASE_ID);
-    payloadDTO.getUpdateSampleSensitive().setSampleSensitive(Map.of("PHONE_NUMBER", "9999999"));
+      EventDTO event = new EventDTO();
+      event.setPayload(payloadDTO);
 
-    EventDTO event = new EventDTO();
-    event.setPayload(payloadDTO);
+      EventHeaderDTO eventHeader = new EventHeaderDTO();
+      eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
+      eventHeader.setTopic(UPDATE_SAMPLE_SENSITIVE_TOPIC);
+      junkDataHelper.junkify(eventHeader);
+      event.setHeader(eventHeader);
 
-    EventHeaderDTO eventHeader = new EventHeaderDTO();
-    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
-    eventHeader.setTopic(UPDATE_SAMPLE_SENSITIVE_TOPIC);
-    junkDataHelper.junkify(eventHeader);
-    event.setHeader(eventHeader);
+      //  When
+      pubsubHelper.sendMessageToSharedProject(UPDATE_SAMPLE_SENSITIVE_TOPIC, event);
 
-    //  When
-    pubsubHelper.sendMessageToSharedProject(UPDATE_SAMPLE_SENSITIVE_TOPIC, event);
+      List<Event> databaseEvents = eventPoller.getEvents(1);
 
-    List<Event> databaseEvents = eventPoller.getEvents(1);
+      //  Then
+      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
+      assertThat(actualCase.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "9999999"));
 
-    //  Then
-    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
-    assertThat(actualCase.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "9999999"));
+      assertThat(databaseEvents.size()).isEqualTo(1);
+      Event databaseEvent = databaseEvents.get(0);
+      assertThat(databaseEvent.getCaze().getId()).isEqualTo(TEST_CASE_ID);
+      assertThat(databaseEvent.getType()).isEqualTo(EventType.UPDATE_SAMPLE_SENSITIVE);
 
-    assertThat(databaseEvents.size()).isEqualTo(1);
-    Event databaseEvent = databaseEvents.get(0);
-    assertThat(databaseEvent.getCaze().getId()).isEqualTo(TEST_CASE_ID);
-    assertThat(databaseEvent.getType()).isEqualTo(EventType.UPDATE_SAMPLE_SENSITIVE);
+      PayloadDTO actualPayload =
+          objectMapper.readValue(databaseEvent.getPayload(), PayloadDTO.class);
+      assertThat(actualPayload.getUpdateSampleSensitive().getSampleSensitive())
+          .isEqualTo(Map.of("PHONE_NUMBER", "REDACTED"));
 
-    PayloadDTO actualPayload = objectMapper.readValue(databaseEvent.getPayload(), PayloadDTO.class);
-    assertThat(actualPayload.getUpdateSampleSensitive().getSampleSensitive())
-        .isEqualTo(Map.of("PHONE_NUMBER", "REDACTED"));
+      // Get the emitted event and check the sensitive part is redacted
+      EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
+      CaseUpdateDTO emittedCase = actualEvent.getPayload().getCaseUpdate();
+      assertThat(emittedCase.getCaseId()).isEqualTo(caze.getId());
+      assertThat(emittedCase.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "REDACTED"));
+    }
   }
 }

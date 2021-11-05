@@ -50,6 +50,7 @@ public class CaseServiceTest {
     caze.setId(UUID.randomUUID());
     caze.setCollectionExercise(collex);
     caze.setSample(Map.of("foo", "bar"));
+    caze.setSampleSensitive(Map.of("Top", "Secret"));
     caze.setInvalid(true);
     caze.setRefusalReceived(RefusalType.HARD_REFUSAL);
 
@@ -72,6 +73,7 @@ public class CaseServiceTest {
     assertThat(actualCaseUpdate.getSample()).isEqualTo(caze.getSample());
     assertThat(actualCaseUpdate.isInvalid()).isTrue();
     assertThat(actualCaseUpdate.getRefusalReceived()).isEqualTo(RefusalTypeDTO.HARD_REFUSAL);
+    assertThat(actualCaseUpdate.getSampleSensitive()).isEqualTo(Map.of("Top", "REDACTED"));
   }
 
   @Test
