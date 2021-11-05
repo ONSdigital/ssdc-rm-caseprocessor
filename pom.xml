@@ -52,7 +52,6 @@
   </repositories>
 
   <dependencies>
-    
     <dependency>
       <groupId>uk.gov.ons.ssdc</groupId>
       <artifactId>ssdc-rm-common-entity-model</artifactId>

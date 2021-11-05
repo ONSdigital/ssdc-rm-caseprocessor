@@ -68,7 +68,6 @@ public class CaseService {
     }
     caseUpdate.setSampleSensitive(caze.getSampleSensitive());
 
-    // Due to time taken only run this is there's sampleSensitive data on the case
     if (caseUpdate.getSampleSensitive() != null) {
       caseUpdate = (CaseUpdateDTO) RedactHelper.redact(caseUpdate);
     }
