@@ -10,9 +10,12 @@ public class TestConstants {
   public static final String NEW_CASE_TOPIC = "event_new-case";
   public static final String OUTBOUND_SMS_REQUEST_SUBSCRIPTION =
       "rm-internal-sms-request-enriched_notify-service";
+  public static final String OUTBOUND_EMAIL_REQUEST_SUBSCRIPTION =
+      "rm-internal-email-request-enriched_notify-service";
 
   public static final String TELEPHONE_CAPTURE_TOPIC = "rm-internal-telephone-capture";
   public static final String SMS_FULFILMENT_TOPIC = "rm-internal-sms-fulfilment";
+  public static final String EMAIL_FULFILMENT_TOPIC = "rm-internal-email-fulfilment";
 
   public static final UUID TEST_CORRELATION_ID = UUID.randomUUID();
   public static final String TEST_ORIGINATING_USER = "foo@bar.com";

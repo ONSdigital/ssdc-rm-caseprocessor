@@ -20,7 +20,8 @@ public class RedactHelper {
   private static final ThingToRedact[] THINGS_TO_REDACT = {
     new ThingToRedact("getSampleSensitive", Map.class),
     new ThingToRedact("setUac", String.class),
-    new ThingToRedact("setPhoneNumber", String.class)
+    new ThingToRedact("setPhoneNumber", String.class),
+    new ThingToRedact("setEmail", String.class)
   };
 
   public static Object redact(Object rootObjectToRedact) {
