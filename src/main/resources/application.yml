@@ -70,8 +70,9 @@ messagelogging:
   logstacktraces: false
 
 logging:
+  profile: STRUCTURED
   level:
-    org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler: ERROR
+    root: INFO
 
 caserefgeneratorkey: abc123
 
