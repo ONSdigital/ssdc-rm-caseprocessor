@@ -44,6 +44,7 @@ public class AppConfig {
 
   @PostConstruct
   public void init() {
+//    This puts the actual log.with(object)  into the data part of the logging
     LoggingConfigs.setCurrent(LoggingConfigs.getCurrent().useJson());
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
   }
