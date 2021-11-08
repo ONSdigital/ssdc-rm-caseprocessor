@@ -168,7 +168,7 @@ class ActionRuleIT {
 
   @Test
   void testEmailRule() throws Exception {
-    try (QueueSpy<EventDTO> smsRequestQueue =
+    try (QueueSpy<EventDTO> emailRequestQueue =
         pubsubHelper.listen(OUTBOUND_EMAIL_REQUEST_SUBSCRIPTION, EventDTO.class)) {
       // Given
       Case caze = junkDataHelper.setupJunkCase();
@@ -178,7 +178,7 @@ class ActionRuleIT {
       // When
       setUpActionRule(
           ActionRuleType.EMAIL, caze.getCollectionExercise(), null, null, emailTemplate);
-      EventDTO rme = smsRequestQueue.getQueue().poll(20, TimeUnit.SECONDS);
+      EventDTO rme = emailRequestQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
       assertThat(rme).isNotNull();
