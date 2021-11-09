@@ -22,7 +22,8 @@ public class ActionRuleScheduler {
 
   @Scheduled(fixedDelayString = "${scheduler.frequency}")
   public void triggerActionRule() {
-//    This is a lazy hack to get instant logging without further effort
+    //    This is a hack to get instant logging without needing to post etc
+    //    *** DO NOT MERGE ***
     EventDTO event = new EventDTO();
     PayloadDTO payloadDTO = new PayloadDTO();
     ReceiptDTO receiptDTO = new ReceiptDTO();
@@ -34,7 +35,6 @@ public class ActionRuleScheduler {
     log.with(event).warn("WARN!!!");
     log.with(event).info("INFO!!!");
     log.with(event).debug("DEBUGGING!!!");
-
 
     if (!clusterLeaderManager.isThisHostClusterLeader()) {
       return; // This host (i.e. pod) is not the leader... don't do any scheduling
