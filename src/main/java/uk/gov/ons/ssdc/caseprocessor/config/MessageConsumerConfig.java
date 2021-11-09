@@ -58,6 +58,9 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.sms-fulfilment-subscription}")
   private String smsFulfilmentSubscription;
 
+  @Value("${queueconfig.email-fulfilment-subscription}")
+  private String emailFulfilmentSubscription;
+
   public MessageConsumerConfig(
       ManagedMessageRecoverer managedMessageRecoverer, PubSubTemplate pubSubTemplate) {
     this.managedMessageRecoverer = managedMessageRecoverer;
@@ -121,6 +124,11 @@ public class MessageConsumerConfig {
 
   @Bean
   public MessageChannel smsFulfilmentInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel emailFulfilmentInputChannel() {
     return new DirectChannel();
   }
 
@@ -215,6 +223,12 @@ public class MessageConsumerConfig {
   PubSubInboundChannelAdapter smsFulfilmentInbound(
       @Qualifier("smsFulfilmentInputChannel") MessageChannel channel) {
     return makeAdapter(channel, smsFulfilmentSubscription);
+  }
+
+  @Bean
+  PubSubInboundChannelAdapter emailFulfilmentInbound(
+      @Qualifier("emailFulfilmentInputChannel") MessageChannel channel) {
+    return makeAdapter(channel, emailFulfilmentSubscription);
   }
 
   private PubSubInboundChannelAdapter makeAdapter(MessageChannel channel, String subscriptionName) {
