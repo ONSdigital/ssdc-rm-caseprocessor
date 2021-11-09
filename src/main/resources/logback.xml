@@ -74,6 +74,16 @@
         </filter>
     </appender>
 
+    <appender class="ch.qos.logback.core.ConsoleAppender"
+              name="DEV">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+    </appender>
+
     <appender class="ch.qos.logback.classic.net.SyslogAppender"
               name="SYSLOG">
         <syslogHost>localhost</syslogHost>
