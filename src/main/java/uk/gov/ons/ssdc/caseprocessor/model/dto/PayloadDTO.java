@@ -20,6 +20,8 @@ public class PayloadDTO {
   private EqLaunchDTO eqLaunch;
   private UacAuthenticationDTO uacAuthentication;
   private EnrichedSmsFulfilment enrichedSmsFulfilment;
+  private EnrichedEmailFulfilment enrichedEmailFulfilment;
   private NewCase newCase;
   private SmsRequest smsRequest;
+  private EmailRequest emailRequest;
 }
