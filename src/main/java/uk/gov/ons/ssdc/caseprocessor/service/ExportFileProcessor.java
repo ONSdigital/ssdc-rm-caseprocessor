@@ -9,6 +9,7 @@ import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
+import uk.gov.ons.ssdc.caseprocessor.rasrm.service.RasRmCaseIacService;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 import uk.gov.ons.ssdc.common.model.entity.*;
 
@@ -18,6 +19,7 @@ public class ExportFileProcessor {
   private final UacService uacService;
   private final EventLogger eventLogger;
   private final ExportFileRowRepository exportFileRowRepository;
+  private final RasRmCaseIacService rasRmCaseIacService;
 
   private final StringWriter stringWriter = new StringWriter();
   private final CSVWriter csvWriter =
@@ -32,11 +34,13 @@ public class ExportFileProcessor {
       UacQidCache uacQidCache,
       UacService uacService,
       EventLogger eventLogger,
-      ExportFileRowRepository exportFileRowRepository) {
+      ExportFileRowRepository exportFileRowRepository,
+      RasRmCaseIacService rasRmCaseIacService) {
     this.uacQidCache = uacQidCache;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.exportFileRowRepository = exportFileRowRepository;
+    this.rasRmCaseIacService = rasRmCaseIacService;
   }
 
   public void process(FulfilmentToProcess fulfilmentToProcess) {
@@ -89,6 +93,9 @@ public class ExportFileProcessor {
 
           rowStrings[i] = uacQidDTO.getQid();
           break;
+        case "__ras_rm_iac__":
+          rowStrings[i] = rasRmCaseIacService.getRasRmIac(caze);
+          break;
         default:
           rowStrings[i] = caze.getSample().get(templateItem);
       }
@@ -119,7 +126,7 @@ public class ExportFileProcessor {
     return csvRow;
   }
 
-  public UacQidDTO getUacQidForCase(
+  private UacQidDTO getUacQidForCase(
       Case caze, UUID correlationId, String originatingUser, Object metadata) {
     UacQidDTO uacQidDTO = uacQidCache.getUacQidPair(1);
     UacQidLink uacQidLink = new UacQidLink();
