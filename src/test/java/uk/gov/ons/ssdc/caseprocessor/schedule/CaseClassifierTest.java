@@ -52,9 +52,11 @@ class CaseClassifierTest {
   void testEnqueueCasesForActionRuleRasRmBusiness() {
     // Given
     JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
-    RasRmSampleSummaryCollexLinkService rasRmSampleSummaryCollexLinkService = mock(RasRmSampleSummaryCollexLinkService.class);
+    RasRmSampleSummaryCollexLinkService rasRmSampleSummaryCollexLinkService =
+        mock(RasRmSampleSummaryCollexLinkService.class);
 
-    CaseClassifier underTest = new CaseClassifier(jdbcTemplate, rasRmSampleSummaryCollexLinkService);
+    CaseClassifier underTest =
+        new CaseClassifier(jdbcTemplate, rasRmSampleSummaryCollexLinkService);
     String classifiers = "foo IN ('bar')";
     Survey survey = new Survey();
     survey.setSampleDefinitionUrl("business.json");

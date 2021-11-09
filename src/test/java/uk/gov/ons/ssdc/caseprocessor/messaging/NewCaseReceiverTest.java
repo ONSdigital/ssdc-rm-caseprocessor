@@ -403,9 +403,9 @@ public class NewCaseReceiverTest {
     survey.setId(UUID.randomUUID());
     survey.setSampleValidationRules(
         new ColumnValidator[] {
-            new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
-            new ColumnValidator("POSTCODE", false, new Rule[] {new MandatoryRule()}),
-            new ColumnValidator("Telephone", true, new Rule[] {new MandatoryRule()})
+          new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
+          new ColumnValidator("POSTCODE", false, new Rule[] {new MandatoryRule()}),
+          new ColumnValidator("Telephone", true, new Rule[] {new MandatoryRule()})
         });
     survey.setSampleDefinitionUrl("business.json");
 
