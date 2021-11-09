@@ -2,7 +2,6 @@ package uk.gov.ons.ssdc.caseprocessor.schedule;
 
 import static uk.gov.ons.ssdc.caseprocessor.rasrm.constants.RasRmConstants.BUSINESS_SAMPLE_DEFINITION_URL_SUFFIX;
 
-import java.util.Set;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -12,9 +11,6 @@ import uk.gov.ons.ssdc.common.model.entity.ActionRule;
 
 @Component
 public class CaseClassifier {
-  private static final Set<String> MANDATORY_COLLEX_METADATA =
-      Set.of("rasRmSampleSummaryId", "rasRmCollectionExerciseId");
-
   private final JdbcTemplate jdbcTemplate;
   private final RasRmSampleSummaryCollexLinkService rasRmSampleSummaryCollexLinkService;
 

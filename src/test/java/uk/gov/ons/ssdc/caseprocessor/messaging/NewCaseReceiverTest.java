@@ -34,6 +34,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.NewCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
+import uk.gov.ons.ssdc.caseprocessor.rasrm.service.RasRmCaseNotificationEnrichmentService;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 import uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper;
@@ -59,6 +60,7 @@ public class NewCaseReceiverTest {
   @Mock private CaseService caseService;
   @Mock private CaseRepository caseRepository;
   @Mock private CollectionExerciseRepository collectionExerciseRepository;
+  @Mock private RasRmCaseNotificationEnrichmentService rasRmNewBusinessCaseEnricher;
 
   @InjectMocks NewCaseReceiver underTest;
 
@@ -364,5 +366,80 @@ public class NewCaseReceiverTest {
     assertThat(thrownException.getMessage())
         .isEqualTo("Attempt to send data to RM which was not part of defined sample");
     verifyNoInteractions(eventLogger);
+  }
+
+  @Test
+  public void testNewCaseReceiverRasRmBusinessCase() {
+    // Given
+    NewCase newCase = new NewCase();
+    newCase.setCaseId(TEST_CASE_ID);
+    newCase.setCollectionExerciseId(TEST_CASE_COLLECTION_EXERCISE_ID);
+
+    Map<String, String> sample = new HashMap<>();
+    sample.put("ADDRESS_LINE1", "123 Fake Street");
+    sample.put("POSTCODE", "NP10 111");
+    newCase.setSample(sample);
+
+    Map<String, String> sampleSensitive = new HashMap<>();
+    sampleSensitive.put("Telephone", "02071234567");
+    newCase.setSampleSensitive(sampleSensitive);
+
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
+    eventHeader.setCorrelationId(TEST_CORRELATION_ID);
+    eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setNewCase(newCase);
+
+    EventDTO event = new EventDTO();
+    event.setHeader(eventHeader);
+    event.setPayload(payloadDTO);
+
+    Message<byte[]> eventMessage = constructMessage(event);
+
+    when(caseRepository.existsById(TEST_CASE_ID)).thenReturn(false);
+
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+    survey.setSampleValidationRules(
+        new ColumnValidator[] {
+            new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
+            new ColumnValidator("POSTCODE", false, new Rule[] {new MandatoryRule()}),
+            new ColumnValidator("Telephone", true, new Rule[] {new MandatoryRule()})
+        });
+    survey.setSampleDefinitionUrl("business.json");
+
+    CollectionExercise collex = new CollectionExercise();
+    collex.setSurvey(survey);
+    collex.setMetadata(new Object());
+    Optional<CollectionExercise> collexOpt = Optional.of(collex);
+    when(collectionExerciseRepository.findById(TEST_CASE_COLLECTION_EXERCISE_ID))
+        .thenReturn(collexOpt);
+
+    when(caseRepository.saveAndFlush(any(Case.class)))
+        .then(
+            invocation -> {
+              Case caze = invocation.getArgument(0);
+              caze.setSecretSequenceNumber(123);
+              return caze;
+            });
+
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
+
+    // When
+    underTest.receiveNewCase(eventMessage);
+
+    // Then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService)
+        .emitCaseUpdate(
+            caseArgumentCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
+    Case actualCase = caseArgumentCaptor.getValue();
+    assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID);
+
+    verify(eventLogger)
+        .logCaseEvent(actualCase, "New case created", EventType.NEW_CASE, event, eventMessage);
+
+    verify(rasRmNewBusinessCaseEnricher).notifyRasRmAndEnrichSample(sample, collex.getMetadata());
   }
 }

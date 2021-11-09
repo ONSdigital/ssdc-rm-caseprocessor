@@ -24,6 +24,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
+import uk.gov.ons.ssdc.caseprocessor.rasrm.service.RasRmCaseIacService;
 import uk.gov.ons.ssdc.common.model.entity.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +33,7 @@ class ExportFileProcessorTest {
   @Mock private UacService uacService;
   @Mock private EventLogger eventLogger;
   @Mock private ExportFileRowRepository exportFileRowRepository;
+  @Mock private RasRmCaseIacService rasRmCaseIacService;
 
   @InjectMocks ExportFileProcessor underTest;
 
@@ -99,6 +101,65 @@ class ExportFileProcessorTest {
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
     assertThat(actualUacQidLink.isActive()).isTrue();
     assertThat(actualUacQidLink.getMetadata()).isEqualTo(TEST_UAC_METADATA);
+
+    ArgumentCaptor<EventDTO> eventCaptor = ArgumentCaptor.forClass(EventDTO.class);
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(caze),
+            eq("Export file generated with pack code " + PACK_CODE),
+            eq(EventType.EXPORT_FILE),
+            eventCaptor.capture(),
+            any(OffsetDateTime.class));
+
+    EventHeaderDTO actualHeader = eventCaptor.getValue().getHeader();
+    Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(actionRule.getId());
+  }
+
+  @Test
+  void testProcessExportRasRmIacFileRow() {
+    // Given
+    Case caze = new Case();
+    caze.setSample(Map.of("foo", "bar"));
+    caze.setCaseRef(123L);
+
+    ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
+    exportFileTemplate.setTemplate(new String[] {"__ras_rm_iac__"});
+    exportFileTemplate.setPackCode(PACK_CODE);
+    exportFileTemplate.setExportFileDestination(EXPORT_FILE_DESTINATION);
+
+    ActionRule actionRule = new ActionRule();
+    actionRule.setId(UUID.randomUUID());
+    actionRule.setType(ActionRuleType.EXPORT_FILE);
+    actionRule.setExportFileTemplate(exportFileTemplate);
+    actionRule.setUacMetadata(TEST_UAC_METADATA);
+
+    CaseToProcess caseToProcess = new CaseToProcess();
+    caseToProcess.setActionRule(actionRule);
+    caseToProcess.setCaze(caze);
+    caseToProcess.setBatchId(UUID.fromString("6a127d58-c1cb-489c-a3f5-72014a0c32d6"));
+
+    when(rasRmCaseIacService.getRasRmIac(any(Case.class))).thenReturn("test IAC");
+
+    // When
+    underTest.processExportFileRow(
+        exportFileTemplate.getTemplate(),
+        caze,
+        caseToProcess.getBatchId(),
+        caseToProcess.getBatchQuantity(),
+        exportFileTemplate.getPackCode(),
+        exportFileTemplate.getExportFileDestination(),
+        actionRule.getId(),
+        null,
+        actionRule.getUacMetadata());
+
+    //    // Then
+    ArgumentCaptor<ExportFileRow> exportFileRowArgumentCaptor =
+        ArgumentCaptor.forClass(ExportFileRow.class);
+    verify(exportFileRowRepository).save(exportFileRowArgumentCaptor.capture());
+    ExportFileRow actualExportFileRow = exportFileRowArgumentCaptor.getValue();
+    assertThat(actualExportFileRow.getPackCode()).isEqualTo(PACK_CODE);
+    assertThat(actualExportFileRow.getExportFileDestination()).isEqualTo(EXPORT_FILE_DESTINATION);
+    assertThat(actualExportFileRow.getRow()).isEqualTo("\"test IAC\"");
 
     ArgumentCaptor<EventDTO> eventCaptor = ArgumentCaptor.forClass(EventDTO.class);
     verify(eventLogger)
