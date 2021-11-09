@@ -34,7 +34,7 @@ public class JunkDataHelper {
     junkCase.setCollectionExercise(setupJunkCollex());
     junkCase.setCaseRef(RANDOM.nextLong());
     junkCase.setSample(Map.of("foo", "bar"));
-    junkCase.setSampleSensitive(Map.of("phoneNumber", "123"));
+    junkCase.setSampleSensitive(Map.of("phoneNumber", "123", "emailAddress", "junk@junk.com"));
     caseRepository.save(junkCase);
 
     return junkCase;
