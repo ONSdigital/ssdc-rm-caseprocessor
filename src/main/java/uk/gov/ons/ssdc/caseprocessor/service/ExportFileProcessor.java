@@ -137,12 +137,12 @@ public class ExportFileProcessor {
       Case caze, UUID correlationId, String originatingUser, Object metadata) {
 
     CollectionInstrumentSelectionRule[] collectionInstrumentSelectionRules = new CollectionInstrumentSelectionRule[] {
-        new CollectionInstrumentSelectionRule(1000, "caze.sample['POSTCODE'] = 'peter'", "http://brian/andrew"),
-        new CollectionInstrumentSelectionRule(500, "caze.sample['POSTCODE'] = 'john'", "http://norman/george"),
+        new CollectionInstrumentSelectionRule(1000, "caze.sample['POSTCODE'] == 'peter' and uacMetadata['wave'] == 1", "http://brian/andrew"),
+        new CollectionInstrumentSelectionRule(500, "caze.sample['POSTCODE'] == 'john'", "http://norman/george"),
         new CollectionInstrumentSelectionRule(0, null, "http://thomas/ermintrude")
     };
 
-    EvaluationBundle bundle = new EvaluationBundle(caze);
+    EvaluationBundle bundle = new EvaluationBundle(caze, metadata);
     EvaluationContext context = new StandardEvaluationContext(bundle);
 
     ExpressionParser expressionParser = new SpelExpressionParser();

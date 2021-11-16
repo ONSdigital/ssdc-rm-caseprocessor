@@ -1,11 +1,10 @@
 package uk.gov.ons.ssdc.caseprocessor.collectioninstrument;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Value;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 
-@AllArgsConstructor
-@Data
+@Value
 public class EvaluationBundle {
-  public Case caze;
+  Case caze;
+  Object uacMetadata;
 }
