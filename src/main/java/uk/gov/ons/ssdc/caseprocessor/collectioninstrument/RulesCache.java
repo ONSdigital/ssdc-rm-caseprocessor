@@ -11,6 +11,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.common.model.entity.CollectionInstrumentSelectionRule;
 
 @Component
 public class RulesCache {
@@ -18,33 +19,21 @@ public class RulesCache {
 
   private final CollectionExerciseRepository collectionExerciseRepository;
 
-  public RulesCache(
-      CollectionExerciseRepository collectionExerciseRepository) {
+  public RulesCache(CollectionExerciseRepository collectionExerciseRepository) {
     this.collectionExerciseRepository = collectionExerciseRepository;
   }
 
   @Cacheable("collectionInstrumentRules")
   public CachedRule[] getRules(UUID collectionExerciseId) {
-    CollectionExercise collectionExercise = collectionExerciseRepository.findById(
-        collectionExerciseId).orElseThrow(() -> new RuntimeException("Collex not found"));
+    CollectionExercise collectionExercise =
+        collectionExerciseRepository
+            .findById(collectionExerciseId)
+            .orElseThrow(() -> new RuntimeException("Collex not found"));
 
-    // TODO: get the rules off the collex instead of hard-coding them here
-    CollectionInstrumentSelectionRule[] collectionInstrumentSelectionRules =
-        new CollectionInstrumentSelectionRule[] {
-            new CollectionInstrumentSelectionRule(
-                1000,
-                "caze.sample['POSTCODE'] == 'peter' and uacMetadata != null and uacMetadata['wave'] == 1",
-                "http://brian/andrew"),
-            new CollectionInstrumentSelectionRule(
-                500, "caze.sample['POSTCODE'] == 'john'", "http://norman/george"),
-            new CollectionInstrumentSelectionRule(0, null, "http://thomas/ermintrude")
-        };
-
-    return prepareAndSortRules(collectionInstrumentSelectionRules);
+    return prepareAndSortRules(collectionExercise.getCollectionInstrumentSelectionRules());
   }
 
-  private CachedRule[] prepareAndSortRules(
-      CollectionInstrumentSelectionRule[] unpreparedRules) {
+  private CachedRule[] prepareAndSortRules(CollectionInstrumentSelectionRule[] unpreparedRules) {
     List<CachedRule> preparedRules = new ArrayList<>(unpreparedRules.length);
 
     for (CollectionInstrumentSelectionRule unpreparedRule : unpreparedRules) {
@@ -65,5 +54,4 @@ public class RulesCache {
 
     return preparedRules.toArray(new CachedRule[preparedRules.size()]);
   }
-
 }
