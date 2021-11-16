@@ -4,8 +4,15 @@ import com.opencsv.CSVWriter;
 import java.io.StringWriter;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
+import uk.gov.ons.ssdc.caseprocessor.collectioninstrument.CollectionInstrumentSelectionRule;
+import uk.gov.ons.ssdc.caseprocessor.collectioninstrument.EvaluationBundle;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
@@ -128,6 +135,42 @@ public class ExportFileProcessor {
 
   private UacQidDTO getUacQidForCase(
       Case caze, UUID correlationId, String originatingUser, Object metadata) {
+
+    CollectionInstrumentSelectionRule[] collectionInstrumentSelectionRules = new CollectionInstrumentSelectionRule[] {
+        new CollectionInstrumentSelectionRule(1000, "caze.sample['POSTCODE'] = 'peter'", "http://brian/andrew"),
+        new CollectionInstrumentSelectionRule(500, "caze.sample['POSTCODE'] = 'john'", "http://norman/george"),
+        new CollectionInstrumentSelectionRule(0, null, "http://thomas/ermintrude")
+    };
+
+    EvaluationBundle bundle = new EvaluationBundle(caze);
+    EvaluationContext context = new StandardEvaluationContext(bundle);
+
+    ExpressionParser expressionParser = new SpelExpressionParser();
+    String selectedUrl = null;
+    int selectedPriority = Integer.MIN_VALUE;
+    for (CollectionInstrumentSelectionRule rule : collectionInstrumentSelectionRules) {
+      if (rule.getPriority() < selectedPriority) {
+        // If the priority of the rule is lower than a rule that has matched, then ignore the
+        // rule, because another one is higher priority so we should use that one
+        continue;
+      }
+
+      Boolean expressionResult = Boolean.TRUE;
+
+      // No expression means "match anything"... used for 'default' rule
+      if (rule.getSpelExpression() != null) {
+        Expression spelExpression = expressionParser.parseExpression(rule.getSpelExpression());
+        expressionResult = spelExpression.getValue(context, Boolean.class);
+      }
+
+      if (expressionResult) {
+        selectedPriority = rule.getPriority();
+        selectedUrl = rule.getCollectionInstrumentUrl();
+      }
+    }
+
+    System.out.println("Would have used this instrument: " + selectedUrl);
+
     UacQidDTO uacQidDTO = uacQidCache.getUacQidPair(1);
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
