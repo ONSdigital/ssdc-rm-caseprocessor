@@ -46,6 +46,7 @@ public class UacService {
     uac.setActive(savedUacQidLink.isActive());
     uac.setReceiptReceived(savedUacQidLink.isReceiptReceived());
     uac.setEqLaunched(savedUacQidLink.isEqLaunched());
+    uac.setCollectionInstrumentUrl(savedUacQidLink.getCollectionInstrumentUrl());
 
     Case caze = savedUacQidLink.getCaze();
     if (caze != null) {
@@ -79,6 +80,7 @@ public class UacService {
     return uacQidLinkRepository.existsByQid(qid);
   }
 
+  // TODO: this method will need the collectionInstrumentUrl supplied to it
   public void createLinkAndEmitNewUacQid(
       Case caze,
       String uac,

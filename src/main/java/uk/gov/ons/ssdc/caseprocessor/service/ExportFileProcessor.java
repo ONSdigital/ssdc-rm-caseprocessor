@@ -164,8 +164,6 @@ public class ExportFileProcessor {
       }
     }
 
-    System.out.println("Would have used this instrument: " + selectedUrl);
-
     UacQidDTO uacQidDTO = uacQidCache.getUacQidPair(1);
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
@@ -173,6 +171,7 @@ public class ExportFileProcessor {
     uacQidLink.setUac(uacQidDTO.getUac());
     uacQidLink.setMetadata(metadata);
     uacQidLink.setCaze(caze);
+    uacQidLink.setCollectionInstrumentUrl(selectedUrl);
     uacService.saveAndEmitUacUpdateEvent(uacQidLink, correlationId, originatingUser);
 
     return uacQidDTO;

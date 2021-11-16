@@ -14,4 +14,5 @@ public class UacUpdateDTO {
   private UUID caseId;
   private boolean receiptReceived;
   private boolean eqLaunched;
+  private String collectionInstrumentUrl;
 }
