@@ -4,8 +4,8 @@ import lombok.Value;
 import org.springframework.expression.Expression;
 
 @Value
-public class FullyPreparedRule {
-  Expression spelExpression;
+public class CachedRule {
+  Expression spelExpression; // This is the main thing we want to cache in memory, for performance
   int priority;
   String collectionInstrumentUrl;
 }
