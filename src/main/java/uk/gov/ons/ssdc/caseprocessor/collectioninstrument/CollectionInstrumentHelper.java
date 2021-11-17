@@ -51,6 +51,18 @@ public class CollectionInstrumentHelper {
       }
     }
 
+    // This check is waaaay too late... these checks need to happen in the UI etc to stop
+    // dodgy rules from ever being configured... it's here as a final line of defence, but we
+    // absolutely can not rely on it because it will wreak havoc on operational support.
+    if (selectedCollectionInstrumentUrl == null) {
+      log.with("collection_exercise_id", caze.getCollectionExercise().getId())
+          .error(
+              "Collection instrument rules are set up incorrectly: there MUST be a default rule");
+
+      throw new RuntimeException(
+          "Collection instrument rules are set up incorrectly: there MUST be a default rule");
+    }
+
     return selectedCollectionInstrumentUrl;
   }
 }
