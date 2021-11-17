@@ -2,6 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.ons.ssdc.caseprocessor.collectioninstrument.CollectionInstrumentHelper;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
@@ -29,11 +31,9 @@ import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ExtendWith(MockitoExtension.class)
 public class UacServiceTest {
-  private static final String TEST_UAC_HASH =
-      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
-
   @Mock UacQidLinkRepository uacQidLinkRepository;
   @Mock MessageSender messageSender;
+  @Mock CollectionInstrumentHelper collectionInstrumentHelper;
 
   @InjectMocks UacService underTest;
 
@@ -45,10 +45,11 @@ public class UacServiceTest {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setUac("abc");
+    uacQidLink.setUacHash("test hash");
     uacQidLink.setQid("01234");
     uacQidLink.setActive(true);
 
-    when(uacQidLinkRepository.save(uacQidLink)).thenReturn(uacQidLink);
+    when(uacQidLinkRepository.save(uacQidLink)).then(returnsFirstArg());
     underTest.saveAndEmitUacUpdateEvent(uacQidLink, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
 
     verify(uacQidLinkRepository).save(uacQidLink);
@@ -62,7 +63,7 @@ public class UacServiceTest {
     assertThat(actualEvent.getHeader().getOriginatingUser()).isEqualTo(TEST_ORIGINATING_USER);
 
     UacUpdateDTO uacUpdateDto = actualEvent.getPayload().getUacUpdate();
-    assertThat(uacUpdateDto.getUacHash()).isEqualTo(TEST_UAC_HASH);
+    assertThat(uacUpdateDto.getUacHash()).isEqualTo("test hash");
     assertThat(uacUpdateDto.getQid()).isEqualTo(uacUpdateDto.getQid());
   }
 
@@ -108,13 +109,11 @@ public class UacServiceTest {
 
     Case testCase = new Case();
     testCase.setId(UUID.randomUUID());
-    UacQidLink expectedSavedUacQidLink = new UacQidLink();
-    expectedSavedUacQidLink.setUac(uac);
-    expectedSavedUacQidLink.setQid(qid);
-    expectedSavedUacQidLink.setCaze(testCase);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    when(uacQidLinkRepository.save(uacQidLinkCaptor.capture())).thenReturn(expectedSavedUacQidLink);
+    when(uacQidLinkRepository.save(uacQidLinkCaptor.capture())).then(returnsFirstArg());
+    when(collectionInstrumentHelper.getCollectionInstrumentUrl(testCase, TEST_UAC_METADATA))
+        .thenReturn("testCollectionInstrument");
 
     // When
     underTest.createLinkAndEmitNewUacQid(
@@ -125,8 +124,11 @@ public class UacServiceTest {
     assertThat(actualSavedUacQidLink.isActive()).isTrue();
     assertThat(actualSavedUacQidLink.getQid()).isEqualTo(qid);
     assertThat(actualSavedUacQidLink.getUac()).isEqualTo(uac);
+    assertThat(actualSavedUacQidLink.getUacHash()).isEqualTo(HashHelper.hash(uac));
     assertThat(actualSavedUacQidLink.getMetadata()).isEqualTo(TEST_UAC_METADATA);
     assertThat(actualSavedUacQidLink.getCaze()).isEqualTo(testCase);
+    assertThat(actualSavedUacQidLink.getCollectionInstrumentUrl())
+        .isEqualTo("testCollectionInstrument");
 
     ArgumentCaptor<EventDTO> eventArgumentCaptor = ArgumentCaptor.forClass(EventDTO.class);
     verify(messageSender).sendMessage(any(), eventArgumentCaptor.capture());
@@ -139,5 +141,6 @@ public class UacServiceTest {
     assertThat(uacUpdateDto.getUacHash()).isEqualTo(HashHelper.hash(uac));
     assertThat(uacUpdateDto.getQid()).isEqualTo(qid);
     assertThat(uacUpdateDto.getCaseId()).isEqualTo(testCase.getId());
+    assertThat(uacUpdateDto.getCollectionInstrumentUrl()).isEqualTo("testCollectionInstrument");
   }
 }

@@ -12,6 +12,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.rasrm.service.RasRmCaseIacService;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
+import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 import uk.gov.ons.ssdc.common.model.entity.*;
 
 @Component
@@ -141,6 +142,7 @@ public class ExportFileProcessor {
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setQid(uacQidDTO.getQid());
     uacQidLink.setUac(uacQidDTO.getUac());
+    uacQidLink.setUacHash(HashHelper.hash(uacQidDTO.getUac()));
     uacQidLink.setMetadata(metadata);
     uacQidLink.setCaze(caze);
     uacQidLink.setCollectionInstrumentUrl(collectionInstrumentUrl);
