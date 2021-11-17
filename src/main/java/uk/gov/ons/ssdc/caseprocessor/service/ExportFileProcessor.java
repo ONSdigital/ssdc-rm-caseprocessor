@@ -4,13 +4,9 @@ import com.opencsv.CSVWriter;
 import java.io.StringWriter;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
-import uk.gov.ons.ssdc.caseprocessor.collectioninstrument.CachedRule;
-import uk.gov.ons.ssdc.caseprocessor.collectioninstrument.EvaluationBundle;
-import uk.gov.ons.ssdc.caseprocessor.collectioninstrument.RulesCache;
+import uk.gov.ons.ssdc.caseprocessor.collectioninstrument.CollectionInstrumentHelper;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
@@ -25,7 +21,7 @@ public class ExportFileProcessor {
   private final EventLogger eventLogger;
   private final ExportFileRowRepository exportFileRowRepository;
   private final RasRmCaseIacService rasRmCaseIacService;
-  private final RulesCache rulesCache;
+  private final CollectionInstrumentHelper collectionInstrumentHelper;
 
   private final StringWriter stringWriter = new StringWriter();
   private final CSVWriter csvWriter =
@@ -42,13 +38,13 @@ public class ExportFileProcessor {
       EventLogger eventLogger,
       ExportFileRowRepository exportFileRowRepository,
       RasRmCaseIacService rasRmCaseIacService,
-      RulesCache rulesCache) {
+      CollectionInstrumentHelper collectionInstrumentHelper) {
     this.uacQidCache = uacQidCache;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.exportFileRowRepository = exportFileRowRepository;
     this.rasRmCaseIacService = rasRmCaseIacService;
-    this.rulesCache = rulesCache;
+    this.collectionInstrumentHelper = collectionInstrumentHelper;
   }
 
   public void process(FulfilmentToProcess fulfilmentToProcess) {
@@ -137,32 +133,8 @@ public class ExportFileProcessor {
   private UacQidDTO getUacQidForCase(
       Case caze, UUID correlationId, String originatingUser, Object metadata) {
 
-    EvaluationBundle bundle = new EvaluationBundle(caze, metadata);
-    EvaluationContext context = new StandardEvaluationContext(bundle);
-
-    CachedRule[] rules = rulesCache.getRules(caze.getCollectionExercise().getId());
-
-    String selectedUrl = null;
-    int selectedPriority = Integer.MIN_VALUE;
-    for (CachedRule cachedRule : rules) {
-      if (cachedRule.getPriority() < selectedPriority) {
-        // If the priority of the rule is lower than a rule that has matched, then ignore the
-        // rule, because another one is higher priority so we should use that one
-        continue;
-      }
-
-      Boolean expressionResult = Boolean.TRUE;
-
-      // No expression means "match anything"... used for 'default' rule
-      if (cachedRule.getSpelExpression() != null) {
-        expressionResult = cachedRule.getSpelExpression().getValue(context, Boolean.class);
-      }
-
-      if (expressionResult) {
-        selectedPriority = cachedRule.getPriority();
-        selectedUrl = cachedRule.getCollectionInstrumentUrl();
-      }
-    }
+    String collectionInstrumentUrl =
+        collectionInstrumentHelper.getCollectionInstrumentUrl(caze, metadata);
 
     UacQidDTO uacQidDTO = uacQidCache.getUacQidPair(1);
     UacQidLink uacQidLink = new UacQidLink();
@@ -171,7 +143,7 @@ public class ExportFileProcessor {
     uacQidLink.setUac(uacQidDTO.getUac());
     uacQidLink.setMetadata(metadata);
     uacQidLink.setCaze(caze);
-    uacQidLink.setCollectionInstrumentUrl(selectedUrl);
+    uacQidLink.setCollectionInstrumentUrl(collectionInstrumentUrl);
     uacService.saveAndEmitUacUpdateEvent(uacQidLink, correlationId, originatingUser);
 
     return uacQidDTO;
