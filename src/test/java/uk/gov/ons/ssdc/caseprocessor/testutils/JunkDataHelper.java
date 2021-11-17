@@ -13,6 +13,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseReposito
 import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.common.model.entity.CollectionInstrumentSelectionRule;
 import uk.gov.ons.ssdc.common.model.entity.Survey;
 import uk.gov.ons.ssdc.common.validation.ColumnValidator;
 import uk.gov.ons.ssdc.common.validation.MandatoryRule;
@@ -61,6 +62,10 @@ public class JunkDataHelper {
     junkCollectionExercise.setStartDate(OffsetDateTime.now());
     junkCollectionExercise.setEndDate(OffsetDateTime.now().plusDays(2));
     junkCollectionExercise.setMetadata(null);
+    junkCollectionExercise.setCollectionInstrumentSelectionRules(
+        new CollectionInstrumentSelectionRule[] {
+          new CollectionInstrumentSelectionRule(0, null, "junkCollectionInstrumentUrl")
+        });
     collectionExerciseRepository.saveAndFlush(junkCollectionExercise);
 
     return junkCollectionExercise;

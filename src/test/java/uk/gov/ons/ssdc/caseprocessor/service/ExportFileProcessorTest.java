@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
+import uk.gov.ons.ssdc.caseprocessor.collectioninstrument.CollectionInstrumentHelper;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
@@ -34,6 +35,7 @@ class ExportFileProcessorTest {
   @Mock private EventLogger eventLogger;
   @Mock private ExportFileRowRepository exportFileRowRepository;
   @Mock private RasRmCaseIacService rasRmCaseIacService;
+  @Mock private CollectionInstrumentHelper collectionInstrumentHelper;
 
   @InjectMocks ExportFileProcessor underTest;
 
@@ -70,6 +72,8 @@ class ExportFileProcessorTest {
     uacQidDTO.setQid(QID);
 
     when(uacQidCache.getUacQidPair(anyInt())).thenReturn(uacQidDTO);
+    when(collectionInstrumentHelper.getCollectionInstrumentUrl(caze, TEST_UAC_METADATA))
+        .thenReturn("testCollectionInstrumentUrl");
 
     // When
     underTest.processExportFileRow(
@@ -101,6 +105,8 @@ class ExportFileProcessorTest {
     assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
     assertThat(actualUacQidLink.isActive()).isTrue();
     assertThat(actualUacQidLink.getMetadata()).isEqualTo(TEST_UAC_METADATA);
+    assertThat(actualUacQidLink.getCollectionInstrumentUrl())
+        .isEqualTo("testCollectionInstrumentUrl");
 
     ArgumentCaptor<EventDTO> eventCaptor = ArgumentCaptor.forClass(EventDTO.class);
     verify(eventLogger)
