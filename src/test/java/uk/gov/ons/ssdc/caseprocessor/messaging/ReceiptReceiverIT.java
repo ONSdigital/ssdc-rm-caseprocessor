@@ -68,10 +68,12 @@ public class ReceiptReceiverIT {
       uacQidLink.setId(TEST_UACLINK_ID);
       uacQidLink.setQid(TEST_QID);
       uacQidLink.setUac("abc");
+      uacQidLink.setUacHash("fakeHash");
       uacQidLink.setCaze(caze);
       uacQidLink.setActive(true);
       uacQidLink.setReceiptReceived(false);
       uacQidLink.setEqLaunched(false);
+      uacQidLink.setCollectionInstrumentUrl("dummyUrl");
       uacQidLinkRepository.saveAndFlush(uacQidLink);
 
       ReceiptDTO receiptDTO = new ReceiptDTO();

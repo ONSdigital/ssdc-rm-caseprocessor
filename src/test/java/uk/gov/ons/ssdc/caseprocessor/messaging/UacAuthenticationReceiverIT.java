@@ -52,7 +52,9 @@ public class UacAuthenticationReceiverIT {
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setQid(TEST_QID);
     uacQidLink.setUac("Junk");
+    uacQidLink.setUacHash("junkHash");
     uacQidLink.setCaze(junkDataHelper.setupJunkCase());
+    uacQidLink.setCollectionInstrumentUrl("junkInstrumentUrl");
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
     EventDTO eqLaunchedEvent = new EventDTO();
