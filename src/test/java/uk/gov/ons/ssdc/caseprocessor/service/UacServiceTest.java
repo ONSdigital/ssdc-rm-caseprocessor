@@ -25,6 +25,8 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.common.model.entity.Survey;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,11 +44,23 @@ public class UacServiceTest {
     ReflectionTestUtils.setField(underTest, "uacUpdateTopic", "Test topic");
     ReflectionTestUtils.setField(underTest, "sharedPubsubProject", "Test project");
 
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setId(UUID.randomUUID());
+    collectionExercise.setSurvey(survey);
+
+    Case caze = new Case();
+    caze.setId(UUID.randomUUID());
+    caze.setCollectionExercise(collectionExercise);
+
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setUac("abc");
     uacQidLink.setQid("01234");
     uacQidLink.setActive(true);
+    uacQidLink.setCaze(caze);
 
     when(uacQidLinkRepository.save(uacQidLink)).thenReturn(uacQidLink);
     underTest.saveAndEmitUacUpdateEvent(uacQidLink, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
@@ -64,6 +78,9 @@ public class UacServiceTest {
     UacUpdateDTO uacUpdateDto = actualEvent.getPayload().getUacUpdate();
     assertThat(uacUpdateDto.getUacHash()).isEqualTo(TEST_UAC_HASH);
     assertThat(uacUpdateDto.getQid()).isEqualTo(uacUpdateDto.getQid());
+    assertThat(uacUpdateDto.getCaseId()).isEqualTo(caze.getId());
+    assertThat(uacUpdateDto.getSurveyId()).isEqualTo(survey.getId());
+    assertThat(uacUpdateDto.getCollectionExerciseId()).isEqualTo(collectionExercise.getId());
   }
 
   @Test
@@ -106,8 +123,16 @@ public class UacServiceTest {
     String qid = "TEST_QID";
     String uac = "TEST_UAC";
 
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setId(UUID.randomUUID());
+    collectionExercise.setSurvey(survey);
+
     Case testCase = new Case();
     testCase.setId(UUID.randomUUID());
+    testCase.setCollectionExercise(collectionExercise);
     UacQidLink expectedSavedUacQidLink = new UacQidLink();
     expectedSavedUacQidLink.setUac(uac);
     expectedSavedUacQidLink.setQid(qid);

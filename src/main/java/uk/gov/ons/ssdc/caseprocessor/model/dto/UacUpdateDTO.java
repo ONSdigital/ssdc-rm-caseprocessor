@@ -12,6 +12,8 @@ public class UacUpdateDTO {
   private boolean active;
   private String qid;
   private UUID caseId;
+  private UUID collectionExerciseId;
+  private UUID surveyId;
   private boolean receiptReceived;
   private boolean eqLaunched;
 }
