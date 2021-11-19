@@ -54,10 +54,9 @@ public class UacService {
     uac.setEqLaunched(savedUacQidLink.isEqLaunched());
     uac.setCollectionInstrumentUrl(savedUacQidLink.getCollectionInstrumentUrl());
 
-    Case caze = savedUacQidLink.getCaze();
-    if (caze != null) {
-      uac.setCaseId(caze.getId());
-    }
+    uac.setCaseId(savedUacQidLink.getCaze().getId());
+    uac.setCollectionExerciseId(savedUacQidLink.getCaze().getCollectionExercise().getId());
+    uac.setSurveyId(savedUacQidLink.getCaze().getCollectionExercise().getSurvey().getId());
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setUacUpdate(uac);
