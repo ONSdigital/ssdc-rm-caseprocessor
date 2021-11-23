@@ -30,7 +30,7 @@ public class RefusalReceiver {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
     RefusalDTO refusal = event.getPayload().getRefusal();
-    Case refusedCase = caseService.getCaseByCaseId(refusal.getCaseId());
+    Case refusedCase = caseService.getCase(refusal.getCaseId());
     refusedCase.setRefusalReceived(RefusalType.valueOf(refusal.getType().name()));
 
     caseService.saveCaseAndEmitCaseUpdate(

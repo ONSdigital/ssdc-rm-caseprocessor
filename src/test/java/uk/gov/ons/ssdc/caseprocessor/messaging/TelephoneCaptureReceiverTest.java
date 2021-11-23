@@ -50,7 +50,7 @@ class TelephoneCaptureReceiverTest {
     EventDTO event = buildTelephoneCaptureEvent();
     Message<byte[]> eventMessage = constructMessage(event);
 
-    when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(testCase);
+    when(caseService.getCase(CASE_ID)).thenReturn(testCase);
     when(uacService.existsByQid(TEST_QID)).thenReturn(false);
 
     // When
@@ -82,7 +82,7 @@ class TelephoneCaptureReceiverTest {
     existingUacQidLink.setQid(TEST_QID);
     existingUacQidLink.setCaze(testCase);
 
-    when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(testCase);
+    when(caseService.getCase(CASE_ID)).thenReturn(testCase);
 
     when(uacService.existsByQid(TEST_QID)).thenReturn(true);
     when(uacService.findByQid(TEST_QID)).thenReturn(existingUacQidLink);
@@ -111,7 +111,7 @@ class TelephoneCaptureReceiverTest {
     existingUacQidLink.setQid(TEST_QID);
     existingUacQidLink.setCaze(otherCase);
 
-    when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(testCase);
+    when(caseService.getCase(CASE_ID)).thenReturn(testCase);
 
     when(uacService.existsByQid(TEST_QID)).thenReturn(true);
     when(uacService.findByQid(TEST_QID)).thenReturn(existingUacQidLink);

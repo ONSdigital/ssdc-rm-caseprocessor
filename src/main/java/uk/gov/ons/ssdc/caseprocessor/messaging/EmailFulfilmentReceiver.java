@@ -37,7 +37,7 @@ public class EmailFulfilmentReceiver {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
     EnrichedEmailFulfilment emailFulfilment = event.getPayload().getEnrichedEmailFulfilment();
 
-    Case caze = caseService.getCaseByCaseId(emailFulfilment.getCaseId());
+    Case caze = caseService.getCase(emailFulfilment.getCaseId());
 
     if (emailFulfilment.getQid() != null) {
       // Check the QID does not already exist

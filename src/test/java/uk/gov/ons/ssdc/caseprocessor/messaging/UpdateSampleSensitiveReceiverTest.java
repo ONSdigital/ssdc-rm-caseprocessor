@@ -81,7 +81,7 @@ class UpdateSampleSensitiveReceiverTest {
     Map<String, String> sensitiveData = new HashMap<>();
     sensitiveData.put("PHONE_NUMBER", "1111111");
     expectedCase.setSampleSensitive(sensitiveData);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // when
     underTest.receiveMessage(message);
@@ -139,7 +139,7 @@ class UpdateSampleSensitiveReceiverTest {
     Map<String, String> sensitiveData = new HashMap<>();
     sensitiveData.put("PHONE_NUMBER", "1111111");
     expectedCase.setSampleSensitive(sensitiveData);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // when
     underTest.receiveMessage(message);
@@ -184,7 +184,7 @@ class UpdateSampleSensitiveReceiverTest {
     Map<String, String> sensitiveData = new HashMap<>();
     sensitiveData.put("PHONE_NUMBER", "1111111");
     expectedCase.setSampleSensitive(sensitiveData);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
     assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
@@ -226,7 +226,7 @@ class UpdateSampleSensitiveReceiverTest {
     Map<String, String> sensitiveData = new HashMap<>();
     sensitiveData.put("PHONE_NUMBER", "123");
     expectedCase.setSampleSensitive(sensitiveData);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
     assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));

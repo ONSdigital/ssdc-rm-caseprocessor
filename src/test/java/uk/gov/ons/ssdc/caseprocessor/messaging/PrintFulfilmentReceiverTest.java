@@ -77,7 +77,7 @@ class PrintFulfilmentReceiverTest {
         .getCollectionExercise()
         .getSurvey()
         .setFulfilmentExportFileTemplates(List.of(fulfilmentSurveyExportFileTemplate));
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCase(any(UUID.class))).thenReturn(expectedCase);
 
     // When
     underTest.receiveMessage(message);
