@@ -77,8 +77,10 @@ public class DeactivateUacReceiverIT {
       uacQidLink.setId(UUID.randomUUID());
       uacQidLink.setQid(TEST_QID);
       uacQidLink.setUac("test_uac");
+      uacQidLink.setUacHash("fakeHash");
       uacQidLink.setActive(true);
       uacQidLink.setCaze(junkDataHelper.setupJunkCase());
+      uacQidLink.setCollectionInstrumentUrl("dummyUrl");
       uacQidLinkRepository.save(uacQidLink);
 
       // WHEN

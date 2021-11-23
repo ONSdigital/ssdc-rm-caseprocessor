@@ -16,4 +16,5 @@ public class UacUpdateDTO {
   private UUID surveyId;
   private boolean receiptReceived;
   private boolean eqLaunched;
+  private String collectionInstrumentUrl;
 }

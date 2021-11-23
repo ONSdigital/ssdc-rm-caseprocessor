@@ -6,11 +6,13 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
+import uk.gov.ons.ssdc.caseprocessor.collectioninstrument.CollectionInstrumentHelper;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.rasrm.service.RasRmCaseIacService;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
+import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 import uk.gov.ons.ssdc.common.model.entity.*;
 
 @Component
@@ -20,6 +22,7 @@ public class ExportFileProcessor {
   private final EventLogger eventLogger;
   private final ExportFileRowRepository exportFileRowRepository;
   private final RasRmCaseIacService rasRmCaseIacService;
+  private final CollectionInstrumentHelper collectionInstrumentHelper;
 
   private final StringWriter stringWriter = new StringWriter();
   private final CSVWriter csvWriter =
@@ -35,12 +38,14 @@ public class ExportFileProcessor {
       UacService uacService,
       EventLogger eventLogger,
       ExportFileRowRepository exportFileRowRepository,
-      RasRmCaseIacService rasRmCaseIacService) {
+      RasRmCaseIacService rasRmCaseIacService,
+      CollectionInstrumentHelper collectionInstrumentHelper) {
     this.uacQidCache = uacQidCache;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.exportFileRowRepository = exportFileRowRepository;
     this.rasRmCaseIacService = rasRmCaseIacService;
+    this.collectionInstrumentHelper = collectionInstrumentHelper;
   }
 
   public void process(FulfilmentToProcess fulfilmentToProcess) {
@@ -128,13 +133,19 @@ public class ExportFileProcessor {
 
   private UacQidDTO getUacQidForCase(
       Case caze, UUID correlationId, String originatingUser, Object metadata) {
+
+    String collectionInstrumentUrl =
+        collectionInstrumentHelper.getCollectionInstrumentUrl(caze, metadata);
+
     UacQidDTO uacQidDTO = uacQidCache.getUacQidPair(1);
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setQid(uacQidDTO.getQid());
     uacQidLink.setUac(uacQidDTO.getUac());
+    uacQidLink.setUacHash(HashHelper.hash(uacQidDTO.getUac()));
     uacQidLink.setMetadata(metadata);
     uacQidLink.setCaze(caze);
+    uacQidLink.setCollectionInstrumentUrl(collectionInstrumentUrl);
     uacService.saveAndEmitUacUpdateEvent(uacQidLink, correlationId, originatingUser);
 
     return uacQidDTO;

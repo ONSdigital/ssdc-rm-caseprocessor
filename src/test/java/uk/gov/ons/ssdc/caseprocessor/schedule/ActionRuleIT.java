@@ -242,8 +242,10 @@ class ActionRuleIT {
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setQid("123456789");
     uacQidLink.setUac("abc");
+    uacQidLink.setUacHash("fakeHash");
     uacQidLink.setActive(true);
     uacQidLink.setCaze(caze);
+    uacQidLink.setCollectionInstrumentUrl("dummyUrl");
     return uacQidLinkRepository.saveAndFlush(uacQidLink);
   }
 
