@@ -33,7 +33,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.SkippedMessage;
 
 @ExtendWith(MockitoExtension.class)
 class ManagedMessageRecovererTest {
-  private static String TEST_MESSAGE_HASH =
+  private static final String TEST_MESSAGE_HASH =
       "90f56b5b3ffe9558a546af25a7256da4b2761864575f9d59c81b70629023465b";
 
   @Mock private BasicAcknowledgeablePubsubMessage originalMessage;
