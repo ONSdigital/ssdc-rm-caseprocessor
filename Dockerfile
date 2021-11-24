@@ -1,4 +1,4 @@
-FROM openjdk:11-jdk-slim
+FROM openjdk:17-jdk-slim
 
 ARG JAR_FILE=ssdc-rm-caseprocessor*.jar
 
