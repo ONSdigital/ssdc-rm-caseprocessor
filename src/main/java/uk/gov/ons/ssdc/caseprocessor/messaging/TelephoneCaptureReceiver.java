@@ -37,7 +37,7 @@ public class TelephoneCaptureReceiver {
 
     TelephoneCaptureDTO telephoneCapturePayload = event.getPayload().getTelephoneCapture();
 
-    Case caze = caseService.getCaseByCaseId(telephoneCapturePayload.getCaseId());
+    Case caze = caseService.getCase(telephoneCapturePayload.getCaseId());
 
     // Double check the QID does not already exist
     if (uacService.existsByQid(telephoneCapturePayload.getQid())) {
