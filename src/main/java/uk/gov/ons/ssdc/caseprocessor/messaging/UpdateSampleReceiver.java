@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
@@ -28,14 +29,14 @@ public class UpdateSampleReceiver {
     this.eventLogger = eventLogger;
   }
 
-  @Transactional
+  @Transactional(isolation = Isolation.REPEATABLE_READ)
   @ServiceActivator(inputChannel = "updateSampleInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
     UpdateSample updateSample = event.getPayload().getUpdateSample();
 
-    Case caze = caseService.getCaseByCaseId(updateSample.getCaseId());
+    Case caze = caseService.getCaseAndLockForUpdate(updateSample.getCaseId());
 
     for (Map.Entry<String, String> entry : updateSample.getSample().entrySet()) {
       // Validate that only existing sample data is being attempted to be updated

@@ -79,12 +79,24 @@ public class CaseService {
     return event;
   }
 
-  public Case getCaseByCaseId(UUID caseId) {
+  public Case getCase(UUID caseId) {
     Optional<Case> cazeResult = caseRepository.findById(caseId);
 
     if (cazeResult.isEmpty()) {
-      throw new RuntimeException(String.format("Case ID '%s' not present", caseId));
+      throw new RuntimeException(String.format("Case with ID '%s' not found", caseId));
     }
+    return cazeResult.get();
+  }
+
+  public Case getCaseAndLockForUpdate(UUID caseId) {
+    Optional<Case> cazeResult = caseRepository.findByIdWithUpdateLock(caseId);
+
+    if (cazeResult.isEmpty()) {
+      throw new RuntimeException(
+          String.format(
+              "Case with ID '%s' not found, or could not obtain lock due to contention", caseId));
+    }
+
     return cazeResult.get();
   }
 }

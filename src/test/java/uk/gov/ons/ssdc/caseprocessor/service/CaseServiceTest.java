@@ -129,7 +129,7 @@ public class CaseServiceTest {
     Optional<Case> caseOpt = Optional.of(caze);
     when(caseRepository.findById(any())).thenReturn(caseOpt);
 
-    Case returnedCase = underTest.getCaseByCaseId(caze.getId());
+    Case returnedCase = underTest.getCase(caze.getId());
     assertThat(returnedCase).isEqualTo(caze);
     verify(caseRepository).findById(caze.getId());
   }
@@ -137,10 +137,9 @@ public class CaseServiceTest {
   @Test
   public void getByCaseIdMissingCase() {
     UUID caseId = UUID.randomUUID();
-    String expectedErrorMessage = String.format("Case ID '%s' not present", caseId);
+    String expectedErrorMessage = String.format("Case with ID '%s' not found", caseId);
 
-    RuntimeException thrown =
-        assertThrows(RuntimeException.class, () -> underTest.getCaseByCaseId(caseId));
+    RuntimeException thrown = assertThrows(RuntimeException.class, () -> underTest.getCase(caseId));
 
     assertThat(thrown.getMessage()).isEqualTo(expectedErrorMessage);
   }
