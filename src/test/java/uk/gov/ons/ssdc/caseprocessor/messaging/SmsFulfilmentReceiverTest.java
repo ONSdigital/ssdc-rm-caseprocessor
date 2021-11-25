@@ -57,7 +57,7 @@ class SmsFulfilmentReceiverTest {
     EventDTO event = buildEnrichedSmsFulfilmentEventWithUacQid();
     Message<byte[]> eventMessage = constructMessage(event);
 
-    when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(testCase);
+    when(caseService.getCase(CASE_ID)).thenReturn(testCase);
     when(uacService.existsByQid(TEST_QID)).thenReturn(false);
 
     // When
@@ -85,7 +85,7 @@ class SmsFulfilmentReceiverTest {
     EventDTO event = buildEnrichedSmsFulfilmentEvent();
     Message<byte[]> eventMessage = constructMessage(event);
 
-    when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(testCase);
+    when(caseService.getCase(CASE_ID)).thenReturn(testCase);
 
     // When
     underTest.receiveMessage(eventMessage);
@@ -109,7 +109,7 @@ class SmsFulfilmentReceiverTest {
     existingUacQidLink.setQid(TEST_QID);
     existingUacQidLink.setCaze(testCase);
 
-    when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(testCase);
+    when(caseService.getCase(CASE_ID)).thenReturn(testCase);
 
     when(uacService.existsByQid(TEST_QID)).thenReturn(true);
     when(uacService.findByQid(TEST_QID)).thenReturn(existingUacQidLink);
@@ -138,7 +138,7 @@ class SmsFulfilmentReceiverTest {
     existingUacQidLink.setQid(TEST_QID);
     existingUacQidLink.setCaze(otherCase);
 
-    when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(testCase);
+    when(caseService.getCase(CASE_ID)).thenReturn(testCase);
 
     when(uacService.existsByQid(TEST_QID)).thenReturn(true);
     when(uacService.findByQid(TEST_QID)).thenReturn(existingUacQidLink);
