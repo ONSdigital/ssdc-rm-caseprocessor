@@ -6,6 +6,7 @@ import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEM
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,19 +70,7 @@ public class UpdateSampleReceiverIT {
     caze.setCollectionExercise(junkDataHelper.setupJunkCollex());
     caseRepository.saveAndFlush(caze);
 
-    PayloadDTO payloadDTO = new PayloadDTO();
-    payloadDTO.setUpdateSample(new UpdateSample());
-    payloadDTO.getUpdateSample().setCaseId(TEST_CASE_ID);
-    payloadDTO.getUpdateSample().setSample(Map.of("testSampleField", "Updated"));
-
-    EventDTO event = new EventDTO();
-    event.setPayload(payloadDTO);
-
-    EventHeaderDTO eventHeader = new EventHeaderDTO();
-    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
-    eventHeader.setTopic(UPDATE_SAMPLE_TOPIC);
-    junkDataHelper.junkify(eventHeader);
-    event.setHeader(eventHeader);
+    EventDTO event = prepareEvent("testSampleField");
 
     //  When
     pubsubHelper.sendMessageToSharedProject(UPDATE_SAMPLE_TOPIC, event);
@@ -100,5 +89,70 @@ public class UpdateSampleReceiverIT {
     PayloadDTO actualPayload = objectMapper.readValue(databaseEvent.getPayload(), PayloadDTO.class);
     assertThat(actualPayload.getUpdateSample().getSample())
         .isEqualTo(Map.of("testSampleField", "Updated"));
+  }
+
+  @Test
+  public void testUpdateSampleSimultaneousRequestsOnSameCase() throws EventsNotFoundException {
+    // Given
+    Case caze = new Case();
+    caze.setId(TEST_CASE_ID);
+    Map<String, String> sampleData = new HashMap<>();
+    sampleData.put("testSampleFieldA", "Original value");
+    sampleData.put("testSampleFieldB", "Original value");
+    sampleData.put("testSampleFieldC", "Original value");
+    sampleData.put("testSampleFieldD", "Original value");
+    caze.setSample(sampleData);
+    caze.setSampleSensitive(new HashMap<>());
+    caze.setCollectionExercise(junkDataHelper.setupJunkCollex());
+    caseRepository.saveAndFlush(caze);
+
+    EventDTO[] events =
+        new EventDTO[] {
+          prepareEvent("testSampleFieldA"),
+          prepareEvent("testSampleFieldB"),
+          prepareEvent("testSampleFieldC"),
+          prepareEvent("testSampleFieldD")
+        };
+
+    // When
+    Arrays.stream(events)
+        .parallel()
+        .forEach(
+            event -> {
+              pubsubHelper.sendMessageToSharedProject(UPDATE_SAMPLE_TOPIC, event);
+            });
+
+    eventPoller.getEvents(4);
+
+    // Then
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
+    assertThat(actualCase.getSample())
+        .isEqualTo(
+            Map.of(
+                "testSampleFieldA",
+                "Updated",
+                "testSampleFieldB",
+                "Updated",
+                "testSampleFieldC",
+                "Updated",
+                "testSampleFieldD",
+                "Updated"));
+  }
+
+  private EventDTO prepareEvent(String sampleFieldToUpdate) {
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setUpdateSample(new UpdateSample());
+    payloadDTO.getUpdateSample().setCaseId(TEST_CASE_ID);
+    payloadDTO.getUpdateSample().setSample(Map.of(sampleFieldToUpdate, "Updated"));
+
+    EventDTO event = new EventDTO();
+    event.setPayload(payloadDTO);
+
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
+    eventHeader.setTopic(UPDATE_SAMPLE_TOPIC);
+    junkDataHelper.junkify(eventHeader);
+    event.setHeader(eventHeader);
+    return event;
   }
 }

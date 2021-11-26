@@ -80,7 +80,7 @@ public class UpdateSampleReceiverTest {
     expectedCase.setSample(sampleData);
     expectedCase.setSampleSensitive(new HashMap<>());
 
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // when
     underTest.receiveMessage(message);
@@ -118,7 +118,7 @@ public class UpdateSampleReceiverTest {
     Map<String, String> existingSampleData = new HashMap<>();
     existingSampleData.put("testThing", "xyz666");
     expectedCase.setSample(existingSampleData);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
     RuntimeException thrown =
@@ -152,7 +152,7 @@ public class UpdateSampleReceiverTest {
     Map<String, String> existingSensitiveSampleData = new HashMap<>();
     existingSensitiveSampleData.put("mobileNumber", "111111111");
     expectedCase.setSampleSensitive(existingSensitiveSampleData);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
     RuntimeException thrown =
@@ -194,7 +194,7 @@ public class UpdateSampleReceiverTest {
     Map<String, String> existingSampleData = new HashMap<>();
     existingSampleData.put("testSampleField", "Test");
     expectedCase.setSample(existingSampleData);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
     RuntimeException thrown =
