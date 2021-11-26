@@ -20,6 +20,9 @@ public class AppConfig {
   @Value("${spring.task.scheduling.pool.size}")
   private int schedulingPoolSize;
 
+  @Value("$logging.profile")
+  private String loggingProfile;
+
   @Bean
   public PubSubTemplate pubSubTemplate(
       PublisherFactory publisherFactory,
@@ -44,7 +47,10 @@ public class AppConfig {
 
   @PostConstruct
   public void init() {
-    LoggingConfigs.setCurrent(LoggingConfigs.getCurrent().useJson());
+    if (loggingProfile.equals("STRUCTURED")) {
+      LoggingConfigs.setCurrent(LoggingConfigs.getCurrent().useJson());
+    }
+
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
   }
 }
