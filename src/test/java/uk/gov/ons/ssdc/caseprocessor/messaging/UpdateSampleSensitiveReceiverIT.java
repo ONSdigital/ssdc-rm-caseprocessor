@@ -6,6 +6,7 @@ import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEM
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ import uk.gov.ons.ssdc.common.model.entity.EventType;
 @ActiveProfiles("test")
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-public class UpdateNewCaseSensitiveReceiverIT {
+public class UpdateSampleSensitiveReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
   private static final String UPDATE_SAMPLE_SENSITIVE_TOPIC = "event_update-sample-sensitive";
@@ -76,19 +77,7 @@ public class UpdateNewCaseSensitiveReceiverIT {
       caze.setCollectionExercise(junkDataHelper.setupJunkCollex());
       caseRepository.saveAndFlush(caze);
 
-      PayloadDTO payloadDTO = new PayloadDTO();
-      payloadDTO.setUpdateSampleSensitive(new UpdateSampleSensitive());
-      payloadDTO.getUpdateSampleSensitive().setCaseId(TEST_CASE_ID);
-      payloadDTO.getUpdateSampleSensitive().setSampleSensitive(Map.of("PHONE_NUMBER", "9999999"));
-
-      EventDTO event = new EventDTO();
-      event.setPayload(payloadDTO);
-
-      EventHeaderDTO eventHeader = new EventHeaderDTO();
-      eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
-      eventHeader.setTopic(UPDATE_SAMPLE_SENSITIVE_TOPIC);
-      junkDataHelper.junkify(eventHeader);
-      event.setHeader(eventHeader);
+      EventDTO event = prepareEvent("PHONE_NUMBER", "9999999");
 
       //  When
       pubsubHelper.sendMessageToSharedProject(UPDATE_SAMPLE_SENSITIVE_TOPIC, event);
@@ -115,5 +104,70 @@ public class UpdateNewCaseSensitiveReceiverIT {
       assertThat(emittedCase.getCaseId()).isEqualTo(caze.getId());
       assertThat(emittedCase.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "REDACTED"));
     }
+  }
+
+  @Test
+  public void testUpdateSampleSensitiveSimultaneousRequestsOnSameCase()
+      throws EventsNotFoundException {
+    // Given
+    Case caze = new Case();
+    caze.setId(TEST_CASE_ID);
+    Map<String, String> sensitiveData = new HashMap<>();
+    sensitiveData.put("sensitiveA", "Original value");
+    sensitiveData.put("sensitiveB", "Original value");
+    sensitiveData.put("sensitiveC", "Original value");
+    sensitiveData.put("sensitiveD", "Original value");
+    caze.setSampleSensitive(sensitiveData);
+    caze.setCollectionExercise(junkDataHelper.setupJunkCollex());
+    caseRepository.saveAndFlush(caze);
+
+    EventDTO[] events =
+        new EventDTO[] {
+          prepareEvent("sensitiveA", "Updated"),
+          prepareEvent("sensitiveB", "Updated"),
+          prepareEvent("sensitiveC", "Updated"),
+          prepareEvent("sensitiveD", "Updated")
+        };
+
+    // When
+    Arrays.stream(events)
+        .parallel()
+        .forEach(
+            event -> {
+              pubsubHelper.sendMessageToSharedProject(UPDATE_SAMPLE_SENSITIVE_TOPIC, event);
+            });
+
+    eventPoller.getEvents(4);
+
+    // Then
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
+    assertThat(actualCase.getSampleSensitive())
+        .isEqualTo(
+            Map.of(
+                "sensitiveA",
+                "Updated",
+                "sensitiveB",
+                "Updated",
+                "sensitiveC",
+                "Updated",
+                "sensitiveD",
+                "Updated"));
+  }
+
+  private EventDTO prepareEvent(String sampleFieldToUpdate, String newValue) {
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setUpdateSampleSensitive(new UpdateSampleSensitive());
+    payloadDTO.getUpdateSampleSensitive().setCaseId(TEST_CASE_ID);
+    payloadDTO.getUpdateSampleSensitive().setSampleSensitive(Map.of(sampleFieldToUpdate, newValue));
+
+    EventDTO event = new EventDTO();
+    event.setPayload(payloadDTO);
+
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
+    eventHeader.setTopic(UPDATE_SAMPLE_SENSITIVE_TOPIC);
+    junkDataHelper.junkify(eventHeader);
+    event.setHeader(eventHeader);
+    return event;
   }
 }

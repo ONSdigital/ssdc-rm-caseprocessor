@@ -66,7 +66,7 @@ public class RefusalReceiverTest {
     caze.setId(CASE_ID);
     caze.setRefusalReceived(null);
 
-    when(caseService.getCaseByCaseId(CASE_ID)).thenReturn(caze);
+    when(caseService.getCase(CASE_ID)).thenReturn(caze);
 
     // When
     underTest.receiveMessage(message);

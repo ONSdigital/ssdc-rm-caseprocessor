@@ -55,7 +55,7 @@ public class InvalidCaseReceiverTest {
     // Given
     Case expectedCase = new Case();
     expectedCase.setInvalid(false);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCase(any(UUID.class))).thenReturn(expectedCase);
 
     // when
     underTest.receiveMessage(message);

@@ -37,7 +37,7 @@ public class SmsFulfilmentReceiver {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
     EnrichedSmsFulfilment smsFulfilment = event.getPayload().getEnrichedSmsFulfilment();
 
-    Case caze = caseService.getCaseByCaseId(smsFulfilment.getCaseId());
+    Case caze = caseService.getCase(smsFulfilment.getCaseId());
 
     if (smsFulfilment.getQid() != null) {
       // Check the QID does not already exist

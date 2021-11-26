@@ -37,7 +37,7 @@ public class PrintFulfilmentReceiver {
   public void receiveMessage(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
-    Case caze = caseService.getCaseByCaseId(event.getPayload().getPrintFulfilment().getCaseId());
+    Case caze = caseService.getCase(event.getPayload().getPrintFulfilment().getCaseId());
 
     ExportFileTemplate exportFileTemplate =
         getAllowedPrintTemplate(event.getPayload().getPrintFulfilment().getPackCode(), caze);
