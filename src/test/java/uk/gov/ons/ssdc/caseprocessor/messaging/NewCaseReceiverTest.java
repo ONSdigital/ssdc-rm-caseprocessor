@@ -249,7 +249,8 @@ public class NewCaseReceiverTest {
     RuntimeException thrownException =
         assertThrows(RuntimeException.class, () -> underTest.receiveNewCase(eventMessage));
     assertThat(thrownException.getMessage())
-        .isEqualTo("New case event failed validation on column \"POSTCODE\"");
+        .isEqualTo(
+            "NEW_CASE event: Column 'POSTCODE' Failed validation for Rule 'LengthRule' validation error: Exceeded max length of 8");
     verifyNoInteractions(eventLogger);
   }
 

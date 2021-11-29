@@ -97,16 +97,17 @@ public class NewCaseReceiver {
       Optional<String> columnValidationErrors;
 
       if (columnValidator.isSensitive()) {
-        columnValidationErrors = columnValidator.validateRow(newCasePayload.getSampleSensitive());
+        columnValidationErrors =
+            columnValidator.validateRowWithDataExcludedErrorMsgs(
+                newCasePayload.getSampleSensitive());
       } else {
-        columnValidationErrors = columnValidator.validateRow(newCasePayload.getSample());
+        columnValidationErrors =
+            columnValidator.validateRowWithDataExcludedErrorMsgs(newCasePayload.getSample());
       }
 
       if (columnValidationErrors.isPresent()) {
         throw new RuntimeException(
-            String.format(
-                "New case event failed validation on column \"%s\"",
-                columnValidator.getColumnName()));
+            "NEW_CASE event: " + columnValidationErrors.get());
       }
     }
 

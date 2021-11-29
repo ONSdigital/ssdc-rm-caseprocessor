@@ -45,6 +45,7 @@ class SampleValidateHelperTest {
 
     // Then
     assertThat(thrown.getMessage())
-        .isEqualTo("UPDATE_SAMPLE_SENSITIVE failed validation for column name: testSampleField");
+        .isEqualTo(
+            "UPDATE_SAMPLE_SENSITIVE event: Column 'testSampleField' Failed validation for Rule 'LengthRule' validation error: Exceeded max length of 1");
   }
 }

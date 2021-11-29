@@ -13,10 +13,10 @@ public class SampleValidateHelper {
     if (columnValidator.getColumnName().equals(entry.getKey())) {
       Map<String, String> validateThis = Map.of(entry.getKey(), entry.getValue());
 
-      Optional<String> validationErrors = columnValidator.validateRow(validateThis);
+      Optional<String> validationErrors =
+          columnValidator.validateRowWithDataExcludedErrorMsgs(validateThis);
       if (validationErrors.isPresent()) {
-        throw new RuntimeException(
-            eventType + " failed validation for column name: " + columnValidator.getColumnName());
+        throw new RuntimeException(eventType + " event: " + validationErrors.get());
       }
     }
   }

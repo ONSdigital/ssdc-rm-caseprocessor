@@ -200,7 +200,8 @@ public class UpdateSampleReceiverTest {
     RuntimeException thrown =
         assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
     assertThat(thrown.getMessage())
-        .isEqualTo("UPDATE_SAMPLE failed validation for column name: testSampleField");
+        .isEqualTo(
+            "UPDATE_SAMPLE event: Column 'testSampleField' Failed validation for Rule 'LengthRule' validation error: Exceeded max length of 4");
 
     verify(caseService, never()).saveCase(any());
     verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(Message.class));
