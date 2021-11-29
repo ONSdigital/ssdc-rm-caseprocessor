@@ -28,7 +28,7 @@ after_success:
   - curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
   - curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
   - gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
-  - "false" # Test that a failure aborts the job stage
+  - exit 1 # Test that a failure aborts the job stage
   - shasum -a 256 -c codecov.SHA256SUM
   - chmod +x codecov
   - ./codecov
