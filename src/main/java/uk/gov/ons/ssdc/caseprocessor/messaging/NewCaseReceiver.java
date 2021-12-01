@@ -73,43 +73,9 @@ public class NewCaseReceiver {
                             + "' not found"));
 
     ColumnValidator[] columnValidators = collex.getSurvey().getSampleValidationRules();
-
-    Set<String> nonSensitiveColumns =
-        Arrays.stream(columnValidators)
-            .filter(columnValidator -> !columnValidator.isSensitive())
-            .map(ColumnValidator::getColumnName)
-            .collect(Collectors.toSet());
-    if (!nonSensitiveColumns.containsAll(newCasePayload.getSample().keySet())) {
-      throw new RuntimeException("Attempt to send data to RM which was not part of defined sample");
-    }
-
-    Set<String> sensitiveColumns =
-        Arrays.stream(columnValidators)
-            .filter(ColumnValidator::isSensitive)
-            .map(ColumnValidator::getColumnName)
-            .collect(Collectors.toSet());
-    if (!sensitiveColumns.containsAll(newCasePayload.getSampleSensitive().keySet())) {
-      throw new RuntimeException(
-          "Attempt to send sensitive data to RM which was not part of defined sample");
-    }
-
-    for (ColumnValidator columnValidator : columnValidators) {
-      Optional<String> columnValidationErrors;
-
-      if (columnValidator.isSensitive()) {
-        columnValidationErrors =
-            columnValidator.validateRowWithDataExcludedErrorMsgs(
-                newCasePayload.getSampleSensitive());
-      } else {
-        columnValidationErrors =
-            columnValidator.validateRowWithDataExcludedErrorMsgs(newCasePayload.getSample());
-      }
-
-      if (columnValidationErrors.isPresent()) {
-        throw new RuntimeException(
-            "NEW_CASE event: " + columnValidationErrors.get());
-      }
-    }
+    checkNewSampleWithinSampleDefinition(columnValidators, newCasePayload);
+    checkNewSensitiveWithinSampleSensitiveDefinition(columnValidators, newCasePayload);
+    validateNewCase(newCasePayload, columnValidators);
 
     Map<String, String> sample = newCasePayload.getSample();
 
@@ -132,6 +98,50 @@ public class NewCaseReceiver {
         newCase, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
 
     eventLogger.logCaseEvent(newCase, "New case created", EventType.NEW_CASE, event, message);
+  }
+
+  private Set<String> checkNewSensitiveWithinSampleSensitiveDefinition(
+      ColumnValidator[] columnValidators, NewCase newCasePayload) {
+    Set<String> sensitiveColumns =
+        Arrays.stream(columnValidators)
+            .filter(ColumnValidator::isSensitive)
+            .map(ColumnValidator::getColumnName)
+            .collect(Collectors.toSet());
+    if (!sensitiveColumns.containsAll(newCasePayload.getSampleSensitive().keySet())) {
+      throw new RuntimeException(
+          "Attempt to send sensitive data to RM which was not part of defined sample");
+    }
+
+    return sensitiveColumns;
+  }
+
+  private void checkNewSampleWithinSampleDefinition(
+      ColumnValidator[] columnValidators, NewCase newCasePayload) {
+    Set<String> nonSensitiveColumns =
+        Arrays.stream(columnValidators)
+            .filter(columnValidator -> !columnValidator.isSensitive())
+            .map(ColumnValidator::getColumnName)
+            .collect(Collectors.toSet());
+    if (!nonSensitiveColumns.containsAll(newCasePayload.getSample().keySet())) {
+      throw new RuntimeException("Attempt to send data to RM which was not part of defined sample");
+    }
+  }
+
+  private void validateNewCase(NewCase newCasePayload, ColumnValidator[] columnValidators) {
+    for (ColumnValidator columnValidator : columnValidators) {
+      Optional<String> columnValidationErrors;
+
+      if (columnValidator.isSensitive()) {
+        columnValidationErrors =
+            columnValidator.validateRow(newCasePayload.getSampleSensitive(), true);
+      } else {
+        columnValidationErrors = columnValidator.validateRow(newCasePayload.getSample(), true);
+      }
+
+      if (columnValidationErrors.isPresent()) {
+        throw new RuntimeException("NEW_CASE event: " + columnValidationErrors.get());
+      }
+    }
   }
 
   private Case saveNewCaseAndStampCaseRef(Case caze) {

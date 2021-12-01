@@ -8,13 +8,10 @@ import uk.gov.ons.ssdc.common.validation.ColumnValidator;
 
 public class SampleValidateHelper {
 
-  public static void validateNewValue(
-      Entry<String, String> entry, ColumnValidator columnValidator, EventType eventType) {
-    if (columnValidator.getColumnName().equals(entry.getKey())) {
-      Map<String, String> validateThis = Map.of(entry.getKey(), entry.getValue());
+  public static void validateNewValue(String columnName, String validateThis, ColumnValidator columnValidator, EventType eventType) {
 
-      Optional<String> validationErrors =
-          columnValidator.validateRowWithDataExcludedErrorMsgs(validateThis);
+    if (columnValidator.getColumnName().equals(columnName)) {
+      Optional<String> validationErrors = columnValidator.validateData(validateThis, true);
       if (validationErrors.isPresent()) {
         throw new RuntimeException(eventType + " event: " + validationErrors.get());
       }

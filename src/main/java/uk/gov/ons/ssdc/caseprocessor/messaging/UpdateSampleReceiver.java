@@ -39,13 +39,15 @@ public class UpdateSampleReceiver {
     Case caze = caseService.getCaseAndLockForUpdate(updateSample.getCaseId());
 
     for (Map.Entry<String, String> entry : updateSample.getSample().entrySet()) {
+      String columnName = entry.getKey();
+      String newValue = entry.getValue();
       // Validate that only existing sample data is being attempted to be updated
-      validateOnlyExistingSampleDataBeingUpdated(caze, entry);
+      validateOnlyExistingSampleDataBeingUpdated(caze, columnName);
 
       // Validate the updated value according to the rules for the column
       for (ColumnValidator columnValidator :
           caze.getCollectionExercise().getSurvey().getSampleValidationRules()) {
-        SampleValidateHelper.validateNewValue(entry, columnValidator, EventType.UPDATE_SAMPLE);
+        SampleValidateHelper.validateNewValue(columnName, newValue, columnValidator, EventType.UPDATE_SAMPLE);
       }
 
       caze.getSample().put(entry.getKey(), entry.getValue());
@@ -57,10 +59,12 @@ public class UpdateSampleReceiver {
     eventLogger.logCaseEvent(caze, "Sample data updated", EventType.UPDATE_SAMPLE, event, message);
   }
 
-  private void validateOnlyExistingSampleDataBeingUpdated(Case caze, Entry<String, String> entry) {
-    if (!caze.getSample().containsKey(entry.getKey())) {
+  private void validateOnlyExistingSampleDataBeingUpdated(Case caze, String columnName) {
+//    TODO: Is this right?  Should it not be within the sample definition?
+//    Adding new data, if within sample def should be ok, if we have non mandatory fields?
+    if (!caze.getSample().containsKey(columnName)) {
       throw new RuntimeException(
-          "Key (" + entry.getKey() + ") does not match existing sample data");
+          "Column name (" + columnName + ") does not exist in current sample");
     }
   }
 }

@@ -37,7 +37,8 @@ public class UpdateSampleSensitiveReceiver {
     Case caze = caseService.getCaseAndLockForUpdate(updateSampleSensitive.getCaseId());
 
     for (Map.Entry<String, String> entry : updateSampleSensitive.getSampleSensitive().entrySet()) {
-
+      String columnName = entry.getKey();
+      String newValue = entry.getValue();
       // First, validate that only sensitive data that is defined is being attempted to be updated
       validateOnlySensitiveDataBeingUpdated(caze, entry);
 
@@ -47,8 +48,7 @@ public class UpdateSampleSensitiveReceiver {
         // If the data is not being blanked, validate it according to rules
         for (ColumnValidator columnValidator :
             caze.getCollectionExercise().getSurvey().getSampleValidationRules()) {
-          SampleValidateHelper.validateNewValue(
-              entry, columnValidator, EventType.UPDATE_SAMPLE_SENSITIVE);
+          SampleValidateHelper.validateNewValue(columnName, newValue, columnValidator, EventType.UPDATE_SAMPLE_SENSITIVE);
         }
       }
 
@@ -63,9 +63,11 @@ public class UpdateSampleSensitiveReceiver {
         caze, "Sensitive data updated", EventType.UPDATE_SAMPLE_SENSITIVE, event, message);
   }
 
-  private void validateOnlySensitiveDataBeingUpdated(Case caze, Entry<String, String> entry) {
-    if (!caze.getSampleSensitive().containsKey(entry.getKey())) {
-      throw new RuntimeException("Key (" + entry.getKey() + ") does not match an existing entry!");
+  private void validateOnlySensitiveDataBeingUpdated(Case caze, String columnName) {
+    //    TODO: Is this right?  Should it not be within the sampleSensitive definition?
+//    Adding new data, if within sample def should be ok, if we have non mandatory fields?
+    if (!caze.getSampleSensitive().containsKey(columnName)) {
+      throw new RuntimeException("Column name (" + columnName + ") does not match an existing entry!");
     }
   }
 }
