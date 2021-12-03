@@ -233,7 +233,8 @@ public class NewCaseReceiverTest {
     survey.setId(UUID.randomUUID());
     survey.setSampleValidationRules(
         new ColumnValidator[] {
-          new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
+          new ColumnValidator(
+              "ADDRESS_LINE1", false, new Rule[] {new MandatoryRule(), new LengthRule(8)}),
           new ColumnValidator(
               "POSTCODE", false, new Rule[] {new MandatoryRule(), new LengthRule(8)}),
           new ColumnValidator("Telephone", true, new Rule[] {new MandatoryRule()})
@@ -248,9 +249,14 @@ public class NewCaseReceiverTest {
 
     RuntimeException thrownException =
         assertThrows(RuntimeException.class, () -> underTest.receiveNewCase(eventMessage));
-    assertThat(thrownException.getMessage())
-        .isEqualTo(
-            "NEW_CASE event: Column 'POSTCODE' Failed validation for Rule 'LengthRule' validation error: Exceeded max length of 8");
+
+    String expectedErrorMsg =
+        "NEW_CASE event: Column 'ADDRESS_LINE1' Failed validation for Rule 'LengthRule' "
+            + "validation error: Exceeded max length of 8"
+            + System.lineSeparator()
+            + "Column 'POSTCODE' Failed validation for Rule 'LengthRule' validation error: Exceeded max length of 8";
+
+    assertThat(thrownException.getMessage()).isEqualTo(expectedErrorMsg);
     verifyNoInteractions(eventLogger);
   }
 

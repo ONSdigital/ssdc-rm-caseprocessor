@@ -3,9 +3,10 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import static uk.gov.ons.ssdc.caseprocessor.rasrm.constants.RasRmConstants.BUSINESS_SAMPLE_DEFINITION_URL_SUFFIX;
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,6 +76,7 @@ public class NewCaseReceiver {
     ColumnValidator[] columnValidators = collex.getSurvey().getSampleValidationRules();
     checkNewSampleWithinSampleDefinition(columnValidators, newCasePayload);
     checkNewSensitiveWithinSampleSensitiveDefinition(columnValidators, newCasePayload);
+
     validateNewCase(newCasePayload, columnValidators);
 
     Map<String, String> sample = newCasePayload.getSample();
@@ -128,19 +130,24 @@ public class NewCaseReceiver {
   }
 
   private void validateNewCase(NewCase newCasePayload, ColumnValidator[] columnValidators) {
+    List<String> validationErrors = new ArrayList<>();
+
     for (ColumnValidator columnValidator : columnValidators) {
-      Optional<String> columnValidationErrors;
-
       if (columnValidator.isSensitive()) {
-        columnValidationErrors =
-            columnValidator.validateRow(newCasePayload.getSampleSensitive(), true);
+        columnValidator
+            .validateRow(newCasePayload.getSampleSensitive(), true)
+            .ifPresent(validationErrors::add);
       } else {
-        columnValidationErrors = columnValidator.validateRow(newCasePayload.getSample(), true);
+        columnValidator
+            .validateRow(newCasePayload.getSample(), true)
+            .ifPresent(validationErrors::add);
       }
+    }
 
-      if (columnValidationErrors.isPresent()) {
-        throw new RuntimeException("NEW_CASE event: " + columnValidationErrors.get());
-      }
+    if (!validationErrors.isEmpty()) {
+      throw new RuntimeException(
+          "NEW_CASE event: "
+              + validationErrors.stream().collect(Collectors.joining(System.lineSeparator())));
     }
   }
 

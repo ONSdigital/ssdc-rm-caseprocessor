@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -54,12 +53,8 @@ public class UpdateSampleReceiver {
       for (ColumnValidator columnValidator :
           caze.getCollectionExercise().getSurvey().getSampleValidationRules()) {
 
-        Optional<String> errors =
-            SampleValidateHelper.validateNewValue(columnName, newValue, columnValidator);
-
-        if (errors.isPresent()) {
-          validationErrors.add(errors.get());
-        }
+        SampleValidateHelper.validateNewValue(columnName, newValue, columnValidator)
+            .ifPresent(validationErrors::add);
       }
 
       caze.getSample().put(entry.getKey(), entry.getValue());
