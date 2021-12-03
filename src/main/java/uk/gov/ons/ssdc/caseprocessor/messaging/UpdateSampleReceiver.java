@@ -1,9 +1,14 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
+import static java.util.function.Predicate.not;
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -38,19 +43,33 @@ public class UpdateSampleReceiver {
 
     Case caze = caseService.getCaseAndLockForUpdate(updateSample.getCaseId());
 
+    List<String> validationErrors = new ArrayList<>();
     for (Map.Entry<String, String> entry : updateSample.getSample().entrySet()) {
       String columnName = entry.getKey();
       String newValue = entry.getValue();
-      // Validate that only existing sample data is being attempted to be updated
-      validateOnlyExistingSampleDataBeingUpdated(caze, columnName);
+
+      validateOnlyDefinedSampleDataBeingUpdated(caze, columnName);
 
       // Validate the updated value according to the rules for the column
       for (ColumnValidator columnValidator :
           caze.getCollectionExercise().getSurvey().getSampleValidationRules()) {
-        SampleValidateHelper.validateNewValue(columnName, newValue, columnValidator, EventType.UPDATE_SAMPLE);
+
+        Optional<String> errors =
+            SampleValidateHelper.validateNewValue(columnName, newValue, columnValidator);
+
+        if (errors.isPresent()) {
+          validationErrors.add(errors.get());
+        }
       }
 
       caze.getSample().put(entry.getKey(), entry.getValue());
+    }
+
+    if (validationErrors.size() > 0) {
+      throw new RuntimeException(
+          EventType.UPDATE_SAMPLE
+              + " event: "
+              + validationErrors.stream().collect(Collectors.joining(System.lineSeparator())));
     }
 
     caseService.saveCaseAndEmitCaseUpdate(
@@ -59,12 +78,13 @@ public class UpdateSampleReceiver {
     eventLogger.logCaseEvent(caze, "Sample data updated", EventType.UPDATE_SAMPLE, event, message);
   }
 
-  private void validateOnlyExistingSampleDataBeingUpdated(Case caze, String columnName) {
-//    TODO: Is this right?  Should it not be within the sample definition?
-//    Adding new data, if within sample def should be ok, if we have non mandatory fields?
-    if (!caze.getSample().containsKey(columnName)) {
-      throw new RuntimeException(
-          "Column name (" + columnName + ") does not exist in current sample");
+  private void validateOnlyDefinedSampleDataBeingUpdated(Case caze, String columnName) {
+    if (Arrays.stream(caze.getCollectionExercise().getSurvey().getSampleValidationRules())
+        .filter(not(ColumnValidator::isSensitive))
+        .filter(columnValidator -> columnValidator.getColumnName().equals(columnName))
+        .findFirst()
+        .isEmpty()) {
+      throw new RuntimeException("Column name '" + columnName + "' is not within defined sample");
     }
   }
 }

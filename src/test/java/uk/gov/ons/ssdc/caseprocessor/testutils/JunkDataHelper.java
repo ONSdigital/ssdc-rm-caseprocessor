@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.testutils;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
@@ -41,15 +42,32 @@ public class JunkDataHelper {
     return junkCase;
   }
 
+  public ColumnValidator[] setUpColumnValidatorsMandatory(
+      List<String> columnNames, boolean sensitive) {
+    ColumnValidator[] columnValidators = new ColumnValidator[columnNames.size()];
+
+    for (int i = 0; i < columnNames.size(); i++) {
+      columnValidators[i] =
+          new ColumnValidator(columnNames.get(i), sensitive, new Rule[] {new MandatoryRule()});
+    }
+
+    return columnValidators;
+  }
+
   public CollectionExercise setupJunkCollex() {
-    Survey junkSurvey = new Survey();
-    junkSurvey.setId(UUID.randomUUID());
-    junkSurvey.setName("Junk survey");
-    junkSurvey.setSampleValidationRules(
+    return setUpJunkCollexWithThisColumnValidators(
         new ColumnValidator[] {
           new ColumnValidator("Junk", false, new Rule[] {new MandatoryRule()}),
           new ColumnValidator("SensitiveJunk", true, new Rule[] {new MandatoryRule()})
         });
+  }
+
+  public CollectionExercise setUpJunkCollexWithThisColumnValidators(
+      ColumnValidator[] columnValidators) {
+    Survey junkSurvey = new Survey();
+    junkSurvey.setId(UUID.randomUUID());
+    junkSurvey.setName("Junk survey");
+    junkSurvey.setSampleValidationRules(columnValidators);
     junkSurvey.setSampleSeparator('j');
     junkSurvey.setSampleDefinitionUrl("http://junk");
     surveyRepository.saveAndFlush(junkSurvey);

@@ -34,8 +34,12 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.Event;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
+import uk.gov.ons.ssdc.common.validation.ColumnValidator;
+import uk.gov.ons.ssdc.common.validation.MandatoryRule;
+import uk.gov.ons.ssdc.common.validation.Rule;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -69,15 +73,14 @@ public class UpdateSampleSensitiveReceiverIT {
     //
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
         pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
+
       Case caze = new Case();
       caze.setId(TEST_CASE_ID);
-      Map<String, String> sensitiveData = new HashMap<>();
-      sensitiveData.put("PHONE_NUMBER", "1111111");
-      caze.setSampleSensitive(sensitiveData);
+      caze.setSampleSensitive(Map.of("SensitiveJunk", "02071234567"));
       caze.setCollectionExercise(junkDataHelper.setupJunkCollex());
       caseRepository.saveAndFlush(caze);
 
-      EventDTO event = prepareEvent("PHONE_NUMBER", "9999999");
+      EventDTO event = prepareEvent("SensitiveJunk", "9999999");
 
       //  When
       pubsubHelper.sendMessageToSharedProject(UPDATE_SAMPLE_SENSITIVE_TOPIC, event);
@@ -86,7 +89,7 @@ public class UpdateSampleSensitiveReceiverIT {
 
       //  Then
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
-      assertThat(actualCase.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "9999999"));
+      assertThat(actualCase.getSampleSensitive()).isEqualTo(Map.of("SensitiveJunk", "9999999"));
 
       assertThat(databaseEvents.size()).isEqualTo(1);
       Event databaseEvent = databaseEvents.get(0);
@@ -96,13 +99,13 @@ public class UpdateSampleSensitiveReceiverIT {
       PayloadDTO actualPayload =
           objectMapper.readValue(databaseEvent.getPayload(), PayloadDTO.class);
       assertThat(actualPayload.getUpdateSampleSensitive().getSampleSensitive())
-          .isEqualTo(Map.of("PHONE_NUMBER", "REDACTED"));
+          .isEqualTo(Map.of("SensitiveJunk", "REDACTED"));
 
       // Get the emitted event and check the sensitive part is redacted
       EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
       CaseUpdateDTO emittedCase = actualEvent.getPayload().getCaseUpdate();
       assertThat(emittedCase.getCaseId()).isEqualTo(caze.getId());
-      assertThat(emittedCase.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "REDACTED"));
+      assertThat(emittedCase.getSampleSensitive()).isEqualTo(Map.of("SensitiveJunk", "REDACTED"));
     }
   }
 
@@ -118,7 +121,17 @@ public class UpdateSampleSensitiveReceiverIT {
     sensitiveData.put("sensitiveC", "Original value");
     sensitiveData.put("sensitiveD", "Original value");
     caze.setSampleSensitive(sensitiveData);
-    caze.setCollectionExercise(junkDataHelper.setupJunkCollex());
+
+    CollectionExercise collectionExercise =
+        junkDataHelper.setUpJunkCollexWithThisColumnValidators(
+            new ColumnValidator[] {
+              new ColumnValidator("sensitiveA", true, new Rule[] {new MandatoryRule()}),
+              new ColumnValidator("sensitiveB", true, new Rule[] {new MandatoryRule()}),
+              new ColumnValidator("sensitiveC", true, new Rule[] {new MandatoryRule()}),
+              new ColumnValidator("sensitiveD", true, new Rule[] {new MandatoryRule()})
+            });
+
+    caze.setCollectionExercise(collectionExercise);
     caseRepository.saveAndFlush(caze);
 
     EventDTO[] events =

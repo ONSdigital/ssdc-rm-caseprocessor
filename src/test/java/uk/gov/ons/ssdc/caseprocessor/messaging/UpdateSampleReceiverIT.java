@@ -31,8 +31,12 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.Event;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
+import uk.gov.ons.ssdc.common.validation.ColumnValidator;
+import uk.gov.ons.ssdc.common.validation.MandatoryRule;
+import uk.gov.ons.ssdc.common.validation.Rule;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -67,7 +71,12 @@ public class UpdateSampleReceiverIT {
     sampleData.put("testSampleField", "Test");
     caze.setSample(sampleData);
     caze.setSampleSensitive(new HashMap<>());
-    caze.setCollectionExercise(junkDataHelper.setupJunkCollex());
+
+    caze.setCollectionExercise(
+        junkDataHelper.setUpJunkCollexWithThisColumnValidators(
+            new ColumnValidator[] {
+              new ColumnValidator("testSampleField", false, new Rule[] {new MandatoryRule()}),
+            }));
     caseRepository.saveAndFlush(caze);
 
     EventDTO event = prepareEvent("testSampleField");
@@ -103,7 +112,17 @@ public class UpdateSampleReceiverIT {
     sampleData.put("testSampleFieldD", "Original value");
     caze.setSample(sampleData);
     caze.setSampleSensitive(new HashMap<>());
-    caze.setCollectionExercise(junkDataHelper.setupJunkCollex());
+
+    CollectionExercise collectionExercise =
+        junkDataHelper.setUpJunkCollexWithThisColumnValidators(
+            new ColumnValidator[] {
+              new ColumnValidator("testSampleFieldA", false, new Rule[] {new MandatoryRule()}),
+              new ColumnValidator("testSampleFieldB", false, new Rule[] {new MandatoryRule()}),
+              new ColumnValidator("testSampleFieldC", false, new Rule[] {new MandatoryRule()}),
+              new ColumnValidator("testSampleFieldD", false, new Rule[] {new MandatoryRule()})
+            });
+
+    caze.setCollectionExercise(collectionExercise);
     caseRepository.saveAndFlush(caze);
 
     EventDTO[] events =
