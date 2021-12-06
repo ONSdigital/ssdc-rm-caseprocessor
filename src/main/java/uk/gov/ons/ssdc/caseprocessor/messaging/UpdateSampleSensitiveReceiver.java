@@ -2,8 +2,11 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -36,24 +39,35 @@ public class UpdateSampleSensitiveReceiver {
 
     Case caze = caseService.getCaseAndLockForUpdate(updateSampleSensitive.getCaseId());
 
-    for (Map.Entry<String, String> entry : updateSampleSensitive.getSampleSensitive().entrySet()) {
+    List<String> validationErrors = new ArrayList<>();
 
-      // First, validate that only sensitive data that is defined is being attempted to be updated
-      validateOnlySensitiveDataBeingUpdated(caze, entry);
+    for (Map.Entry<String, String> entry : updateSampleSensitive.getSampleSensitive().entrySet()) {
+      String columnName = entry.getKey();
+      String newValue = entry.getValue();
+
+      validateUpdateWithinSensitiveSampleDefinition(caze, columnName);
 
       // Blanking out the sensitive PII data is allowed, for GDPR reasons
-      if (entry.getValue().length() != 0) {
+      if (newValue.length() != 0) {
 
         // If the data is not being blanked, validate it according to rules
         for (ColumnValidator columnValidator :
             caze.getCollectionExercise().getSurvey().getSampleValidationRules()) {
-          SampleValidateHelper.validateNewValue(
-              entry, columnValidator, EventType.UPDATE_SAMPLE_SENSITIVE);
+
+          SampleValidateHelper.validateNewValue(columnName, newValue, columnValidator)
+              .ifPresent(validationErrors::add);
         }
       }
 
       // Finally, update the cases sample sensitive blob with the validated value
-      caze.getSampleSensitive().put(entry.getKey(), entry.getValue());
+      caze.getSampleSensitive().put(columnName, newValue);
+    }
+
+    if (validationErrors.size() > 0) {
+      throw new RuntimeException(
+          EventType.UPDATE_SAMPLE_SENSITIVE
+              + " event: "
+              + validationErrors.stream().collect(Collectors.joining(System.lineSeparator())));
     }
 
     caseService.saveCaseAndEmitCaseUpdate(
@@ -63,9 +77,14 @@ public class UpdateSampleSensitiveReceiver {
         caze, "Sensitive data updated", EventType.UPDATE_SAMPLE_SENSITIVE, event, message);
   }
 
-  private void validateOnlySensitiveDataBeingUpdated(Case caze, Entry<String, String> entry) {
-    if (!caze.getSampleSensitive().containsKey(entry.getKey())) {
-      throw new RuntimeException("Key (" + entry.getKey() + ") does not match an existing entry!");
+  private void validateUpdateWithinSensitiveSampleDefinition(Case caze, String columnName) {
+    if (Arrays.stream(caze.getCollectionExercise().getSurvey().getSampleValidationRules())
+        .filter(ColumnValidator::isSensitive)
+        .filter(columnValidator -> columnValidator.getColumnName().equals(columnName))
+        .findFirst()
+        .isEmpty()) {
+      throw new RuntimeException(
+          "Column name '" + columnName + "' is not within defined sensitive sample");
     }
   }
 }
