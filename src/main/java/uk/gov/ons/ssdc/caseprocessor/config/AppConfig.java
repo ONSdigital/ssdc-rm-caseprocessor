@@ -20,7 +20,7 @@ public class AppConfig {
   @Value("${spring.task.scheduling.pool.size}")
   private int schedulingPoolSize;
 
-  @Value("{$logging.profile}")
+  @Value("${logging.profile}")
   private String loggingProfile;
 
   @Bean
