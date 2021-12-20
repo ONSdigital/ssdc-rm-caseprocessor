@@ -27,7 +27,7 @@ public class InvalidCaseReceiver {
   public void receiveMessage(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
-    Case caze = caseService.getCaseByCaseId(event.getPayload().getInvalidCase().getCaseId());
+    Case caze = caseService.getCase(event.getPayload().getInvalidCase().getCaseId());
 
     caze.setInvalid(true);
 

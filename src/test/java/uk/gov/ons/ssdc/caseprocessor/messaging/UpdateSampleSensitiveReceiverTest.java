@@ -81,7 +81,7 @@ class UpdateSampleSensitiveReceiverTest {
     Map<String, String> sensitiveData = new HashMap<>();
     sensitiveData.put("PHONE_NUMBER", "1111111");
     expectedCase.setSampleSensitive(sensitiveData);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // when
     underTest.receiveMessage(message);
@@ -139,7 +139,7 @@ class UpdateSampleSensitiveReceiverTest {
     Map<String, String> sensitiveData = new HashMap<>();
     sensitiveData.put("PHONE_NUMBER", "1111111");
     expectedCase.setSampleSensitive(sensitiveData);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // when
     underTest.receiveMessage(message);
@@ -180,21 +180,30 @@ class UpdateSampleSensitiveReceiverTest {
     Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
+    Survey survey = new Survey();
+    survey.setSampleValidationRules(
+        new ColumnValidator[] {
+          new ColumnValidator("PHONE_NUMBER", true, new Rule[] {new LengthRule(30)})
+        });
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setSurvey(survey);
     Case expectedCase = new Case();
-    Map<String, String> sensitiveData = new HashMap<>();
-    sensitiveData.put("PHONE_NUMBER", "1111111");
-    expectedCase.setSampleSensitive(sensitiveData);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    expectedCase.setCollectionExercise(collectionExercise);
+
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
-    assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+    Throwable exception =
+        assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+    assertThat(exception.getMessage())
+        .isEqualTo("Column name 'UPRN' is not within defined sensitive sample");
 
     verify(caseService, never()).saveCase(any());
     verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(Message.class));
   }
 
   @Test
-  void testUpdateSampleSensitiveReceiverFailsValidation() {
+  void testUpdateSampleSensitiveReceiverFailsValidationOnMultipleFields() {
     EventDTO managementEvent = new EventDTO();
     managementEvent.setHeader(new EventHeaderDTO());
     managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
@@ -204,10 +213,13 @@ class UpdateSampleSensitiveReceiverTest {
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setUpdateSampleSensitive(new UpdateSampleSensitive());
     managementEvent.getPayload().getUpdateSampleSensitive().setCaseId(UUID.randomUUID());
+    Map<String, String> updatedSensitiveData = new HashMap<>();
+    updatedSensitiveData.put("PHONE_NUMBER", "123456789");
+    updatedSensitiveData.put("ADDRESS_LINE_1", "Number 1 A Street");
     managementEvent
         .getPayload()
         .getUpdateSampleSensitive()
-        .setSampleSensitive(Map.of("PHONE_NUMBER", "123456789"));
+        .setSampleSensitive(updatedSensitiveData);
     Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
@@ -215,7 +227,8 @@ class UpdateSampleSensitiveReceiverTest {
     survey.setId(UUID.randomUUID());
     survey.setSampleValidationRules(
         new ColumnValidator[] {
-          new ColumnValidator("PHONE_NUMBER", true, new Rule[] {new LengthRule(3)})
+          new ColumnValidator("PHONE_NUMBER", true, new Rule[] {new LengthRule(3)}),
+          new ColumnValidator("ADDRESS_LINE_1", true, new Rule[] {new LengthRule(3)})
         });
     CollectionExercise collex = new CollectionExercise();
     collex.setId(UUID.randomUUID());
@@ -225,11 +238,20 @@ class UpdateSampleSensitiveReceiverTest {
     expectedCase.setCollectionExercise(collex);
     Map<String, String> sensitiveData = new HashMap<>();
     sensitiveData.put("PHONE_NUMBER", "123");
+    sensitiveData.put("ADDRESS_LINE_1", "1234");
     expectedCase.setSampleSensitive(sensitiveData);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
-    assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+    RuntimeException thrownException =
+        assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+    String exepectedErrorMsg =
+        "UPDATE_SAMPLE_SENSITIVE event: Column 'ADDRESS_LINE_1' Failed validation"
+            + " for Rule 'LengthRule' validation error: Exceeded max length of 3"
+            + System.lineSeparator()
+            + "Column 'PHONE_NUMBER' Failed validation for Rule 'LengthRule' validation error: Exceeded max length of 3";
+
+    assertThat(thrownException.getMessage()).isEqualTo(exepectedErrorMsg);
 
     verify(caseService, never()).saveCase(any());
     verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(Message.class));

@@ -80,7 +80,7 @@ public class UpdateSampleReceiverTest {
     expectedCase.setSample(sampleData);
     expectedCase.setSampleSensitive(new HashMap<>());
 
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // when
     underTest.receiveMessage(message);
@@ -114,16 +114,28 @@ public class UpdateSampleReceiverTest {
     Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+    survey.setSampleValidationRules(
+        new ColumnValidator[] {
+          new ColumnValidator("PHONE_NUMBER", false, new Rule[] {new LengthRule(30)})
+        });
+    CollectionExercise collex = new CollectionExercise();
+    collex.setId(UUID.randomUUID());
+    collex.setSurvey(survey);
+
     Case expectedCase = new Case();
+    expectedCase.setCollectionExercise(collex);
     Map<String, String> existingSampleData = new HashMap<>();
     existingSampleData.put("testThing", "xyz666");
     expectedCase.setSample(existingSampleData);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
     RuntimeException thrown =
         assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
-    assertThat(thrown.getMessage()).isEqualTo("Key (newThing) does not match existing sample data");
+    assertThat(thrown.getMessage())
+        .isEqualTo("Column name 'newThing' is not within defined sample");
 
     verify(caseService, never()).saveCaseAndEmitCaseUpdate(any(), any(), any());
     verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(Message.class));
@@ -145,20 +157,31 @@ public class UpdateSampleReceiverTest {
     Message<byte[]> message = constructMessage(managementEvent);
 
     // Given
+    Survey survey = new Survey();
+    survey.setId(UUID.randomUUID());
+    survey.setSampleValidationRules(
+        new ColumnValidator[] {
+          new ColumnValidator("testThing", true, new Rule[] {new LengthRule(4)})
+        });
+    CollectionExercise collex = new CollectionExercise();
+    collex.setId(UUID.randomUUID());
+    collex.setSurvey(survey);
+
     Case expectedCase = new Case();
+    expectedCase.setCollectionExercise(collex);
     Map<String, String> existingSampleData = new HashMap<>();
     existingSampleData.put("testThing", "xyz666");
     expectedCase.setSample(existingSampleData);
     Map<String, String> existingSensitiveSampleData = new HashMap<>();
     existingSensitiveSampleData.put("mobileNumber", "111111111");
     expectedCase.setSampleSensitive(existingSensitiveSampleData);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
     RuntimeException thrown =
         assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
     assertThat(thrown.getMessage())
-        .isEqualTo("Key (mobileNumber) does not match existing sample data");
+        .isEqualTo("Column name 'mobileNumber' is not within defined sample");
 
     verify(caseService, never()).saveCaseAndEmitCaseUpdate(any(), any(), any());
     verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(Message.class));
@@ -183,7 +206,7 @@ public class UpdateSampleReceiverTest {
     survey.setId(UUID.randomUUID());
     survey.setSampleValidationRules(
         new ColumnValidator[] {
-          new ColumnValidator("testSampleField", true, new Rule[] {new LengthRule(4)})
+          new ColumnValidator("testSampleField", false, new Rule[] {new LengthRule(4)})
         });
     CollectionExercise collex = new CollectionExercise();
     collex.setId(UUID.randomUUID());
@@ -194,13 +217,14 @@ public class UpdateSampleReceiverTest {
     Map<String, String> existingSampleData = new HashMap<>();
     existingSampleData.put("testSampleField", "Test");
     expectedCase.setSample(existingSampleData);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+    when(caseService.getCaseAndLockForUpdate(any(UUID.class))).thenReturn(expectedCase);
 
     // When, then throws
     RuntimeException thrown =
         assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
     assertThat(thrown.getMessage())
-        .isEqualTo("UPDATE_SAMPLE failed validation for column name: testSampleField");
+        .isEqualTo(
+            "UPDATE_SAMPLE event: Column 'testSampleField' Failed validation for Rule 'LengthRule' validation error: Exceeded max length of 4");
 
     verify(caseService, never()).saveCase(any());
     verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(Message.class));
