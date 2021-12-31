@@ -12,8 +12,8 @@ format-check:
 	mvn fmt:check
 
 test:
-    build
+	mvn clean verify jacoco:report
 
 docker-build:
-    docker build . -t eu.gcr.io/ssdc-rm-ci/rm/ssdc-rm-caseprocessor:latest
+	docker build . -t eu.gcr.io/ssdc-rm-ci/rm/ssdc-rm-caseprocessor:latest
 
