@@ -14,6 +14,6 @@ format-check:
 test:
     build
 
-docker_build:
+docker-build:
     docker build . -t eu.gcr.io/ssdc-rm-ci/rm/ssdc-rm-caseprocessor:latest
 
