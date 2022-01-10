@@ -22,7 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EnrichedEmailFulfilment;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EmailConfirmation;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
@@ -161,23 +161,23 @@ class EmailFulfilmentReceiverTest {
 
   private EventDTO buildEnrichedEmailFulfilmentEventWithUacQid() {
     EventDTO event = buildEnrichedEmailFulfilmentEvent();
-    event.getPayload().getEnrichedEmailFulfilment().setUac(TEST_UAC);
-    event.getPayload().getEnrichedEmailFulfilment().setQid(TEST_QID);
+    event.getPayload().getEmailConfirmation().setUac(TEST_UAC);
+    event.getPayload().getEmailConfirmation().setQid(TEST_QID);
     return event;
   }
 
   private EventDTO buildEnrichedEmailFulfilmentEvent() {
-    EnrichedEmailFulfilment enrichedEmailFulfilment = new EnrichedEmailFulfilment();
-    enrichedEmailFulfilment.setCaseId(CASE_ID);
-    enrichedEmailFulfilment.setPackCode(PACK_CODE);
-    enrichedEmailFulfilment.setUacMetadata(TEST_UAC_METADATA);
+    EmailConfirmation emailConfirmation = new EmailConfirmation();
+    emailConfirmation.setCaseId(CASE_ID);
+    emailConfirmation.setPackCode(PACK_CODE);
+    emailConfirmation.setUacMetadata(TEST_UAC_METADATA);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     eventHeader.setCorrelationId(TEST_CORRELATION_ID);
     eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
     PayloadDTO payloadDTO = new PayloadDTO();
-    payloadDTO.setEnrichedEmailFulfilment(enrichedEmailFulfilment);
+    payloadDTO.setEmailConfirmation(emailConfirmation);
 
     EventDTO event = new EventDTO();
     event.setHeader(eventHeader);

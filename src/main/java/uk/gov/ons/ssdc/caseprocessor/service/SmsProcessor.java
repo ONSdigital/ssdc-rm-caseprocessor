@@ -38,6 +38,7 @@ public class SmsProcessor {
     smsRequest.setPackCode(packCode);
     smsRequest.setPhoneNumber(phoneNumber);
     smsRequest.setUacMetadata(actionRule.getUacMetadata());
+    smsRequest.setScheduled(true);
 
     EventHeaderDTO eventHeader =
         EventHelper.createEventDTO(smsRequestTopic, actionRule.getId(), actionRule.getCreatedBy());

@@ -38,8 +38,8 @@ spring:
 
 queueconfig:
   telephone-capture-subscription: rm-internal-telephone-capture_case-processor
-  sms-fulfilment-subscription: rm-internal-sms-fulfilment_case-processor
-  email-fulfilment-subscription: rm-internal-email-fulfilment_case-processor
+  sms-confirmation-subscription: rm-internal-sms-confirmation_case-processor
+  email-confirmation-subscription: rm-internal-email-confirmation_case-processor
   new-case-subscription: event_new-case_rm-case-processor
   receipt-subscription: event_receipt_rm-case-processor
   refusal-subscription: event_refusal_rm-case-processor

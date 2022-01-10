@@ -7,8 +7,8 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EnrichedSmsFulfilment;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.SmsConfirmation;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 import uk.gov.ons.ssdc.common.model.entity.Case;
@@ -23,6 +23,7 @@ public class SmsFulfilmentReceiver {
   private final EventLogger eventLogger;
 
   private static final String SMS_FULFILMENT_DESCRIPTION = "SMS fulfilment request received";
+  private static final String SCHEDULED_SMS_DESCRIPTION = "Scheduled SMS request received";
 
   public SmsFulfilmentReceiver(
       UacService uacService, CaseService caseService, EventLogger eventLogger) {
@@ -32,10 +33,10 @@ public class SmsFulfilmentReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "smsFulfilmentInputChannel", adviceChain = "retryAdvice")
+  @ServiceActivator(inputChannel = "smsConfirmationInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
-    EnrichedSmsFulfilment smsFulfilment = event.getPayload().getEnrichedSmsFulfilment();
+    SmsConfirmation smsFulfilment = event.getPayload().getSmsConfirmation();
 
     Case caze = caseService.getCase(smsFulfilment.getCaseId());
 
@@ -66,7 +67,12 @@ public class SmsFulfilmentReceiver {
           event.getHeader().getOriginatingUser());
     }
 
-    eventLogger.logCaseEvent(
-        caze, SMS_FULFILMENT_DESCRIPTION, EventType.SMS_FULFILMENT, event, message);
+    if (smsFulfilment.isScheduled()) {
+      eventLogger.logCaseEvent(
+          caze, SCHEDULED_SMS_DESCRIPTION, EventType.ACTION_RULE_SMS_CONFIRMATION, event, message);
+    } else {
+      eventLogger.logCaseEvent(
+          caze, SMS_FULFILMENT_DESCRIPTION, EventType.SMS_FULFILMENT, event, message);
+    }
   }
 }

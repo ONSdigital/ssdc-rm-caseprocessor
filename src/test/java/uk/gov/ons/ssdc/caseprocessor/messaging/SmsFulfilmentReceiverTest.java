@@ -22,10 +22,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EnrichedSmsFulfilment;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.SmsConfirmation;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
 import uk.gov.ons.ssdc.common.model.entity.Case;
@@ -153,23 +153,23 @@ class SmsFulfilmentReceiverTest {
 
   private EventDTO buildEnrichedSmsFulfilmentEventWithUacQid() {
     EventDTO event = buildEnrichedSmsFulfilmentEvent();
-    event.getPayload().getEnrichedSmsFulfilment().setUac(TEST_UAC);
-    event.getPayload().getEnrichedSmsFulfilment().setQid(TEST_QID);
+    event.getPayload().getSmsConfirmation().setUac(TEST_UAC);
+    event.getPayload().getSmsConfirmation().setQid(TEST_QID);
     return event;
   }
 
   private EventDTO buildEnrichedSmsFulfilmentEvent() {
-    EnrichedSmsFulfilment enrichedSmsFulfilment = new EnrichedSmsFulfilment();
-    enrichedSmsFulfilment.setCaseId(CASE_ID);
-    enrichedSmsFulfilment.setPackCode(PACK_CODE);
-    enrichedSmsFulfilment.setUacMetadata(TEST_UAC_METADATA);
+    SmsConfirmation smsConfirmation = new SmsConfirmation();
+    smsConfirmation.setCaseId(CASE_ID);
+    smsConfirmation.setPackCode(PACK_CODE);
+    smsConfirmation.setUacMetadata(TEST_UAC_METADATA);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
     eventHeader.setCorrelationId(TEST_CORRELATION_ID);
     eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
     PayloadDTO payloadDTO = new PayloadDTO();
-    payloadDTO.setEnrichedSmsFulfilment(enrichedSmsFulfilment);
+    payloadDTO.setSmsConfirmation(smsConfirmation);
 
     EventDTO event = new EventDTO();
     event.setHeader(eventHeader);

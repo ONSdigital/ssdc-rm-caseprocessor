@@ -2,7 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.SMS_FULFILMENT_TOPIC;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.SMS_CONFIRMATION_TOPIC;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import java.util.List;
@@ -17,10 +17,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.client.UacQidServiceClient;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EnrichedSmsFulfilment;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.SmsConfirmation;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
@@ -69,19 +69,19 @@ class SmsFulfilmentReceiverIT {
     Case testCase = junkDataHelper.setupJunkCase();
 
     // Build the event message
-    EnrichedSmsFulfilment enrichedSmsFulfilment = new EnrichedSmsFulfilment();
-    enrichedSmsFulfilment.setUac(smsUacQid.getUac());
-    enrichedSmsFulfilment.setQid(smsUacQid.getQid());
-    enrichedSmsFulfilment.setCaseId(testCase.getId());
-    enrichedSmsFulfilment.setPackCode(PACK_CODE);
-    enrichedSmsFulfilment.setUacMetadata(TEST_UAC_METADATA);
+    SmsConfirmation smsConfirmation = new SmsConfirmation();
+    smsConfirmation.setUac(smsUacQid.getUac());
+    smsConfirmation.setQid(smsUacQid.getQid());
+    smsConfirmation.setCaseId(testCase.getId());
+    smsConfirmation.setPackCode(PACK_CODE);
+    smsConfirmation.setUacMetadata(TEST_UAC_METADATA);
 
     PayloadDTO payloadDTO = new PayloadDTO();
-    payloadDTO.setEnrichedSmsFulfilment(enrichedSmsFulfilment);
+    payloadDTO.setSmsConfirmation(smsConfirmation);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
-    eventHeader.setTopic(SMS_FULFILMENT_TOPIC);
+    eventHeader.setTopic(SMS_CONFIRMATION_TOPIC);
     junkDataHelper.junkify(eventHeader);
 
     EventDTO event = new EventDTO();
@@ -90,7 +90,7 @@ class SmsFulfilmentReceiverIT {
 
     try (QueueSpy<EventDTO> outboundUacQueueSpy =
         pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
-      pubsubHelper.sendMessage(SMS_FULFILMENT_TOPIC, event);
+      pubsubHelper.sendMessage(SMS_CONFIRMATION_TOPIC, event);
       EventDTO emittedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
 
       assertThat(emittedEvent.getHeader().getTopic()).isEqualTo(uacUpdateTopic);

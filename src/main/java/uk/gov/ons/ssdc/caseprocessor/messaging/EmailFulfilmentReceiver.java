@@ -7,7 +7,7 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EnrichedEmailFulfilment;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EmailConfirmation;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
@@ -23,6 +23,7 @@ public class EmailFulfilmentReceiver {
   private final EventLogger eventLogger;
 
   private static final String EMAIL_FULFILMENT_DESCRIPTION = "Email fulfilment request received";
+  private static final String SCHEDULED_EMAIL_DESCRIPTION = "Scheduled email request received";
 
   public EmailFulfilmentReceiver(
       UacService uacService, CaseService caseService, EventLogger eventLogger) {
@@ -32,10 +33,10 @@ public class EmailFulfilmentReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "emailFulfilmentInputChannel", adviceChain = "retryAdvice")
+  @ServiceActivator(inputChannel = "emailConfirmationInputChannel", adviceChain = "retryAdvice")
   public void receiveMessage(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
-    EnrichedEmailFulfilment emailFulfilment = event.getPayload().getEnrichedEmailFulfilment();
+    EmailConfirmation emailFulfilment = event.getPayload().getEmailConfirmation();
 
     Case caze = caseService.getCase(emailFulfilment.getCaseId());
 
@@ -66,7 +67,16 @@ public class EmailFulfilmentReceiver {
           event.getHeader().getOriginatingUser());
     }
 
-    eventLogger.logCaseEvent(
-        caze, EMAIL_FULFILMENT_DESCRIPTION, EventType.EMAIL_FULFILMENT, event, message);
+    if (emailFulfilment.isScheduled()) {
+      eventLogger.logCaseEvent(
+          caze,
+          SCHEDULED_EMAIL_DESCRIPTION,
+          EventType.ACTION_RULE_EMAIL_CONFIRMATION,
+          event,
+          message);
+    } else {
+      eventLogger.logCaseEvent(
+          caze, EMAIL_FULFILMENT_DESCRIPTION, EventType.EMAIL_FULFILMENT, event, message);
+    }
   }
 }

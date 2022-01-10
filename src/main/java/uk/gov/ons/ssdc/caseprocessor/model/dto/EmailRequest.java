@@ -12,4 +12,6 @@ public class EmailRequest {
   private String packCode;
 
   private Object uacMetadata;
+
+  private boolean scheduled;
 }

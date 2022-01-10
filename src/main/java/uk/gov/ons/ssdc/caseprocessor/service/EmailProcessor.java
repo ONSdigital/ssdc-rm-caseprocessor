@@ -38,6 +38,7 @@ public class EmailProcessor {
     emailRequest.setPackCode(packCode);
     emailRequest.setEmail(email);
     emailRequest.setUacMetadata(actionRule.getUacMetadata());
+    emailRequest.setScheduled(true);
 
     EventHeaderDTO eventHeader =
         EventHelper.createEventDTO(

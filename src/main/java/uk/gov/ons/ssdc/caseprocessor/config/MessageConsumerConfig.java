@@ -55,11 +55,11 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.update-sample-sensitive-subscription}")
   private String updateSampleSensitiveSubscription;
 
-  @Value("${queueconfig.sms-fulfilment-subscription}")
-  private String smsFulfilmentSubscription;
+  @Value("${queueconfig.sms-confirmation-subscription}")
+  private String smsConfirmationSubscription;
 
-  @Value("${queueconfig.email-fulfilment-subscription}")
-  private String emailFulfilmentSubscription;
+  @Value("${queueconfig.email-confirmation-subscription}")
+  private String emailConfirmationSubscription;
 
   public MessageConsumerConfig(
       ManagedMessageRecoverer managedMessageRecoverer, PubSubTemplate pubSubTemplate) {
@@ -123,12 +123,12 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public MessageChannel smsFulfilmentInputChannel() {
+  public MessageChannel smsConfirmationInputChannel() {
     return new DirectChannel();
   }
 
   @Bean
-  public MessageChannel emailFulfilmentInputChannel() {
+  public MessageChannel emailConfirmationInputChannel() {
     return new DirectChannel();
   }
 
@@ -220,15 +220,15 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  PubSubInboundChannelAdapter smsFulfilmentInbound(
-      @Qualifier("smsFulfilmentInputChannel") MessageChannel channel) {
-    return makeAdapter(channel, smsFulfilmentSubscription);
+  PubSubInboundChannelAdapter smsConfirmationInbound(
+      @Qualifier("smsConfirmationInputChannel") MessageChannel channel) {
+    return makeAdapter(channel, smsConfirmationSubscription);
   }
 
   @Bean
-  PubSubInboundChannelAdapter emailFulfilmentInbound(
-      @Qualifier("emailFulfilmentInputChannel") MessageChannel channel) {
-    return makeAdapter(channel, emailFulfilmentSubscription);
+  PubSubInboundChannelAdapter emailConfirmationInbound(
+      @Qualifier("emailConfirmationInputChannel") MessageChannel channel) {
+    return makeAdapter(channel, emailConfirmationSubscription);
   }
 
   private PubSubInboundChannelAdapter makeAdapter(MessageChannel channel, String subscriptionName) {
