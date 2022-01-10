@@ -1,7 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.EMAIL_FULFILMENT_TOPIC;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.EMAIL_CONFIRMATION_TOPIC;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
@@ -17,7 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.ons.ssdc.caseprocessor.client.UacQidServiceClient;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.EnrichedEmailFulfilment;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.EmailConfirmation;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
@@ -69,19 +69,19 @@ class EmailFulfilmentReceiverIT {
     Case testCase = junkDataHelper.setupJunkCase();
 
     // Build the event message
-    EnrichedEmailFulfilment enrichedEmailFulfilment = new EnrichedEmailFulfilment();
-    enrichedEmailFulfilment.setUac(emailUacQid.getUac());
-    enrichedEmailFulfilment.setQid(emailUacQid.getQid());
-    enrichedEmailFulfilment.setCaseId(testCase.getId());
-    enrichedEmailFulfilment.setPackCode(PACK_CODE);
-    enrichedEmailFulfilment.setUacMetadata(TEST_UAC_METADATA);
+    EmailConfirmation emailConfirmation = new EmailConfirmation();
+    emailConfirmation.setUac(emailUacQid.getUac());
+    emailConfirmation.setQid(emailUacQid.getQid());
+    emailConfirmation.setCaseId(testCase.getId());
+    emailConfirmation.setPackCode(PACK_CODE);
+    emailConfirmation.setUacMetadata(TEST_UAC_METADATA);
 
     PayloadDTO payloadDTO = new PayloadDTO();
-    payloadDTO.setEnrichedEmailFulfilment(enrichedEmailFulfilment);
+    payloadDTO.setEmailConfirmation(emailConfirmation);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
-    eventHeader.setTopic(EMAIL_FULFILMENT_TOPIC);
+    eventHeader.setTopic(EMAIL_CONFIRMATION_TOPIC);
     junkDataHelper.junkify(eventHeader);
 
     EventDTO event = new EventDTO();
@@ -90,7 +90,7 @@ class EmailFulfilmentReceiverIT {
 
     try (QueueSpy<EventDTO> outboundUacQueueSpy =
         pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
-      pubsubHelper.sendMessage(EMAIL_FULFILMENT_TOPIC, event);
+      pubsubHelper.sendMessage(EMAIL_CONFIRMATION_TOPIC, event);
       EventDTO emittedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
 
       assertThat(emittedEvent.getHeader().getTopic()).isEqualTo(uacUpdateTopic);
