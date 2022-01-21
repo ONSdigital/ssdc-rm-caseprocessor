@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 public class CaseUpdateDTO {
   private UUID caseId;
+  private String caseRef;
   private UUID collectionExerciseId;
   private UUID surveyId;
   private boolean invalid;

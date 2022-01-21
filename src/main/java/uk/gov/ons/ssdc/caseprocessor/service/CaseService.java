@@ -56,6 +56,7 @@ public class CaseService {
     PayloadDTO payloadDTO = new PayloadDTO();
     CaseUpdateDTO caseUpdate = new CaseUpdateDTO();
     caseUpdate.setCaseId(caze.getId());
+    caseUpdate.setCaseRef(Long.toString(caze.getCaseRef()));
     caseUpdate.setCollectionExerciseId(caze.getCollectionExercise().getId());
     caseUpdate.setSurveyId(caze.getCollectionExercise().getSurvey().getId());
     caseUpdate.setSample(caze.getSample());
