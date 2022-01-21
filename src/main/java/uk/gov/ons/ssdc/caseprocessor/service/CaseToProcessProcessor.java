@@ -8,7 +8,6 @@ import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
 
 @Component
 public class CaseToProcessProcessor {
-
   private final ExportFileProcessor exportFileProcessor;
   private final DeactivateUacProcessor deactivateUacProcessor;
   private final SmsProcessor smsProcessor;

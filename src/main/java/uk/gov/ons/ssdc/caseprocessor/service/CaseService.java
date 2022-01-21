@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.ssdc.caseprocessor.enrichment.CaseMetadataEnricher;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
@@ -19,6 +20,7 @@ import uk.gov.ons.ssdc.common.model.entity.Case;
 
 @Service
 public class CaseService {
+  private final CaseMetadataEnricher caseMetadataEnricher;
   private final CaseRepository caseRepository;
   private final MessageSender messageSender;
 
@@ -28,12 +30,19 @@ public class CaseService {
   @Value("${queueconfig.shared-pubsub-project}")
   private String sharedPubsubProject;
 
-  public CaseService(CaseRepository caseRepository, MessageSender messageSender) {
+  public CaseService(
+      CaseMetadataEnricher caseUpdateProcessor,
+      CaseRepository caseRepository,
+      MessageSender messageSender) {
+    this.caseMetadataEnricher = caseUpdateProcessor;
     this.caseRepository = caseRepository;
     this.messageSender = messageSender;
   }
 
   public void saveCaseAndEmitCaseUpdate(Case caze, UUID correlationId, String originatingUser) {
+    // Before updating this case, do we need to update any our MetaData on it?
+    caseMetadataEnricher.updateCaseMetaData(caze);
+
     saveCase(caze);
     emitCaseUpdate(caze, correlationId, originatingUser);
   }
