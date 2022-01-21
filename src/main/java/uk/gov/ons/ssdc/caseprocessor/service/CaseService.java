@@ -60,6 +60,8 @@ public class CaseService {
     caseUpdate.setCollectionExerciseId(caze.getCollectionExercise().getId());
     caseUpdate.setSurveyId(caze.getCollectionExercise().getSurvey().getId());
     caseUpdate.setSample(caze.getSample());
+    caseUpdate.setCreatedAt(caze.getCreatedAt());
+    caseUpdate.setLastUpdatedAt(caze.getLastUpdatedAt());
 
     caseUpdate.setInvalid(caze.isInvalid());
     if (caze.getRefusalReceived() != null) {

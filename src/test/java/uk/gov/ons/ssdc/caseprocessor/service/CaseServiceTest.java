@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -103,6 +104,8 @@ public class CaseServiceTest {
     caze.setSample(Map.of("foo", "bar"));
     caze.setInvalid(true);
     caze.setRefusalReceived(RefusalType.EXTRAORDINARY_REFUSAL);
+    caze.setCreatedAt(OffsetDateTime.now().minusSeconds(10));
+    caze.setLastUpdatedAt(OffsetDateTime.now());
 
     underTest.emitCaseUpdate(caze, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
 
@@ -124,6 +127,8 @@ public class CaseServiceTest {
     assertThat(actualCaseUpdate.isInvalid()).isTrue();
     assertThat(actualCaseUpdate.getRefusalReceived())
         .isEqualTo(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
+    assertThat(actualCaseUpdate.getCreatedAt()).isEqualTo(caze.getCreatedAt());
+    assertThat(actualCaseUpdate.getLastUpdatedAt()).isEqualTo(caze.getLastUpdatedAt());
   }
 
   @Test
