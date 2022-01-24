@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_CORRELATION_ID;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_ORIGINATING_USER;
 
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,6 +49,7 @@ public class CaseServiceTest {
 
     Case caze = new Case();
     caze.setId(UUID.randomUUID());
+    caze.setCaseRef(1234567890L);
     caze.setCollectionExercise(collex);
     caze.setSample(Map.of("foo", "bar"));
     caze.setSampleSensitive(Map.of("Top", "Secret"));
@@ -68,6 +70,7 @@ public class CaseServiceTest {
 
     CaseUpdateDTO actualCaseUpdate = actualEvent.getPayload().getCaseUpdate();
     assertThat(actualCaseUpdate.getCaseId()).isEqualTo(caze.getId());
+    assertThat(actualCaseUpdate.getCaseRef()).isEqualTo(caze.getCaseRef().toString());
     assertThat(actualCaseUpdate.getCollectionExerciseId()).isEqualTo(collex.getId());
     assertThat(actualCaseUpdate.getSurveyId()).isEqualTo(survey.getId());
     assertThat(actualCaseUpdate.getSample()).isEqualTo(caze.getSample());
@@ -84,7 +87,7 @@ public class CaseServiceTest {
   }
 
   @Test
-  public void emitCaseCreatedEvent() {
+  public void emitCaseUpdatedEvent() {
     ReflectionTestUtils.setField(underTest, "caseUpdateTopic", "Test topic");
     ReflectionTestUtils.setField(underTest, "sharedPubsubProject", "Test project");
 
@@ -96,10 +99,13 @@ public class CaseServiceTest {
 
     Case caze = new Case();
     caze.setId(UUID.randomUUID());
+    caze.setCaseRef(1234567890L);
     caze.setCollectionExercise(collex);
     caze.setSample(Map.of("foo", "bar"));
     caze.setInvalid(true);
     caze.setRefusalReceived(RefusalType.EXTRAORDINARY_REFUSAL);
+    caze.setCreatedAt(OffsetDateTime.now().minusSeconds(10));
+    caze.setLastUpdatedAt(OffsetDateTime.now());
 
     underTest.emitCaseUpdate(caze, TEST_CORRELATION_ID, TEST_ORIGINATING_USER);
 
@@ -114,12 +120,15 @@ public class CaseServiceTest {
 
     CaseUpdateDTO actualCaseUpdate = actualEvent.getPayload().getCaseUpdate();
     assertThat(actualCaseUpdate.getCaseId()).isEqualTo(caze.getId());
+    assertThat(actualCaseUpdate.getCaseRef()).isEqualTo(caze.getCaseRef().toString());
     assertThat(actualCaseUpdate.getCollectionExerciseId()).isEqualTo(collex.getId());
     assertThat(actualCaseUpdate.getSurveyId()).isEqualTo(survey.getId());
     assertThat(actualCaseUpdate.getSample()).isEqualTo(caze.getSample());
     assertThat(actualCaseUpdate.isInvalid()).isTrue();
     assertThat(actualCaseUpdate.getRefusalReceived())
         .isEqualTo(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
+    assertThat(actualCaseUpdate.getCreatedAt()).isEqualTo(caze.getCreatedAt());
+    assertThat(actualCaseUpdate.getLastUpdatedAt()).isEqualTo(caze.getLastUpdatedAt());
   }
 
   @Test

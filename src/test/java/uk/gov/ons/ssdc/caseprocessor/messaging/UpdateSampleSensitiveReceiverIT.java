@@ -49,6 +49,7 @@ public class UpdateSampleSensitiveReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
   private static final String UPDATE_SAMPLE_SENSITIVE_TOPIC = "event_update-sample-sensitive";
+  private static final Long TEST_CASE_REF = 1234567890L;
 
   @Value("${queueconfig.case-update-topic}")
   private String caseUpdateTopic;
@@ -76,6 +77,7 @@ public class UpdateSampleSensitiveReceiverIT {
 
       Case caze = new Case();
       caze.setId(TEST_CASE_ID);
+      caze.setCaseRef(TEST_CASE_REF);
       caze.setSampleSensitive(Map.of("SensitiveJunk", "02071234567"));
       caze.setCollectionExercise(junkDataHelper.setupJunkCollex());
       caseRepository.saveAndFlush(caze);
@@ -115,6 +117,7 @@ public class UpdateSampleSensitiveReceiverIT {
     // Given
     Case caze = new Case();
     caze.setId(TEST_CASE_ID);
+    caze.setCaseRef(TEST_CASE_REF);
     Map<String, String> sensitiveData = new HashMap<>();
     sensitiveData.put("sensitiveA", "Original value");
     sensitiveData.put("sensitiveB", "Original value");
