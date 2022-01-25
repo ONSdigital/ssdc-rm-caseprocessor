@@ -11,10 +11,14 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileTemplateRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentSurveyExportFileTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.CollectionInstrumentSelectionRule;
+import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
+import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyExportFileTemplate;
 import uk.gov.ons.ssdc.common.model.entity.Survey;
 import uk.gov.ons.ssdc.common.validation.ColumnValidator;
 import uk.gov.ons.ssdc.common.validation.MandatoryRule;
@@ -28,6 +32,10 @@ public class JunkDataHelper {
   @Autowired private CaseRepository caseRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
   @Autowired private SurveyRepository surveyRepository;
+  @Autowired private ExportFileTemplateRepository exportFileTemplateRepository;
+
+  @Autowired
+  private FulfilmentSurveyExportFileTemplateRepository fulfilmentSurveyExportFileTemplateRepository;
 
   public Case setupJunkCase() {
     Case junkCase = new Case();
@@ -87,6 +95,26 @@ public class JunkDataHelper {
     collectionExerciseRepository.saveAndFlush(junkCollectionExercise);
 
     return junkCollectionExercise;
+  }
+
+  public ExportFileTemplate setUpJunkExportFileTemplate(String[] template) {
+    ExportFileTemplate junkExportFileTemplate = new ExportFileTemplate();
+    junkExportFileTemplate.setExportFileDestination("junk");
+    junkExportFileTemplate.setPackCode("JUNK");
+    junkExportFileTemplate.setTemplate(template);
+    junkExportFileTemplate.setDescription("junk");
+    exportFileTemplateRepository.saveAndFlush(junkExportFileTemplate);
+    return junkExportFileTemplate;
+  }
+
+  public void linkExportFileTemplateToSurveyFulfilment(
+      ExportFileTemplate exportFileTemplate, Survey survey) {
+    FulfilmentSurveyExportFileTemplate fulfilmentSurveyExportFileTemplate =
+        new FulfilmentSurveyExportFileTemplate();
+    fulfilmentSurveyExportFileTemplate.setSurvey(survey);
+    fulfilmentSurveyExportFileTemplate.setExportFileTemplate(exportFileTemplate);
+    fulfilmentSurveyExportFileTemplate.setId(UUID.randomUUID());
+    fulfilmentSurveyExportFileTemplateRepository.saveAndFlush(fulfilmentSurveyExportFileTemplate);
   }
 
   public void junkify(EventHeaderDTO eventHeaderDTO) {
