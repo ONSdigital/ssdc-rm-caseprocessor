@@ -1,8 +1,11 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.REQUEST_PERSONALISATION_PREFIX;
+
 import com.opencsv.CSVWriter;
 import java.io.StringWriter;
 import java.time.OffsetDateTime;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
@@ -60,7 +63,8 @@ public class ExportFileProcessor {
         exportFileTemplate.getExportFileDestination(),
         fulfilmentToProcess.getCorrelationId(),
         fulfilmentToProcess.getOriginatingUser(),
-        fulfilmentToProcess.getUacMetadata());
+        fulfilmentToProcess.getUacMetadata(),
+        fulfilmentToProcess.getPersonalisation());
   }
 
   public void processExportFileRow(
@@ -73,6 +77,31 @@ public class ExportFileProcessor {
       UUID correlationId,
       String originatingUser,
       Object uacMetadata) {
+    // Supply empty personalisation if the caller does not
+    processExportFileRow(
+        template,
+        caze,
+        batchId,
+        batchQuantity,
+        packCode,
+        exportFileDestination,
+        correlationId,
+        originatingUser,
+        uacMetadata,
+        Map.of());
+  }
+
+  public void processExportFileRow(
+      String[] template,
+      Case caze,
+      UUID batchId,
+      int batchQuantity,
+      String packCode,
+      String exportFileDestination,
+      UUID correlationId,
+      String originatingUser,
+      Object uacMetadata,
+      Map<String, String> personalisation) {
 
     UacQidDTO uacQidDTO = null;
     String[] rowStrings = new String[template.length];
@@ -102,7 +131,14 @@ public class ExportFileProcessor {
           rowStrings[i] = rasRmCaseIacService.getRasRmIac(caze);
           break;
         default:
-          rowStrings[i] = caze.getSample().get(templateItem);
+          if (templateItem.startsWith(REQUEST_PERSONALISATION_PREFIX)) {
+            rowStrings[i] =
+                personalisation.get(
+                    templateItem.substring(REQUEST_PERSONALISATION_PREFIX.length()));
+
+          } else {
+            rowStrings[i] = caze.getSample().get(templateItem);
+          }
       }
     }
 

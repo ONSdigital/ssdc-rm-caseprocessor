@@ -21,7 +21,8 @@ public class RedactHelper {
     new ThingToRedact("getSampleSensitive", Map.class),
     new ThingToRedact("setUac", String.class),
     new ThingToRedact("setPhoneNumber", String.class),
-    new ThingToRedact("setEmail", String.class)
+    new ThingToRedact("setEmail", String.class),
+    new ThingToRedact("getPersonalisation", Map.class)
   };
 
   public static Object redact(Object rootObjectToRedact) {
@@ -73,6 +74,9 @@ public class RedactHelper {
         && method.getReturnType().equals(Map.class)) {
       try {
         Map<String, String> sensitiveData = (Map<String, String>) method.invoke(object);
+        if (sensitiveData == null) {
+          return;
+        }
         for (String key : sensitiveData.keySet()) {
           if (StringUtils.hasText((sensitiveData.get(key)))) {
             sensitiveData.put(key, REDACTION_TEXT);
