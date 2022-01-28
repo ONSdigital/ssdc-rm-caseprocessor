@@ -85,7 +85,7 @@ class ExportFileProcessorTest {
         exportFileTemplate.getExportFileDestination(),
         actionRule.getId(),
         null,
-        actionRule.getUacMetadata());
+        actionRule.getUacMetadata(), null);
 
     //    // Then
     ArgumentCaptor<ExportFileRow> exportFileRowArgumentCaptor =
@@ -156,7 +156,7 @@ class ExportFileProcessorTest {
         exportFileTemplate.getExportFileDestination(),
         actionRule.getId(),
         null,
-        actionRule.getUacMetadata());
+        actionRule.getUacMetadata(), null);
 
     //    // Then
     ArgumentCaptor<ExportFileRow> exportFileRowArgumentCaptor =

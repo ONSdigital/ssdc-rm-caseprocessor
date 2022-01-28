@@ -58,7 +58,8 @@ class CaseToProcessProcessorTest {
             exportFileTemplate.getExportFileDestination(),
             actionRule.getId(),
             null,
-            actionRule.getUacMetadata());
+            actionRule.getUacMetadata(),
+                null);
   }
 
   @Test

@@ -39,7 +39,8 @@ public class CaseToProcessProcessor {
             exportFileTemplate.getExportFileDestination(),
             caseToProcess.getActionRule().getId(),
             null,
-            caseToProcess.getActionRule().getUacMetadata());
+            caseToProcess.getActionRule().getUacMetadata(),
+                null);
         break;
       case DEACTIVATE_UAC:
         deactivateUacProcessor.process(

@@ -11,6 +11,7 @@ import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.rasrm.service.RasRmCaseIacService;
+import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.ScheduledTaskService;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 import uk.gov.ons.ssdc.common.model.entity.*;
@@ -23,6 +24,7 @@ public class ExportFileProcessor {
   private final ExportFileRowRepository exportFileRowRepository;
   private final RasRmCaseIacService rasRmCaseIacService;
   private final CollectionInstrumentHelper collectionInstrumentHelper;
+  private final ScheduledTaskService scheduledTaskService;
 
   private final StringWriter stringWriter = new StringWriter();
   private final CSVWriter csvWriter =
@@ -34,18 +36,20 @@ public class ExportFileProcessor {
           "");
 
   public ExportFileProcessor(
-      UacQidCache uacQidCache,
-      UacService uacService,
-      EventLogger eventLogger,
-      ExportFileRowRepository exportFileRowRepository,
-      RasRmCaseIacService rasRmCaseIacService,
-      CollectionInstrumentHelper collectionInstrumentHelper) {
+          UacQidCache uacQidCache,
+          UacService uacService,
+          EventLogger eventLogger,
+          ExportFileRowRepository exportFileRowRepository,
+          RasRmCaseIacService rasRmCaseIacService,
+          CollectionInstrumentHelper collectionInstrumentHelper,
+          ScheduledTaskService scheduledTaskService) {
     this.uacQidCache = uacQidCache;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.exportFileRowRepository = exportFileRowRepository;
     this.rasRmCaseIacService = rasRmCaseIacService;
     this.collectionInstrumentHelper = collectionInstrumentHelper;
+    this.scheduledTaskService = scheduledTaskService;
   }
 
   public void process(FulfilmentToProcess fulfilmentToProcess) {
@@ -60,19 +64,22 @@ public class ExportFileProcessor {
         exportFileTemplate.getExportFileDestination(),
         fulfilmentToProcess.getCorrelationId(),
         fulfilmentToProcess.getOriginatingUser(),
-        fulfilmentToProcess.getUacMetadata());
+        fulfilmentToProcess.getUacMetadata(),
+        fulfilmentToProcess.getScheduledTask());
+
   }
 
   public void processExportFileRow(
-      String[] template,
-      Case caze,
-      UUID batchId,
-      int batchQuantity,
-      String packCode,
-      String exportFileDestination,
-      UUID correlationId,
-      String originatingUser,
-      Object uacMetadata) {
+          String[] template,
+          Case caze,
+          UUID batchId,
+          int batchQuantity,
+          String packCode,
+          String exportFileDestination,
+          UUID correlationId,
+          String originatingUser,
+          Object uacMetadata,
+          ScheduledTask scheduledTask) {
 
     UacQidDTO uacQidDTO = null;
     String[] rowStrings = new String[template.length];
@@ -115,12 +122,24 @@ public class ExportFileProcessor {
 
     exportFileRowRepository.save(exportFileRow);
 
-    eventLogger.logCaseEvent(
-        caze,
-        String.format("Export file generated with pack code %s", packCode),
-        EventType.EXPORT_FILE,
-        EventHelper.getDummyEvent(correlationId, originatingUser),
-        OffsetDateTime.now());
+    Event event = eventLogger.logCaseEvent(
+            caze,
+            String.format("Export file generated with pack code %s", packCode),
+            EventType.EXPORT_FILE,
+            EventHelper.getDummyEvent(correlationId, originatingUser),
+            OffsetDateTime.now());
+
+
+    if(scheduledTask != null ) {
+      if (uacQidDTO != null) {
+        scheduledTaskService.updateScheculedTaskSentEvent(
+            scheduledTask, event, uacService.findByQid(uacQidDTO.getQid()));
+      }
+      else {
+        scheduledTaskService.updateScheculedTaskSentEvent(
+                scheduledTask, event,null);
+      }
+    }
   }
 
   // Has to be synchronised to stop different threads from mangling writer buffer contents

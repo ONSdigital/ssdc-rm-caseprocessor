@@ -1,5 +1,9 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
+import static com.google.cloud.spring.pubsub.support.PubSubTopicUtils.toProjectTopicName;
+
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
@@ -13,11 +17,6 @@ import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 import uk.gov.ons.ssdc.caseprocessor.utils.RedactHelper;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 
-import java.util.Optional;
-import java.util.UUID;
-
-import static com.google.cloud.spring.pubsub.support.PubSubTopicUtils.toProjectTopicName;
-
 @Service
 public class CaseService {
   private final CaseRepository caseRepository;
@@ -29,9 +28,7 @@ public class CaseService {
   @Value("${queueconfig.shared-pubsub-project}")
   private String sharedPubsubProject;
 
-  public CaseService(
-      CaseRepository caseRepository,
-      MessageSender messageSender) {
+  public CaseService(CaseRepository caseRepository, MessageSender messageSender) {
     this.caseRepository = caseRepository;
     this.messageSender = messageSender;
   }

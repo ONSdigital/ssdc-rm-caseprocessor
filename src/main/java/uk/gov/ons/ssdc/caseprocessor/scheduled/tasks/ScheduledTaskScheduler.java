@@ -1,9 +1,10 @@
-package uk.gov.ons.ssdc.caseprocessor.schedule;
+package uk.gov.ons.ssdc.caseprocessor.scheduled.tasks;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.ssdc.caseprocessor.schedule.ClusterLeaderManager;
 
 @Service
 public class ScheduledTaskScheduler {
@@ -12,12 +13,12 @@ public class ScheduledTaskScheduler {
   private final ClusterLeaderManager clusterLeaderManager;
 
   public ScheduledTaskScheduler(
-          ScheduledTaskTriggerer scheduledTaskTriggerer, ClusterLeaderManager clusterLeaderManager) {
+      ScheduledTaskTriggerer scheduledTaskTriggerer, ClusterLeaderManager clusterLeaderManager) {
     this.scheduledTaskTriggerer = scheduledTaskTriggerer;
     this.clusterLeaderManager = clusterLeaderManager;
   }
 
-//  TODO: Make this specific for this
+  //  TODO: Make this specific for this
   @Scheduled(fixedDelayString = "${scheduler.frequency}")
   public void triggerScheduledTasks() {
     if (!clusterLeaderManager.isThisHostClusterLeader()) {
