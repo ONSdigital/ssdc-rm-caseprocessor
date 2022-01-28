@@ -93,14 +93,14 @@ public class ExportFileProcessor {
           break;
         case "__uac__":
           if (uacQidDTO == null) {
-            uacQidDTO = getUacQidForCase(caze, correlationId, originatingUser, uacMetadata);
+            uacQidDTO = getUacQidForCase(caze, correlationId, originatingUser, uacMetadata, scheduledTask.getId());
           }
 
           rowStrings[i] = uacQidDTO.getUac();
           break;
         case "__qid__":
           if (uacQidDTO == null) {
-            uacQidDTO = getUacQidForCase(caze, correlationId, originatingUser, uacMetadata);
+            uacQidDTO = getUacQidForCase(caze, correlationId, originatingUser, uacMetadata, scheduledTask.getId());
           }
 
           rowStrings[i] = uacQidDTO.getQid();
@@ -151,7 +151,7 @@ public class ExportFileProcessor {
   }
 
   private UacQidDTO getUacQidForCase(
-      Case caze, UUID correlationId, String originatingUser, Object metadata) {
+      Case caze, UUID correlationId, String originatingUser, Object metadata, UUID scheduledTaskID) {
 
     String collectionInstrumentUrl =
         collectionInstrumentHelper.getCollectionInstrumentUrl(caze, metadata);
@@ -164,6 +164,8 @@ public class ExportFileProcessor {
     uacQidLink.setUacHash(HashHelper.hash(uacQidDTO.getUac()));
     uacQidLink.setMetadata(metadata);
     uacQidLink.setCaze(caze);
+    uacQidLink.setScheduledTaskId(scheduledTaskID);
+
     uacQidLink.setCollectionInstrumentUrl(collectionInstrumentUrl);
     uacService.saveAndEmitUacUpdateEvent(uacQidLink, correlationId, originatingUser);
 

@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.ScheduledTaskService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
+import uk.gov.ons.ssdc.common.model.entity.Event;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
@@ -17,10 +19,12 @@ import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 public class ReceiptReceiver {
   private final UacService uacService;
   private final EventLogger eventLogger;
+  private final ScheduledTaskService scheduledTaskService;
 
-  public ReceiptReceiver(UacService uacService, EventLogger eventLogger) {
+  public ReceiptReceiver(UacService uacService, EventLogger eventLogger, ScheduledTaskService scheduledTaskService) {
     this.uacService = uacService;
     this.eventLogger = eventLogger;
+    this.scheduledTaskService = scheduledTaskService;
   }
 
   @Transactional(isolation = Isolation.REPEATABLE_READ)
@@ -41,6 +45,13 @@ public class ReceiptReceiver {
               event.getHeader().getOriginatingUser());
     }
 
-    eventLogger.logUacQidEvent(uacQidLink, "Receipt received", EventType.RECEIPT, event, message);
+    Event loggedEvent = eventLogger.logUacQidEvent(uacQidLink, "Receipt received", EventType.RECEIPT, event, message);
+
+    // Problem with this, what happens if the ScheduledTask is removed - this goes boom.
+    // Although we may want to remove/deativate any UAC that was attached to a dead ScheduledTask?
+    // Also death
+    if(uacQidLink.getScheduledTaskId() != null) {
+        scheduledTaskService.receiptScheduledTask(uacQidLink.getScheduledTaskId(), loggedEvent);
+    }
   }
 }

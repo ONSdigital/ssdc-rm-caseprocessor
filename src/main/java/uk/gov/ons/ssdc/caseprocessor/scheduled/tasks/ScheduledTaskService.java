@@ -25,11 +25,6 @@ public class ScheduledTaskService {
 
   // Add data like Event to ScheduledTask
   public void updateScheculedTaskSentEvent(ScheduledTask scheduledTask, Event event, UacQidLink uacQidLink) {
-
-    // The perils of STATE, would we just log this against the case / Scheduled Task anyway.
-    // It feels like a big Error to be calling this function at the moment if not in this STATE
-    // Not required for this POC, but shows potential issues with approach.
-    // Is a coded table / Set of STATES and matching conditions a good idea, or madness.
 /*
 
 
@@ -106,21 +101,17 @@ public class ScheduledTaskService {
     ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
   ░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
 
-
-
+     The perils of STATE, would we just log this against the case / Scheduled Task anyway.
+     It feels like a big Error to be calling this function at the moment if not in this STATE
+     Not required for this POC, but shows potential issues with approach.
+     Is a coded table / Set of STATES and matching conditions a good idea, or madness.
  */
+
     if (scheduledTask.getActionState() != ScheduledTaskState.IN_FULFILMENT) {
       throw new RuntimeException(
           String.format(
               "ScheduledTask with ID Should be in State %s, is in State %s",
               ScheduledTaskState.IN_FULFILMENT, scheduledTask.getActionState()));
-    }
-
-    // A few potential edge cases....
-    if (scheduledTask.getSentEvent() != null) {
-      throw new RuntimeException(
-          String.format(
-              "Already a sent Event recorded for this scheduledTask?: %s", scheduledTask.getId()));
     }
 
     scheduledTask.setSentEvent(event);
@@ -132,6 +123,13 @@ public class ScheduledTaskService {
     // We might be able to go without this, e.g. UACQidLink suggests it needs a receipting event.
     // But in another way a State is easier to query, and easier for anyone viewing the Task
     // State is a pain and has pitfalls.  None State also has pitfalls.
+
+    if(scheduledTask.getScheduledTaskDetails().get("type").equals("COMPLETION")) {
+        //So we have a failure event?
+      recordFailureToComplete(scheduledTask);
+      return;
+    }
+
     if (scheduledTask.isReceiptRequiredForCompletion()) {
       scheduledTask.setActionState(ScheduledTaskState.SENT);
     } else {
@@ -150,5 +148,29 @@ public class ScheduledTaskService {
     }
 
     return scheduledTaskResult.get();
+  }
+
+  private void recordFailureToComplete(ScheduledTask scheduledTask) {
+      //This could be padded out with logging.
+
+       //TODO: for CIS this is 3 stikes and out, and would sit at case level, somewhere
+       // caseService.recordCompletionFailure(scheduledTask.getResponsePeriod().getCaze());
+
+    //Also don't like the name  NOT_COMPLETED_WITHIN_PERIOD
+    scheduledTask.setActionState(ScheduledTaskState.NOT_COMPLETED_WITHIN_PERIOD);
+    scheduledTaskRepository.saveAndFlush(scheduledTask);
+
+    // TODO: For CIS we'd want to 'close' the response period, meaning at least we'd mark as complete any
+    // TODO: existing scheduled Tasks that were 'OPEN'.
+
+    // responsePeriodService.closeAllScheduledTasksInPeriod(scheduledTask.getResponsePeriod());
+  }
+
+  public void receiptScheduledTask(UUID scheduledTaskId, Event loggedEvent) {
+      ScheduledTask scheduledTask = getById(scheduledTaskId);
+
+    /*  Production Code, Insert STATE fun here? */
+    scheduledTask.setReceiptingEvent(loggedEvent);
+    scheduledTask.setActionState(ScheduledTaskState.COMPLETED);
   }
 }

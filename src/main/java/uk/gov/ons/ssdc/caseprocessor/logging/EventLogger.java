@@ -61,7 +61,7 @@ public class EventLogger {
     logCaseEvent(caze, eventDescription, eventType, event, messageTimestamp);
   }
 
-  public void logUacQidEvent(
+  public Event logUacQidEvent(
       UacQidLink uacQidLink,
       String eventDescription,
       EventType eventType,
@@ -83,7 +83,7 @@ public class EventLogger {
             messageTimestamp);
     loggedEvent.setUacQidLink(uacQidLink);
 
-    eventRepository.save(loggedEvent);
+    return eventRepository.save(loggedEvent);
   }
 
   private Event buildEvent(
