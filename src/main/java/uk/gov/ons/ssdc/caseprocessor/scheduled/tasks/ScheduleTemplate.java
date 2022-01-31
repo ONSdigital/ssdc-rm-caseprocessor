@@ -1,5 +1,9 @@
-package uk.gov.ons.ssdc.caseprocessor.messaging;
+package uk.gov.ons.ssdc.caseprocessor.scheduled.tasks;
 
+
+import lombok.Data;
+
+import java.time.OffsetDateTime;
 
 /*
    First Stab very simple,  Like for Monthly Reminder, PCR, EQ, INCENTIVE.
@@ -55,5 +59,12 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
               }
  */
+
+@Data
 public class ScheduleTemplate {
+    private TemplateType type;
+    private DateOffSet [] taskSpacing;
+    private boolean scheduleFromCreate;
+    private OffsetDateTime startDate;
+    private Task[] tasks;
 }

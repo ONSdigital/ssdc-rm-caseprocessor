@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +40,11 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.ResponsePeriodRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ScheduledTaskRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
+import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.DateOffSet;
+import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.DateUnit;
+import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.ScheduleTemplate;
+import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.Task;
+import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.TemplateType;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
@@ -543,15 +551,70 @@ public class ScheduledTaskIT {
   }
 
   @Test
-  public void turnTemplateIntoScheduledTasksOnCaseCreation() throws InterruptedException {
+  public void turnTemplateIntoScheduledTasksOnCaseCreation() throws InterruptedException, JsonProcessingException {
     Case caze = junkDataHelper.setupJunkCase();
     Survey survey = caze.getCollectionExercise().getSurvey();
 
     // Maybe build in caseprocessor for now, then move to DLL
     ScheduleTemplate scheduleTemplate = new ScheduleTemplate();
-    survey.setScheduleTemplate();
+    scheduleTemplate.setType(TemplateType.REPEAT);
+    scheduleTemplate.setTaskSpacing(
+        new DateOffSet[] {
+          new DateOffSet(DateUnit.WEEK, 1),
+          new DateOffSet(DateUnit.WEEK, 1),
+          new DateOffSet(DateUnit.WEEK, 1),
+          new DateOffSet(DateUnit.WEEK, 1),
+          new DateOffSet(DateUnit.MONTH, 1),
+          new DateOffSet(DateUnit.MONTH, 1),
+          new DateOffSet(DateUnit.MONTH, 1),
+          new DateOffSet(DateUnit.MONTH, 1),
+          new DateOffSet(DateUnit.MONTH, 1),
+          new DateOffSet(DateUnit.MONTH, 1),
+          new DateOffSet(DateUnit.MONTH, 1),
+          new DateOffSet(DateUnit.MONTH, 1),
+          new DateOffSet(DateUnit.MONTH, 1),
+          new DateOffSet(DateUnit.MONTH, 1),
+          new DateOffSet(DateUnit.MONTH, 1)
+        });
 
-    // In the Sur
+    scheduleTemplate.setScheduleFromCreate(true);
+    scheduleTemplate.setStartDate(null);
+
+    scheduleTemplate.setTasks(
+        new Task[] {
+          new Task(
+              "Start Of Period Letter",
+              ScheduledTaskType.ACTION_WITH_PACKCODE,
+              "CIS_REMINDERR",
+              false,
+              new DateOffSet(DateUnit.DAY, 0)),
+          new Task(
+              "PCR ExportFile",
+              ScheduledTaskType.ACTION_WITH_PACKCODE,
+              "CIS_PCR",
+              false,
+              new DateOffSet(DateUnit.DAY, 7)),
+          new Task(
+              "EQ",
+              ScheduledTaskType.ACTION_WITH_PACKCODE,
+              "CIS_EQ",
+              false,
+              new DateOffSet(DateUnit.DAY, 7)),
+          new Task(
+              "Incentive",
+              ScheduledTaskType.INCENTIVE,
+              "CIS_INCENTIVE",
+              false,
+              new DateOffSet(DateUnit.DAY, 10))
+        });
+
+    ObjectMapper objectMapper = new ObjectMapper();
+    String scheduledTemplateJSON = objectMapper.writeValueAsString(scheduleTemplate);
+
+    survey.setScheduleTemplate(scheduledTemplateJSON);
+    surveyRepository.saveAndFlush(survey);
+
+
 
   }
 
