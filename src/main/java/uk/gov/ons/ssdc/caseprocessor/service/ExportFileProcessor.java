@@ -36,13 +36,13 @@ public class ExportFileProcessor {
           "");
 
   public ExportFileProcessor(
-          UacQidCache uacQidCache,
-          UacService uacService,
-          EventLogger eventLogger,
-          ExportFileRowRepository exportFileRowRepository,
-          RasRmCaseIacService rasRmCaseIacService,
-          CollectionInstrumentHelper collectionInstrumentHelper,
-          ScheduledTaskService scheduledTaskService) {
+      UacQidCache uacQidCache,
+      UacService uacService,
+      EventLogger eventLogger,
+      ExportFileRowRepository exportFileRowRepository,
+      RasRmCaseIacService rasRmCaseIacService,
+      CollectionInstrumentHelper collectionInstrumentHelper,
+      ScheduledTaskService scheduledTaskService) {
     this.uacQidCache = uacQidCache;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
@@ -66,20 +66,19 @@ public class ExportFileProcessor {
         fulfilmentToProcess.getOriginatingUser(),
         fulfilmentToProcess.getUacMetadata(),
         fulfilmentToProcess.getScheduledTask());
-
   }
 
   public void processExportFileRow(
-          String[] template,
-          Case caze,
-          UUID batchId,
-          int batchQuantity,
-          String packCode,
-          String exportFileDestination,
-          UUID correlationId,
-          String originatingUser,
-          Object uacMetadata,
-          ScheduledTask scheduledTask) {
+      String[] template,
+      Case caze,
+      UUID batchId,
+      int batchQuantity,
+      String packCode,
+      String exportFileDestination,
+      UUID correlationId,
+      String originatingUser,
+      Object uacMetadata,
+      ScheduledTask scheduledTask) {
 
     UacQidDTO uacQidDTO = null;
     String[] rowStrings = new String[template.length];
@@ -93,14 +92,16 @@ public class ExportFileProcessor {
           break;
         case "__uac__":
           if (uacQidDTO == null) {
-            uacQidDTO = getUacQidForCase(caze, correlationId, originatingUser, uacMetadata, scheduledTask.getId());
+            uacQidDTO =
+                getUacQidForCase(caze, correlationId, originatingUser, uacMetadata, scheduledTask);
           }
 
           rowStrings[i] = uacQidDTO.getUac();
           break;
         case "__qid__":
           if (uacQidDTO == null) {
-            uacQidDTO = getUacQidForCase(caze, correlationId, originatingUser, uacMetadata, scheduledTask.getId());
+            uacQidDTO =
+                getUacQidForCase(caze, correlationId, originatingUser, uacMetadata, scheduledTask);
           }
 
           rowStrings[i] = uacQidDTO.getQid();
@@ -122,22 +123,20 @@ public class ExportFileProcessor {
 
     exportFileRowRepository.save(exportFileRow);
 
-    Event event = eventLogger.logCaseEvent(
+    Event event =
+        eventLogger.logCaseEvent(
             caze,
             String.format("Export file generated with pack code %s", packCode),
             EventType.EXPORT_FILE,
             EventHelper.getDummyEvent(correlationId, originatingUser),
             OffsetDateTime.now());
 
-
-    if(scheduledTask != null ) {
+    if (scheduledTask != null) {
       if (uacQidDTO != null) {
         scheduledTaskService.updateScheculedTaskSentEvent(
             scheduledTask, event, uacService.findByQid(uacQidDTO.getQid()));
-      }
-      else {
-        scheduledTaskService.updateScheculedTaskSentEvent(
-                scheduledTask, event,null);
+      } else {
+        scheduledTaskService.updateScheculedTaskSentEvent(scheduledTask, event, null);
       }
     }
   }
@@ -151,7 +150,17 @@ public class ExportFileProcessor {
   }
 
   private UacQidDTO getUacQidForCase(
-      Case caze, UUID correlationId, String originatingUser, Object metadata, UUID scheduledTaskID) {
+      Case caze,
+      UUID correlationId,
+      String originatingUser,
+      Object metadata,
+      ScheduledTask scheduledTask) {
+
+    UUID scheduledTaskID = null;
+
+    if (scheduledTask != null) {
+      scheduledTaskID = scheduledTask.getId();
+    }
 
     String collectionInstrumentUrl =
         collectionInstrumentHelper.getCollectionInstrumentUrl(caze, metadata);

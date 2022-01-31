@@ -50,12 +50,12 @@ public class DeleteDataHelper {
 
   @Transactional
   public void deleteAllData() {
-    scheduledTaskRepository.deleteAllInBatch();
-    responsePeriodRepository.deleteAllInBatch();
     actionRuleRepository.deleteAllInBatch();
     fulfilmentNextTriggerRepository.deleteAllInBatch();
     caseToProcessRepository.deleteAllInBatch();
     fulfilmentToProcessRepository.deleteAllInBatch();
+    scheduledTaskRepository.deleteAllInBatch();
+    responsePeriodRepository.deleteAllInBatch();
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();

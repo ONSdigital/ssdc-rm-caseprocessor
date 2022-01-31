@@ -59,7 +59,7 @@ class CaseToProcessProcessorTest {
             actionRule.getId(),
             null,
             actionRule.getUacMetadata(),
-                null);
+            null);
   }
 
   @Test

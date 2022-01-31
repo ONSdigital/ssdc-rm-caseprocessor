@@ -19,8 +19,12 @@ public class FulfilmentService {
   }
 
   public void processPrintFulfilment(
-          Case caze, String packCode, UUID correlationId, String originatingUser, Object metaData,
-          ScheduledTask scheduledTask) {
+      Case caze,
+      String packCode,
+      UUID correlationId,
+      String originatingUser,
+      Object metaData,
+      ScheduledTask scheduledTask) {
     ExportFileTemplate exportFileTemplate = getAllowedPrintTemplate(packCode, caze);
 
     FulfilmentToProcess fulfilmentToProcess = new FulfilmentToProcess();

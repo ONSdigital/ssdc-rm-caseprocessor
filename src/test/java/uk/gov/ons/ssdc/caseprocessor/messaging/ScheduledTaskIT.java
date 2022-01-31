@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -112,11 +111,10 @@ public class ScheduledTaskIT {
       throws InterruptedException {
     // Given
     Case caze = junkDataHelper.setupJunkCase();
-    String packCode = "PACK_CODE_PRINT";
 
     Survey survey = caze.getCollectionExercise().getSurvey();
     FulfilmentSurveyExportFileTemplate fulfilmentSurveyExportFileTemplate =
-        addExportFileTemplate(packCode, new String[] {"__caseref__", "foo"});
+        addExportFileTemplate(START_OF_PERIOD_REMINDER, new String[] {"__caseref__", "foo"});
     fulfilmentSurveyExportFileTemplate.setSurvey(survey);
     fulfilmentSurveyExportFileTemplateRepository.saveAndFlush(fulfilmentSurveyExportFileTemplate);
 
@@ -127,20 +125,30 @@ public class ScheduledTaskIT {
     responsePeriod.setName("Test response period 1");
     responsePeriodRepository.saveAndFlush(responsePeriod);
 
-    ScheduledTask scheduledTask = new ScheduledTask();
-    scheduledTask.setId(UUID.randomUUID());
-    scheduledTask.setRmToActionDate(OffsetDateTime.now());
-    scheduledTask.setResponsePeriod(responsePeriod);
-    scheduledTask.setActionState(ScheduledTaskState.NOT_STARTED);
-    scheduledTask.setReceiptRequiredForCompletion(false);
-
-    Map<String, String> details = new HashMap<>();
-    details.put("ScheduledTaskType", ScheduledTaskType.ACTION_WITH_PACKCODE.toString());
-    details.put("packCode", packCode);
-    scheduledTask.setScheduledTaskDetails(details);
-
+    Map<String, String> details =
+        Map.of(
+            "type",
+            ScheduledTaskType.ACTION_WITH_PACKCODE.toString(),
+            "packCode",
+            START_OF_PERIOD_REMINDER);
     // When - this will save this task to be scheduled,
-    scheduledTaskRepository.saveAndFlush(scheduledTask);
+    ScheduledTask scheduledTask =
+        addScheduledTask(responsePeriod, details, ScheduledTaskState.NOT_STARTED, false);
+
+    //
+    //    ScheduledTask scheduledTask = new ScheduledTask();
+    //    scheduledTask.setId(UUID.randomUUID());
+    //    scheduledTask.setRmToActionDate(OffsetDateTime.now());
+    //    scheduledTask.setResponsePeriod(responsePeriod);
+    //    scheduledTask.setActionState(ScheduledTaskState.NOT_STARTED);
+    //    scheduledTask.setReceiptRequiredForCompletion(false);
+
+    //    Map<String, String> details = new HashMap<>();
+    //    details.put("ScheduledTaskType", ScheduledTaskType.ACTION_WITH_PACKCODE.toString());
+    //    details.put("packCode", packCode);
+    //    scheduledTask.setScheduledTaskDetails(details);
+    //
+    //    scheduledTaskRepository.saveAndFlush(scheduledTask);
 
     //  What do we expect at the end of N seconds
     // The Scheduled Task should be moved to COMPLETED
@@ -179,7 +187,7 @@ public class ScheduledTaskIT {
 
     assertThat(sentEvent.getType()).isEqualTo(EventType.EXPORT_FILE);
     assertThat(sentEvent.getDescription())
-        .isEqualTo("Export file generated with pack code " + packCode);
+        .isEqualTo("Export file generated with pack code " + START_OF_PERIOD_REMINDER);
     assertThat(sentEvent.getCaze().getId()).isEqualTo(caze.getId());
 
     assertThat(actualScheduledTask.getUacQidLink()).isNull();
@@ -217,7 +225,7 @@ public class ScheduledTaskIT {
     scheduledTask.setReceiptRequiredForCompletion(true);
 
     Map<String, String> details = new HashMap<>();
-    details.put("ScheduledTaskType", ScheduledTaskType.ACTION_WITH_PACKCODE.toString());
+    details.put("type", ScheduledTaskType.ACTION_WITH_PACKCODE.toString());
     details.put("packCode", packCode);
     scheduledTask.setScheduledTaskDetails(details);
 
@@ -379,7 +387,7 @@ public class ScheduledTaskIT {
 
     Map<String, String> details =
         Map.of(
-            "ScheduledTaskType",
+            "type",
             ScheduledTaskType.ACTION_WITH_PACKCODE.toString(),
             "packCode",
             START_OF_PERIOD_REMINDER);
@@ -387,20 +395,12 @@ public class ScheduledTaskIT {
         addScheduledTask(responsePeriod, details, ScheduledTaskState.COMPLETED, false);
 
     details =
-        Map.of(
-            "ScheduledTaskType",
-            ScheduledTaskType.ACTION_WITH_PACKCODE.toString(),
-            "packCode",
-            PCR_PACKCODE);
+        Map.of("type", ScheduledTaskType.ACTION_WITH_PACKCODE.toString(), "packCode", PCR_PACKCODE);
     ScheduledTask pcr =
         addScheduledTask(responsePeriod, details, ScheduledTaskState.COMPLETED, true);
 
     details =
-        Map.of(
-            "ScheduledTaskType",
-            ScheduledTaskType.ACTION_WITH_PACKCODE.toString(),
-            "packCode",
-            EQ_PACKCODE);
+        Map.of("type", ScheduledTaskType.ACTION_WITH_PACKCODE.toString(), "packCode", EQ_PACKCODE);
     ScheduledTask eq =
         addScheduledTask(responsePeriod, details, ScheduledTaskState.COMPLETED, true);
 
@@ -432,13 +432,7 @@ public class ScheduledTaskIT {
     //    For CIS and others it may just be this simple
     // And yes this isn't SPEL, nor is the JSON above.
     details =
-        Map.of(
-            "ScheduledTaskType",
-            ScheduledTaskType.ASSESS_SOME_SPEL.toString(),
-            "type",
-            "COMPLETION",
-            "packCode",
-            CIS_COMPLETION_FAILURE);
+        Map.of("type", ScheduledTaskType.COMPLETION.toString(), "packCode", CIS_COMPLETION_FAILURE);
     ScheduledTask completionCheck =
         addScheduledTask(responsePeriod, details, ScheduledTaskState.NOT_STARTED, false);
 
@@ -478,7 +472,7 @@ public class ScheduledTaskIT {
 
     Survey survey = caze.getCollectionExercise().getSurvey();
     FulfilmentSurveyExportFileTemplate fulfilmentSurveyExportFileTemplate =
-            addExportFileTemplate(packCode, new String[] {"__caseref__", "foo"});
+        addExportFileTemplate(packCode, new String[] {"__caseref__", "foo"});
     fulfilmentSurveyExportFileTemplate.setSurvey(survey);
     fulfilmentSurveyExportFileTemplateRepository.saveAndFlush(fulfilmentSurveyExportFileTemplate);
 
@@ -490,42 +484,28 @@ public class ScheduledTaskIT {
     responsePeriodRepository.saveAndFlush(responsePeriod);
 
     Map<String, String> details =
-            Map.of(
-                    "ScheduledTaskType",
-                    ScheduledTaskType.ACTION_WITH_PACKCODE.toString(),
-                    "packCode",
-                    START_OF_PERIOD_REMINDER);
+        Map.of(
+            "type",
+            ScheduledTaskType.ACTION_WITH_PACKCODE.toString(),
+            "packCode",
+            START_OF_PERIOD_REMINDER);
     ScheduledTask reminderLetter =
-            addScheduledTask(responsePeriod, details, ScheduledTaskState.COMPLETED, false);
+        addScheduledTask(responsePeriod, details, ScheduledTaskState.COMPLETED, false);
 
     details =
-            Map.of(
-                    "ScheduledTaskType",
-                    ScheduledTaskType.ACTION_WITH_PACKCODE.toString(),
-                    "packCode",
-                    PCR_PACKCODE);
+        Map.of("type", ScheduledTaskType.ACTION_WITH_PACKCODE.toString(), "packCode", PCR_PACKCODE);
     ScheduledTask pcr =
-            addScheduledTask(responsePeriod, details, ScheduledTaskState.COMPLETED, true);
+        addScheduledTask(responsePeriod, details, ScheduledTaskState.COMPLETED, true);
 
     details =
-            Map.of(
-                    "ScheduledTaskType",
-                    ScheduledTaskType.ACTION_WITH_PACKCODE.toString(),
-                    "packCode",
-                    EQ_PACKCODE);
+        Map.of("type", ScheduledTaskType.ACTION_WITH_PACKCODE.toString(), "packCode", EQ_PACKCODE);
     ScheduledTask incompleteEQ =
-            addScheduledTask(responsePeriod, details, ScheduledTaskState.SENT, true);
+        addScheduledTask(responsePeriod, details, ScheduledTaskState.SENT, true);
 
     details =
-            Map.of(
-                    "ScheduledTaskType",
-                    ScheduledTaskType.ASSESS_SOME_SPEL.toString(),
-                    "type",
-                    "COMPLETION",
-                    "packCode",
-                    CIS_COMPLETION_FAILURE);
+        Map.of("type", ScheduledTaskType.COMPLETION.toString(), "packCode", CIS_COMPLETION_FAILURE);
     ScheduledTask completionCheck =
-            addScheduledTask(responsePeriod, details, ScheduledTaskState.NOT_STARTED, false);
+        addScheduledTask(responsePeriod, details, ScheduledTaskState.NOT_STARTED, false);
 
     int wait_time_seconds = 10;
 
@@ -537,7 +517,8 @@ public class ScheduledTaskIT {
       }
     }
 
-    //blow up on failure above -- make nice retry function db polling function, if we don't have one
+    // blow up on failure above -- make nice retry function db polling function, if we don't have
+    // one
 
     // Only do this when the fulfilment is written
     FulfilmentNextTrigger fulfilmentNextTrigger = new FulfilmentNextTrigger();
@@ -549,15 +530,15 @@ public class ScheduledTaskIT {
     Thread.sleep(5000);
 
     Optional<ScheduledTask> actualScheduledTaskOpt =
-            scheduledTaskRepository.findById(completionCheck.getId());
+        scheduledTaskRepository.findById(completionCheck.getId());
 
     assertThat(actualScheduledTaskOpt).isPresent();
     ScheduledTask actualScheduledTask = actualScheduledTaskOpt.get();
-    assertThat(actualScheduledTask.getActionState()).isEqualTo(ScheduledTaskState.NOT_COMPLETED_WITHIN_PERIOD);
+    assertThat(actualScheduledTask.getActionState())
+        .isEqualTo(ScheduledTaskState.NOT_COMPLETED_WITHIN_PERIOD);
 
     assertThat(actualScheduledTask.getSentEvent()).isNotNull();
   }
-
 
   private ScheduledTask addScheduledTask(
       ResponsePeriod responsePeriod,

@@ -21,7 +21,8 @@ public class ReceiptReceiver {
   private final EventLogger eventLogger;
   private final ScheduledTaskService scheduledTaskService;
 
-  public ReceiptReceiver(UacService uacService, EventLogger eventLogger, ScheduledTaskService scheduledTaskService) {
+  public ReceiptReceiver(
+      UacService uacService, EventLogger eventLogger, ScheduledTaskService scheduledTaskService) {
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.scheduledTaskService = scheduledTaskService;
@@ -45,13 +46,15 @@ public class ReceiptReceiver {
               event.getHeader().getOriginatingUser());
     }
 
-    Event loggedEvent = eventLogger.logUacQidEvent(uacQidLink, "Receipt received", EventType.RECEIPT, event, message);
+    Event loggedEvent =
+        eventLogger.logUacQidEvent(
+            uacQidLink, "Receipt received", EventType.RECEIPT, event, message);
 
     // Problem with this, what happens if the ScheduledTask is removed - this goes boom.
     // Although we may want to remove/deativate any UAC that was attached to a dead ScheduledTask?
     // Also death
-    if(uacQidLink.getScheduledTaskId() != null) {
-        scheduledTaskService.receiptScheduledTask(uacQidLink.getScheduledTaskId(), loggedEvent);
+    if (uacQidLink.getScheduledTaskId() != null) {
+      scheduledTaskService.receiptScheduledTask(uacQidLink.getScheduledTaskId(), loggedEvent);
     }
   }
 }

@@ -40,7 +40,7 @@ public class CaseToProcessProcessor {
             caseToProcess.getActionRule().getId(),
             null,
             caseToProcess.getActionRule().getUacMetadata(),
-                null);
+            null);
         break;
       case DEACTIVATE_UAC:
         deactivateUacProcessor.process(

@@ -1,11 +1,9 @@
 package uk.gov.ons.ssdc.caseprocessor.scheduled.tasks;
 
-import java.util.Map;
-
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.util.Map;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.ssdc.caseprocessor.collectioninstrument.CollectionInstrumentHelper;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ScheduledTaskRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.FulfilmentService;
 import uk.gov.ons.ssdc.common.model.entity.Case;
@@ -30,17 +28,21 @@ public class ScheduledTaskProcessor {
   public void process(ScheduledTask scheduledTask) {
     Map<String, String> scheduledTaskDetails = scheduledTask.getScheduledTaskDetails();
     ScheduledTaskType scheduledTaskType =
-        ScheduledTaskType.valueOf(scheduledTaskDetails.get("ScheduledTaskType"));
+        ScheduledTaskType.valueOf(scheduledTaskDetails.get("type"));
     // In future we could unpack these into a variety of objects?
     // Some sort of switch etc.
+
+    // What wasn't here when I did this was caze.preferences.
+    // We'd look at that for the Type e.g. Reminder, PCR, EQ and find the contact preference.
+    // So this would look very different
 
     switch (scheduledTaskType) {
       case ACTION_WITH_PACKCODE:
         processActionWithPackCode(scheduledTask, scheduledTaskDetails);
         break;
 
-      case ASSESS_SOME_SPEL:
-        processSPEL(scheduledTask, scheduledTaskDetails);
+      case COMPLETION:
+        processsCompletionCheck(scheduledTask, scheduledTaskDetails);
         break;
 
       default:
@@ -50,16 +52,15 @@ public class ScheduledTaskProcessor {
     }
   }
 
-  //  Not actually doing this now, basically going to figure out if it's a
-  private void processSPEL(ScheduledTask scheduledTask, Map<String, String> scheduledTaskDetails) {
+  private void processsCompletionCheck(
+      ScheduledTask scheduledTask, Map<String, String> scheduledTaskDetails) {
     if (scheduledTaskDetails.get("type").equals("COMPLETION")) {
-        if(areAllReceiptRequiredTasksComplete(scheduledTask.getResponsePeriod())) {
-            scheduledTask.setActionState(ScheduledTaskState.COMPLETED);
-            scheduledTaskRepository.saveAndFlush(scheduledTask);
-            return;
-        }
+      if (areAllReceiptRequiredTasksComplete(scheduledTask.getResponsePeriod())) {
+        scheduledTask.setActionState(ScheduledTaskState.COMPLETED);
+        scheduledTaskRepository.saveAndFlush(scheduledTask);
+        return;
+      }
 
-        /* we have a failure to complete */
       processActionWithPackCode(scheduledTask, scheduledTaskDetails);
     }
   }
@@ -96,7 +97,7 @@ public class ScheduledTaskProcessor {
     // Metadata?  hmmm  understand it's use better, using null for now
     fulfilmentService.processPrintFulfilment(
         caze,
-            scheduledTaskDetails.get("packCode"),
+        scheduledTaskDetails.get("packCode"),
         scheduledTask.getId(),
         "SCHEDULED_TASK",
         null,
