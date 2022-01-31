@@ -35,6 +35,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentSurveyExportFile
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ResponsePeriodRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ScheduledTaskRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
@@ -85,6 +86,7 @@ public class ScheduledTaskIT {
   @Autowired private FulfilmentToProcessRepository fulfilmentToProcessRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
   @Autowired private EventRepository eventRepository;
+  @Autowired private SurveyRepository surveyRepository;
 
   @Autowired
   private FulfilmentSurveyExportFileTemplateRepository fulfilmentSurveyExportFileTemplateRepository;
@@ -538,6 +540,19 @@ public class ScheduledTaskIT {
         .isEqualTo(ScheduledTaskState.NOT_COMPLETED_WITHIN_PERIOD);
 
     assertThat(actualScheduledTask.getSentEvent()).isNotNull();
+  }
+
+  @Test
+  public void turnTemplateIntoScheduledTasksOnCaseCreation() throws InterruptedException {
+    Case caze = junkDataHelper.setupJunkCase();
+    Survey survey = caze.getCollectionExercise().getSurvey();
+
+    // Maybe build in caseprocessor for now, then move to DLL
+    ScheduleTemplate scheduleTemplate = new ScheduleTemplate();
+    survey.setScheduleTemplate();
+
+    // In the Sur
+
   }
 
   private ScheduledTask addScheduledTask(
