@@ -62,6 +62,7 @@ import java.time.OffsetDateTime;
 
 @Data
 public class ScheduleTemplate {
+    private String name;
     private TemplateType type;
     private DateOffSet [] taskSpacing;
     private boolean scheduleFromCreate;

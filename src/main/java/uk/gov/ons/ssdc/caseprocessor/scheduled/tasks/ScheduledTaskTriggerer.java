@@ -4,6 +4,7 @@ import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.OffsetDateTime;
 import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,11 @@ public class ScheduledTaskTriggerer {
     List<ScheduledTask> scheduledTasks = scheduledTaskRepository.findAll();
 
     for (ScheduledTask scheduledTask : scheduledTasks) {
+
+      if(scheduledTask.getRmToActionDate().isAfter(OffsetDateTime.now())) {
+        continue;
+      }
+
       if (scheduledTask.getActionState() != ScheduledTaskState.NOT_STARTED) {
         continue;
       }

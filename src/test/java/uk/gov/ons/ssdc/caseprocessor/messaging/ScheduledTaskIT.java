@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -43,6 +44,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.DateOffSet;
 import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.DateUnit;
 import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.ScheduleTemplate;
+import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.ScheduledTaskBuilder;
 import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.Task;
 import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.TemplateType;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
@@ -95,6 +97,7 @@ public class ScheduledTaskIT {
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
   @Autowired private EventRepository eventRepository;
   @Autowired private SurveyRepository surveyRepository;
+  @Autowired private ScheduledTaskBuilder scheduledTaskBuilder;
 
   @Autowired
   private FulfilmentSurveyExportFileTemplateRepository fulfilmentSurveyExportFileTemplateRepository;
@@ -192,7 +195,7 @@ public class ScheduledTaskIT {
     ScheduledTask actualScheduledTask = actualScheduledTaskOpt.get();
     assertThat(actualScheduledTask.getActionState()).isEqualTo(ScheduledTaskState.COMPLETED);
 
-    Event sentEvent = actualScheduledTask.getSentEvent();
+    Event sentEvent = eventRepository.findById(actualScheduledTask.getSentEventId()).get();
     assertThat(sentEvent).isNotNull();
 
     assertThat(sentEvent.getType()).isEqualTo(EventType.EXPORT_FILE);
@@ -200,7 +203,7 @@ public class ScheduledTaskIT {
         .isEqualTo("Export file generated with pack code " + START_OF_PERIOD_REMINDER);
     assertThat(sentEvent.getCaze().getId()).isEqualTo(caze.getId());
 
-    assertThat(actualScheduledTask.getUacQidLink()).isNull();
+    assertThat(actualScheduledTask.getUacQidLinkId()).isNull();
 
     List<ExportFileRow> exportFileRowList = exportFileRowRepository.findAll();
     assertThat(exportFileRowList.size()).isEqualTo(1);
@@ -274,7 +277,7 @@ public class ScheduledTaskIT {
     ScheduledTask actualScheduledTask = actualScheduledTaskOpt.get();
     assertThat(actualScheduledTask.getActionState()).isEqualTo(ScheduledTaskState.SENT);
 
-    Event sentEvent = actualScheduledTask.getSentEvent();
+    Event sentEvent = eventRepository.findById(actualScheduledTask.getSentEventId()).get();
     assertThat(sentEvent).isNotNull();
 
     assertThat(sentEvent.getType()).isEqualTo(EventType.EXPORT_FILE);
@@ -282,7 +285,7 @@ public class ScheduledTaskIT {
         .isEqualTo("Export file generated with pack code " + packCode);
     assertThat(sentEvent.getCaze().getId()).isEqualTo(caze.getId());
 
-    UacQidLink actualUacQidLink = actualScheduledTask.getUacQidLink();
+    UacQidLink actualUacQidLink = uacQidLinkRepository.findById(actualScheduledTask.getUacQidLinkId()).get();
     assertThat(actualUacQidLink).isNotNull();
 
     List<ExportFileRow> exportFileRowList = exportFileRowRepository.findAll();
@@ -292,7 +295,7 @@ public class ScheduledTaskIT {
             "\""
                 + caze.getCaseRef()
                 + "\"|\"bar\"|\""
-                + actualScheduledTask.getUacQidLink().getUac()
+                + actualUacQidLink.getUac()
                 + "\"");
   }
 
@@ -322,7 +325,7 @@ public class ScheduledTaskIT {
     ScheduledTask scheduledTask = new ScheduledTask();
     scheduledTask.setId(UUID.randomUUID());
     scheduledTask.setActionState(ScheduledTaskState.SENT);
-    scheduledTask.setUacQidLink(uacQidLink);
+    scheduledTask.setUacQidLinkId(uacQidLink.getId());
     scheduledTask.setReceiptRequiredForCompletion(true);
     scheduledTask.setResponsePeriod(responsePeriod);
     scheduledTask.setRmToActionDate(OffsetDateTime.now().minusDays(1L));
@@ -463,7 +466,7 @@ public class ScheduledTaskIT {
     ScheduledTask actualScheduledTask = actualScheduledTaskOpt.get();
     assertThat(actualScheduledTask.getActionState()).isEqualTo(ScheduledTaskState.COMPLETED);
 
-    assertThat(actualScheduledTask.getSentEvent()).isNull();
+    assertThat(actualScheduledTask.getSentEventId()).isNull();
   }
 
   @Test
@@ -547,7 +550,7 @@ public class ScheduledTaskIT {
     assertThat(actualScheduledTask.getActionState())
         .isEqualTo(ScheduledTaskState.NOT_COMPLETED_WITHIN_PERIOD);
 
-    assertThat(actualScheduledTask.getSentEvent()).isNotNull();
+    assertThat(actualScheduledTask.getSentEventId()).isNotNull();
   }
 
   @Test
@@ -614,8 +617,31 @@ public class ScheduledTaskIT {
     survey.setScheduleTemplate(scheduledTemplateJSON);
     surveyRepository.saveAndFlush(survey);
 
+    // Set one up, but in the future, we don't want them to fire for this particular test
+    //When
+    OffsetDateTime actualStartDate = OffsetDateTime.now().plusDays(1);
+    List<ResponsePeriod> responsePeriodList = scheduledTaskBuilder.buildResponsePeriodAndScheduledTasks(caze,
+            actualStartDate );
+
+    // Yes... as those paying attention will have noticed, this is not really a proper IT,
+    // I'd expect it to create the Caze with an Event, and then check it.  But it's part of a spike,
+    // nice for it to exercise the database correctly too, rather than mock the hell out of everything
+
+    // Then
+    // What are we expecting?
+    // X responsePeriods, each with N Scheduled Tasks
+
+    List<ResponsePeriod> actualResponsePeriodList = responsePeriodRepository.findAll();
+    assertThat(actualResponsePeriodList.size()).isEqualTo(scheduleTemplate.getTaskSpacing().length);
+    
+    List<ScheduledTask> actualScheduledTasksAll = scheduledTaskRepository.findAll();
+    assertThat(actualScheduledTasksAll.size()).isEqualTo(scheduleTemplate.getTaskSpacing().length * scheduleTemplate.getTasks().length);
 
 
+//    for(ResponsePeriod responsePeriod : actualResponsePeriodList) {
+//      ScheduledTask reminderLetter = responsePeriod.getScheduledTasks().get(0);
+//      assertThat(reminderLetter.getTaskName()).isEqualTo("Start Of Period Letter");
+//    }
   }
 
   private ScheduledTask addScheduledTask(

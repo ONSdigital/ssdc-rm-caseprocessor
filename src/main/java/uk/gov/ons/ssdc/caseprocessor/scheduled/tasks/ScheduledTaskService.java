@@ -40,10 +40,11 @@ public class ScheduledTaskService {
               ScheduledTaskState.IN_FULFILMENT, scheduledTask.getActionState()));
     }
 
-    scheduledTask.setSentEvent(event);
+    scheduledTask.setSentEventId(event.getId());
 
-    // This might be null, for example a Reminder at start of ResponsePeriod.  Doesn't matter
-    scheduledTask.setUacQidLink(uacQidLink);
+    if (uacQidLink != null) {
+      scheduledTask.setUacQidLinkId(uacQidLink.getId());
+    }
 
     // Might want to check State is currently as expected?
     // We might be able to go without this, e.g. UACQidLink suggests it needs a receipting event.
@@ -97,7 +98,7 @@ public class ScheduledTaskService {
     ScheduledTask scheduledTask = getById(scheduledTaskId);
 
     /*  Production Code, Insert STATE fun here? */
-    scheduledTask.setReceiptingEvent(loggedEvent);
+    scheduledTask.setReceiptingEventId(loggedEvent.getId());
     scheduledTask.setActionState(ScheduledTaskState.COMPLETED);
   }
 }

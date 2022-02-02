@@ -3,6 +3,8 @@ package uk.gov.ons.ssdc.caseprocessor.scheduled.tasks;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.ResponsePeriodRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.ScheduledTaskRepository;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.ResponsePeriod;
 import uk.gov.ons.ssdc.common.model.entity.ScheduledTask;
@@ -17,61 +19,93 @@ import java.util.UUID;
 @Component
 public class ScheduledTaskBuilder {
 
-    public ResponsePeriod [] buildResponsePeriodAndScheduledTasks(Case caze) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
+  private final ResponsePeriodRepository responsePeriodRepository;
+  private final ScheduledTaskRepository scheduledTaskRepository;
 
-        ScheduleTemplate scheduleTemplate = objectMapper.readValue(
-                (String) caze.getCollectionExercise().getSurvey().getScheduleTemplate(), ScheduleTemplate.class);
+  public ScheduledTaskBuilder(
+      ResponsePeriodRepository responsePeriodRepository,
+      ScheduledTaskRepository scheduledTaskRepository) {
 
-        // build response periods with same OffSet function
-        // for each one add scheduledTasks as we go.
+    this.responsePeriodRepository = responsePeriodRepository;
+    this.scheduledTaskRepository = scheduledTaskRepository;
+  }
 
+  public List<ResponsePeriod> buildResponsePeriodAndScheduledTasks(Case caze, OffsetDateTime startDate)
+      throws JsonProcessingException {
+    ObjectMapper objectMapper = new ObjectMapper();
 
+    ScheduleTemplate scheduleTemplate =
+        objectMapper.readValue(
+            (String) caze.getCollectionExercise().getSurvey().getScheduleTemplate(),
+            ScheduleTemplate.class);
 
-//        List<ResponsePeriod> responsePeriodList = new ArrayList<>();
+    OffsetDateTime startOfResponsePeriod = startDate;
 
+    int iterationCount = 1;
+    List<ResponsePeriod> responsePeriodList = new ArrayList<>();
+
+    for (DateOffSet dateOffSet : scheduleTemplate.getTaskSpacing()) {
+      ResponsePeriod responsePeriod = new ResponsePeriod();
+      responsePeriod.setId(UUID.randomUUID());
+      responsePeriod.setName(scheduleTemplate.getName() + " " + iterationCount);
+      responsePeriod.setCaze(caze);
+      responsePeriodRepository.saveAndFlush(responsePeriod);
+
+      List<ScheduledTask> scheduledTasks =
+          buildScheduledTaskList(
+              scheduleTemplate.getTasks(), startOfResponsePeriod, responsePeriod);
+      responsePeriod.setScheduledTasks(scheduledTasks);
+
+      responsePeriodRepository.saveAndFlush(responsePeriod);
+      responsePeriodList.add(responsePeriod);
+
+      startOfResponsePeriod = getOffDate(startOfResponsePeriod, dateOffSet);
+      iterationCount++;
     }
 
-    private List<ScheduledTask> buildScheduledTaskList(Task [] tasks, OffsetDateTime startDate, String periodName) {
-        List<ScheduledTask> scheduledTasks = new ArrayList<>();
+    return responsePeriodList;
+  }
 
-        for(Task task : tasks) {
-            ScheduledTask scheduledTask = new ScheduledTask();
-            scheduledTask.setId(UUID.randomUUID());
-            scheduledTask.setTaskName(periodName + " " + task.getName());
-            scheduledTask.setReceiptRequiredForCompletion(task.isReceiptRequired());
+  private List<ScheduledTask> buildScheduledTaskList(
+      Task[] tasks, OffsetDateTime startDate, ResponsePeriod responsePeriod) {
+    List<ScheduledTask> scheduledTasks = new ArrayList<>();
 
-            OffsetDateTime dateToStart = getRMActionDate(startDate, task.getDateOffSet());
-            scheduledTask.setRmToActionDate(dateToStart);
+    for (Task task : tasks) {
+      ScheduledTask scheduledTask = new ScheduledTask();
+      scheduledTask.setId(UUID.randomUUID());
+      scheduledTask.setTaskName(responsePeriod.getName() + " " + task.getName());
+      scheduledTask.setReceiptRequiredForCompletion(task.isReceiptRequired());
 
-            Map<String, String> details =
-                    Map.of(
-                            "type",
-                            task.getScheduledTaskType().toString(),
-                            "packCode",
-                            task.getPackCode());
-            scheduledTask.setScheduledTaskDetails(details);
-            scheduledTask.setActionState(ScheduledTaskState.NOT_STARTED);
+      OffsetDateTime dateToStart = getOffDate(startDate, task.getDateOffSet());
+      scheduledTask.setRmToActionDate(dateToStart);
 
-            scheduledTasks.add(scheduledTask);
-        }
+      Map<String, String> details =
+          Map.of("type", task.getScheduledTaskType().toString(), "packCode", task.getPackCode());
+      scheduledTask.setScheduledTaskDetails(details);
+      scheduledTask.setActionState(ScheduledTaskState.NOT_STARTED);
+      scheduledTask.setResponsePeriod(responsePeriod);
 
-        return scheduledTasks;
+      scheduledTask = scheduledTaskRepository.saveAndFlush(scheduledTask);
+
+      scheduledTasks.add(scheduledTask);
     }
 
-    private OffsetDateTime getRMActionDate(OffsetDateTime startDate, DateOffSet dateOffSet) {
+    return scheduledTasks;
+  }
 
-        switch(dateOffSet.getDateUnit()) {
-            case DAY:
-                return startDate.plusDays(dateOffSet.getMultiplier());
+  private OffsetDateTime getOffDate(OffsetDateTime startDate, DateOffSet dateOffSet) {
 
-            case WEEK:
-                return startDate.plusWeeks(dateOffSet.getMultiplier());
+    switch (dateOffSet.getDateUnit()) {
+      case DAY:
+        return startDate.plusDays(dateOffSet.getMultiplier());
 
-            case MONTH:
-                return startDate.plusMonths(dateOffSet.getMultiplier());
-        }
+      case WEEK:
+        return startDate.plusWeeks(dateOffSet.getMultiplier());
 
-        throw new RuntimeException("Can't get to getRMActionDate exception, it's enums");
+      case MONTH:
+        return startDate.plusMonths(dateOffSet.getMultiplier());
     }
+
+    throw new RuntimeException("Can't get to getRMActionDate exception, it's enums");
+  }
 }
