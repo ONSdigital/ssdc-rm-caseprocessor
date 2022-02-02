@@ -11,6 +11,7 @@ import uk.gov.ons.ssdc.common.model.entity.ScheduledTask;
 import uk.gov.ons.ssdc.common.model.entity.ScheduledTaskState;
 
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,7 @@ public class ScheduledTaskBuilder {
     this.scheduledTaskRepository = scheduledTaskRepository;
   }
 
-  public List<ResponsePeriod> buildResponsePeriodAndScheduledTasks(Case caze, OffsetDateTime startDate)
+  public List<ResponsePeriod> buildResponsePeriodAndScheduledTasks(Case caze)
       throws JsonProcessingException {
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -39,7 +40,11 @@ public class ScheduledTaskBuilder {
             (String) caze.getCollectionExercise().getSurvey().getScheduleTemplate(),
             ScheduleTemplate.class);
 
-    OffsetDateTime startOfResponsePeriod = startDate;
+    OffsetDateTime startOfResponsePeriod = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+
+    if(!scheduleTemplate.isScheduleFromCreate()) {
+      startOfResponsePeriod = scheduleTemplate.getStartDate();
+    }
 
     int iterationCount = 1;
     List<ResponsePeriod> responsePeriodList = new ArrayList<>();
@@ -79,8 +84,13 @@ public class ScheduledTaskBuilder {
       OffsetDateTime dateToStart = getOffDate(startDate, task.getDateOffSet());
       scheduledTask.setRmToActionDate(dateToStart);
 
+      /* This could be quite different? */
+      /* A different Type might expect SPEL?,  Or just use SPEL */
+      /* So there could be an extra field: SPEL, or just a SPEL field - which might be more elegant? */
       Map<String, String> details =
-          Map.of("type", task.getScheduledTaskType().toString(), "packCode", task.getPackCode());
+          Map.of("type", task.getScheduledTaskType().toString(),
+                  "packCode", task.getPackCode());
+
       scheduledTask.setScheduledTaskDetails(details);
       scheduledTask.setActionState(ScheduledTaskState.NOT_STARTED);
       scheduledTask.setResponsePeriod(responsePeriod);

@@ -1,17 +1,5 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
-import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
-
-import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
@@ -22,10 +10,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
@@ -41,16 +29,12 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.ResponsePeriodRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ScheduledTaskRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
-import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.DateOffSet;
-import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.DateUnit;
-import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.ScheduleTemplate;
 import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.ScheduledTaskBuilder;
-import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.Task;
-import uk.gov.ons.ssdc.caseprocessor.scheduled.tasks.TemplateType;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
+import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.Event;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
@@ -65,6 +49,19 @@ import uk.gov.ons.ssdc.common.model.entity.ScheduledTaskState;
 import uk.gov.ons.ssdc.common.model.entity.ScheduledTaskType;
 import uk.gov.ons.ssdc.common.model.entity.Survey;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
+
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -553,95 +550,197 @@ public class ScheduledTaskIT {
     assertThat(actualScheduledTask.getSentEventId()).isNotNull();
   }
 
+  @Transactional
   @Test
   public void turnTemplateIntoScheduledTasksOnCaseCreation() throws InterruptedException, JsonProcessingException {
     Case caze = junkDataHelper.setupJunkCase();
     Survey survey = caze.getCollectionExercise().getSurvey();
 
-    // Maybe build in caseprocessor for now, then move to DLL
-    ScheduleTemplate scheduleTemplate = new ScheduleTemplate();
-    scheduleTemplate.setType(TemplateType.REPEAT);
-    scheduleTemplate.setTaskSpacing(
-        new DateOffSet[] {
-          new DateOffSet(DateUnit.WEEK, 1),
-          new DateOffSet(DateUnit.WEEK, 1),
-          new DateOffSet(DateUnit.WEEK, 1),
-          new DateOffSet(DateUnit.WEEK, 1),
-          new DateOffSet(DateUnit.MONTH, 1),
-          new DateOffSet(DateUnit.MONTH, 1),
-          new DateOffSet(DateUnit.MONTH, 1),
-          new DateOffSet(DateUnit.MONTH, 1),
-          new DateOffSet(DateUnit.MONTH, 1),
-          new DateOffSet(DateUnit.MONTH, 1),
-          new DateOffSet(DateUnit.MONTH, 1),
-          new DateOffSet(DateUnit.MONTH, 1),
-          new DateOffSet(DateUnit.MONTH, 1),
-          new DateOffSet(DateUnit.MONTH, 1),
-          new DateOffSet(DateUnit.MONTH, 1)
-        });
+    String templateAsJson = """
+            {
+              "name": "CIS",
+              "type": "REPEAT",
+              "taskSpacing": [
+                {
+                  "dateUnit": "WEEK",
+                  "multiplier": 1
+                },
+                {
+                  "dateUnit": "WEEK",
+                  "multiplier": 1
+                },
+                {
+                  "dateUnit": "WEEK",
+                  "multiplier": 1
+                },
+                {
+                  "dateUnit": "WEEK",
+                  "multiplier": 1
+                },
+                {
+                  "dateUnit": "MONTH",
+                  "multiplier": 1
+                },
+                {
+                  "dateUnit": "MONTH",
+                  "multiplier": 1
+                },
+                {
+                  "dateUnit": "MONTH",
+                  "multiplier": 1
+                },
+                {
+                  "dateUnit": "MONTH",
+                  "multiplier": 1
+                },
+                {
+                  "dateUnit": "MONTH",
+                  "multiplier": 1
+                },
+                {
+                  "dateUnit": "MONTH",
+                  "multiplier": 1
+                },
+                {
+                  "dateUnit": "MONTH",
+                  "multiplier": 1
+                },
+                {
+                  "dateUnit": "MONTH",
+                  "multiplier": 1
+                },
+                {
+                  "dateUnit": "MONTH",
+                  "multiplier": 1
+                },
+                {
+                  "dateUnit": "MONTH",
+                  "multiplier": 1
+                },
+                {
+                  "dateUnit": "MONTH",
+                  "multiplier": 1
+                }
+              ],
+              "scheduleFromCreate": true,
+              "startDate": null,
+              "tasks": [
+                {
+                  "name": "Start Of Period Letter",
+                  "scheduledTaskType": "ACTION_WITH_PACKCODE",
+                  "packCode": "CIS_REMINDER",
+                  "receiptRequired": false,
+                  "dateOffSet": {
+                    "dateUnit": "DAY",
+                    "multiplier": 0
+                  }
+                },
+                {
+                  "name": "PCR ExportFile",
+                  "scheduledTaskType": "ACTION_WITH_PACKCODE",
+                  "packCode": "CIS_PCR",
+                  "receiptRequired": false,
+                  "dateOffSet": {
+                    "dateUnit": "DAY",
+                    "multiplier": 7
+                  }
+                },
+                {
+                  "name": "EQ",
+                  "scheduledTaskType": "ACTION_WITH_PACKCODE",
+                  "packCode": "CIS_EQ",
+                  "receiptRequired": false,
+                  "dateOffSet": {
+                    "dateUnit": "DAY",
+                    "multiplier": 7
+                  }
+                },
+                {
+                  "name": "Incentive",
+                  "scheduledTaskType": "INCENTIVE",
+                  "packCode": "CIS_INCENTIVE",
+                  "receiptRequired": false,
+                  "dateOffSet": {
+                    "dateUnit": "DAY",
+                    "multiplier": 10
+                  }
+                }
+              ]
+            }
+            """;
 
-    scheduleTemplate.setScheduleFromCreate(true);
-    scheduleTemplate.setStartDate(null);
 
-    scheduleTemplate.setTasks(
-        new Task[] {
-          new Task(
-              "Start Of Period Letter",
-              ScheduledTaskType.ACTION_WITH_PACKCODE,
-              "CIS_REMINDERR",
-              false,
-              new DateOffSet(DateUnit.DAY, 0)),
-          new Task(
-              "PCR ExportFile",
-              ScheduledTaskType.ACTION_WITH_PACKCODE,
-              "CIS_PCR",
-              false,
-              new DateOffSet(DateUnit.DAY, 7)),
-          new Task(
-              "EQ",
-              ScheduledTaskType.ACTION_WITH_PACKCODE,
-              "CIS_EQ",
-              false,
-              new DateOffSet(DateUnit.DAY, 7)),
-          new Task(
-              "Incentive",
-              ScheduledTaskType.INCENTIVE,
-              "CIS_INCENTIVE",
-              false,
-              new DateOffSet(DateUnit.DAY, 10))
-        });
-
-    ObjectMapper objectMapper = new ObjectMapper();
-    String scheduledTemplateJSON = objectMapper.writeValueAsString(scheduleTemplate);
-
-    survey.setScheduleTemplate(scheduledTemplateJSON);
+    survey.setScheduleTemplate(templateAsJson);
     surveyRepository.saveAndFlush(survey);
 
     // Set one up, but in the future, we don't want them to fire for this particular test
     //When
-    OffsetDateTime actualStartDate = OffsetDateTime.now().plusDays(1);
-    List<ResponsePeriod> responsePeriodList = scheduledTaskBuilder.buildResponsePeriodAndScheduledTasks(caze,
-            actualStartDate );
+
+    List<ResponsePeriod> responsePeriodList = scheduledTaskBuilder.buildResponsePeriodAndScheduledTasks(caze);
+
+    //  this is still a little flakey, but we'll see.
+    // The function does something similar.
+    OffsetDateTime startTime = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
     // Yes... as those paying attention will have noticed, this is not really a proper IT,
     // I'd expect it to create the Caze with an Event, and then check it.  But it's part of a spike,
-    // nice for it to exercise the database correctly too, rather than mock the hell out of everything
+    // nice/easier for it to exercise the database correctly too, rather than mock the hell out of everything
 
     // Then
     // What are we expecting?
     // X responsePeriods, each with N Scheduled Tasks
 
     List<ResponsePeriod> actualResponsePeriodList = responsePeriodRepository.findAll();
-    assertThat(actualResponsePeriodList.size()).isEqualTo(scheduleTemplate.getTaskSpacing().length);
+    assertThat(actualResponsePeriodList.size()).isEqualTo(15);
     
     List<ScheduledTask> actualScheduledTasksAll = scheduledTaskRepository.findAll();
-    assertThat(actualScheduledTasksAll.size()).isEqualTo(scheduleTemplate.getTaskSpacing().length * scheduleTemplate.getTasks().length);
+    assertThat(actualScheduledTasksAll.size()).isEqualTo(60);
 
+    int counter = 1;
 
-//    for(ResponsePeriod responsePeriod : actualResponsePeriodList) {
-//      ScheduledTask reminderLetter = responsePeriod.getScheduledTasks().get(0);
-//      assertThat(reminderLetter.getTaskName()).isEqualTo("Start Of Period Letter");
-//    }
+    for(ResponsePeriod responsePeriod : actualResponsePeriodList) {
+       //short term hack around hibernate eager fetch
+      responsePeriod = responsePeriodRepository.findById(responsePeriod.getId()).get();
+      ScheduledTask reminderLetter = responsePeriod.getScheduledTasks().get(0);
+      assertThat(reminderLetter.getTaskName()).isEqualTo(String.format("CIS %s Start Of Period Letter", counter));
+      assertThat(reminderLetter.getActionState()).isEqualTo(ScheduledTaskState.NOT_STARTED);
+      assertThat(reminderLetter.getRmToActionDate()).isEqualToIgnoringMinutes(startTime);
+      assertThat(reminderLetter.isReceiptRequiredForCompletion()).isFalse();
+      Map<String, String> details = reminderLetter.getScheduledTaskDetails();
+      assertThat(details.get("packCode")).isEqualTo("CIS_REMINDER");
+      assertThat(details.get("type")).isEqualTo("ACTION_WITH_PACKCODE");
+
+      ScheduledTask incentive = responsePeriod.getScheduledTasks().get(3);
+      assertThat(incentive.getTaskName()).isEqualTo(String.format("CIS %s Incentive", counter));
+      assertThat(incentive.getActionState()).isEqualTo(ScheduledTaskState.NOT_STARTED);
+      assertThat(incentive.getRmToActionDate()).isEqualToIgnoringMinutes(startTime.plusDays(10L));
+      assertThat(incentive.isReceiptRequiredForCompletion()).isFalse();
+      details = incentive.getScheduledTaskDetails();
+      assertThat(details.get("packCode")).isEqualTo("CIS_INCENTIVE");
+      assertThat(details.get("type")).isEqualTo("INCENTIVE");
+
+      if(counter < 5) {
+        startTime = startTime.plusWeeks(1);
+      }
+      else {
+        startTime = startTime.plusMonths(1);
+      }
+
+      counter++;
+    }
+
+    ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
+    String responsePeriodJson = objectMapper.writeValueAsString(responsePeriodList);
+
+    System.out.println("***************************************************************");
+    System.out.println("****  SPIKE ONLY JSON OUTPUT OF TASKS, YOU NEED TO PRETTIFY (if you want to view)  **************");
+    System.out.println("");
+    System.out.println("");
+    System.out.println(responsePeriodJson);
+    System.out.println("");
+    System.out.println("");
+    System.out.println("***************************************************************");
+
   }
 
   private ScheduledTask addScheduledTask(
