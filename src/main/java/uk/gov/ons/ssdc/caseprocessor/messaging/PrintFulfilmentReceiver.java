@@ -48,6 +48,8 @@ public class PrintFulfilmentReceiver {
     fulfilmentToProcess.setCorrelationId(event.getHeader().getCorrelationId());
     fulfilmentToProcess.setOriginatingUser(event.getHeader().getOriginatingUser());
     fulfilmentToProcess.setUacMetadata(event.getPayload().getPrintFulfilment().getUacMetadata());
+    fulfilmentToProcess.setPersonalisation(
+        event.getPayload().getPrintFulfilment().getPersonalisation());
 
     fulfilmentToProcessRepository.saveAndFlush(fulfilmentToProcess);
 

@@ -12,6 +12,7 @@ import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEM
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,6 +62,10 @@ class PrintFulfilmentReceiverTest {
     managementEvent.getPayload().getPrintFulfilment().setCaseId(UUID.randomUUID());
     managementEvent.getPayload().getPrintFulfilment().setPackCode(PACK_CODE);
     managementEvent.getPayload().getPrintFulfilment().setUacMetadata(TEST_UAC_METADATA);
+    managementEvent
+        .getPayload()
+        .getPrintFulfilment()
+        .setPersonalisation(Map.of("name", "Joe Bloggs"));
     Message<byte[]> message = constructMessage(managementEvent);
 
     ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
@@ -90,6 +95,7 @@ class PrintFulfilmentReceiverTest {
     assertThat(fulfilmentToProcess.getExportFileTemplate()).isEqualTo(exportFileTemplate);
     assertThat(fulfilmentToProcess.getCaze()).isEqualTo(expectedCase);
     assertThat(fulfilmentToProcess.getUacMetadata()).isEqualTo(TEST_UAC_METADATA);
+    assertThat(fulfilmentToProcess.getPersonalisation()).containsEntry("name", "Joe Bloggs");
 
     verify(eventLogger)
         .logCaseEvent(

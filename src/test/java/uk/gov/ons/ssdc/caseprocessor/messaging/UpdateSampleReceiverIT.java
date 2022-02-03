@@ -45,6 +45,7 @@ import uk.gov.ons.ssdc.common.validation.Rule;
 public class UpdateSampleReceiverIT {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final Long TEST_CASE_REF = 1234567890L;
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
   private static final String UPDATE_SAMPLE_TOPIC = "event_update-sample";
 
@@ -67,6 +68,7 @@ public class UpdateSampleReceiverIT {
 
     Case caze = new Case();
     caze.setId(TEST_CASE_ID);
+    caze.setCaseRef(TEST_CASE_REF);
     Map<String, String> sampleData = new HashMap<>();
     sampleData.put("testSampleField", "Test");
     caze.setSample(sampleData);
@@ -105,6 +107,7 @@ public class UpdateSampleReceiverIT {
     // Given
     Case caze = new Case();
     caze.setId(TEST_CASE_ID);
+    caze.setCaseRef(TEST_CASE_REF);
     Map<String, String> sampleData = new HashMap<>();
     sampleData.put("testSampleFieldA", "Original value");
     sampleData.put("testSampleFieldB", "Original value");
