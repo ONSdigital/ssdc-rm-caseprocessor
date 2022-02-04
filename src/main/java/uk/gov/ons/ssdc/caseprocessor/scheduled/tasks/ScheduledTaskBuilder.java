@@ -2,6 +2,12 @@ package uk.gov.ons.ssdc.caseprocessor.scheduled.tasks;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ResponsePeriodRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ScheduledTaskRepository;
@@ -9,13 +15,6 @@ import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.ResponsePeriod;
 import uk.gov.ons.ssdc.common.model.entity.ScheduledTask;
 import uk.gov.ons.ssdc.common.model.entity.ScheduledTaskState;
-
-import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 @Component
 public class ScheduledTaskBuilder {
@@ -42,7 +41,7 @@ public class ScheduledTaskBuilder {
 
     OffsetDateTime startOfResponsePeriod = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
-    if(!scheduleTemplate.isScheduleFromCreate()) {
+    if (!scheduleTemplate.isScheduleFromCreate()) {
       startOfResponsePeriod = scheduleTemplate.getStartDate();
     }
 
@@ -88,8 +87,7 @@ public class ScheduledTaskBuilder {
       /* A different Type might expect SPEL?,  Or just use SPEL */
       /* So there could be an extra field: SPEL, or just a SPEL field - which might be more elegant? */
       Map<String, String> details =
-          Map.of("type", task.getScheduledTaskType().toString(),
-                  "packCode", task.getPackCode());
+          Map.of("type", task.getScheduledTaskType().toString(), "packCode", task.getPackCode());
 
       scheduledTask.setScheduledTaskDetails(details);
       scheduledTask.setActionState(ScheduledTaskState.NOT_STARTED);

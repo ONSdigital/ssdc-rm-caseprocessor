@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DateOffSet {
-    private DateUnit dateUnit;
-    private int multiplier;
+  private DateUnit dateUnit;
+  private int multiplier;
 }

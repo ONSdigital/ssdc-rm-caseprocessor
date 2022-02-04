@@ -556,40 +556,47 @@ public class ScheduledTaskIT {
     Case caze = junkDataHelper.setupJunkCase();
     Survey survey = caze.getCollectionExercise().getSurvey();
 
+//    Error prone not Java 17 compliant yet
+
     String templateAsJson = """
             {
               "name": "CIS",
-              "type": "REPEAT",
               "taskSpacing": [
                 {
+                  "name": "CIS WEEK 1",
                   "dateUnit": "WEEK",
-                  "multiplier": 1
+                  "multiplier": 1,
+                  "tasks" : tasksWeekly
+                },
+                {
+                   "name": "CIS WEEK 2",
+                  "dateUnit": "WEEK",
+                  "multiplier": 2,
+                  "tasks":...
                 },
                 {
                   "dateUnit": "WEEK",
-                  "multiplier": 1
+                  "multiplier": 3
                 },
                 {
                   "dateUnit": "WEEK",
-                  "multiplier": 1
-                },
-                {
-                  "dateUnit": "WEEK",
-                  "multiplier": 1
+                  "multiplier": 4
                 },
                 {
                   "dateUnit": "MONTH",
-                  "multiplier": 1
+                  "multiplier": 1,
+                   "tasks":...
                 },
                 {
                   "dateUnit": "MONTH",
-                  "multiplier": 1
+                  "multiplier": 2
                 },
                 {
                   "dateUnit": "MONTH",
-                  "multiplier": 1
+                  "multiplier": 3
                 },
                 {
+                  "name": "Month4",
                   "dateUnit": "MONTH",
                   "multiplier": 1
                 },
@@ -624,7 +631,7 @@ public class ScheduledTaskIT {
               ],
               "scheduleFromCreate": true,
               "startDate": null,
-              "tasks": [
+              "tasksWeekly": [
                 {
                   "name": "Start Of Period Letter",
                   "scheduledTaskType": "ACTION_WITH_PACKCODE",

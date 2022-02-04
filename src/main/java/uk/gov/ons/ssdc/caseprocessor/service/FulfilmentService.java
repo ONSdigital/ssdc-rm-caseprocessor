@@ -33,7 +33,7 @@ public class FulfilmentService {
     fulfilmentToProcess.setCorrelationId(correlationId);
     fulfilmentToProcess.setOriginatingUser(originatingUser);
     fulfilmentToProcess.setUacMetadata(metaData);
-    fulfilmentToProcess.setScheduledTask(scheduledTask);
+    fulfilmentToProcess.setScheduledTaskId(scheduledTask);
 
     fulfilmentToProcessRepository.saveAndFlush(fulfilmentToProcess);
   }

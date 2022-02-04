@@ -38,7 +38,7 @@ public class ScheduledTaskTriggerer {
 
     for (ScheduledTask scheduledTask : scheduledTasks) {
 
-      if(scheduledTask.getRmToActionDate().isAfter(OffsetDateTime.now())) {
+      if (scheduledTask.getRmToActionDate().isAfter(OffsetDateTime.now())) {
         continue;
       }
 
