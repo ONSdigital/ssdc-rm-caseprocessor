@@ -3,11 +3,16 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import static uk.gov.ons.ssdc.caseprocessor.rasrm.constants.RasRmConstants.BUSINESS_SAMPLE_DEFINITION_URL_SUFFIX;
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
@@ -17,6 +22,11 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.NewCase;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponsePeriod;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponsePeriodDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.ScheduleTemplate;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.ScheduledTaskDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.Task;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.rasrm.service.RasRmCaseNotificationEnrichmentService;
@@ -25,6 +35,8 @@ import uk.gov.ons.ssdc.caseprocessor.utils.CaseRefGenerator;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
+import uk.gov.ons.ssdc.common.model.entity.ScheduledTaskStatus;
+import uk.gov.ons.ssdc.common.model.entity.Survey;
 import uk.gov.ons.ssdc.common.validation.ColumnValidator;
 
 @MessageEndpoint
@@ -53,7 +65,7 @@ public class NewCaseReceiver {
 
   @Transactional
   @ServiceActivator(inputChannel = "newCaseInputChannel", adviceChain = "retryAdvice")
-  public void receiveNewCase(Message<byte[]> message) {
+  public void receiveNewCase(Message<byte[]> message) throws JsonProcessingException {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
     NewCase newCasePayload = event.getPayload().getNewCase();
@@ -92,6 +104,10 @@ public class NewCaseReceiver {
     Case newCase = new Case();
     newCase.setId(newCasePayload.getCaseId());
     newCase.setCollectionExercise(collex);
+
+    List<ResponsePeriodDTO> responsePeriodDTOS = getSchedule(collex.getSurvey());
+    newCase.setSchedule(responsePeriodDTOS);
+
     newCase.setSample(sample);
     newCase.setSampleSensitive(newCasePayload.getSampleSensitive());
 
@@ -158,5 +174,71 @@ public class NewCaseReceiver {
     caze = caseRepository.saveAndFlush(caze);
 
     return caze;
+  }
+
+  // Hove this off into a process,  and this function to orchastrate not chain
+  private List<ResponsePeriodDTO> getSchedule(Survey survey) throws JsonProcessingException {
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    // needs something like this, will do for now.
+    if (survey.getScheduleTemplate() == null) {
+      return null;
+    }
+
+    ScheduleTemplate scheduleTemplate =
+        objectMapper.readValue((String) survey.getScheduleTemplate(), ScheduleTemplate.class);
+
+    return createSchedule(scheduleTemplate);
+  }
+
+  private List<ResponsePeriodDTO> createSchedule(ScheduleTemplate scheduleTemplate) {
+
+    List<ResponsePeriodDTO> responsePeriodDTOs = new ArrayList<>();
+    OffsetDateTime responsePeriodStartDate = OffsetDateTime.now();
+
+    for (ResponsePeriod responsePeriod : scheduleTemplate.getResponsePeriods()) {
+      ResponsePeriodDTO responsePeriodDTO = new ResponsePeriodDTO();
+      responsePeriodDTO.setName(responsePeriod.getName());
+      responsePeriodDTO.setOffSetFromStart(responsePeriod.getOffSetFromStart());
+      responsePeriodDTO.setDateUnit(responsePeriod.getDateUnit());
+
+      responsePeriodDTOs.add(responsePeriodDTO);
+
+      responsePeriodStartDate =
+          responsePeriodStartDate.plusSeconds(
+              responsePeriodDTO.getDateUnit().getDuration().getSeconds()
+                  * responsePeriodDTO.getOffSetFromStart());
+
+      responsePeriodDTO.setScheduledTasks(createScheduledTaskList(responsePeriod, responsePeriodStartDate));
+    }
+
+    return responsePeriodDTOs;
+  }
+
+  private List<ScheduledTaskDTO> createScheduledTaskList(
+      ResponsePeriod responsePeriod, OffsetDateTime startDate) {
+    List<ScheduledTaskDTO> scheduledTaskDTOList = new ArrayList<>();
+
+    for (Task task : responsePeriod.getTasks()) {
+      ScheduledTaskDTO scheduledTaskDTO = new ScheduledTaskDTO();
+      scheduledTaskDTO.setId(UUID.randomUUID());
+      scheduledTaskDTO.setName(task.getName());
+      scheduledTaskDTO.setScheduledTaskType(task.getScheduledTaskType());
+      scheduledTaskDTO.setPackCode(task.getPackCode());
+
+      OffsetDateTime newTime = startDate.plusSeconds(
+              task.getDateOffSet().getDateUnit().getDuration().getSeconds()
+                      * task.getDateOffSet().getMultiplier());
+
+      scheduledTaskDTO.setRmScheduledDateTime(newTime.toString());
+
+
+      scheduledTaskDTO.setDateOffSet(task.getDateOffSet());
+      scheduledTaskDTO.setScheduledTaskStatus(ScheduledTaskStatus.NOT_STARTED);
+
+      scheduledTaskDTOList.add(scheduledTaskDTO);
+    }
+
+    return scheduledTaskDTOList;
   }
 }
