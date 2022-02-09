@@ -250,7 +250,8 @@ class ExportFileProcessorTest {
     ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
     exportFileTemplate.setPackCode(PACK_CODE);
     exportFileTemplate.setExportFileDestination(EXPORT_FILE_DESTINATION);
-    exportFileTemplate.setTemplate(new String[] {"__caseref__", "__uac__", "__request__.foo", "__request__.spam"});
+    exportFileTemplate.setTemplate(
+        new String[] {"__caseref__", "__uac__", "__request__.foo", "__request__.spam"});
 
     Case caze = new Case();
     caze.setSample(Map.of("foo", "bar"));
@@ -264,7 +265,7 @@ class ExportFileProcessorTest {
     fulfilmentToProcess.setCorrelationId(TEST_CORRELATION_ID);
     fulfilmentToProcess.setOriginatingUser(TEST_ORIGINATING_USER);
     fulfilmentToProcess.setUacMetadata(TEST_UAC_METADATA);
-    fulfilmentToProcess.setPersonalisation(Map.of("foo","bar", "spam", "eggs"));
+    fulfilmentToProcess.setPersonalisation(Map.of("foo", "bar", "spam", "eggs"));
 
     UacQidDTO uacQidDTO = new UacQidDTO();
     uacQidDTO.setUac(UAC);
