@@ -243,4 +243,134 @@ class ExportFileProcessorTest {
     Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(TEST_CORRELATION_ID);
     Assertions.assertThat(actualHeader.getOriginatingUser()).isEqualTo(TEST_ORIGINATING_USER);
   }
+
+  @Test
+  void testProcessFulfilmentWithPersonalisation() {
+    // Given
+    ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
+    exportFileTemplate.setPackCode(PACK_CODE);
+    exportFileTemplate.setExportFileDestination(EXPORT_FILE_DESTINATION);
+    exportFileTemplate.setTemplate(new String[] {"__caseref__", "__uac__", "__request__.foo", "__request__.spam"});
+
+    Case caze = new Case();
+    caze.setSample(Map.of("foo", "bar"));
+    caze.setCaseRef(123L);
+
+    FulfilmentToProcess fulfilmentToProcess = new FulfilmentToProcess();
+    fulfilmentToProcess.setExportFileTemplate(exportFileTemplate);
+    fulfilmentToProcess.setCaze(caze);
+    fulfilmentToProcess.setBatchId(UUID.fromString("6a127d58-c1cb-489c-a3f5-72014a0c32d6"));
+    fulfilmentToProcess.setBatchQuantity(200);
+    fulfilmentToProcess.setCorrelationId(TEST_CORRELATION_ID);
+    fulfilmentToProcess.setOriginatingUser(TEST_ORIGINATING_USER);
+    fulfilmentToProcess.setUacMetadata(TEST_UAC_METADATA);
+    fulfilmentToProcess.setPersonalisation(Map.of("foo","bar", "spam", "eggs"));
+
+    UacQidDTO uacQidDTO = new UacQidDTO();
+    uacQidDTO.setUac(UAC);
+    uacQidDTO.setQid(QID);
+
+    when(uacQidCache.getUacQidPair(anyInt())).thenReturn(uacQidDTO);
+
+    // When
+    underTest.process(fulfilmentToProcess);
+
+    // Then
+    ArgumentCaptor<ExportFileRow> exportFileRowArgumentCaptor =
+        ArgumentCaptor.forClass(ExportFileRow.class);
+    verify(exportFileRowRepository).save(exportFileRowArgumentCaptor.capture());
+    ExportFileRow actualExportFileRow = exportFileRowArgumentCaptor.getValue();
+    assertThat(actualExportFileRow.getPackCode()).isEqualTo(PACK_CODE);
+    assertThat(actualExportFileRow.getExportFileDestination()).isEqualTo(EXPORT_FILE_DESTINATION);
+    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\"|\"" + UAC + "\"|\"bar\"|\"eggs\"");
+
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacService)
+        .saveAndEmitUacUpdateEvent(
+            uacQidLinkCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getUac()).isEqualTo(UAC);
+    assertThat(actualUacQidLink.getQid()).isEqualTo(QID);
+    assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
+    assertThat(actualUacQidLink.isActive()).isTrue();
+    assertThat(actualUacQidLink.getMetadata()).isEqualTo(TEST_UAC_METADATA);
+
+    ArgumentCaptor<EventDTO> eventCaptor = ArgumentCaptor.forClass(EventDTO.class);
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(caze),
+            eq("Export file generated with pack code " + PACK_CODE),
+            eq(EventType.EXPORT_FILE),
+            eventCaptor.capture(),
+            any(OffsetDateTime.class));
+
+    EventHeaderDTO actualHeader = eventCaptor.getValue().getHeader();
+    Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(TEST_CORRELATION_ID);
+    Assertions.assertThat(actualHeader.getOriginatingUser()).isEqualTo(TEST_ORIGINATING_USER);
+  }
+
+  @Test
+  void testProcessFulfilmentNullPersonalisation() {
+    // Given
+    ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
+    exportFileTemplate.setPackCode(PACK_CODE);
+    exportFileTemplate.setExportFileDestination(EXPORT_FILE_DESTINATION);
+    exportFileTemplate.setTemplate(new String[] {"__caseref__", "__uac__", "__request__.foo"});
+
+    Case caze = new Case();
+    caze.setSample(Map.of("foo", "bar"));
+    caze.setCaseRef(123L);
+
+    FulfilmentToProcess fulfilmentToProcess = new FulfilmentToProcess();
+    fulfilmentToProcess.setExportFileTemplate(exportFileTemplate);
+    fulfilmentToProcess.setCaze(caze);
+    fulfilmentToProcess.setBatchId(UUID.fromString("6a127d58-c1cb-489c-a3f5-72014a0c32d6"));
+    fulfilmentToProcess.setBatchQuantity(200);
+    fulfilmentToProcess.setCorrelationId(TEST_CORRELATION_ID);
+    fulfilmentToProcess.setOriginatingUser(TEST_ORIGINATING_USER);
+    fulfilmentToProcess.setUacMetadata(TEST_UAC_METADATA);
+    fulfilmentToProcess.setPersonalisation(null);
+
+    UacQidDTO uacQidDTO = new UacQidDTO();
+    uacQidDTO.setUac(UAC);
+    uacQidDTO.setQid(QID);
+
+    when(uacQidCache.getUacQidPair(anyInt())).thenReturn(uacQidDTO);
+
+    // When
+    underTest.process(fulfilmentToProcess);
+
+    // Then
+    ArgumentCaptor<ExportFileRow> exportFileRowArgumentCaptor =
+        ArgumentCaptor.forClass(ExportFileRow.class);
+    verify(exportFileRowRepository).save(exportFileRowArgumentCaptor.capture());
+    ExportFileRow actualExportFileRow = exportFileRowArgumentCaptor.getValue();
+    assertThat(actualExportFileRow.getPackCode()).isEqualTo(PACK_CODE);
+    assertThat(actualExportFileRow.getExportFileDestination()).isEqualTo(EXPORT_FILE_DESTINATION);
+    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\"|\"" + UAC + "\"|");
+
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacService)
+        .saveAndEmitUacUpdateEvent(
+            uacQidLinkCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getUac()).isEqualTo(UAC);
+    assertThat(actualUacQidLink.getQid()).isEqualTo(QID);
+    assertThat(actualUacQidLink.getCaze()).isEqualTo(caze);
+    assertThat(actualUacQidLink.isActive()).isTrue();
+    assertThat(actualUacQidLink.getMetadata()).isEqualTo(TEST_UAC_METADATA);
+
+    ArgumentCaptor<EventDTO> eventCaptor = ArgumentCaptor.forClass(EventDTO.class);
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(caze),
+            eq("Export file generated with pack code " + PACK_CODE),
+            eq(EventType.EXPORT_FILE),
+            eventCaptor.capture(),
+            any(OffsetDateTime.class));
+
+    EventHeaderDTO actualHeader = eventCaptor.getValue().getHeader();
+    Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(TEST_CORRELATION_ID);
+    Assertions.assertThat(actualHeader.getOriginatingUser()).isEqualTo(TEST_ORIGINATING_USER);
+  }
 }
