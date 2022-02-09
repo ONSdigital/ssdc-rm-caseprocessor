@@ -8,7 +8,6 @@ import lombok.Data;
 public class ResponsePeriod {
   private String name;
   // Use OffSet Date thingy instead
-  private ChronoUnit dateUnit;
-  private int offSetFromStart;
+  private DateOffSet dateOffSet;
   private List<Task> tasks;
 }

@@ -20,6 +20,7 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.DateOffSet;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.NewCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.ResponsePeriod;
@@ -31,6 +32,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.rasrm.service.RasRmCaseNotificationEnrichmentService;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
+import uk.gov.ons.ssdc.caseprocessor.service.ScheduledTaskService;
 import uk.gov.ons.ssdc.caseprocessor.utils.CaseRefGenerator;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
@@ -46,21 +48,24 @@ public class NewCaseReceiver {
   private final CollectionExerciseRepository collectionExerciseRepository;
   private final EventLogger eventLogger;
   private final RasRmCaseNotificationEnrichmentService rasRmNewBusinessCaseEnricher;
+  private final ScheduledTaskService scheduledTaskService;
 
   @Value("${caserefgeneratorkey}")
   private byte[] caserefgeneratorkey;
 
   public NewCaseReceiver(
-      CaseRepository caseRepository,
-      CaseService caseService,
-      CollectionExerciseRepository collectionExerciseRepository,
-      EventLogger eventLogger,
-      RasRmCaseNotificationEnrichmentService rasRmNewBusinessCaseEnricher) {
+          CaseRepository caseRepository,
+          CaseService caseService,
+          CollectionExerciseRepository collectionExerciseRepository,
+          EventLogger eventLogger,
+          RasRmCaseNotificationEnrichmentService rasRmNewBusinessCaseEnricher,
+          ScheduledTaskService scheduledTaskService) {
     this.caseRepository = caseRepository;
     this.caseService = caseService;
     this.collectionExerciseRepository = collectionExerciseRepository;
     this.eventLogger = eventLogger;
     this.rasRmNewBusinessCaseEnricher = rasRmNewBusinessCaseEnricher;
+    this.scheduledTaskService = scheduledTaskService;
   }
 
   @Transactional
@@ -114,6 +119,10 @@ public class NewCaseReceiver {
     newCase = saveNewCaseAndStampCaseRef(newCase);
     caseService.emitCaseUpdate(
         newCase, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
+
+    List<ResponsePeriodDTO> responsePeriodDTOs = (List<ResponsePeriodDTO>) newCase.getSchedule();
+
+    scheduledTaskService.createScheduledTasksFromSchedulePlan((ResponsePeriodDTO[]) newCase.getSchedule());
 
     eventLogger.logCaseEvent(newCase, "New case created", EventType.NEW_CASE, event, message);
   }
@@ -199,15 +208,15 @@ public class NewCaseReceiver {
     for (ResponsePeriod responsePeriod : scheduleTemplate.getResponsePeriods()) {
       ResponsePeriodDTO responsePeriodDTO = new ResponsePeriodDTO();
       responsePeriodDTO.setName(responsePeriod.getName());
-      responsePeriodDTO.setOffSetFromStart(responsePeriod.getOffSetFromStart());
-      responsePeriodDTO.setDateUnit(responsePeriod.getDateUnit());
+
+      responsePeriodDTO.setDateOffSet(responsePeriod.getDateOffSet());
 
       responsePeriodDTOs.add(responsePeriodDTO);
 
       responsePeriodStartDate =
           responsePeriodStartDate.plusSeconds(
-              responsePeriodDTO.getDateUnit().getDuration().getSeconds()
-                  * responsePeriodDTO.getOffSetFromStart());
+              responsePeriodDTO.getDateOffSet().getDateUnit().getDuration().getSeconds()
+                  * responsePeriodDTO.getDateOffSet().getMultiplier());
 
       responsePeriodDTO.setScheduledTasks(createScheduledTaskList(responsePeriod, responsePeriodStartDate));
     }

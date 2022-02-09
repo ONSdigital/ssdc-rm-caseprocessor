@@ -9,7 +9,6 @@ import java.util.List;
 public class ResponsePeriodDTO {
   private String name;
   // Keep record of these, just to view?
-  private ChronoUnit dateUnit;
-  private int offSetFromStart;
+  private DateOffSet dateOffSet;
   private List<ScheduledTaskDTO> scheduledTasks;
 }
