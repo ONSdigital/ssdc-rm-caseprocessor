@@ -133,9 +133,10 @@ public class ExportFileProcessor {
         default:
           if (templateItem.startsWith(REQUEST_PERSONALISATION_PREFIX)) {
             rowStrings[i] =
-                personalisation.get(
-                    templateItem.substring(REQUEST_PERSONALISATION_PREFIX.length()));
-
+                personalisation != null
+                    ? personalisation.get(
+                        templateItem.substring(REQUEST_PERSONALISATION_PREFIX.length()))
+                    : null;
           } else {
             rowStrings[i] = caze.getSample().get(templateItem);
           }
