@@ -1,6 +1,5 @@
 package uk.gov.ons.ssdc.caseprocessor.model.dto;
 
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.Data;
 

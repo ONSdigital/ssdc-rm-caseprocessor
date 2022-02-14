@@ -25,7 +25,7 @@ public class EventLogger {
     this.eventRepository = eventRepository;
   }
 
-  public void logCaseEvent(
+  public Event logCaseEvent(
       Case caze,
       String eventDescription,
       EventType eventType,
@@ -46,7 +46,7 @@ public class EventLogger {
             messageTimestamp);
     loggedEvent.setCaze(caze);
 
-    eventRepository.save(loggedEvent);
+    return eventRepository.save(loggedEvent);
   }
 
   public void logCaseEvent(
@@ -61,7 +61,7 @@ public class EventLogger {
     logCaseEvent(caze, eventDescription, eventType, event, messageTimestamp);
   }
 
-  public void logUacQidEvent(
+  public Event logUacQidEvent(
       UacQidLink uacQidLink,
       String eventDescription,
       EventType eventType,
@@ -83,7 +83,7 @@ public class EventLogger {
             messageTimestamp);
     loggedEvent.setUacQidLink(uacQidLink);
 
-    eventRepository.save(loggedEvent);
+    return eventRepository.save(loggedEvent);
   }
 
   private Event buildEvent(
