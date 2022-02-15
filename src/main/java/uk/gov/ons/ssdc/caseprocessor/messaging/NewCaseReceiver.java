@@ -210,10 +210,10 @@ public class NewCaseReceiver {
   private List<ResponsePeriodDTO> createSchedule(ScheduleTemplate scheduleTemplate) {
 
     List<ResponsePeriodDTO> responsePeriodDTOs = new ArrayList<>();
-    // why add 10 seconds, well because of ATs.
+    // why add 5 seconds, well because of ATs.
     // This certainly isn't perfect
     // TODO: remove test crutch in production code.
-    OffsetDateTime responsePeriodStartDate = OffsetDateTime.now().plusSeconds(10);
+    OffsetDateTime responsePeriodStartDate = OffsetDateTime.now().plusSeconds(5);
 
     for (ResponsePeriod responsePeriod : scheduleTemplate.getResponsePeriods()) {
       ResponsePeriodDTO responsePeriodDTO = new ResponsePeriodDTO();

@@ -35,9 +35,9 @@ public class ScheduledTaskProcessor {
         processActionWithPackCode(scheduledTask);
         break;
 
-      case COMPLETION:
-        processsCompletionCheck(scheduledTask);
-        break;
+        //      case COMPLETION:
+        //        processsCompletionCheck(scheduledTask);
+        //        break;
 
       default:
         {
@@ -46,46 +46,6 @@ public class ScheduledTaskProcessor {
         }
     }
   }
-
-  private void processsCompletionCheck(ScheduledTask scheduledTask) {
-
-    // Needs re implemented
-    //    if (scheduledTaskDetails.get("type").equals("COMPLETION")) {
-    //      if (areAllReceiptRequiredTasksComplete(scheduledTask.getResponsePeriod())) {
-    //        scheduledTask.setActionState(ScheduledTaskState.COMPLETED);
-    //        scheduledTaskRepository.saveAndFlush(scheduledTask);
-    //        return;
-    //      }
-    //
-    //      processActionWithPackCode(scheduledTask, scheduledTaskDetails);
-    //    }
-  }
-
-  //  private boolean areAllReceiptRequiredTasksComplete(ResponsePeriod responsePeriod) {
-  //    // In the Spring time we enjoy nesting
-  //    for (ScheduledTask scheduledTask : responsePeriod.getScheduledTasks()) {
-  //      if (scheduledTask.isReceiptRequiredForCompletion()) {
-  //        if (scheduledTask.getActionState() != ScheduledTaskState.COMPLETED) {
-  //          if (scheduledTask.getActionState() != ScheduledTaskState.SENT) {
-  //            log.with(scheduledTask)
-  //                .warn("ScheduledTask Not in SENT or COMPLETE state, when checking for
-  // COMPLETION");
-  //
-  //            /* we would want to understand this though? for audit purposes, it would require a
-  // logic failure somewhere */
-  //            // By default we can't complain to Case person about this
-  //            continue;
-  //          }
-  //
-  //          // TODO: Could if required change this to record all failed scheduledTasks and return
-  //          // Like validation recording
-  //          return false;
-  //        }
-  //      }
-  //    }
-  //
-  //    return true;
-  //  }
 
   private void processActionWithPackCode(ScheduledTask scheduledTask) {
     Case caze = caseService.getCase(scheduledTask.getCaseId());

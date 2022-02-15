@@ -2,13 +2,13 @@ package uk.gov.ons.ssdc.caseprocessor.schedule;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import java.time.OffsetDateTime;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ScheduledTaskRepository;
 import uk.gov.ons.ssdc.common.model.entity.ScheduledTask;
-import uk.gov.ons.ssdc.common.model.entity.ScheduledTaskStatus;
 
 @Component
 public class ScheduledTaskTriggerer {
@@ -25,29 +25,16 @@ public class ScheduledTaskTriggerer {
 
   @Transactional
   public void triggerScheduledTasks() {
+    try (Stream<ScheduledTask> tasks = scheduledTaskRepository.findScheduledTasks(100)) {
+      List<ScheduledTask> scheduledTasksToDelete = new LinkedList<>();
 
-    //    Needs fancy pants JPA and UPDATE FOR SKIP LOCK?...., but for now this will do
-    //    With our cluster leader stuff do we need UPDATE FOR SKIP LOCK?
-    //    List<ScheduledTask> scheduledTasks =
-    //        scheduledTaskRepository.findByrmToActionDateTimeBeforeAndScheduledTaskStateEquals(
-    //            OffsetDateTime.now(), ScheduledTaskState.NOT_STARTED);
+      tasks.forEach(
+          scheduledTaskToProcess -> {
+            scheduledTaskProcessor.process(scheduledTaskToProcess);
+            scheduledTasksToDelete.add(scheduledTaskToProcess);
+          });
 
-    List<ScheduledTask> scheduledTasks = scheduledTaskRepository.findAll();
-
-    for (ScheduledTask scheduledTask : scheduledTasks) {
-
-      if (scheduledTask.getRmToActionDate().isAfter(OffsetDateTime.now())) {
-        continue;
-      }
-
-      if (scheduledTask.getScheduledTaskStatus() != ScheduledTaskStatus.NOT_STARTED) {
-        continue;
-      }
-
-      scheduledTaskProcessor.process(scheduledTask);
-
-      // finally remove this task from the DB.
-      scheduledTaskRepository.deleteById(scheduledTask.getId());
+      scheduledTaskRepository.deleteAllInBatch(scheduledTasksToDelete);
     }
   }
 }
