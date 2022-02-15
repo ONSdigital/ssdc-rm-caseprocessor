@@ -17,7 +17,6 @@ public class ScheduledTaskScheduler {
     this.clusterLeaderManager = clusterLeaderManager;
   }
 
-  //  TODO: Make this specific for this
   @Scheduled(fixedDelayString = "${scheduler.frequency}")
   public void triggerScheduledTasks() {
     //    Cluster leader or cluster ....
