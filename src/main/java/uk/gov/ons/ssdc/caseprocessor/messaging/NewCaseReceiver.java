@@ -197,7 +197,7 @@ public class NewCaseReceiver {
     ObjectMapper objectMapper = new ObjectMapper();
 
     // needs something like this, will do for now.
-    if (survey.getScheduleTemplate() == null) {
+    if (survey.getScheduleTemplate().toString().length() == 0) {
       return null;
     }
 
