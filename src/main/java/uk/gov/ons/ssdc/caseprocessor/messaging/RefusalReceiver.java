@@ -33,6 +33,11 @@ public class RefusalReceiver {
     Case refusedCase = caseService.getCase(refusal.getCaseId());
     refusedCase.setRefusalReceived(RefusalType.valueOf(refusal.getType().name()));
 
+    if (refusal.isEraseData()) {
+      refusedCase.setSampleSensitive(null);
+      eventLogger.logCaseEvent(
+          refusedCase, "Data erasure request received", EventType.ERASE_DATA, event, message);
+    }
     caseService.saveCaseAndEmitCaseUpdate(
         refusedCase, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
 
