@@ -11,6 +11,7 @@ import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEM
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -112,6 +113,7 @@ public class RefusalReceiverTest {
     Case caze = new Case();
     caze.setId(CASE_ID);
     caze.setRefusalReceived(null);
+    caze.setSampleSensitive(Map.of("testing", "erasure"));
 
     when(caseService.getCase(CASE_ID)).thenReturn(caze);
 
@@ -139,5 +141,53 @@ public class RefusalReceiverTest {
             eq(EventType.ERASE_DATA),
             eq(event),
             eq(message));
+  }
+
+  @Test
+  public void testRefusalWithDataErasureFalse() {
+    // Given
+    RefusalDTO refusalDTO = new RefusalDTO();
+    refusalDTO.setCaseId(CASE_ID);
+    refusalDTO.setType(RefusalTypeDTO.HARD_REFUSAL);
+
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setRefusal(refusalDTO);
+
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
+    eventHeader.setCorrelationId(TEST_CORRELATION_ID);
+    eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
+    eventHeader.setTopic("Test topic");
+    eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
+
+    EventDTO event = new EventDTO();
+    event.setPayload(payloadDTO);
+    event.setHeader(eventHeader);
+    Message<byte[]> message = constructMessage(event);
+
+    Case caze = new Case();
+    caze.setId(CASE_ID);
+    caze.setRefusalReceived(null);
+    caze.setSampleSensitive(Map.of("testing", "erasure"));
+
+    when(caseService.getCase(CASE_ID)).thenReturn(caze);
+
+    // When
+    underTest.receiveMessage(message);
+
+    // Then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdate(
+            caseArgumentCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
+    Case actualCase = caseArgumentCaptor.getValue();
+
+    assertThat(actualCase.getId()).isEqualTo(CASE_ID);
+    assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
+    assertThat(actualCase.getSampleSensitive()).isEqualTo(Map.of("testing", "erasure"));
+
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(caze), eq("Refusal Received"), eq(EventType.REFUSAL), eq(event), eq(message));
   }
 }

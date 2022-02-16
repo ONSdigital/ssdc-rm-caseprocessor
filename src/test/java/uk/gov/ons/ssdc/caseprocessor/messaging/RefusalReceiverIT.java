@@ -111,9 +111,10 @@ public class RefusalReceiverIT {
       junkDataHelper.junkify(eventHeader);
       event.setHeader(eventHeader);
 
+      // WHEN
       pubsubHelper.sendMessageToSharedProject(INBOUND_REFUSAL_TOPIC, event);
 
-      //  THEN
+      // THEN
       EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
 
       CaseUpdateDTO emittedCase = actualEvent.getPayload().getCaseUpdate();
