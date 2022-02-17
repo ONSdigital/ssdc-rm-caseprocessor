@@ -130,6 +130,7 @@ public class RefusalReceiverTest {
     assertThat(actualCase.getId()).isEqualTo(CASE_ID);
     assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.WITHDRAWAL_REFUSAL);
     assertThat(actualCase.getSampleSensitive()).isNull();
+    assertThat(actualCase.isInvalid()).isTrue();
 
     verify(eventLogger)
         .logCaseEvent(
@@ -185,6 +186,7 @@ public class RefusalReceiverTest {
     assertThat(actualCase.getId()).isEqualTo(CASE_ID);
     assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
     assertThat(actualCase.getSampleSensitive()).isEqualTo(Map.of("testing", "erasure"));
+    assertThat(actualCase.isInvalid()).isFalse();
 
     verify(eventLogger)
         .logCaseEvent(

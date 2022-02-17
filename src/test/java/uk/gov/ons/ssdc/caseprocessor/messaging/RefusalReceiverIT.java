@@ -121,6 +121,7 @@ public class RefusalReceiverIT {
       assertThat(emittedCase.getCaseId()).isEqualTo(caze.getId());
       assertThat(emittedCase.getRefusalReceived()).isEqualTo(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
       assertThat(emittedCase.getSampleSensitive()).isNull();
+      assertThat(emittedCase.isInvalid()).isTrue();
 
       assertThat(eventRepository.findAll().size()).isEqualTo(2);
       Event databaseRefusalEvent = eventRepository.findAll().get(1);
