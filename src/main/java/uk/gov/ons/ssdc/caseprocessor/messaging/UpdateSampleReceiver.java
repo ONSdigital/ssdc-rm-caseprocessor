@@ -60,7 +60,7 @@ public class UpdateSampleReceiver {
       caze.getSample().put(entry.getKey(), entry.getValue());
     }
 
-    if (validationErrors.size() > 0) {
+    if (!validationErrors.isEmpty()) {
       throw new RuntimeException(
           EventType.UPDATE_SAMPLE
               + " event: "
