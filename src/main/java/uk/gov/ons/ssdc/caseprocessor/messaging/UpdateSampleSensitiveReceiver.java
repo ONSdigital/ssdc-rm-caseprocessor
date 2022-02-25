@@ -63,7 +63,7 @@ public class UpdateSampleSensitiveReceiver {
       caze.getSampleSensitive().put(columnName, newValue);
     }
 
-    if (validationErrors.size() > 0) {
+    if (!validationErrors.isEmpty()) {
       throw new RuntimeException(
           EventType.UPDATE_SAMPLE_SENSITIVE
               + " event: "

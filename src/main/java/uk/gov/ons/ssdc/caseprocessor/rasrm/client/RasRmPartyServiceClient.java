@@ -2,7 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.rasrm.client;
 
 import static uk.gov.ons.ssdc.caseprocessor.rasrm.constants.RasRmConstants.BUSINESS_SAMPLE_UNIT_TYPE;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.codec.binary.Base64;
@@ -91,13 +91,13 @@ public class RasRmPartyServiceClient {
   }
 
   HttpHeaders createHeaders(String username, String password) {
-    return new HttpHeaders() {
-      {
-        String auth = username + ":" + password;
-        byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(Charset.forName("US-ASCII")));
-        String authHeader = "Basic " + new String(encodedAuth);
-        set("Authorization", authHeader);
-      }
-    };
+    HttpHeaders headers = new HttpHeaders();
+
+    String auth = username + ":" + password;
+    byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.US_ASCII));
+    String authHeader = "Basic " + new String(encodedAuth);
+    headers.set("Authorization", authHeader);
+
+    return headers;
   }
 }
