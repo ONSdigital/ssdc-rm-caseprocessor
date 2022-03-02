@@ -131,7 +131,6 @@ class RasRmCaseIacServiceTest {
     RuntimeException thrown =
         assertThrows(RuntimeException.class, () -> underTest.getRasRmIac(caze));
 
-    assertThat(thrown.getMessage())
-        .isEqualTo("RAS RM has not made any IAC available for our case");
+    assertThat(thrown.getMessage()).isEqualTo("RAS RM has not made any IAC available for our case");
   }
 }

@@ -112,22 +112,17 @@ class CollectionInstrumentHelperTest {
     caze.setSample(Map.of("questionnaire", "LMB"));
 
     when(rulesCache.getRules(caze.getCollectionExercise().getId()))
-            .thenReturn(
-                    new CachedRule[] {
-                            new CachedRule(
-                                    expressionParser.parseExpression(
-                                            "typo"),
-                                    99,
-                                    "testCollectionInstrumentUrl")
-                    });
+        .thenReturn(
+            new CachedRule[] {
+              new CachedRule(
+                  expressionParser.parseExpression("typo"), 99, "testCollectionInstrumentUrl")
+            });
 
     RuntimeException thrown =
-            assertThrows(
-                    RuntimeException.class,
-                    () -> underTest.getCollectionInstrumentUrl(caze, Map.of("wave", 1)));
+        assertThrows(
+            RuntimeException.class,
+            () -> underTest.getCollectionInstrumentUrl(caze, Map.of("wave", 1)));
 
-    assertThat(thrown.getMessage())
-            .isEqualTo(
-                    "Collection instrument selection rule causing error");
+    assertThat(thrown.getMessage()).isEqualTo("Collection instrument selection rule causing error");
   }
 }

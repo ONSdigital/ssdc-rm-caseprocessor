@@ -105,26 +105,29 @@ class RasRmCaseNotificationEnrichmentServiceTest {
   @Test
   public void testNullMetaDataException() {
     RuntimeException thrown =
-            assertThrows(RuntimeException.class, () -> underTest.notifyRasRmAndEnrichSample(null, null));
+        assertThrows(
+            RuntimeException.class, () -> underTest.notifyRasRmAndEnrichSample(null, null));
     assertThat(thrown.getMessage())
-            .isEqualTo("Unexpected null metadata. Metadata is required for RAS-RM business.");
+        .isEqualTo("Unexpected null metadata. Metadata is required for RAS-RM business.");
   }
 
   @Test
   public void testMetaDataNotAMap() {
     RuntimeException thrown =
-            assertThrows(RuntimeException.class, () -> underTest.notifyRasRmAndEnrichSample(null, "NotAMapButAString"));
+        assertThrows(
+            RuntimeException.class,
+            () -> underTest.notifyRasRmAndEnrichSample(null, "NotAMapButAString"));
     assertThat(thrown.getMessage())
-            .isEqualTo("Unexpected metadata type. Wanted Map but got String");
+        .isEqualTo("Unexpected metadata type. Wanted Map but got String");
   }
 
   @Test
   public void testMissingMANDATORY_COLLEX_METADATA() {
     RuntimeException thrown =
-            assertThrows(RuntimeException.class, () -> underTest.notifyRasRmAndEnrichSample(null,
-                    Map.of("Not", "TheRequiredFields")));
-    assertThat(thrown.getMessage())
-            .isEqualTo("Metadata does not contain mandatory values");
+        assertThrows(
+            RuntimeException.class,
+            () -> underTest.notifyRasRmAndEnrichSample(null, Map.of("Not", "TheRequiredFields")));
+    assertThat(thrown.getMessage()).isEqualTo("Metadata does not contain mandatory values");
   }
 
   @Test
@@ -132,33 +135,34 @@ class RasRmCaseNotificationEnrichmentServiceTest {
     ReflectionTestUtils.setField(underTest, "rasRmCaseNotificationTopic", "Test topic");
     ReflectionTestUtils.setField(underTest, "rasRmPubsubProject", "Test project");
     Map<String, String> sample =
-            Map.of(
-                    "rurefWrong",
-                    "Test ruref",
-                    "runame1",
-                    "Test runame1",
-                    "froempment",
-                    "123",
-                    "frotover",
-                    "456",
-                    "cell_no",
-                    "789");
+        Map.of(
+            "rurefWrong",
+            "Test ruref",
+            "runame1",
+            "Test runame1",
+            "froempment",
+            "123",
+            "frotover",
+            "456",
+            "cell_no",
+            "789");
 
     UUID rasRmSampleSummaryId = UUID.randomUUID();
     UUID rasRmCollectionExerciseId = UUID.randomUUID();
     UUID rasRmCollectionInstrumentId = UUID.randomUUID();
     Map<String, String> metadata =
-            Map.of(
-                    "rasRmSampleSummaryId",
-                    rasRmSampleSummaryId.toString(),
-                    "rasRmCollectionExerciseId",
-                    rasRmCollectionExerciseId.toString(),
-                    "rasRmCollectionInstrumentId",
-                    rasRmCollectionInstrumentId.toString());
+        Map.of(
+            "rasRmSampleSummaryId",
+            rasRmSampleSummaryId.toString(),
+            "rasRmCollectionExerciseId",
+            rasRmCollectionExerciseId.toString(),
+            "rasRmCollectionInstrumentId",
+            rasRmCollectionInstrumentId.toString());
 
     RuntimeException thrown =
-            assertThrows(RuntimeException.class, () -> underTest.notifyRasRmAndEnrichSample(sample, metadata));
+        assertThrows(
+            RuntimeException.class, () -> underTest.notifyRasRmAndEnrichSample(sample, metadata));
     assertThat(thrown.getMessage())
-            .isEqualTo("Cannot notify RAS-RM of business case which does not have column: ruref");
+        .isEqualTo("Cannot notify RAS-RM of business case which does not have column: ruref");
   }
 }

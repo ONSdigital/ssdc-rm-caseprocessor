@@ -121,16 +121,16 @@ class PrintFulfilmentReceiverTest {
     managementEvent.getPayload().getPrintFulfilment().setPackCode(PACK_CODE);
     managementEvent.getPayload().getPrintFulfilment().setUacMetadata(TEST_UAC_METADATA);
     managementEvent
-            .getPayload()
-            .getPrintFulfilment()
-            .setPersonalisation(Map.of("name", "Joe Bloggs"));
+        .getPayload()
+        .getPrintFulfilment()
+        .setPersonalisation(Map.of("name", "Joe Bloggs"));
     Message<byte[]> message = constructMessage(managementEvent);
 
     ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
     exportFileTemplate.setPackCode("Different PackCode");
 
     FulfilmentSurveyExportFileTemplate fulfilmentSurveyExportFileTemplate =
-            new FulfilmentSurveyExportFileTemplate();
+        new FulfilmentSurveyExportFileTemplate();
     fulfilmentSurveyExportFileTemplate.setExportFileTemplate(exportFileTemplate);
 
     Case expectedCase = new Case();
@@ -143,7 +143,7 @@ class PrintFulfilmentReceiverTest {
 
     // When
     RuntimeException thrown =
-            assertThrows(RuntimeException.class, () ->  underTest.receiveMessage(message));
+        assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
     assertThat(thrown.getMessage())
         .isEqualTo("Pack code PACK_CODE is not allowed as a fulfilment on survey MyTestSurvey");
     verifyNoInteractions(eventLogger);

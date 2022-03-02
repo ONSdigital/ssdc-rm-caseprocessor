@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,11 +55,9 @@ public class UacQidCacheTest {
     when(uacQidServiceClient.getUacQids(1, 2)).thenReturn(listUacDtos);
 
     RuntimeException thrown =
-            assertThrows(RuntimeException.class, () -> underTest.getUacQidPair(1));
+        assertThrows(RuntimeException.class, () -> underTest.getUacQidPair(1));
 
     Assertions.assertThat(thrown.getMessage())
-            .isEqualTo("Timeout getting UacQidDTO for questionnaireType :1");
-
+        .isEqualTo("Timeout getting UacQidDTO for questionnaireType :1");
   }
-
 }
