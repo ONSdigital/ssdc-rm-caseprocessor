@@ -52,11 +52,6 @@ public class PrintFulfilmentReceiver {
       return;
     }
 
-    try {
-      sleep(5000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
     Case caze = caseService.getCase(event.getPayload().getPrintFulfilment().getCaseId());
 
     ExportFileTemplate exportFileTemplate =
