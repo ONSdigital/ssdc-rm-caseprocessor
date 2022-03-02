@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.NewCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
@@ -27,8 +28,6 @@ public class RedactHelperTest {
     // Extra check to make sure the original object wasn't accidentally mutated
     assertThat(newCase.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "999999"));
   }
-
-//  TODO: Add Exception tests here/
 
   @Test
   public void testRedactWorksForString() {
