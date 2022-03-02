@@ -101,4 +101,33 @@ class CollectionInstrumentHelperTest {
         .isEqualTo(
             "Collection instrument rules are set up incorrectly: there MUST be a default rule");
   }
+
+  @Test
+  void selectionRuleErrorException() {
+    CollectionExercise collex = new CollectionExercise();
+    collex.setId(UUID.randomUUID());
+
+    Case caze = new Case();
+    caze.setCollectionExercise(collex);
+    caze.setSample(Map.of("questionnaire", "LMB"));
+
+    when(rulesCache.getRules(caze.getCollectionExercise().getId()))
+            .thenReturn(
+                    new CachedRule[] {
+                            new CachedRule(
+                                    expressionParser.parseExpression(
+                                            "typo"),
+                                    99,
+                                    "testCollectionInstrumentUrl")
+                    });
+
+    RuntimeException thrown =
+            assertThrows(
+                    RuntimeException.class,
+                    () -> underTest.getCollectionInstrumentUrl(caze, Map.of("wave", 1)));
+
+    assertThat(thrown.getMessage())
+            .isEqualTo(
+                    "Collection instrument selection rule causing error");
+  }
 }

@@ -28,6 +28,8 @@ public class RedactHelperTest {
     assertThat(newCase.getSampleSensitive()).isEqualTo(Map.of("PHONE_NUMBER", "999999"));
   }
 
+//  TODO: Add Exception tests here/
+
   @Test
   public void testRedactWorksForString() {
     // GIVEN
