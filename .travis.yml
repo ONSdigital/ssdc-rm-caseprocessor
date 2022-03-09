@@ -12,6 +12,11 @@ env:
     - IMAGE_NAME="$DOCKER_GCP_LOCATION/ssdc-rm-caseprocessor"
 
 before_install:
+  - docker login -u "${DOCKER_GCP_USERNAME}" -p "${DOCKER_GCP_PASSWORD}" https://europe-west2-docker.pkg.dev;
+  - docker login -u "${DOCKERHUB_USERNAME}" -p "${DOCKERHUB_PASSWORD}";
+  - docker network create ssdcrmdockerdev_default
+  - echo "$DOCKER_GCP_PASSWORD" > ~/google-service-account-key.json
+  - export GOOGLE_APPLICATION_CREDENTIALS=~/google-service-account-key.json
   #  remove after travis fixed
   - java -version
   - sudo apt-get -y remove default-jdk
@@ -28,11 +33,6 @@ before_install:
   - mvn --version
   # remove down to here
   - mvn fmt:check pmd:check
-  - docker login -u "${DOCKER_GCP_USERNAME}" -p "${DOCKER_GCP_PASSWORD}" https://europe-west2-docker.pkg.dev;
-  - docker login -u "${DOCKERHUB_USERNAME}" -p "${DOCKERHUB_PASSWORD}";
-  - docker network create ssdcrmdockerdev_default
-  - echo "$DOCKER_GCP_PASSWORD" > ~/google-service-account-key.json
-  - export GOOGLE_APPLICATION_CREDENTIALS=~/google-service-account-key.json
 
 install: echo "SKIPPING DEFAULT INSTALL" # Travis has a default maven install. Don't build twice!
 
