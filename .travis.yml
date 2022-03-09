@@ -25,6 +25,7 @@ before_install:
   - unzip -qq apache-maven-3.8.4-bin.zip
   - export M2_HOME=$PWD/apache-maven-3.8.4
   - export PATH=$M2_HOME/bin:$PATH
+  - mvn --version
   # remove down to here
   - mvn fmt:check pmd:check
   - docker login -u "${DOCKER_GCP_USERNAME}" -p "${DOCKER_GCP_PASSWORD}" https://europe-west2-docker.pkg.dev;
