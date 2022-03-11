@@ -1,5 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.model.dto;
 
+import java.util.Map;
 import java.util.UUID;
 import lombok.Data;
 
@@ -11,4 +12,5 @@ public class SmsConfirmation {
   private String qid;
   private Object uacMetadata;
   private boolean scheduled;
+  private Map<String, String> personalisation;
 }
