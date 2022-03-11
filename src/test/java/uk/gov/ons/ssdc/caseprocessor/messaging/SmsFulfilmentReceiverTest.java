@@ -54,7 +54,7 @@ class SmsFulfilmentReceiverTest {
     // Given
     Case testCase = new Case();
     testCase.setId(CASE_ID);
-    EventDTO event = buildEnrichedSmsFulfilmentEventWithUacQid();
+    EventDTO event = buildSmsFulfilmentConfirmationEventWithUacQid();
     Message<byte[]> eventMessage = constructMessage(event);
 
     when(caseService.getCase(CASE_ID)).thenReturn(testCase);
@@ -82,7 +82,7 @@ class SmsFulfilmentReceiverTest {
     // Given
     Case testCase = new Case();
     testCase.setId(CASE_ID);
-    EventDTO event = buildEnrichedSmsFulfilmentEvent();
+    EventDTO event = buildSmsFulfilmentConfirmationEvent();
     Message<byte[]> eventMessage = constructMessage(event);
 
     when(caseService.getCase(CASE_ID)).thenReturn(testCase);
@@ -102,7 +102,7 @@ class SmsFulfilmentReceiverTest {
     // Given
     Case testCase = new Case();
     testCase.setId(CASE_ID);
-    EventDTO event = buildEnrichedSmsFulfilmentEventWithUacQid();
+    EventDTO event = buildSmsFulfilmentConfirmationEventWithUacQid();
     Message<byte[]> eventMessage = constructMessage(event);
 
     UacQidLink existingUacQidLink = new UacQidLink();
@@ -131,7 +131,7 @@ class SmsFulfilmentReceiverTest {
     Case otherCase = new Case();
     otherCase.setId(UUID.randomUUID());
 
-    EventDTO event = buildEnrichedSmsFulfilmentEventWithUacQid();
+    EventDTO event = buildSmsFulfilmentConfirmationEventWithUacQid();
     Message<byte[]> eventMessage = constructMessage(event);
 
     UacQidLink existingUacQidLink = new UacQidLink();
@@ -151,18 +151,19 @@ class SmsFulfilmentReceiverTest {
     verifyNoInteractions(eventLogger);
   }
 
-  private EventDTO buildEnrichedSmsFulfilmentEventWithUacQid() {
-    EventDTO event = buildEnrichedSmsFulfilmentEvent();
+  private EventDTO buildSmsFulfilmentConfirmationEventWithUacQid() {
+    EventDTO event = buildSmsFulfilmentConfirmationEvent();
     event.getPayload().getSmsConfirmation().setUac(TEST_UAC);
     event.getPayload().getSmsConfirmation().setQid(TEST_QID);
     return event;
   }
 
-  private EventDTO buildEnrichedSmsFulfilmentEvent() {
+  private EventDTO buildSmsFulfilmentConfirmationEvent() {
     SmsConfirmation smsConfirmation = new SmsConfirmation();
     smsConfirmation.setCaseId(CASE_ID);
     smsConfirmation.setPackCode(PACK_CODE);
     smsConfirmation.setUacMetadata(TEST_UAC_METADATA);
+    smsConfirmation.setPersonalisation(Map.of("foo", "bar"));
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
