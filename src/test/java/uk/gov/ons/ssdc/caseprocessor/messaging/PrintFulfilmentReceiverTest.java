@@ -1,10 +1,10 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.MessageConstructor.constructMessage;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.TEST_UAC_METADATA;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
@@ -104,5 +104,48 @@ class PrintFulfilmentReceiverTest {
             eq(EventType.PRINT_FULFILMENT),
             eq(managementEvent),
             eq(message));
+  }
+
+  @Test
+  public void packCodeNotAllowedRunTimeException() {
+    // Given
+    EventDTO managementEvent = new EventDTO();
+    managementEvent.setHeader(new EventHeaderDTO());
+    managementEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
+    managementEvent.getHeader().setDateTime(OffsetDateTime.now(ZoneId.of("UTC")).minusHours(1));
+    managementEvent.getHeader().setTopic("Test topic");
+    managementEvent.getHeader().setChannel("CC");
+    managementEvent.setPayload(new PayloadDTO());
+    managementEvent.getPayload().setPrintFulfilment(new PrintFulfilmentDTO());
+    managementEvent.getPayload().getPrintFulfilment().setCaseId(UUID.randomUUID());
+    managementEvent.getPayload().getPrintFulfilment().setPackCode(PACK_CODE);
+    managementEvent.getPayload().getPrintFulfilment().setUacMetadata(TEST_UAC_METADATA);
+    managementEvent
+        .getPayload()
+        .getPrintFulfilment()
+        .setPersonalisation(Map.of("name", "Joe Bloggs"));
+    Message<byte[]> message = constructMessage(managementEvent);
+
+    ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
+    exportFileTemplate.setPackCode("Different PackCode");
+
+    FulfilmentSurveyExportFileTemplate fulfilmentSurveyExportFileTemplate =
+        new FulfilmentSurveyExportFileTemplate();
+    fulfilmentSurveyExportFileTemplate.setExportFileTemplate(exportFileTemplate);
+
+    Case expectedCase = new Case();
+    expectedCase.setCollectionExercise(new CollectionExercise());
+    Survey survey = new Survey();
+    survey.setName("MyTestSurvey");
+    survey.setFulfilmentExportFileTemplates(List.of(fulfilmentSurveyExportFileTemplate));
+    expectedCase.getCollectionExercise().setSurvey(survey);
+    when(caseService.getCase(any(UUID.class))).thenReturn(expectedCase);
+
+    // When
+    RuntimeException thrown =
+        assertThrows(RuntimeException.class, () -> underTest.receiveMessage(message));
+    assertThat(thrown.getMessage())
+        .isEqualTo("Pack code PACK_CODE is not allowed as a fulfilment on survey MyTestSurvey");
+    verifyNoInteractions(eventLogger);
   }
 }
