@@ -40,6 +40,7 @@ class EmailFulfilmentReceiverIT {
 
   private static final String PACK_CODE = "TEST_EMAIL";
   private static final Map<String, String> TEST_UAC_METADATA = Map.of("TEST_UAC_METADATA", "TEST");
+  private static final Map<String, String> TEST_PERSONALISATION = Map.of("foo", "bar");
 
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
@@ -75,6 +76,7 @@ class EmailFulfilmentReceiverIT {
     emailConfirmation.setCaseId(testCase.getId());
     emailConfirmation.setPackCode(PACK_CODE);
     emailConfirmation.setUacMetadata(TEST_UAC_METADATA);
+    emailConfirmation.setPersonalisation(TEST_PERSONALISATION);
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setEmailConfirmation(emailConfirmation);
