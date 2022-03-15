@@ -40,6 +40,7 @@ class SmsFulfilmentReceiverIT {
 
   private static final String PACK_CODE = "TEST_SMS";
   private static final Map<String, String> TEST_UAC_METADATA = Map.of("TEST_UAC_METADATA", "TEST");
+  private static final Map<String, String> TEST_PERSONALISATION = Map.of("foo", "bar");
 
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
@@ -75,6 +76,7 @@ class SmsFulfilmentReceiverIT {
     smsConfirmation.setCaseId(testCase.getId());
     smsConfirmation.setPackCode(PACK_CODE);
     smsConfirmation.setUacMetadata(TEST_UAC_METADATA);
+    smsConfirmation.setPersonalisation(TEST_PERSONALISATION);
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setSmsConfirmation(smsConfirmation);
