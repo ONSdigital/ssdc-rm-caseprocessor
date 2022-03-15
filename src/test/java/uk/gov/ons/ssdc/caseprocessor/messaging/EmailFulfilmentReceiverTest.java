@@ -46,6 +46,7 @@ class EmailFulfilmentReceiverTest {
   private static final String TEST_UAC = "TEST_UAC";
   private static final String PACK_CODE = "TEST_EMAIL";
   private static final Map<String, String> TEST_UAC_METADATA = Map.of("TEST_UAC_METADATA", "TEST");
+  private static final Map<String, String> TEST_PERSONALISATION = Map.of("foo", "bar");
 
   private static final String EMAIL_FULFILMENT_DESCRIPTION = "Email fulfilment request received";
 
@@ -54,7 +55,7 @@ class EmailFulfilmentReceiverTest {
     // Given
     Case testCase = new Case();
     testCase.setId(CASE_ID);
-    EventDTO event = buildEnrichedEmailFulfilmentEventWithUacQid();
+    EventDTO event = buildEmailFulfilmentConfirmationEventWithUacQid();
     Message<byte[]> eventMessage = constructMessage(event);
 
     when(caseService.getCase(CASE_ID)).thenReturn(testCase);
@@ -86,7 +87,7 @@ class EmailFulfilmentReceiverTest {
     // Given
     Case testCase = new Case();
     testCase.setId(CASE_ID);
-    EventDTO event = buildEnrichedEmailFulfilmentEvent();
+    EventDTO event = buildEmailFulfilmentConfirmationEvent();
     Message<byte[]> eventMessage = constructMessage(event);
 
     when(caseService.getCase(CASE_ID)).thenReturn(testCase);
@@ -110,7 +111,7 @@ class EmailFulfilmentReceiverTest {
     // Given
     Case testCase = new Case();
     testCase.setId(CASE_ID);
-    EventDTO event = buildEnrichedEmailFulfilmentEventWithUacQid();
+    EventDTO event = buildEmailFulfilmentConfirmationEventWithUacQid();
     Message<byte[]> eventMessage = constructMessage(event);
 
     UacQidLink existingUacQidLink = new UacQidLink();
@@ -139,7 +140,7 @@ class EmailFulfilmentReceiverTest {
     Case otherCase = new Case();
     otherCase.setId(UUID.randomUUID());
 
-    EventDTO event = buildEnrichedEmailFulfilmentEventWithUacQid();
+    EventDTO event = buildEmailFulfilmentConfirmationEventWithUacQid();
     Message<byte[]> eventMessage = constructMessage(event);
 
     UacQidLink existingUacQidLink = new UacQidLink();
@@ -159,18 +160,19 @@ class EmailFulfilmentReceiverTest {
     verifyNoInteractions(eventLogger);
   }
 
-  private EventDTO buildEnrichedEmailFulfilmentEventWithUacQid() {
-    EventDTO event = buildEnrichedEmailFulfilmentEvent();
+  private EventDTO buildEmailFulfilmentConfirmationEventWithUacQid() {
+    EventDTO event = buildEmailFulfilmentConfirmationEvent();
     event.getPayload().getEmailConfirmation().setUac(TEST_UAC);
     event.getPayload().getEmailConfirmation().setQid(TEST_QID);
     return event;
   }
 
-  private EventDTO buildEnrichedEmailFulfilmentEvent() {
+  private EventDTO buildEmailFulfilmentConfirmationEvent() {
     EmailConfirmation emailConfirmation = new EmailConfirmation();
     emailConfirmation.setCaseId(CASE_ID);
     emailConfirmation.setPackCode(PACK_CODE);
     emailConfirmation.setUacMetadata(TEST_UAC_METADATA);
+    emailConfirmation.setPersonalisation(TEST_PERSONALISATION);
 
     EventHeaderDTO eventHeader = new EventHeaderDTO();
     eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
