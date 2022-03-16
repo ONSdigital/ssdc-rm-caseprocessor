@@ -5,12 +5,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.PRINT_FULFILMENT_TOPIC;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -91,6 +95,69 @@ class PrintFulfilmentReceiverIT {
     assertThat(fulfilmentToProcess.getExportFileTemplate()).isEqualTo(exportFileTemplate);
     assertThat(fulfilmentToProcess.getPersonalisation()).isEqualTo(personalisation);
     assertThat(fulfilmentToProcess.getUacMetadata()).isEqualTo(uacMetadata);
+    assertThat(fulfilmentToProcess.getMessageId())
+        .isEqualTo(printFulfilmentEvent.getHeader().getMessageId());
+  }
+
+  @Test
+  void testPrintFulfilmentDuplicate() throws InterruptedException {
+    // Given
+    Logger fooLogger = (Logger) LoggerFactory.getLogger(PrintFulfilmentReceiver.class);
+    ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+    listAppender.start();
+    fooLogger.addAppender(listAppender);
+
+    Case caze = junkDataHelper.setupJunkCase();
+    ExportFileTemplate exportFileTemplate =
+        junkDataHelper.setUpJunkExportFileTemplate(new String[] {"__request__.name"});
+    junkDataHelper.linkExportFileTemplateToSurveyFulfilment(
+        exportFileTemplate, caze.getCollectionExercise().getSurvey());
+
+    EventDTO printFulfilmentEvent = new EventDTO();
+    printFulfilmentEvent.setHeader(new EventHeaderDTO());
+    junkDataHelper.junkify(printFulfilmentEvent.getHeader());
+    printFulfilmentEvent.getHeader().setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
+    printFulfilmentEvent.getHeader().setTopic(PRINT_FULFILMENT_TOPIC);
+    printFulfilmentEvent.setPayload(new PayloadDTO());
+    printFulfilmentEvent.getPayload().setPrintFulfilment(new PrintFulfilmentDTO());
+    printFulfilmentEvent.getPayload().getPrintFulfilment().setCaseId(caze.getId());
+    printFulfilmentEvent
+        .getPayload()
+        .getPrintFulfilment()
+        .setPackCode(exportFileTemplate.getPackCode());
+
+    Map<String, String> personalisation = Map.of("name", "Joe Bloggs");
+    printFulfilmentEvent.getPayload().getPrintFulfilment().setPersonalisation(personalisation);
+    Map<String, String> uacMetadata = Map.of("foo", "bar");
+    printFulfilmentEvent.getPayload().getPrintFulfilment().setUacMetadata(uacMetadata);
+
+    // When
+    pubsubHelper.sendMessageToSharedProject(PRINT_FULFILMENT_TOPIC, printFulfilmentEvent);
+    pubsubHelper.sendMessageToSharedProject(PRINT_FULFILMENT_TOPIC, printFulfilmentEvent);
+
+    // Then
+    List<FulfilmentToProcess> fulfilmentsToProcess = getFulfilmentsToProcess();
+    assertThat(fulfilmentsToProcess).hasSize(1);
+    FulfilmentToProcess fulfilmentToProcess = fulfilmentsToProcess.get(0);
+
+    assertThat(fulfilmentToProcess.getCorrelationId())
+        .isEqualTo(printFulfilmentEvent.getHeader().getCorrelationId());
+    assertThat(fulfilmentToProcess.getCaze().getId()).isEqualTo(caze.getId());
+    assertThat(fulfilmentToProcess.getExportFileTemplate()).isEqualTo(exportFileTemplate);
+    assertThat(fulfilmentToProcess.getPersonalisation()).isEqualTo(personalisation);
+    assertThat(fulfilmentToProcess.getUacMetadata()).isEqualTo(uacMetadata);
+    assertThat(fulfilmentToProcess.getMessageId())
+        .isEqualTo(printFulfilmentEvent.getHeader().getMessageId());
+
+    // check the logging
+    List<ILoggingEvent> logsList = listAppender.list;
+    assertThat(logsList.size()).isEqualTo(1);
+    String expecetedLogMessage =
+        String.format(
+            "Received duplicate fulfilment message ID, ignoring and acking the duplicate message; correlationId=\"%s\"; messageId=\"%s\"",
+            printFulfilmentEvent.getHeader().getCorrelationId(),
+            printFulfilmentEvent.getHeader().getMessageId());
+    assertThat(logsList.get(0).getMessage()).isEqualTo(expecetedLogMessage);
   }
 
   private List<FulfilmentToProcess> getFulfilmentsToProcess() throws InterruptedException {
