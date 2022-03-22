@@ -3,7 +3,7 @@ steps:
     entrypoint: mvn
     args: [ '--version' ]
   - name: docker
-    args: ['compose', '--help']
+    args: ['docker compose', '--help']
     waitFor: ['-']
   - name: maven
     entrypoint: mvn
