@@ -6,6 +6,8 @@ services:
     command: ["-c", "shared_buffers=256MB", "-c", "max_connections=500"]
     ports:
       - "16432:5432"
+    networks:
+      - cloudbuild
 
   uac-qid-case-it:
     container_name: uac-qid-case-it
@@ -22,12 +24,16 @@ services:
       interval: 30s
       timeout: 10s
       retries: 10
+    networks:
+      - cloudbuild
 
   pubsub-emulator-case-it:
     container_name: pubsub-emulator-case-it
     image: europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/gcloud-pubsub-emulator:latest
     ports:
       - "18538:8538"
+    networks:
+      - cloudbuild
 
 
   setup-pubsub-emulator-case-it:
