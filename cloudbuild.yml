@@ -5,7 +5,7 @@ steps:
   - name: maven
     entrypoint: mvn
     args: [ 'fmt:check','pmd:check' ]
-    id: mvn format
+    id: mvn-format
   - id: docker-network
     name: 'docker'
     args: [ 'network', 'create' ,'ssdcrmdockerdev_default']
