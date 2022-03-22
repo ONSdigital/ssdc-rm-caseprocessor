@@ -2,7 +2,7 @@ steps:
   - name: maven
     entrypoint: mvn
     args: [ '--version' ]
-  - name: maven:3-jdk-17
+  - name: maven
     entrypoint: mvn
     args: [ 'fmt:check','pmd:check' ]
 #  - name: maven:3-jdk-17
