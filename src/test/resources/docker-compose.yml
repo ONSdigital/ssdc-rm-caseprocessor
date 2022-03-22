@@ -45,14 +45,14 @@ services:
     depends_on:
       - pubsub-emulator-case-it
     entrypoint: sh -c "/setup_pubsub.sh"
-    networks:
-      - cloudbuild
 
   start_dependencies:
     image: dadarek/wait-for-dependencies
     depends_on:
       uac-qid-case-it:
         condition: service_healthy
-    networks:
-      - cloudbuild
 
+networks:
+  default:
+    external:
+      name: cloudbuild
