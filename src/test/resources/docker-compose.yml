@@ -53,6 +53,5 @@ services:
         condition: service_healthy
 
 networks:
-  default:
-    external:
-      name: cloudbuild
+  cloudbuild:
+    external: true
