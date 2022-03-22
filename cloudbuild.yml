@@ -7,7 +7,7 @@ steps:
     args: [ 'fmt:check','pmd:check' ]
   - id: docker-network
     name: 'docker'
-    args: [ 'network', 'create' ,'ssdcrmdockerdev_default'
+    args: [ 'network', 'create' ,'ssdcrmdockerdev_default']
     waitFor: [ '-' ]
   - id: docker-compose
     name: 'docker/compose:1.19.0'
