@@ -5,6 +5,10 @@ steps:
   - name: maven
     entrypoint: mvn
     args: [ 'fmt:check','pmd:check' ]
+  - id: docker-network
+    name: 'docker'
+    args: [ 'network', 'create' ,'ssdcrmdockerdev_default'
+    waitFor: [ '-' ]
   - id: docker-compose
     name: 'docker/compose:1.19.0'
     args: ['-f', '/workspace/src/test/resources/docker-compose.yml', 'up', '-d']
