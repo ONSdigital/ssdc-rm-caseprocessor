@@ -5,8 +5,8 @@ steps:
   - name: maven
     entrypoint: mvn
     args: [ 'fmt:check','pmd:check' ]
-#  - name: maven:3-jdk-17
-#    entrypoint: mvn
-#    args: [ 'verify','jacoco:report' ]
+  - name: maven
+    entrypoint: mvn
+    args: [ 'verify','jacoco:report' ]
 #  - name: bash
 #    args: ["./check_codecov.sh"]
