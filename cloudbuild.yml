@@ -1,5 +1,5 @@
 steps:
-  - name: maven:3-jdk-17
+  - name: openjdk:17-jdk-slim
     entrypoint: mvn
     args: [ '--version' ]
   - name: maven:3-jdk-17
