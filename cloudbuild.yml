@@ -2,9 +2,6 @@ steps:
   - name: maven
     entrypoint: mvn
     args: [ '--version' ]
-  - name: docker
-    args: ['docker compose', '--help']
-    waitFor: ['-']
   - name: maven
     entrypoint: mvn
     args: [ 'fmt:check','pmd:check' ]

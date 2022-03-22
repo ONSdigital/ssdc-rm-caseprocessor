@@ -246,7 +246,7 @@
             </goals>
             <phase>package</phase>
             <configuration>
-              <repository>europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/${project.artifactId}</repository>
+              <repository>europe-west2-docker.pkg.dev/ssdc-rm-ryangrundy-317208/docker/${project.artifactId}</repository>
               <buildArgs>
                 <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
               </buildArgs>
