@@ -1,4 +1,4 @@
-version: '2.1'
+version: '3'
 services:
   postgres-case-it:
     container_name: postgres-case-it
@@ -6,7 +6,7 @@ services:
     command: ["-c", "shared_buffers=256MB", "-c", "max_connections=500"]
     ports:
       - "16432:5432"
-    network_mode: cloudbuild
+    networks: [cloudbuild]
 
   uac-qid-case-it:
     container_name: uac-qid-case-it
@@ -23,14 +23,14 @@ services:
       interval: 30s
       timeout: 10s
       retries: 10
-    network_mode: cloudbuild
+    networks: [cloudbuild]
 
   pubsub-emulator-case-it:
     container_name: pubsub-emulator-case-it
     image: europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/gcloud-pubsub-emulator:latest
     ports:
       - "18538:8538"
-    network_mode: cloudbuild
+    networks: [cloudbuild]
 
   setup-pubsub-emulator-case-it:
     container_name: setup-pubsub-emulator-case-it
@@ -51,4 +51,5 @@ services:
 
 networks:
   default:
-    name: cloudbuild
+    external:
+      name: cloudbuild
