@@ -21,7 +21,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
 
 @Component
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 public class DeleteDataHelper {
   @Autowired private CaseRepository caseRepository;
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;

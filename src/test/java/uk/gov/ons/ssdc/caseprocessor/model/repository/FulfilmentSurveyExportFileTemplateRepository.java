@@ -7,6 +7,6 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyExportFileTemplate;
 
 @Component
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 public interface FulfilmentSurveyExportFileTemplateRepository
     extends JpaRepository<FulfilmentSurveyExportFileTemplate, UUID> {}

@@ -10,7 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 
 @Configuration
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 public class TestConfig {
   @Bean("pubSubTemplateForIntegrationTests")
   public PubSubTemplate pubSubTemplate(
