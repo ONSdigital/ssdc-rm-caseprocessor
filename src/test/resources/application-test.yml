@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://postgres-case-it:6432/postgres
+    url: jdbc:postgresql://postgres-case-it:5432/postgres
 
   cloud:
     gcp:
