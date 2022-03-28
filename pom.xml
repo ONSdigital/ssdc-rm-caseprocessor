@@ -241,7 +241,7 @@
         <version>3.2.0</version>
         <configuration>
           <to>
-            <image>europe-west2-docker.pkg.dev/ssdc-rm-braceh2/docker/${project.artifactId}</image>
+            <image>europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/${project.artifactId}</image>
           </to>
           <container>
             <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
