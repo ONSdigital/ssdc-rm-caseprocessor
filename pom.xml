@@ -236,24 +236,52 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>com.spotify</groupId>
-        <artifactId>dockerfile-maven-plugin</artifactId>
-        <version>1.4.10</version>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>0.39.1</version>
+        <configuration>
+          <images>
+            <image>
+              <name>europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/ssdc-rm-caseprocessor</name>
+              <alias>ssdc-rm-caseprocessor</alias>
+              <build>
+                <dockerFileDir>${project.basedir}</dockerFileDir>
+              </build>
+            </image>
+          </images>
+        </configuration>
+
         <executions>
           <execution>
+            <id>start</id>
+            <phase>pre-integration-test</phase>
             <goals>
+              <goal>stop</goal>
               <goal>build</goal>
+              <goal>start</goal>
             </goals>
-            <phase>package</phase>
-            <configuration>
-              <repository>europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/${project.artifactId}</repository>
-              <buildArgs>
-                <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
-              </buildArgs>
-            </configuration>
           </execution>
         </executions>
       </plugin>
+<!--      <plugin>-->
+<!--        <groupId>com.spotify</groupId>-->
+<!--        <artifactId>dockerfile-maven-plugin</artifactId>-->
+<!--        <version>1.4.10</version>-->
+<!--        <executions>-->
+<!--          <execution>-->
+<!--            <goals>-->
+<!--              <goal>build</goal>-->
+<!--            </goals>-->
+<!--            <phase>package</phase>-->
+<!--            <configuration>-->
+<!--              <repository>europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/${project.artifactId}</repository>-->
+<!--              <buildArgs>-->
+<!--                <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>-->
+<!--              </buildArgs>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+<!--        </executions>-->
+<!--      </plugin>-->
       <plugin>
         <groupId>com.coveo</groupId>
         <artifactId>fmt-maven-plugin</artifactId>
