@@ -18,4 +18,6 @@ public interface FulfilmentToProcessRepository extends JpaRepository<FulfilmentT
 
   @Query("SELECT DISTINCT f.exportFileTemplate.packCode FROM FulfilmentToProcess f")
   List<String> findDistinctPackCode();
+
+  boolean existsByMessageId(UUID messageId);
 }

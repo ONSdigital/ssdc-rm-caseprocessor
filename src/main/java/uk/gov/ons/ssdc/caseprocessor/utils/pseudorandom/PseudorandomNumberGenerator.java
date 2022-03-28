@@ -3,8 +3,7 @@ package uk.gov.ons.ssdc.caseprocessor.utils.pseudorandom;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 
 /**
  * Format Preserving 'Encryption' using the scheme FE1 from the paper "Format-Preserving Encryption"
@@ -27,9 +26,7 @@ public class PseudorandomNumberGenerator {
 
   /** A simple round function based on SHA-256. */
   private static class FPEEncryptor {
-
     private byte[] wip;
-    private MessageDigest digest;
 
     /**
      * Initialise a new 'encryptor'.
@@ -43,18 +40,12 @@ public class PseudorandomNumberGenerator {
      *   <li>Writing the key.
      * </ol>
      *
-     * And then setting {@link #wip} to the SHA256'd value of this byte array.
+     * <p>And then setting {@link #wip} to the SHA256'd value of this byte array.
      *
      * @param key the key to 'salt' the SHA256 digest.
      * @param modulus the range of the output numbers.
      */
     private FPEEncryptor(byte[] key, int modulus) {
-      try {
-        digest = MessageDigest.getInstance("SHA-256");
-      } catch (NoSuchAlgorithmException e) {
-        throw new RuntimeException("Could not initialise hashing", e);
-      }
-
       byte[] encodedModulus = Utility.convertToByteArrayAndStripLeadingZeros(modulus);
 
       if (encodedModulus.length > MAX_N_BYTES) {
@@ -80,7 +71,8 @@ public class PseudorandomNumberGenerator {
         // Can't imagine why this would ever happen!
         throw new RuntimeException("Unable to write to byte array output stream!", e);
       }
-      wip = digest.digest(baos.toByteArray());
+
+      wip = HashHelper.digest(baos.toByteArray());
     }
 
     /**
@@ -117,9 +109,10 @@ public class PseudorandomNumberGenerator {
 
         baos.write(Utility.toBytes(rBin.length));
         baos.write(rBin);
-        byte[] digestBtyes = digest.digest(baos.toByteArray());
 
+        byte[] digestBtyes = HashHelper.digest(baos.toByteArray());
         return turnFinalValueIntoPositiveBigInteger(digestBtyes);
+
       } catch (IOException e) {
         throw new RuntimeException(
             "Unable to write to internal byte array, this should never happen so indicates a defect in the code",
