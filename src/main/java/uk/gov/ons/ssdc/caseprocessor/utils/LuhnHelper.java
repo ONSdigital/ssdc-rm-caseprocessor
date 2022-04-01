@@ -11,7 +11,7 @@ public class LuhnHelper {
       String checkDigit = lcd.calculate(numberString);
       return Long.parseLong(String.format("%s%s", numberString, checkDigit));
     } catch (CheckDigitException e) {
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException(e);
     }
   }
 }
