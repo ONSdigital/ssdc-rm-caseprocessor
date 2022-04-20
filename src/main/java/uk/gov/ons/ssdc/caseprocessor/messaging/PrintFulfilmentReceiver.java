@@ -2,6 +2,8 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -22,6 +24,7 @@ public class PrintFulfilmentReceiver {
   private final CaseService caseService;
   private final EventLogger eventLogger;
   private final FulfilmentToProcessRepository fulfilmentToProcessRepository;
+  private static final Logger log = LoggerFactory.getLogger(PrintFulfilmentReceiver.class);
 
   public PrintFulfilmentReceiver(
       CaseService caseService,
@@ -37,6 +40,14 @@ public class PrintFulfilmentReceiver {
   public void receiveMessage(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
+    if (fulfilmentToProcessRepository.existsByMessageId(event.getHeader().getMessageId())) {
+      log.with("correlationId", event.getHeader().getCorrelationId())
+          .with("messageId", event.getHeader().getMessageId())
+          .info(
+              "Received duplicate fulfilment message ID, ignoring and acking the duplicate message");
+      return;
+    }
+
     Case caze = caseService.getCase(event.getPayload().getPrintFulfilment().getCaseId());
 
     ExportFileTemplate exportFileTemplate =
@@ -46,6 +57,7 @@ public class PrintFulfilmentReceiver {
     fulfilmentToProcess.setExportFileTemplate(exportFileTemplate);
     fulfilmentToProcess.setCaze(caze);
     fulfilmentToProcess.setCorrelationId(event.getHeader().getCorrelationId());
+    fulfilmentToProcess.setMessageId(event.getHeader().getMessageId());
     fulfilmentToProcess.setOriginatingUser(event.getHeader().getOriginatingUser());
     fulfilmentToProcess.setUacMetadata(event.getPayload().getPrintFulfilment().getUacMetadata());
     fulfilmentToProcess.setPersonalisation(

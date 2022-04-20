@@ -68,7 +68,7 @@ public class UacQidCache {
 
       return uacQidDTO;
     } catch (InterruptedException e) {
-      throw new RuntimeException(e.getMessage());
+      throw new RuntimeException(e);
     }
   }
 

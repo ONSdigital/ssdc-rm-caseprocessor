@@ -184,12 +184,10 @@ public class NewCaseReceiver {
   }
 
   private Case saveNewCaseAndStampCaseRef(Case caze) {
-    caze = caseRepository.saveAndFlush(caze);
-    caze.setCaseRef(
-        CaseRefGenerator.getCaseRef(caze.getSecretSequenceNumber(), caserefgeneratorkey));
-    caze = caseRepository.saveAndFlush(caze);
-
-    return caze;
+    Case newCase = caseRepository.saveAndFlush(caze);
+    newCase.setCaseRef(
+        CaseRefGenerator.getCaseRef(newCase.getSecretSequenceNumber(), caserefgeneratorkey));
+    return caseRepository.saveAndFlush(newCase);
   }
 
   // Hove this off into a process,  and this function to orchastrate not chain
