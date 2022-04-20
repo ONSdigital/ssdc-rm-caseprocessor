@@ -59,7 +59,8 @@ public class ScheduledTaskProcessor {
             .getId(), // This is correlationId, use this for now - will link back to something at
         // least?
         "SRM_SCHEDULED_TASK",
-        metaData);
+        metaData,
+        scheduledTask.getId());
 
     scheduledTaskService.updateScheduledTaskAgainstCase(
         caze, scheduledTask.getId(), null, null, ScheduledTaskStatus.IN_FULFILMENT);

@@ -63,14 +63,14 @@ public class JunkDataHelper {
   }
 
   public CollectionExercise setupJunkCollex() {
-    return setUpJunkCollexWithThisColumnValidators(
+    return setUpJunkCollexWithTheseColumnValidators(
         new ColumnValidator[] {
           new ColumnValidator("Junk", false, new Rule[] {new MandatoryRule()}),
           new ColumnValidator("SensitiveJunk", true, new Rule[] {new MandatoryRule()})
         });
   }
 
-  public CollectionExercise setUpJunkCollexWithThisColumnValidators(
+  public CollectionExercise setUpJunkCollexWithTheseColumnValidators(
       ColumnValidator[] columnValidators) {
     Survey junkSurvey = new Survey();
     junkSurvey.setId(UUID.randomUUID());

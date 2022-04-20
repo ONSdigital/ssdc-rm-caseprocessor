@@ -75,7 +75,7 @@ public class UpdateSampleReceiverIT {
     caze.setSampleSensitive(new HashMap<>());
 
     caze.setCollectionExercise(
-        junkDataHelper.setUpJunkCollexWithThisColumnValidators(
+        junkDataHelper.setUpJunkCollexWithTheseColumnValidators(
             new ColumnValidator[] {
               new ColumnValidator("testSampleField", false, new Rule[] {new MandatoryRule()}),
             }));
@@ -117,7 +117,7 @@ public class UpdateSampleReceiverIT {
     caze.setSampleSensitive(new HashMap<>());
 
     CollectionExercise collectionExercise =
-        junkDataHelper.setUpJunkCollexWithThisColumnValidators(
+        junkDataHelper.setUpJunkCollexWithTheseColumnValidators(
             new ColumnValidator[] {
               new ColumnValidator("testSampleFieldA", false, new Rule[] {new MandatoryRule()}),
               new ColumnValidator("testSampleFieldB", false, new Rule[] {new MandatoryRule()}),

@@ -25,7 +25,12 @@ public class FulfilmentService {
   }
 
   public void processPrintFulfilment(
-      Case caze, String packCode, UUID correlationId, String originatingUser, Object metaData) {
+      Case caze,
+      String packCode,
+      UUID correlationId,
+      String originatingUser,
+      Object metaData,
+      UUID messageId) {
     ExportFileTemplate exportFileTemplate = getAllowedPrintTemplate(packCode, caze);
 
     FulfilmentToProcess fulfilmentToProcess = new FulfilmentToProcess();
@@ -34,6 +39,7 @@ public class FulfilmentService {
     fulfilmentToProcess.setCorrelationId(correlationId);
     fulfilmentToProcess.setOriginatingUser(originatingUser);
     fulfilmentToProcess.setUacMetadata(metaData);
+    fulfilmentToProcess.setMessageId(messageId);
 
     fulfilmentToProcessRepository.saveAndFlush(fulfilmentToProcess);
   }
