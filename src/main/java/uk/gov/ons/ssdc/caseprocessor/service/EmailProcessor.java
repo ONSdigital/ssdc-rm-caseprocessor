@@ -57,6 +57,7 @@ public class EmailProcessor {
         String.format("Email requested by action rule for pack code %s", packCode),
         EventType.ACTION_RULE_EMAIL_REQUEST,
         event,
-        OffsetDateTime.now());
+        OffsetDateTime.now(),
+        null);
   }
 }

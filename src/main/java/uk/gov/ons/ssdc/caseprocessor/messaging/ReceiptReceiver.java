@@ -2,8 +2,6 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 
-import java.util.Map;
-import java.util.UUID;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -11,24 +9,19 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.ssdc.caseprocessor.service.ScheduledTaskService;
 import uk.gov.ons.ssdc.caseprocessor.service.UacService;
-import uk.gov.ons.ssdc.common.model.entity.Event;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.model.entity.ScheduledTaskStatus;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @MessageEndpoint
 public class ReceiptReceiver {
+
   private final UacService uacService;
   private final EventLogger eventLogger;
-  private final ScheduledTaskService scheduledTaskService;
 
-  public ReceiptReceiver(
-      UacService uacService, EventLogger eventLogger, ScheduledTaskService scheduledTaskService) {
+  public ReceiptReceiver(UacService uacService, EventLogger eventLogger) {
     this.uacService = uacService;
     this.eventLogger = eventLogger;
-    this.scheduledTaskService = scheduledTaskService;
   }
 
   @Transactional(isolation = Isolation.REPEATABLE_READ)
@@ -49,22 +42,6 @@ public class ReceiptReceiver {
               event.getHeader().getOriginatingUser());
     }
 
-    Event loggedEvent =
-        eventLogger.logUacQidEvent(
-            uacQidLink, "Receipt received", EventType.RECEIPT, event, message);
-
-    if (uacQidLink.getMetadata() != null) {
-      Map<String, String> uacMetaMap = (Map<String, String>) uacQidLink.getMetadata();
-
-      if (uacMetaMap.containsKey("scheduledTaskId")) {
-
-        scheduledTaskService.updateScheduledTaskAgainstCase(
-            uacQidLink.getCaze(),
-            UUID.fromString(uacMetaMap.get("scheduledTaskId")),
-            loggedEvent,
-            uacQidLink,
-            ScheduledTaskStatus.COMPLETED);
-      }
-    }
+    eventLogger.logUacQidEvent(uacQidLink, "Receipt received", EventType.RECEIPT, event, message);
   }
 }

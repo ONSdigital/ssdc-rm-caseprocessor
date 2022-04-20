@@ -10,7 +10,6 @@ import uk.gov.ons.ssdc.caseprocessor.service.FulfilmentService;
 import uk.gov.ons.ssdc.caseprocessor.service.ScheduledTaskService;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.ScheduledTask;
-import uk.gov.ons.ssdc.common.model.entity.ScheduledTaskStatus;
 
 @Component
 public class ScheduledTaskProcessor {
@@ -18,7 +17,6 @@ public class ScheduledTaskProcessor {
 
   private final FulfilmentService fulfilmentService;
   private final CaseService caseService;
-  private final ScheduledTaskService scheduledTaskService;
 
   public ScheduledTaskProcessor(
       FulfilmentService fulfilmentService,
@@ -26,7 +24,6 @@ public class ScheduledTaskProcessor {
       ScheduledTaskService scheduledTaskService) {
     this.fulfilmentService = fulfilmentService;
     this.caseService = caseService;
-    this.scheduledTaskService = scheduledTaskService;
   }
 
   public void process(ScheduledTask scheduledTask) {
@@ -61,8 +58,5 @@ public class ScheduledTaskProcessor {
         "SRM_SCHEDULED_TASK",
         metaData,
         scheduledTask.getId());
-
-    scheduledTaskService.updateScheduledTaskAgainstCase(
-        caze, scheduledTask.getId(), null, null, ScheduledTaskStatus.IN_FULFILMENT);
   }
 }

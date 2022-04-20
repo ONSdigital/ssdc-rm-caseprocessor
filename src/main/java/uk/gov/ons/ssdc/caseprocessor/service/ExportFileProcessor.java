@@ -20,13 +20,13 @@ import uk.gov.ons.ssdc.common.model.entity.*;
 
 @Component
 public class ExportFileProcessor {
+
   private final UacQidCache uacQidCache;
   private final UacService uacService;
   private final EventLogger eventLogger;
   private final ExportFileRowRepository exportFileRowRepository;
   private final RasRmCaseIacService rasRmCaseIacService;
   private final CollectionInstrumentHelper collectionInstrumentHelper;
-  private final ScheduledTaskService scheduledTaskService;
 
   private final StringWriter stringWriter = new StringWriter();
   private final CSVWriter csvWriter =
@@ -43,15 +43,13 @@ public class ExportFileProcessor {
       EventLogger eventLogger,
       ExportFileRowRepository exportFileRowRepository,
       RasRmCaseIacService rasRmCaseIacService,
-      CollectionInstrumentHelper collectionInstrumentHelper,
-      ScheduledTaskService scheduledTaskService) {
+      CollectionInstrumentHelper collectionInstrumentHelper) {
     this.uacQidCache = uacQidCache;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.exportFileRowRepository = exportFileRowRepository;
     this.rasRmCaseIacService = rasRmCaseIacService;
     this.collectionInstrumentHelper = collectionInstrumentHelper;
-    this.scheduledTaskService = scheduledTaskService;
   }
 
   public void process(FulfilmentToProcess fulfilmentToProcess) {
@@ -155,31 +153,22 @@ public class ExportFileProcessor {
 
     exportFileRowRepository.save(exportFileRow);
 
-    Event loggedEvent =
-        eventLogger.logCaseEvent(
-            caze,
-            String.format("Export file generated with pack code %s", packCode),
-            EventType.EXPORT_FILE,
-            EventHelper.getDummyEvent(correlationId, originatingUser),
-            OffsetDateTime.now());
+    UUID scheduledTaskId = null;
 
     if (uacMetadata != null) {
       Map<String, String> uacMetaMap = (Map<String, String>) uacMetadata;
-
       if (uacMetaMap.containsKey("scheduledTaskId")) {
-        UacQidLink uacQidLink = null;
-        if (uacQidDTO != null) {
-          uacQidLink = uacService.findByQid(uacQidDTO.getQid());
-        }
-
-        scheduledTaskService.updateScheduledTaskAgainstCase(
-            caze,
-            UUID.fromString(uacMetaMap.get("scheduledTaskId")),
-            loggedEvent,
-            uacQidLink,
-            ScheduledTaskStatus.SENT);
+        scheduledTaskId = UUID.fromString(uacMetaMap.get("scheduledTaskId"));
       }
     }
+
+    eventLogger.logCaseEvent(
+        caze,
+        String.format("Export file generated with pack code %s", packCode),
+        EventType.EXPORT_FILE,
+        EventHelper.getDummyEvent(correlationId, originatingUser),
+        OffsetDateTime.now(),
+        scheduledTaskId);
   }
 
   // Has to be synchronised to stop different threads from mangling writer buffer contents

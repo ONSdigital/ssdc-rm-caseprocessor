@@ -56,6 +56,7 @@ public class SmsProcessor {
         String.format("SMS requested by action rule for pack code %s", packCode),
         EventType.ACTION_RULE_SMS_REQUEST,
         event,
-        OffsetDateTime.now());
+        OffsetDateTime.now(),
+        null);
   }
 }

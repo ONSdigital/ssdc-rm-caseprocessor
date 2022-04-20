@@ -38,7 +38,6 @@ import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.model.entity.ScheduledTaskStatus;
 import uk.gov.ons.ssdc.common.model.entity.Survey;
 import uk.gov.ons.ssdc.common.validation.ColumnValidator;
 
@@ -254,7 +253,6 @@ public class NewCaseReceiver {
       scheduledTaskDTO.setScheduledDateAsString(newTime.toString());
 
       scheduledTaskDTO.setDateOffSet(task.getDateOffSet());
-      scheduledTaskDTO.setScheduledTaskStatus(ScheduledTaskStatus.NOT_STARTED);
       scheduledTaskDTO.setEventIds(new ArrayList<>());
       scheduledTaskDTO.setUacsIds(new ArrayList<>());
 
