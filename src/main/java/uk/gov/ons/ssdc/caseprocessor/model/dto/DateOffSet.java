@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DateOffSet {
   private ChronoUnit dateUnit;
-  private int multiplier;
+  private int offset;
 }

@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class ScheduleTemplate {
   private String name;
-  private ResponsePeriod[] responsePeriods;
+  private ScheduleTemplateTaskGroup[] scheduleTemplateTaskGroups;
 }

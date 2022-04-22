@@ -8,7 +8,7 @@ import uk.gov.ons.ssdc.common.model.entity.ScheduledTaskType;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Task {
+public class ScheduleTemplateTask {
   private String name;
   private ScheduledTaskType scheduledTaskType;
   private String packCode;

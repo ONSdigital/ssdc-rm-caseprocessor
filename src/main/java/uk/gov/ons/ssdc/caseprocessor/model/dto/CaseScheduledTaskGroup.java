@@ -4,9 +4,9 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class ResponsePeriodDTO {
+public class CaseScheduledTaskGroup {
   private String name;
   // Keep record of these, just to view?
   private DateOffSet dateOffSet;
-  private List<ScheduledTaskDTO> scheduledTasks;
+  private List<CaseScheduledTask> scheduledTasks;
 }

@@ -7,12 +7,11 @@ import lombok.Data;
 import uk.gov.ons.ssdc.common.model.entity.ScheduledTaskType;
 
 @Data
-public class ScheduledTaskDTO {
+public class CaseScheduledTask {
   private UUID id;
   private String name;
   private ScheduledTaskType scheduledTaskType;
   private String packCode;
-  private boolean receiptRequired;
   private DateOffSet dateOffSet;
 
   // alter to work with putting JSON to from string.

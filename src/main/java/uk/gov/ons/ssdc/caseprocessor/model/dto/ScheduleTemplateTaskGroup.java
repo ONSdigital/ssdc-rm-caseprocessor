@@ -4,9 +4,9 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class ResponsePeriod {
+public class ScheduleTemplateTaskGroup {
   private String name;
   // Use OffSet Date thingy instead
   private DateOffSet dateOffSet;
-  private List<Task> tasks;
+  private List<ScheduleTemplateTask> scheduleTemplateTasks;
 }
