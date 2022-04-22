@@ -20,6 +20,7 @@ import uk.gov.ons.ssdc.common.model.entity.*;
 
 @Component
 public class ExportFileProcessor {
+
   private final UacQidCache uacQidCache;
   private final UacService uacService;
   private final EventLogger eventLogger;
@@ -152,12 +153,22 @@ public class ExportFileProcessor {
 
     exportFileRowRepository.save(exportFileRow);
 
+    UUID scheduledTaskId = null;
+
+    if (uacMetadata != null) {
+      Map<String, String> uacMetaMap = (Map<String, String>) uacMetadata;
+      if (uacMetaMap.containsKey("scheduledTaskId")) {
+        scheduledTaskId = UUID.fromString(uacMetaMap.get("scheduledTaskId"));
+      }
+    }
+
     eventLogger.logCaseEvent(
         caze,
         String.format("Export file generated with pack code %s", packCode),
         EventType.EXPORT_FILE,
         EventHelper.getDummyEvent(correlationId, originatingUser),
-        OffsetDateTime.now());
+        OffsetDateTime.now(),
+        scheduledTaskId);
   }
 
   // Has to be synchronised to stop different threads from mangling writer buffer contents

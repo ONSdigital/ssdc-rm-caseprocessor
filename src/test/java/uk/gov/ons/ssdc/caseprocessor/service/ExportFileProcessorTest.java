@@ -115,7 +115,8 @@ class ExportFileProcessorTest {
             eq("Export file generated with pack code " + PACK_CODE),
             eq(EventType.EXPORT_FILE),
             eventCaptor.capture(),
-            any(OffsetDateTime.class));
+            any(OffsetDateTime.class),
+            any());
 
     EventHeaderDTO actualHeader = eventCaptor.getValue().getHeader();
     Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(actionRule.getId());
@@ -174,7 +175,8 @@ class ExportFileProcessorTest {
             eq("Export file generated with pack code " + PACK_CODE),
             eq(EventType.EXPORT_FILE),
             eventCaptor.capture(),
-            any(OffsetDateTime.class));
+            any(OffsetDateTime.class),
+            any());
 
     EventHeaderDTO actualHeader = eventCaptor.getValue().getHeader();
     Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(actionRule.getId());
@@ -237,7 +239,8 @@ class ExportFileProcessorTest {
             eq("Export file generated with pack code " + PACK_CODE),
             eq(EventType.EXPORT_FILE),
             eventCaptor.capture(),
-            any(OffsetDateTime.class));
+            any(OffsetDateTime.class),
+            any());
 
     EventHeaderDTO actualHeader = eventCaptor.getValue().getHeader();
     Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(TEST_CORRELATION_ID);
@@ -303,7 +306,8 @@ class ExportFileProcessorTest {
             eq("Export file generated with pack code " + PACK_CODE),
             eq(EventType.EXPORT_FILE),
             eventCaptor.capture(),
-            any(OffsetDateTime.class));
+            any(OffsetDateTime.class),
+            any());
 
     EventHeaderDTO actualHeader = eventCaptor.getValue().getHeader();
     Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(TEST_CORRELATION_ID);
@@ -368,7 +372,8 @@ class ExportFileProcessorTest {
             eq("Export file generated with pack code " + PACK_CODE),
             eq(EventType.EXPORT_FILE),
             eventCaptor.capture(),
-            any(OffsetDateTime.class));
+            any(OffsetDateTime.class),
+            any());
 
     EventHeaderDTO actualHeader = eventCaptor.getValue().getHeader();
     Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(TEST_CORRELATION_ID);

@@ -70,6 +70,7 @@ class EmailProcessorTest {
             eq("Email requested by action rule for pack code Test pack code"),
             eq(EventType.ACTION_RULE_EMAIL_REQUEST),
             any(),
-            any(OffsetDateTime.class));
+            any(OffsetDateTime.class),
+            any());
   }
 }

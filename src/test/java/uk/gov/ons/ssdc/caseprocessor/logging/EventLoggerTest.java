@@ -54,7 +54,7 @@ public class EventLoggerTest {
     payload.setNewCase(redactMe);
     event.setPayload(payload);
 
-    underTest.logCaseEvent(caze, "Test description", EventType.NEW_CASE, event, messageTime);
+    underTest.logCaseEvent(caze, "Test description", EventType.NEW_CASE, event, messageTime, null);
 
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
     verify(eventRepository).save(eventArgumentCaptor.capture());

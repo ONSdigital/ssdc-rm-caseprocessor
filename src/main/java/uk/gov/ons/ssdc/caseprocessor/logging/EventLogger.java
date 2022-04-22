@@ -30,7 +30,8 @@ public class EventLogger {
       String eventDescription,
       EventType eventType,
       EventDTO event,
-      OffsetDateTime messageTimestamp) {
+      OffsetDateTime messageTimestamp,
+      UUID scheduledTaskId) {
 
     EventHeaderDTO eventHeader = event.getHeader();
     OffsetDateTime eventDate = eventHeader.getDateTime();
@@ -43,7 +44,8 @@ public class EventLogger {
             eventType,
             eventHeader,
             RedactHelper.redact(eventPayload),
-            messageTimestamp);
+            messageTimestamp,
+            scheduledTaskId);
     loggedEvent.setCaze(caze);
 
     eventRepository.save(loggedEvent);
@@ -58,7 +60,7 @@ public class EventLogger {
 
     OffsetDateTime messageTimestamp = getMessageTimeStamp(message);
 
-    logCaseEvent(caze, eventDescription, eventType, event, messageTimestamp);
+    logCaseEvent(caze, eventDescription, eventType, event, messageTimestamp, null);
   }
 
   public void logUacQidEvent(
@@ -67,6 +69,16 @@ public class EventLogger {
       EventType eventType,
       EventDTO event,
       Message<byte[]> message) {
+    logUacQidEvent(uacQidLink, eventDescription, eventType, event, message, null);
+  }
+
+  public void logUacQidEvent(
+      UacQidLink uacQidLink,
+      String eventDescription,
+      EventType eventType,
+      EventDTO event,
+      Message<byte[]> message,
+      UUID scheduledTaskId) {
 
     EventHeaderDTO eventHeader = event.getHeader();
     OffsetDateTime eventDate = eventHeader.getDateTime();
@@ -80,7 +92,8 @@ public class EventLogger {
             eventType,
             eventHeader,
             RedactHelper.redact(eventPayload),
-            messageTimestamp);
+            messageTimestamp,
+            scheduledTaskId);
     loggedEvent.setUacQidLink(uacQidLink);
 
     eventRepository.save(loggedEvent);
@@ -92,7 +105,8 @@ public class EventLogger {
       EventType eventType,
       EventHeaderDTO eventHeader,
       Object eventPayload,
-      OffsetDateTime messageTimestamp) {
+      OffsetDateTime messageTimestamp,
+      UUID scheduledTaskId) {
     Event loggedEvent = new Event();
 
     loggedEvent.setId(UUID.randomUUID());
@@ -106,6 +120,7 @@ public class EventLogger {
     loggedEvent.setMessageTimestamp(messageTimestamp);
     loggedEvent.setCreatedBy(eventHeader.getOriginatingUser());
     loggedEvent.setCorrelationId(eventHeader.getCorrelationId());
+    loggedEvent.setScheduledTaskId(scheduledTaskId);
 
     loggedEvent.setPayload(JsonHelper.convertObjectToJson(eventPayload));
 

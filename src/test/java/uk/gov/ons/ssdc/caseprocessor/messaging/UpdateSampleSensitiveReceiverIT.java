@@ -126,7 +126,7 @@ public class UpdateSampleSensitiveReceiverIT {
     caze.setSampleSensitive(sensitiveData);
 
     CollectionExercise collectionExercise =
-        junkDataHelper.setUpJunkCollexWithThisColumnValidators(
+        junkDataHelper.setUpJunkCollexWithTheseColumnValidators(
             new ColumnValidator[] {
               new ColumnValidator("sensitiveA", true, new Rule[] {new MandatoryRule()}),
               new ColumnValidator("sensitiveB", true, new Rule[] {new MandatoryRule()}),

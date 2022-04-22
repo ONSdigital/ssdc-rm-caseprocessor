@@ -68,6 +68,7 @@ class SmsProcessorTest {
             eq("SMS requested by action rule for pack code Test pack code"),
             eq(EventType.ACTION_RULE_SMS_REQUEST),
             any(),
-            any(OffsetDateTime.class));
+            any(OffsetDateTime.class),
+            any());
   }
 }

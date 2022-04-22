@@ -15,6 +15,7 @@ import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @MessageEndpoint
 public class ReceiptReceiver {
+
   private final UacService uacService;
   private final EventLogger eventLogger;
 

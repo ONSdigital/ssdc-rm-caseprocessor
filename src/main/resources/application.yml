@@ -32,6 +32,8 @@ spring:
   cloud:
     gcp:
       pubsub:
+        emulator-host: localhost:8538
+        project-id: shared-project
         subscriber:
           flow-control:
             max-outstanding-element-count: 100
@@ -57,8 +59,8 @@ queueconfig:
   deactivate-uac-topic: event_deactivate-uac
   ras-rm-case-notification-topic: case-notification
   publishtimeout: 30  # In seconds
-  shared-pubsub-project: REPLACEME
-  ras-rm-pubsub-project: REPLACEME
+  shared-pubsub-project: shared-project
+  ras-rm-pubsub-project: our-project
 
 healthcheck:
   frequency: 15000 #milliseconds
