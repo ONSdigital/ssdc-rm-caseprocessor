@@ -1,20 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
-import static uk.gov.ons.ssdc.caseprocessor.rasrm.constants.RasRmConstants.BUSINESS_SAMPLE_DEFINITION_URL_SUFFIX;
-import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.sql.SQLException;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import org.postgresql.util.PGobject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -34,16 +21,27 @@ import uk.gov.ons.ssdc.caseprocessor.rasrm.service.RasRmCaseNotificationEnrichme
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.ScheduledTaskService;
 import uk.gov.ons.ssdc.caseprocessor.utils.CaseRefGenerator;
-import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.Survey;
 import uk.gov.ons.ssdc.common.validation.ColumnValidator;
 
+import java.sql.SQLException;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static uk.gov.ons.ssdc.caseprocessor.rasrm.constants.RasRmConstants.BUSINESS_SAMPLE_DEFINITION_URL_SUFFIX;
+import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
+
 @MessageEndpoint
 public class NewCaseReceiver {
-  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
   private final CaseRepository caseRepository;
   private final CaseService caseService;
   private final CollectionExerciseRepository collectionExerciseRepository;
@@ -112,11 +110,8 @@ public class NewCaseReceiver {
     newCase.setCollectionExercise(collex);
 
     List<ResponsePeriodDTO> responsePeriodDTOS = getSchedule(collex.getSurvey());
-    PGobject jsonObject = new PGobject();
-    jsonObject.setType("json");
-    jsonObject.setValue(objectMapper.writeValueAsString(responsePeriodDTOS));
 
-    newCase.setSchedule(jsonObject);
+    newCase.setSchedule(responsePeriodDTOS);
 
     newCase.setSample(sample);
     newCase.setSampleSensitive(newCasePayload.getSampleSensitive());
