@@ -13,5 +13,5 @@ public class ScheduleTemplateTask {
   private ScheduledTaskType scheduledTaskType;
   private String packCode;
   private boolean receiptRequired;
-  private DateOffSet dateOffSet;
+  private DateOffSet dateOffSetFromStart;
 }

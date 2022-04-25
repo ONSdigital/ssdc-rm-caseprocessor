@@ -7,6 +7,6 @@ import lombok.Data;
 public class ScheduleTemplateTaskGroup {
   private String name;
   // Use OffSet Date thingy instead
-  private DateOffSet dateOffSet;
+  private DateOffSet dateOffsetFromTaskGroupStart;
   private List<ScheduleTemplateTask> scheduleTemplateTasks;
 }

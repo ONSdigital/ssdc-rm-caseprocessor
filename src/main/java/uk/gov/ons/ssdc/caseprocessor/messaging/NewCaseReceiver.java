@@ -212,14 +212,19 @@ public class NewCaseReceiver {
       CaseScheduledTaskGroup caseScheduledTaskGroup = new CaseScheduledTaskGroup();
       caseScheduledTaskGroup.setName(scheduleTemplateTaskGroup.getName());
 
-      caseScheduledTaskGroup.setDateOffSet(scheduleTemplateTaskGroup.getDateOffSet());
+      caseScheduledTaskGroup.setDateOffsetFromTaskGroupStart(
+          scheduleTemplateTaskGroup.getDateOffsetFromTaskGroupStart());
 
       caseScheduledTaskGroups.add(caseScheduledTaskGroup);
 
       caseTaskGroupStartDate =
           caseTaskGroupStartDate.plusSeconds(
-              caseScheduledTaskGroup.getDateOffSet().getDateUnit().getDuration().getSeconds()
-                  * caseScheduledTaskGroup.getDateOffSet().getOffset());
+              caseScheduledTaskGroup
+                      .getDateOffsetFromTaskGroupStart()
+                      .getDateUnit()
+                      .getDuration()
+                      .getSeconds()
+                  * caseScheduledTaskGroup.getDateOffsetFromTaskGroupStart().getOffset());
 
       caseScheduledTaskGroup.setScheduledTasks(
           createScheduledTaskList(scheduleTemplateTaskGroup, caseTaskGroupStartDate));
@@ -242,13 +247,13 @@ public class NewCaseReceiver {
 
       OffsetDateTime newTime =
           startDate.plusSeconds(
-              scheduleTemplateTask.getDateOffSet().getDateUnit().getDuration().getSeconds()
-                  * scheduleTemplateTask.getDateOffSet().getOffset());
+              scheduleTemplateTask.getDateOffSetFromStart().getDateUnit().getDuration().getSeconds()
+                  * scheduleTemplateTask.getDateOffSetFromStart().getOffset());
 
       caseScheduledTask.setRmScheduledDateTime(newTime);
       caseScheduledTask.setScheduledDateAsString(newTime.toString());
 
-      caseScheduledTask.setDateOffSet(scheduleTemplateTask.getDateOffSet());
+      caseScheduledTask.setDateOffSetFromStart(scheduleTemplateTask.getDateOffSetFromStart());
       caseScheduledTask.setEventIds(new ArrayList<>());
       caseScheduledTask.setUacsIds(new ArrayList<>());
 

@@ -12,7 +12,7 @@ public class CaseScheduledTask {
   private String name;
   private ScheduledTaskType scheduledTaskType;
   private String packCode;
-  private DateOffSet dateOffSet;
+  private DateOffSet dateOffSetFromStart;
 
   // alter to work with putting JSON to from string.
   private OffsetDateTime rmScheduledDateTime;
