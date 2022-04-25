@@ -4,15 +4,12 @@ import static uk.gov.ons.ssdc.caseprocessor.rasrm.constants.RasRmConstants.BUSIN
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.SQLException;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
@@ -20,13 +17,9 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseScheduledTask;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseScheduledTaskGroup;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.NewCase;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ScheduleTemplate;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ScheduleTemplateTask;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ScheduleTemplateTaskGroup;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.ssdc.caseprocessor.rasrm.service.RasRmCaseNotificationEnrichmentService;
@@ -36,11 +29,11 @@ import uk.gov.ons.ssdc.caseprocessor.utils.CaseRefGenerator;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.model.entity.Survey;
 import uk.gov.ons.ssdc.common.validation.ColumnValidator;
 
 @MessageEndpoint
 public class NewCaseReceiver {
+
   private final CaseRepository caseRepository;
   private final CaseService caseService;
   private final CollectionExerciseRepository collectionExerciseRepository;
@@ -108,9 +101,7 @@ public class NewCaseReceiver {
     newCase.setId(newCasePayload.getCaseId());
     newCase.setCollectionExercise(collex);
 
-    List<CaseScheduledTaskGroup> caseScheduledTaskGroups = getSchedule(collex.getSurvey());
-
-    newCase.setSchedule(caseScheduledTaskGroups);
+    newCase.setSchedule(scheduledTaskService.addScheduleToDBAndReturnJSONRepresentation(newCase));
 
     newCase.setSample(sample);
     newCase.setSampleSensitive(newCasePayload.getSampleSensitive());
@@ -118,11 +109,6 @@ public class NewCaseReceiver {
     newCase = saveNewCaseAndStampCaseRef(newCase);
     caseService.emitCaseUpdate(
         newCase, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
-
-    if (caseScheduledTaskGroups != null) {
-      scheduledTaskService.createScheduledTasksFromSchedulePlan(
-          caseScheduledTaskGroups, newCase.getId());
-    }
 
     eventLogger.logCaseEvent(newCase, "New case created", EventType.NEW_CASE, event, message);
   }
@@ -181,85 +167,5 @@ public class NewCaseReceiver {
     newCase.setCaseRef(
         CaseRefGenerator.getCaseRef(newCase.getSecretSequenceNumber(), caserefgeneratorkey));
     return caseRepository.saveAndFlush(newCase);
-  }
-
-  // Hove this off into a process,  and this function to orchastrate not chain
-  private List<CaseScheduledTaskGroup> getSchedule(Survey survey) throws JsonProcessingException {
-    ObjectMapper objectMapper = new ObjectMapper();
-
-    // needs something like this, will do for now.
-    if (survey.getScheduleTemplate() == null
-        || survey.getScheduleTemplate().toString().length() == 0) {
-      return null;
-    }
-
-    ScheduleTemplate scheduleTemplate =
-        objectMapper.readValue((String) survey.getScheduleTemplate(), ScheduleTemplate.class);
-
-    return createSchedule(scheduleTemplate);
-  }
-
-  private List<CaseScheduledTaskGroup> createSchedule(ScheduleTemplate scheduleTemplate) {
-
-    List<CaseScheduledTaskGroup> caseScheduledTaskGroups = new ArrayList<>();
-    // why add 5 seconds, well because of ATs.
-    // This certainly isn't perfect
-    // TODO: remove test crutch in production code.
-    OffsetDateTime caseTaskGroupStartDate = OffsetDateTime.now().plusSeconds(5);
-
-    for (ScheduleTemplateTaskGroup scheduleTemplateTaskGroup :
-        scheduleTemplate.getScheduleTemplateTaskGroups()) {
-      CaseScheduledTaskGroup caseScheduledTaskGroup = new CaseScheduledTaskGroup();
-      caseScheduledTaskGroup.setName(scheduleTemplateTaskGroup.getName());
-
-      caseScheduledTaskGroup.setDateOffsetFromTaskGroupStart(
-          scheduleTemplateTaskGroup.getDateOffsetFromTaskGroupStart());
-
-      caseScheduledTaskGroups.add(caseScheduledTaskGroup);
-
-      caseTaskGroupStartDate =
-          caseTaskGroupStartDate.plusSeconds(
-              caseScheduledTaskGroup
-                      .getDateOffsetFromTaskGroupStart()
-                      .getDateUnit()
-                      .getDuration()
-                      .getSeconds()
-                  * caseScheduledTaskGroup.getDateOffsetFromTaskGroupStart().getOffset());
-
-      caseScheduledTaskGroup.setScheduledTasks(
-          createScheduledTaskList(scheduleTemplateTaskGroup, caseTaskGroupStartDate));
-    }
-
-    return caseScheduledTaskGroups;
-  }
-
-  private List<CaseScheduledTask> createScheduledTaskList(
-      ScheduleTemplateTaskGroup scheduleTemplateTaskGroup, OffsetDateTime startDate) {
-    List<CaseScheduledTask> caseScheduledTaskList = new ArrayList<>();
-
-    for (ScheduleTemplateTask scheduleTemplateTask :
-        scheduleTemplateTaskGroup.getScheduleTemplateTasks()) {
-      CaseScheduledTask caseScheduledTask = new CaseScheduledTask();
-      caseScheduledTask.setId(UUID.randomUUID());
-      caseScheduledTask.setName(scheduleTemplateTask.getName());
-      caseScheduledTask.setScheduledTaskType(scheduleTemplateTask.getScheduledTaskType());
-      caseScheduledTask.setPackCode(scheduleTemplateTask.getPackCode());
-
-      OffsetDateTime newTime =
-          startDate.plusSeconds(
-              scheduleTemplateTask.getDateOffSetFromStart().getDateUnit().getDuration().getSeconds()
-                  * scheduleTemplateTask.getDateOffSetFromStart().getOffset());
-
-      caseScheduledTask.setRmScheduledDateTime(newTime);
-      caseScheduledTask.setScheduledDateAsString(newTime.toString());
-
-      caseScheduledTask.setDateOffSetFromStart(scheduleTemplateTask.getDateOffSetFromStart());
-      caseScheduledTask.setEventIds(new ArrayList<>());
-      caseScheduledTask.setUacsIds(new ArrayList<>());
-
-      caseScheduledTaskList.add(caseScheduledTask);
-    }
-
-    return caseScheduledTaskList;
   }
 }

@@ -16,7 +16,7 @@ public class CaseScheduledTask {
 
   // alter to work with putting JSON to from string.
   private OffsetDateTime rmScheduledDateTime;
-  private String scheduledDateAsString; // for easy viewing, until JSON stores as a String
+  private String scheduledDateToRun; // for easy viewing, until JSON stores as a String
 
   // These are for auditing purposes, if a new UAC was requested we would want to record that too.
   private List<UUID> uacsIds;
