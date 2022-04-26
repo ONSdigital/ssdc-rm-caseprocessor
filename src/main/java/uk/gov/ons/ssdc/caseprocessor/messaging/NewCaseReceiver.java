@@ -17,7 +17,6 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseScheduledTaskGroup;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.NewCase;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
@@ -101,7 +100,11 @@ public class NewCaseReceiver {
     newCase.setId(newCasePayload.getCaseId());
     newCase.setCollectionExercise(collex);
 
-    newCase.setSchedule(scheduledTaskService.addScheduleToDBAndReturnJSONRepresentation(newCase));
+    if (newCase.getCollectionExercise().getSurvey().getScheduleTemplate() != null
+        && newCase.getCollectionExercise().getSurvey().getScheduleTemplate().toString().length()
+            != 0) {
+      newCase.setSchedule(scheduledTaskService.addScheduleToDBAndReturnJSONRepresentation(newCase));
+    }
 
     newCase.setSample(sample);
     newCase.setSampleSensitive(newCasePayload.getSampleSensitive());

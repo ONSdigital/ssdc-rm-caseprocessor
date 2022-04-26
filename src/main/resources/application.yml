@@ -33,7 +33,7 @@ spring:
     gcp:
       pubsub:
         emulator-host: localhost:8538
-        project-id: shared-project
+        project-id: our-project
         subscriber:
           flow-control:
             max-outstanding-element-count: 100

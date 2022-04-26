@@ -27,15 +27,10 @@ public class ScheduledTaskService {
     this.scheduledTaskRepository = scheduledTaskRepository;
   }
 
-  public List<CaseScheduledTaskGroup> addScheduleToDBAndReturnJSONRepresentation(Case caze) throws JsonProcessingException {
+  public List<CaseScheduledTaskGroup> addScheduleToDBAndReturnJSONRepresentation(Case caze)
+      throws JsonProcessingException {
 
     ObjectMapper objectMapper = new ObjectMapper();
-
-    if (caze.getCollectionExercise().getSurvey().getScheduleTemplate() == null
-        || caze.getCollectionExercise().getSurvey().getScheduleTemplate().toString().length()
-            == 0) {
-      return null;
-    }
 
     ScheduleTemplate scheduleTemplate =
         objectMapper.readValue(
