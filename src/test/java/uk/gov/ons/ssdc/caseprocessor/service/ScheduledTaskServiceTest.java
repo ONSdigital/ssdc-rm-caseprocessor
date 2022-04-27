@@ -2,6 +2,9 @@ package uk.gov.ons.ssdc.caseprocessor.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static org.mockito.Mockito.verify;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.ScheduleTaskHelper.convertObjectToJson;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.ScheduleTaskHelper.createOneTaskSimpleScheduleTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -13,6 +16,7 @@ import org.assertj.core.data.TemporalUnitOffset;
 import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,6 +29,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.ScheduleTemplateTaskGroup;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ScheduledTaskRepository;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
+import uk.gov.ons.ssdc.common.model.entity.ScheduledTask;
 import uk.gov.ons.ssdc.common.model.entity.ScheduledTaskType;
 import uk.gov.ons.ssdc.common.model.entity.Survey;
 
@@ -69,6 +74,16 @@ public class ScheduledTaskServiceTest {
         OffsetDateTime expectedTaskDateTime = OffsetDateTime.now().plusDays(1);
 
         assertThat(scheduledTaskRRunDateTime).isCloseTo(expectedTaskDateTime, within(5, ChronoUnit.SECONDS));
+
+        ArgumentCaptor<ScheduledTask> scheduledTaskArgumentCaptor = ArgumentCaptor.forClass(ScheduledTask.class);
+
+        verify(scheduledTaskRepository).saveAndFlush(scheduledTaskArgumentCaptor.capture());
+        ScheduledTask actualScheduledTask = scheduledTaskArgumentCaptor.getValue();
+        assertThat(actualScheduledTask.getId()).isEqualTo(scheduledTask.getId());
+        assertThat(actualScheduledTask.getScheduledTaskType()).isEqualTo(ScheduledTaskType.ACTION_WITH_PACKCODE);
+        assertThat(actualScheduledTask.getPackCode()).isEqualTo("Test-Pack-Code");
+        assertThat(actualScheduledTask.getName()).isEqualTo("Task 1");
+        assertThat(actualScheduledTask.getRmToActionDate()).isCloseTo(expectedTaskDateTime, within(5, ChronoUnit.SECONDS));
     }
 
     private Case getSimpleCaseWithinSurvey(ScheduleTemplate scheduleTemplate) {
@@ -83,39 +98,5 @@ public class ScheduledTaskServiceTest {
         caze.setCollectionExercise(collectionExercise);
 
         return caze;
-    }
-
-    private ScheduleTemplate createOneTaskSimpleScheduleTemplate() {
-        ScheduleTemplateTask scheduleTemplateTask = new ScheduleTemplateTask();
-        scheduleTemplateTask.setName("Task 1");
-        scheduleTemplateTask.setScheduledTaskType(ScheduledTaskType.ACTION_WITH_PACKCODE);
-        scheduleTemplateTask.setDateOffSetFromStart(new DateOffSet(ChronoUnit.DAYS, 1));
-
-        ScheduleTemplateTaskGroup scheduleTemplateTaskGroup = new ScheduleTemplateTaskGroup();
-        scheduleTemplateTaskGroup.setName("Task Group 1");
-        scheduleTemplateTaskGroup.setScheduleTemplateTasks(List.of(scheduleTemplateTask));
-        scheduleTemplateTaskGroup.setDateOffsetFromTaskGroupStart((new DateOffSet(ChronoUnit.DAYS, 0)));
-
-        ScheduleTemplateTaskGroup[] scheduleTemplateTaskGroups = new ScheduleTemplateTaskGroup[]{scheduleTemplateTaskGroup};
-
-        ScheduleTemplate scheduleTemplate = new ScheduleTemplate();
-        scheduleTemplate.setName("Simple Schedule Template");
-        scheduleTemplate.setScheduleTemplateTaskGroups(scheduleTemplateTaskGroups);
-
-        return scheduleTemplate;
-    }
-
-    public String convertObjectToJson(Object obj) {
-        ObjectMapper objectMapper = new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .registerModule(new Jdk8Module())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        try {
-            return objectMapper.writeValueAsString(obj);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed converting Object To Json", e);
-        }
     }
 }
