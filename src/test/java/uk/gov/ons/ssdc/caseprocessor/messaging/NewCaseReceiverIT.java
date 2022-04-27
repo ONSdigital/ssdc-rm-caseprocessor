@@ -1,12 +1,12 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.ScheduleTaskHelper.convertObjectToJson;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.ScheduleTaskHelper.createOneTaskSimpleScheduleTemplate;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.NEW_CASE_TOPIC;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,14 +21,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import src.main.java.uk.gov.ons.ssdc.common.model.entity.ScheduleTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.NewCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.ScheduleTemplate;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileTemplateRepository;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentSurveyExportFileTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ScheduledTaskRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
@@ -39,6 +41,8 @@ import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.Event;
 import uk.gov.ons.ssdc.common.model.entity.EventType;
+import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
+import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyExportFileTemplate;
 import uk.gov.ons.ssdc.common.model.entity.Survey;
 
 @ContextConfiguration
@@ -60,6 +64,11 @@ public class NewCaseReceiverIT {
 
   @Autowired private ScheduledTaskRepository scheduledTaskRepository;
   @Autowired private SurveyRepository surveyRepository;
+
+  @Autowired private ExportFileTemplateRepository exportFileTemplateRepository;
+
+  @Autowired
+  private FulfilmentSurveyExportFileTemplateRepository fulfilmentSurveyExportFileTemplateRepository;
 
   @BeforeEach
   public void setUp() {
@@ -138,9 +147,16 @@ public class NewCaseReceiverIT {
 
       CollectionExercise collectionExercise = junkDataHelper.setupJunkCollex();
       // Setting up schedules
-      ScheduleTemplate scheduleTemplate = createOneTaskSimpleScheduleTemplate();
+
+      ExportFileTemplate exportFileTemplate = addExportFileTemplate("Test-Pack-Code");
+      allowPackCodeOnSurvey("Test-Pack-Code", collectionExercise.getSurvey(), exportFileTemplate);
+      ScheduleTemplate scheduleTemplate =
+          createOneTaskSimpleScheduleTemplate(ChronoUnit.SECONDS, 0);
+
       Survey survey = collectionExercise.getSurvey();
-      survey.setScheduleTemplate("{\"name\": \"CIS\", \"scheduleTemplateTaskGroups\": [{\"name\": \"CIS WEEK 1\", \"dateOffsetFromTaskGroupStart\": {\"dateUnit\": \"WEEKS\", \"offset\": 0}, \"scheduleTemplateTasks\": [{\"name\": \"Start Of Period Letter\", \"scheduledTaskType\": \"ACTION_WITH_PACKCODE\", \"packCode\": \"CIS_REMINDER_BDVKD03SJP\", \"dateOffSetFromStart\": {\"dateUnit\": \"DAYS\", \"offset\": 0}}]}, {\"name\": \"CIS WEEK 2\", \"dateOffsetFromTaskGroupStart\": {\"dateUnit\": \"WEEKS\", \"offset\": 2}, \"scheduleTemplateTasks\": [{\"name\": \"Start Of Period Letter\", \"scheduledTaskType\": \"ACTION_WITH_PACKCODE\", \"packCode\": \"CIS_REMINDER_IZ0G5C7XPH\", \"dateOffSetFromStart\": {\"dateUnit\": \"DAYS\", \"offset\": 0}}]}]}");
+
+      survey.setScheduleTemplate(scheduleTemplate);
+
       surveyRepository.saveAndFlush(survey);
 
       Map<String, String> sample = new HashMap<>();
@@ -178,10 +194,38 @@ public class NewCaseReceiverIT {
       assertThat(actualCase.getSampleSensitive()).isEqualTo(sampleSensitive);
       assertThat(actualCase.getSchedule()).isNotNull();
 
+      // TODO:  Test Schedule
+
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);
       assertThat(events.get(0).getType()).isEqualTo(EventType.NEW_CASE);
       assertThat(events.get(0).getPayload()).contains("{\"SensitiveJunk\": \"REDACTED\"}");
+
+      // TODO: Alter
     }
+  }
+
+  private void allowPackCodeOnSurvey(
+      String packCode, Survey survey, ExportFileTemplate exportFileTemplate) {
+    FulfilmentSurveyExportFileTemplate fulfilmentSurveyExportFileTemplate =
+        new FulfilmentSurveyExportFileTemplate();
+    fulfilmentSurveyExportFileTemplate.setSurvey(survey);
+    fulfilmentSurveyExportFileTemplate.setId(UUID.randomUUID());
+    fulfilmentSurveyExportFileTemplate.setExportFileTemplate(exportFileTemplate);
+
+    fulfilmentSurveyExportFileTemplateRepository.saveAndFlush(fulfilmentSurveyExportFileTemplate);
+  }
+
+  private ExportFileTemplate addExportFileTemplate(String packCode) {
+    ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
+    exportFileTemplate.setPackCode(packCode);
+    exportFileTemplate.setTemplate(new String[] {"ADDRESS_LINE1", "POSTCODE"});
+    exportFileTemplate.setExportFileDestination("SUPPLIER_A");
+    exportFileTemplate.setMetadata("{\"foo\": \"bar\"}");
+    exportFileTemplate.setDescription("test");
+
+    exportFileTemplateRepository.saveAndFlush(exportFileTemplate);
+
+    return exportFileTemplate;
   }
 }

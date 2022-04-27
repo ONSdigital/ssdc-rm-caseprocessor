@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.FulfilmentService;
-import uk.gov.ons.ssdc.caseprocessor.service.ScheduledTaskService;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.ScheduledTask;
 
@@ -18,9 +17,7 @@ public class ScheduledTaskProcessor {
   private final FulfilmentService fulfilmentService;
   private final CaseService caseService;
 
-  public ScheduledTaskProcessor(
-      FulfilmentService fulfilmentService,
-      CaseService caseService) {
+  public ScheduledTaskProcessor(FulfilmentService fulfilmentService, CaseService caseService) {
     this.fulfilmentService = fulfilmentService;
     this.caseService = caseService;
   }
@@ -31,7 +28,7 @@ public class ScheduledTaskProcessor {
         processActionWithPackCode(scheduledTask);
         break;
 
-      // NEW TYPES GO HERE
+        // NEW TYPES GO HERE
 
       default:
         {
@@ -49,9 +46,7 @@ public class ScheduledTaskProcessor {
     fulfilmentService.processPrintFulfilment(
         caze,
         scheduledTask.getPackCode(),
-        scheduledTask
-            .getId(), // This is correlationId, use this for now - will link back to something at
-        // least?
+        scheduledTask.getId(),
         "SRM_SCHEDULED_TASK",
         metaData,
         scheduledTask.getId());

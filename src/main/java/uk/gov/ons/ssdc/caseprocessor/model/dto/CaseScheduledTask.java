@@ -3,6 +3,7 @@ package uk.gov.ons.ssdc.caseprocessor.model.dto;
 import java.util.List;
 import java.util.UUID;
 import lombok.Data;
+import src.main.java.uk.gov.ons.ssdc.common.model.entity.DateOffSet;
 import uk.gov.ons.ssdc.common.model.entity.ScheduledTaskType;
 
 @Data

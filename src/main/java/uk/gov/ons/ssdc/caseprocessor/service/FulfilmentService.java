@@ -46,8 +46,7 @@ public class FulfilmentService {
 
   private ExportFileTemplate getAllowedPrintTemplate(String packCode, Case caze) {
     List<FulfilmentSurveyExportFileTemplate> allowedTemplates =
-        fulfilmentSurveyExportFileTemplateRepository.findBySurvey(
-            caze.getCollectionExercise().getSurvey());
+        fulfilmentSurveyExportFileTemplateRepository.findBySurvey(caze.getCollectionExercise().getSurvey());
 
     for (FulfilmentSurveyExportFileTemplate fulfilmentSurveyExportFileTemplate : allowedTemplates) {
       if (fulfilmentSurveyExportFileTemplate

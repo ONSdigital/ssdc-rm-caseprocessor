@@ -100,10 +100,9 @@ public class NewCaseReceiver {
     newCase.setId(newCasePayload.getCaseId());
     newCase.setCollectionExercise(collex);
 
-    if (newCase.getCollectionExercise().getSurvey().getScheduleTemplate() != null
-        && newCase.getCollectionExercise().getSurvey().getScheduleTemplate().toString().length()
-            != 0) {
-      newCase.setSchedule(scheduledTaskService.addScheduleToDBAndReturnScheduledTaskGroups(newCase));
+    if (newCase.getCollectionExercise().getSurvey().getScheduleTemplate() != null) {
+      newCase.setSchedule(
+          scheduledTaskService.addScheduleToDBAndReturnScheduledTaskGroups(newCase));
     }
 
     newCase.setSample(sample);

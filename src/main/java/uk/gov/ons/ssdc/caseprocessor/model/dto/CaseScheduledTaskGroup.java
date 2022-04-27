@@ -2,6 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.model.dto;
 
 import java.util.List;
 import lombok.Data;
+import src.main.java.uk.gov.ons.ssdc.common.model.entity.DateOffSet;
 
 @Data
 public class CaseScheduledTaskGroup {
