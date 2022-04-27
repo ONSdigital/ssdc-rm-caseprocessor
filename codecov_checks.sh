@@ -14,4 +14,6 @@ gpgv codecov.SHA256SUM.sig codecov.SHA256SUM || exit 1
 shasum -a 256 -c codecov.SHA256SUM || exit 1
 
 chmod +x codecov
-./codecov -C $COMMIT_SHA -r "ONSdigital/ssdc-rm-caseprocessor"
+COMMIT_SHA_LONG = $COMMIT_SHA
+echo $COMMIT_SHA_LONG
+./codecov -C $COMMIT_SHA_LONG  -r "ONSdigital/ssdc-rm-caseprocessor
