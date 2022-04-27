@@ -12,4 +12,4 @@ gpgv codecov.SHA256SUM.sig codecov.SHA256SUM || exit 1
 shasum -a 256 -c codecov.SHA256SUM || exit 1
 
 chmod +x codecov
-./codecov -B $BRANCH_NAME
+./codecov -B $_HEAD_BRANCH -P $_PR_NUMBER
