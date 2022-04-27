@@ -12,5 +12,4 @@ steps:
   - name: gcr.io/cloud-builders/curl
     entrypoint: bash
     args:
-      - 'ls'
       - './codecov_checks.sh'
