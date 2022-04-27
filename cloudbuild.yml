@@ -29,4 +29,4 @@ steps:
         shasum -a 256 -c codecov.SHA256SUM || exit 1
       
         chmod +x codecov
-        ./codecov -C $COMMIT_SHA -B $BRANCH_NAME -r "ONSdigital/ssdc-rm-caseprocessor"
+        ./codecov -C $COMMIT_SHA -B $BRANCH_NAME -r "ONSdigital/ssdc-rm-caseprocessor" -P $_PR_NUMBER
