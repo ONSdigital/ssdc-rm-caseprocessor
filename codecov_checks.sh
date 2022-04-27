@@ -1,4 +1,6 @@
 ls
+echo $_HEAD_BRANCH
+echo $_PR_NUMBER
 apt-get update
 apt-get install -y gnupg
 apt-get install -y git
@@ -12,4 +14,4 @@ gpgv codecov.SHA256SUM.sig codecov.SHA256SUM || exit 1
 shasum -a 256 -c codecov.SHA256SUM || exit 1
 
 chmod +x codecov
-./codecov -B $_HEAD_BRANCH -P $_PR_NUMBER
+./codecov -C $COMMIT_SHA -r "ONSdigital/ssdc-rm-caseprocessor"
