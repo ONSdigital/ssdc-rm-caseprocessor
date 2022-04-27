@@ -1,6 +1,7 @@
 apt-get update
 apt-get install -y gnupg
 apt-get install -y git
+cd ssdc-rm-caseprocessor
 gpg --no-default-keyring --keyring trustedkeys.gpg --import codecov_public_key.asc
 curl -Os https://uploader.codecov.io/latest/linux/codecov
 curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
