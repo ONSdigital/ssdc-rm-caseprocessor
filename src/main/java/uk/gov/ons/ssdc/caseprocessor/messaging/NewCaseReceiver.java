@@ -103,7 +103,7 @@ public class NewCaseReceiver {
     if (newCase.getCollectionExercise().getSurvey().getScheduleTemplate() != null
         && newCase.getCollectionExercise().getSurvey().getScheduleTemplate().toString().length()
             != 0) {
-      newCase.setSchedule(scheduledTaskService.addScheduleToDBAndReturnJSONRepresentation(newCase));
+      newCase.setSchedule(scheduledTaskService.addScheduleToDBAndReturnScheduledTaskGroups(newCase));
     }
 
     newCase.setSample(sample);

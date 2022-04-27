@@ -20,8 +20,7 @@ public class ScheduledTaskProcessor {
 
   public ScheduledTaskProcessor(
       FulfilmentService fulfilmentService,
-      CaseService caseService,
-      ScheduledTaskService scheduledTaskService) {
+      CaseService caseService) {
     this.fulfilmentService = fulfilmentService;
     this.caseService = caseService;
   }
@@ -32,9 +31,7 @@ public class ScheduledTaskProcessor {
         processActionWithPackCode(scheduledTask);
         break;
 
-        //      case COMPLETION:
-        //        processsCompletionCheck(scheduledTask);
-        //        break;
+      // NEW TYPES GO HERE
 
       default:
         {
