@@ -19,10 +19,9 @@ public class ScheduledTaskScheduler {
 
   @Scheduled(fixedDelayString = "${scheduler.frequency}")
   public void triggerScheduledTasks() {
-    //    Cluster leader or cluster ....
-    //    if (!clusterLeaderManager.isThisHostClusterLeader()) {
-    //      return; // This host (i.e. pod) is not the leader... don't do any scheduling
-    //    }
+        if (!clusterLeaderManager.isThisHostClusterLeader()) {
+          return; // This host (i.e. pod) is not the leader... don't do any scheduling
+        }
 
     try {
       scheduledTaskTriggerer.triggerScheduledTasks();
