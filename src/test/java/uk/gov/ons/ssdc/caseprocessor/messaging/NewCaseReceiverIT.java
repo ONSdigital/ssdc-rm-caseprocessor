@@ -243,9 +243,11 @@ public class NewCaseReceiverIT {
       fulfilmentNextTrigger.setTriggerDateTime(OffsetDateTime.now());
       fulfilmentNextTriggerRepository.saveAndFlush(fulfilmentNextTrigger);
 
-      EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
+      EventDTO rme = outboundUacQueue.getQueue().poll(10, TimeUnit.SECONDS);
+      assertThat(rme).isNotNull();
 
       List<ExportFileRow> exportFileRows = exportFileRowRepository.findAll();
+      assertThat(exportFileRows.size()).isEqualTo(1);
       ExportFileRow exportFileRow = exportFileRows.get(0);
 
       Assertions.assertThat(exportFileRow).isNotNull();

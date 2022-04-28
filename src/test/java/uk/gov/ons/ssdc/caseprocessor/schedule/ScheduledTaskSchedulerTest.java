@@ -14,15 +14,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class ScheduledTaskSchedulerTest {
 
-  @Mock
-  private ClusterLeaderManager clusterLeaderManager;
-  @Mock
-  private ScheduledTaskTriggerer scheduledTaskTriggerer;
+  @Mock private ClusterLeaderManager clusterLeaderManager;
+  @Mock private ScheduledTaskTriggerer scheduledTaskTriggerer;
 
   @InjectMocks ScheduledTaskScheduler underTest;
 
   @Test
-  public void testSchedulerSchedules () {
+  public void testSchedulerSchedules() {
     // Given
     when(clusterLeaderManager.isThisHostClusterLeader()).thenReturn(true);
 
