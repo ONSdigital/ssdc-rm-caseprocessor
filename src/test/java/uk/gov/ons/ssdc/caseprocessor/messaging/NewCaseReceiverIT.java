@@ -12,8 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +23,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import src.main.java.uk.gov.ons.ssdc.common.model.entity.ScheduleTemplate;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseScheduledTaskGroup;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
@@ -154,7 +151,7 @@ public class NewCaseReceiverIT {
 
       ExportFileTemplate exportFileTemplate = addExportFileTemplate("Test-Pack-Code");
       allowPackCodeOnSurvey("Test-Pack-Code", collectionExercise.getSurvey(), exportFileTemplate);
-      
+
       ScheduleTemplate scheduleTemplate =
           createOneTaskSimpleScheduleTemplate(ChronoUnit.SECONDS, 0);
 
@@ -198,13 +195,14 @@ public class NewCaseReceiverIT {
       assertThat(actualCase.getSample()).isEqualTo(sample);
       assertThat(actualCase.getSampleSensitive()).isEqualTo(sampleSensitive);
 
-      assertThat(actualCase.getSchedule()).isNotNull() ;
+      assertThat(actualCase.getSchedule()).isNotNull();
       ArrayList<Map> actualSchedule = (ArrayList<Map>) actualCase.getSchedule();
       assertThat(actualSchedule.size()).isEqualTo(1);
 
       assertThat(actualSchedule.get(0).get("name")).isEqualTo("Task Group 1");
 
-      ArrayList<Map> actualScheduleTasks = (ArrayList<Map>) actualSchedule.get(0).get("scheduledTasks");
+      ArrayList<Map> actualScheduleTasks =
+          (ArrayList<Map>) actualSchedule.get(0).get("scheduledTasks");
       assertThat(actualScheduleTasks.size()).isEqualTo(1);
 
       Map task = actualScheduleTasks.get(0);
@@ -219,9 +217,6 @@ public class NewCaseReceiverIT {
 
       Thread.sleep(5000);
       assertThat(scheduledTaskRepository.findAll().size()).isEqualTo(0);
-
-      
-
     }
   }
 
