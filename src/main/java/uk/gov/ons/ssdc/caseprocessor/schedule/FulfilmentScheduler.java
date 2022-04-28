@@ -34,10 +34,9 @@ public class FulfilmentScheduler {
   @Scheduled(fixedDelayString = "${scheduler.frequency}")
   @Transactional
   public void scheduleFulfilments() {
-    //    Keeps going wrong debugging, thinks it's not the leader
-    //    if (!clusterLeaderManager.isThisHostClusterLeader()) {
-    //      return; // This host (i.e. pod) is not the leader... don't do any scheduling
-    //    }
+    if (!clusterLeaderManager.isThisHostClusterLeader()) {
+      return; // This host (i.e. pod) is not the leader... don't do any scheduling
+    }
 
     // Check if it's time to process the fulfilments
     Optional<FulfilmentNextTrigger> triggerOptional =
