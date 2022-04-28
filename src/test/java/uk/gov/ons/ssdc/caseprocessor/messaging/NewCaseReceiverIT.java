@@ -71,26 +71,17 @@ public class NewCaseReceiverIT {
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
 
-  @Autowired
-  private PubsubHelper pubsubHelper;
-  @Autowired
-  private DeleteDataHelper deleteDataHelper;
-  @Autowired
-  private JunkDataHelper junkDataHelper;
-  @Autowired
-  private EventRepository eventRepository;
-  @Autowired
-  private CaseRepository caseRepository;
-  @Autowired
-  private ScheduledTaskRepository scheduledTaskRepository;
-  @Autowired
-  private SurveyRepository surveyRepository;
-  @Autowired
-  private ExportFileTemplateRepository exportFileTemplateRepository;
-  @Autowired
-  private ExportFileRowRepository exportFileRowRepository;
-  @Autowired
-  private FulfilmentNextTriggerRepository fulfilmentNextTriggerRepository;
+  @Autowired private PubsubHelper pubsubHelper;
+  @Autowired private DeleteDataHelper deleteDataHelper;
+  @Autowired private JunkDataHelper junkDataHelper;
+  @Autowired private EventRepository eventRepository;
+  @Autowired private CaseRepository caseRepository;
+  @Autowired private ScheduledTaskRepository scheduledTaskRepository;
+  @Autowired private SurveyRepository surveyRepository;
+  @Autowired private ExportFileTemplateRepository exportFileTemplateRepository;
+  @Autowired private ExportFileRowRepository exportFileRowRepository;
+  @Autowired private FulfilmentNextTriggerRepository fulfilmentNextTriggerRepository;
+
   @Autowired
   private FulfilmentSurveyExportFileTemplateRepository fulfilmentSurveyExportFileTemplateRepository;
 
@@ -160,7 +151,7 @@ public class NewCaseReceiverIT {
   @Test
   public void testNewCaseLoadedWithScheduleSet() throws InterruptedException {
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
-        pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class);
+            pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class);
         QueueSpy<EventDTO> outboundUacQueue =
             pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
 
@@ -186,10 +177,10 @@ public class NewCaseReceiverIT {
       survey.setScheduleTemplate(scheduleTemplate);
 
       survey.setSampleValidationRules(
-          new ColumnValidator[]{
-              new ColumnValidator("ADDRESS_LINE1", false, new Rule[]{new MandatoryRule()}),
-              new ColumnValidator("POSTCODE", false, new Rule[]{new MandatoryRule()}),
-              new ColumnValidator("SensitiveJunk", true, new Rule[]{new MandatoryRule()})
+          new ColumnValidator[] {
+            new ColumnValidator("ADDRESS_LINE1", false, new Rule[] {new MandatoryRule()}),
+            new ColumnValidator("POSTCODE", false, new Rule[] {new MandatoryRule()}),
+            new ColumnValidator("SensitiveJunk", true, new Rule[] {new MandatoryRule()})
           });
 
       surveyRepository.saveAndFlush(survey);
@@ -281,7 +272,7 @@ public class NewCaseReceiverIT {
   private ExportFileTemplate addExportFileTemplate(String packCode) {
     ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
     exportFileTemplate.setPackCode(packCode);
-    exportFileTemplate.setTemplate(new String[]{"ADDRESS_LINE1", "POSTCODE", "__uac__"});
+    exportFileTemplate.setTemplate(new String[] {"ADDRESS_LINE1", "POSTCODE", "__uac__"});
     exportFileTemplate.setExportFileDestination("SUPPLIER_A");
     exportFileTemplate.setMetadata("{\"foo\": \"bar\"}");
     exportFileTemplate.setDescription("test");
