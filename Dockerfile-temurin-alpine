@@ -1,0 +1,11 @@
+FROM eclipse-temurin:17.0.3_7-jdk-alpine
+
+ARG JAR_FILE=ssdc-rm-caseprocessor*.jar
+
+CMD ["java", "-jar", "/opt/ssdc-rm-caseprocessor.jar"]
+COPY healthcheck.sh /opt/healthcheck.sh
+RUN addgroup --gid 1000 caseprocessor && \
+    adduser -S -D -H -u 1000 -G caseprocessor caseprocessor
+USER caseprocessor
+
+COPY target/$JAR_FILE /opt/ssdc-rm-caseprocessor.jar

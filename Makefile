@@ -1,10 +1,11 @@
-
 install:
 	mvn clean install
 
 build: install docker-build
 
-build-no-test:
+build-no-test: install-no-test docker-build
+
+install-no-test:
 	mvn clean install -Dmaven.test.skip=true -DdockerCompose.skip=true
 
 format:
