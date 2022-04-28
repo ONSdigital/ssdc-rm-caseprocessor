@@ -11,6 +11,7 @@ steps:
     args: [ 'verify','jacoco:report', '-DdockerCompose.skip=true', '-Dspring.profiles.active=test-ci' ]
   - name: gcr.io/cloud-builders/curl
     entrypoint: bash
+    secretEnv: [ CODECOV_TOKEN_CP ]
     args:
       - '-eEuo'
       - 'pipefail'
@@ -29,4 +30,9 @@ steps:
         shasum -a 256 -c codecov.SHA256SUM || exit 1
       
         chmod +x codecov
-        ./codecov -C $COMMIT_SHA -B $BRANCH_NAME -r "ONSdigital/ssdc-rm-caseprocessor" -P $_PR_NUMBER
+        ./codecov -t $$CODECOV_TOKEN_CP -C $COMMIT_SHA -B $BRANCH_NAME -r "ONSdigital/ssdc-rm-caseprocessor" -P $_PR_NUMBER
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/$PROJECT_ID/secrets/codecov-token-case-processor/versions/1
+      env: CODECOV_TOKEN_CP
