@@ -202,6 +202,10 @@ public class NewCaseReceiverIT {
       assertThat(events.get(0).getPayload()).contains("{\"SensitiveJunk\": \"REDACTED\"}");
 
       // TODO: Alter
+
+      //      Do a fancy pants retry instead
+      Thread.sleep(5000);
+      assertThat(scheduledTaskRepository.findAll().size()).isEqualTo(0);
     }
   }
 
