@@ -4,6 +4,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.ScheduleTaskHelper.createOneTaskSimpleScheduleTemplate;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.NEW_CASE_TOPIC;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,38 +68,36 @@ public class NewCaseReceiverIT {
   @Value("${queueconfig.case-update-topic}")
   private String caseUpdateTopic;
 
+  @Value("${queueconfig.uac-update-topic}")
+  private String uacUpdateTopic;
+
   @Autowired
   private PubsubHelper pubsubHelper;
   @Autowired
   private DeleteDataHelper deleteDataHelper;
   @Autowired
   private JunkDataHelper junkDataHelper;
-
   @Autowired
   private EventRepository eventRepository;
   @Autowired
   private CaseRepository caseRepository;
-
   @Autowired
   private ScheduledTaskRepository scheduledTaskRepository;
   @Autowired
   private SurveyRepository surveyRepository;
-
   @Autowired
   private ExportFileTemplateRepository exportFileTemplateRepository;
-
   @Autowired
   private ExportFileRowRepository exportFileRowRepository;
-
   @Autowired
   private FulfilmentNextTriggerRepository fulfilmentNextTriggerRepository;
-
   @Autowired
   private FulfilmentSurveyExportFileTemplateRepository fulfilmentSurveyExportFileTemplateRepository;
 
   @BeforeEach
   public void setUp() {
     pubsubHelper.purgeSharedProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
+    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
@@ -160,7 +160,9 @@ public class NewCaseReceiverIT {
   @Test
   public void testNewCaseLoadedWithScheduleSet() throws InterruptedException {
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
-        pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class);
+        QueueSpy<EventDTO> outboundUacQueue =
+            pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
 
       // GIVEN
       EventDTO event = new EventDTO();
@@ -187,7 +189,7 @@ public class NewCaseReceiverIT {
           new ColumnValidator[]{
               new ColumnValidator("ADDRESS_LINE1", false, new Rule[]{new MandatoryRule()}),
               new ColumnValidator("POSTCODE", false, new Rule[]{new MandatoryRule()}),
-              new ColumnValidator("SensitiveJunk", true, new Rule[] {new MandatoryRule()})
+              new ColumnValidator("SensitiveJunk", true, new Rule[]{new MandatoryRule()})
           });
 
       surveyRepository.saveAndFlush(survey);
@@ -245,27 +247,23 @@ public class NewCaseReceiverIT {
       assertThat(events.get(0).getType()).isEqualTo(EventType.NEW_CASE);
       assertThat(events.get(0).getPayload()).contains("{\"SensitiveJunk\": \"REDACTED\"}");
 
-      // TODO: Alter
-
-      Thread.sleep(5000);
-      assertThat(scheduledTaskRepository.findAll().size()).isEqualTo(0);
-
       FulfilmentNextTrigger fulfilmentNextTrigger = new FulfilmentNextTrigger();
       fulfilmentNextTrigger.setId(UUID.randomUUID());
       fulfilmentNextTrigger.setTriggerDateTime(OffsetDateTime.now());
       fulfilmentNextTriggerRepository.saveAndFlush(fulfilmentNextTrigger);
 
-      Thread.sleep(5000);
+      EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       List<ExportFileRow> exportFileRows = exportFileRowRepository.findAll();
       ExportFileRow exportFileRow = exportFileRows.get(0);
 
-      // Then
       Assertions.assertThat(exportFileRow).isNotNull();
       Assertions.assertThat(exportFileRow.getBatchQuantity()).isEqualTo(1);
       Assertions.assertThat(exportFileRow.getPackCode()).isEqualTo(TEST_PACK_CODE);
       Assertions.assertThat(exportFileRow.getExportFileDestination()).isEqualTo("SUPPLIER_A");
-      Assertions.assertThat(exportFileRow.getRow()).isEqualTo("\"666 Fake Street\"|\"PO57 C0D\"");
+      Assertions.assertThat(exportFileRow.getRow()).startsWith("\"666 Fake Street\"|\"PO57 C0D\"|");
+
+      assertThat(scheduledTaskRepository.findAll().size()).isEqualTo(0);
     }
   }
 
@@ -283,7 +281,7 @@ public class NewCaseReceiverIT {
   private ExportFileTemplate addExportFileTemplate(String packCode) {
     ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
     exportFileTemplate.setPackCode(packCode);
-    exportFileTemplate.setTemplate(new String[]{"ADDRESS_LINE1", "POSTCODE"});
+    exportFileTemplate.setTemplate(new String[]{"ADDRESS_LINE1", "POSTCODE", "__uac__"});
     exportFileTemplate.setExportFileDestination("SUPPLIER_A");
     exportFileTemplate.setMetadata("{\"foo\": \"bar\"}");
     exportFileTemplate.setDescription("test");
