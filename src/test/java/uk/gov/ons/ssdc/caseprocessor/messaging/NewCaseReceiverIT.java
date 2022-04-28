@@ -7,10 +7,13 @@ import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CAS
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import src.main.java.uk.gov.ons.ssdc.common.model.entity.ScheduleTemplate;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseScheduledTaskGroup;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
@@ -150,6 +154,7 @@ public class NewCaseReceiverIT {
 
       ExportFileTemplate exportFileTemplate = addExportFileTemplate("Test-Pack-Code");
       allowPackCodeOnSurvey("Test-Pack-Code", collectionExercise.getSurvey(), exportFileTemplate);
+      
       ScheduleTemplate scheduleTemplate =
           createOneTaskSimpleScheduleTemplate(ChronoUnit.SECONDS, 0);
 
@@ -192,9 +197,18 @@ public class NewCaseReceiverIT {
       assertThat(actualCase.getCollectionExercise().getId()).isEqualTo(collectionExercise.getId());
       assertThat(actualCase.getSample()).isEqualTo(sample);
       assertThat(actualCase.getSampleSensitive()).isEqualTo(sampleSensitive);
-      assertThat(actualCase.getSchedule()).isNotNull();
 
-      // TODO:  Test Schedule
+      assertThat(actualCase.getSchedule()).isNotNull() ;
+      ArrayList<Map> actualSchedule = (ArrayList<Map>) actualCase.getSchedule();
+      assertThat(actualSchedule.size()).isEqualTo(1);
+
+      assertThat(actualSchedule.get(0).get("name")).isEqualTo("Task Group 1");
+
+      ArrayList<Map> actualScheduleTasks = (ArrayList<Map>) actualSchedule.get(0).get("scheduledTasks");
+      assertThat(actualScheduleTasks.size()).isEqualTo(1);
+
+      Map task = actualScheduleTasks.get(0);
+      assertThat(task.get("name")).isEqualTo("Task 1");
 
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);
@@ -203,9 +217,11 @@ public class NewCaseReceiverIT {
 
       // TODO: Alter
 
-      //      Do a fancy pants retry instead
       Thread.sleep(5000);
       assertThat(scheduledTaskRepository.findAll().size()).isEqualTo(0);
+
+      
+
     }
   }
 
