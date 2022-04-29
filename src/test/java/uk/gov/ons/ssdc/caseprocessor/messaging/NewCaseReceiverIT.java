@@ -2,9 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static uk.gov.ons.ssdc.caseprocessor.testutils.ScheduleTaskHelper.createOneTaskSimpleScheduleTemplate;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.NEW_CASE_TOPIC;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_CASE_SUBSCRIPTION;
-import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.OUTBOUND_UAC_SUBSCRIPTION;
+import static uk.gov.ons.ssdc.caseprocessor.testutils.TestConstants.*;
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.OUTBOUND_EVENT_SCHEMA_VERSION;
 
 import java.time.OffsetDateTime;
@@ -37,12 +35,13 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentNextTriggerRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentSurveyExportFileTemplateRepository;
-import uk.gov.ons.ssdc.caseprocessor.model.repository.ScheduledTaskRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.SurveyRepository;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
+import uk.gov.ons.ssdc.caseprocessor.testutils.ScheduledTaskPoller;
+import uk.gov.ons.ssdc.caseprocessor.testutils.ScheduledTasksNotProcessedException;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 import uk.gov.ons.ssdc.common.model.entity.Event;
@@ -76,7 +75,6 @@ public class NewCaseReceiverIT {
   @Autowired private JunkDataHelper junkDataHelper;
   @Autowired private EventRepository eventRepository;
   @Autowired private CaseRepository caseRepository;
-  @Autowired private ScheduledTaskRepository scheduledTaskRepository;
   @Autowired private SurveyRepository surveyRepository;
   @Autowired private ExportFileTemplateRepository exportFileTemplateRepository;
   @Autowired private ExportFileRowRepository exportFileRowRepository;
@@ -84,6 +82,8 @@ public class NewCaseReceiverIT {
 
   @Autowired
   private FulfilmentSurveyExportFileTemplateRepository fulfilmentSurveyExportFileTemplateRepository;
+
+  @Autowired ScheduledTaskPoller scheduledTaskPoller;
 
   @BeforeEach
   public void setUp() {
@@ -149,7 +149,8 @@ public class NewCaseReceiverIT {
   }
 
   @Test
-  public void testNewCaseLoadedWithScheduleSet() throws InterruptedException {
+  public void testNewCaseLoadedWithScheduleSet()
+      throws InterruptedException, ScheduledTasksNotProcessedException {
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
             pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class);
         QueueSpy<EventDTO> outboundUacQueue =
@@ -238,6 +239,8 @@ public class NewCaseReceiverIT {
       assertThat(events.get(0).getType()).isEqualTo(EventType.NEW_CASE);
       assertThat(events.get(0).getPayload()).contains("{\"SensitiveJunk\": \"REDACTED\"}");
 
+      scheduledTaskPoller.waitUntilScheduledTasksProcessed();
+
       FulfilmentNextTrigger fulfilmentNextTrigger = new FulfilmentNextTrigger();
       fulfilmentNextTrigger.setId(UUID.randomUUID());
       fulfilmentNextTrigger.setTriggerDateTime(OffsetDateTime.now());
@@ -255,8 +258,6 @@ public class NewCaseReceiverIT {
       Assertions.assertThat(exportFileRow.getPackCode()).isEqualTo(TEST_PACK_CODE);
       Assertions.assertThat(exportFileRow.getExportFileDestination()).isEqualTo("SUPPLIER_A");
       Assertions.assertThat(exportFileRow.getRow()).startsWith("\"666 Fake Street\"|\"PO57 C0D\"|");
-
-      assertThat(scheduledTaskRepository.findAll().size()).isEqualTo(0);
     }
   }
 
