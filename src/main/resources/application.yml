@@ -32,8 +32,6 @@ spring:
   cloud:
     gcp:
       pubsub:
-        emulator-host: localhost:8538
-        project-id: our-project
         subscriber:
           flow-control:
             max-outstanding-element-count: 100
