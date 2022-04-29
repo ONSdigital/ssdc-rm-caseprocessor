@@ -23,8 +23,7 @@ public class ScheduleTaskHelper {
     scheduleTemplateTaskGroup.setScheduleTemplateTasks(List.of(scheduleTemplateTask));
     scheduleTemplateTaskGroup.setDateOffsetFromTaskGroupStart((new DateOffSet(ChronoUnit.DAYS, 0)));
 
-    ScheduleTemplateTaskGroup[] scheduleTemplateTaskGroups =
-        new ScheduleTemplateTaskGroup[] {scheduleTemplateTaskGroup};
+    List<ScheduleTemplateTaskGroup> scheduleTemplateTaskGroups = List.of(scheduleTemplateTaskGroup);
 
     ScheduleTemplate scheduleTemplate = new ScheduleTemplate();
     scheduleTemplate.setName("Simple Schedule Template");
