@@ -1,14 +1,5 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.ons.ssdc.common.model.entity.ScheduledTaskType.ACTION_WITH_PACKCODE;
-
-import java.util.Map;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +9,13 @@ import uk.gov.ons.ssdc.caseprocessor.service.CaseService;
 import uk.gov.ons.ssdc.caseprocessor.service.FulfilmentService;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.ScheduledTask;
+
+import java.util.Map;
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static uk.gov.ons.ssdc.common.model.entity.ScheduledTaskType.ACTION_WITH_PACKCODE;
 
 @ExtendWith(MockitoExtension.class)
 public class ScheduledTaskProcessorTest {
