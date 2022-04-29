@@ -1,7 +1,5 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
@@ -12,8 +10,6 @@ import uk.gov.ons.ssdc.common.model.entity.ScheduledTask;
 
 @Component
 public class ScheduledTaskProcessor {
-  private static final Logger log = LoggerFactory.getLogger(ScheduledTaskProcessor.class);
-
   private final FulfilmentService fulfilmentService;
   private final CaseService caseService;
 

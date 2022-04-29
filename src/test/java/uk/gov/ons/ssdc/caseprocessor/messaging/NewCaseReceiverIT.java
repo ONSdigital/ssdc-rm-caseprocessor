@@ -168,7 +168,7 @@ public class NewCaseReceiverIT {
       // Setting up schedules
 
       ExportFileTemplate exportFileTemplate = addExportFileTemplate(TEST_PACK_CODE);
-      allowPackCodeOnSurvey(TEST_PACK_CODE, collectionExercise.getSurvey(), exportFileTemplate);
+      allowPackCodeOnSurvey(collectionExercise.getSurvey(), exportFileTemplate);
 
       ScheduleTemplate scheduleTemplate =
           createOneTaskSimpleScheduleTemplate(ChronoUnit.SECONDS, 0);
@@ -261,8 +261,7 @@ public class NewCaseReceiverIT {
     }
   }
 
-  private void allowPackCodeOnSurvey(
-      String packCode, Survey survey, ExportFileTemplate exportFileTemplate) {
+  private void allowPackCodeOnSurvey(Survey survey, ExportFileTemplate exportFileTemplate) {
     FulfilmentSurveyExportFileTemplate fulfilmentSurveyExportFileTemplate =
         new FulfilmentSurveyExportFileTemplate();
     fulfilmentSurveyExportFileTemplate.setSurvey(survey);

@@ -3,8 +3,6 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 import static uk.gov.ons.ssdc.caseprocessor.rasrm.constants.RasRmConstants.BUSINESS_SAMPLE_DEFINITION_URL_SUFFIX;
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,7 +58,7 @@ public class NewCaseReceiver {
 
   @Transactional
   @ServiceActivator(inputChannel = "newCaseInputChannel", adviceChain = "retryAdvice")
-  public void receiveNewCase(Message<byte[]> message) throws JsonProcessingException, SQLException {
+  public void receiveNewCase(Message<byte[]> message) {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
     NewCase newCasePayload = event.getPayload().getNewCase();
