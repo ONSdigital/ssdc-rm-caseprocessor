@@ -27,10 +27,8 @@ public class ScheduledTaskService {
     ScheduleTemplate scheduleTemplate =
         caze.getCollectionExercise().getSurvey().getScheduleTemplate();
 
-    List<CaseScheduledTaskGroup> scheduledTaskGroups =
-        createScheduledTaskGroups(scheduleTemplate, caze.getId());
+    return createScheduledTaskGroups(scheduleTemplate, caze.getId());
 
-    return scheduledTaskGroups;
   }
 
   private List<CaseScheduledTaskGroup> createScheduledTaskGroups(
