@@ -1,7 +1,7 @@
 steps:
   - name: maven:3.8.3-openjdk-17-slim
     entrypoint: mvn
-    args: [ 'fmt:check','pmd:check' ]
+    args: [ 'fmt:check','pmd:check', '--no-transfer-progress' ]
     id: mvn-format
   - id: docker-compose
     name: 'docker/compose:1.29.0'
