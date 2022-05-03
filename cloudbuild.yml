@@ -1,5 +1,5 @@
 steps:
-  - name: maven
+  - name: maven:3.8.3-openjdk-17-slim
     entrypoint: mvn
     args: [ 'fmt:check','pmd:check' ]
     id: mvn-format
@@ -8,7 +8,7 @@ steps:
     args: ['-f', '/workspace/src/test/resources/docker-compose-ci.yml', 'up', '-d']
   - name: maven:3.8.3-openjdk-17-slim
     entrypoint: mvn
-    args: [ 'verify','jacoco:report', '-DdockerCompose.skip=true', '-Dspring.profiles.active=test-ci' ]
+    args: [ 'verify','jacoco:report', '-DdockerCompose.skip=true', '-Dspring.profiles.active=test-ci', '--no-transfer-progress' ]
   - name: gcr.io/cloud-builders/curl
     entrypoint: bash
     secretEnv: [ CODECOV_TOKEN_CP ]
