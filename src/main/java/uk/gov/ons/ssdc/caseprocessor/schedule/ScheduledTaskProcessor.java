@@ -25,6 +25,8 @@ public class ScheduledTaskProcessor {
         break;
 
         // NEW TYPES GO HERE
+        // TODO:  This whole area is a holder.  In the long run it's likely the task would not directly control the PackCode
+        //  as they may be case level settings for Print/SMS/Email.  But this is here as agreed for now.
 
       default:
         {
