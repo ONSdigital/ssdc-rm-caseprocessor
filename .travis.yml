@@ -42,3 +42,4 @@ cache:
 branches:
   only:
     - main
+    - dependency-check
