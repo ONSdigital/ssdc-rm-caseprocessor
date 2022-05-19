@@ -243,6 +243,10 @@
           <format>json</format>
           <format>html</format>
           <prettyPrint>true</prettyPrint>
+          <!-- .Disable Net content-->
+          <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+          <nugetconfAnalyzerEnabled>false</nugetconfAnalyzerEnabled>
+          <nuspecAnalyzerEnabled>false</nuspecAnalyzerEnabled>
         </configuration>
         <executions>
           <execution>
