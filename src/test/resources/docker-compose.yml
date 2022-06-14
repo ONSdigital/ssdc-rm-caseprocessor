@@ -17,11 +17,6 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-case-it:5432/postgres?sslmode=disable
       - SPRING_PROFILES_ACTIVE=dev
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8164/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 10
 
   pubsub-emulator-case-it:
     container_name: pubsub-emulator-case-it
@@ -39,12 +34,6 @@ services:
     depends_on:
       - pubsub-emulator-case-it
     entrypoint: sh -c "/setup_pubsub.sh"
-
-  start_dependencies:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      uac-qid-case-it:
-        condition: service_healthy
 
 networks:
   default:
