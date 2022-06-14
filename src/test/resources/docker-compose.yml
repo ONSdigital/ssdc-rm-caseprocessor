@@ -3,7 +3,7 @@ services:
   postgres-case-it:
     container_name: postgres-case-it
     image: europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/ssdc-rm-dev-common-postgres:latest
-    command: ["-c", "shared_buffers=256MB", "-c", "max_connections=500"]
+    command: ["-c", "shared_buffers=256MB", "-c", "max_connections=500" ]
     ports:
       - "16432:5432"
 
@@ -17,9 +17,11 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-case-it:5432/postgres?sslmode=disable
       - SPRING_PROFILES_ACTIVE=dev
+    volumes:
+      - ./java_healthcheck:/opt/healthcheck/
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8164/actuator/health"]
-      interval: 30s
+      test: [ "CMD", "java", "/opt/healthcheck/HealthCheck.java", "http://localhost:8164/actuator/health" ]
+      interval: 20s
       timeout: 10s
       retries: 10
 
