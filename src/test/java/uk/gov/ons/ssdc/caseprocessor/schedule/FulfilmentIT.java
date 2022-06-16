@@ -37,7 +37,7 @@ import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyExportFileTemplate;
 
 @ContextConfiguration
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 @ExtendWith(SpringExtension.class)
 class FulfilmentIT {
   private static final String FULFILMENT_TOPIC = "event_print-fulfilment";

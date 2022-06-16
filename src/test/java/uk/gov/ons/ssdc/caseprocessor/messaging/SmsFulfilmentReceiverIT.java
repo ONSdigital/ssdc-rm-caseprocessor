@@ -33,7 +33,7 @@ import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ContextConfiguration
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 class SmsFulfilmentReceiverIT {

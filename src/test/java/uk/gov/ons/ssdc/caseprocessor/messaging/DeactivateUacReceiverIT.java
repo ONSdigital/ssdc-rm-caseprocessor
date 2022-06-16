@@ -30,7 +30,7 @@ import uk.gov.ons.ssdc.common.model.entity.EventType;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ContextConfiguration
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 public class DeactivateUacReceiverIT {

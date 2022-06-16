@@ -47,7 +47,7 @@ import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ContextConfiguration
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 @ExtendWith(SpringExtension.class)
 class ActionRuleIT {
   private static final String PACK_CODE = "test-pack-code";

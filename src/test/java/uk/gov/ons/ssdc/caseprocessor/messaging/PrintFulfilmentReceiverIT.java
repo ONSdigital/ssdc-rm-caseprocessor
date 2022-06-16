@@ -33,7 +33,7 @@ import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
 import uk.gov.ons.ssdc.common.model.entity.FulfilmentToProcess;
 
 @ContextConfiguration
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 class PrintFulfilmentReceiverIT {

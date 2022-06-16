@@ -6,5 +6,5 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.ons.ssdc.common.model.entity.SmsTemplate;
 
 @Component
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 public interface SmsTemplateRepository extends JpaRepository<SmsTemplate, String> {}

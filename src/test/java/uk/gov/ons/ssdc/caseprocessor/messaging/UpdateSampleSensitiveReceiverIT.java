@@ -42,7 +42,7 @@ import uk.gov.ons.ssdc.common.validation.MandatoryRule;
 import uk.gov.ons.ssdc.common.validation.Rule;
 
 @ContextConfiguration
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 public class UpdateSampleSensitiveReceiverIT {
