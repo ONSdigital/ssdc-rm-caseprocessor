@@ -25,7 +25,7 @@ import uk.gov.ons.ssdc.common.validation.MandatoryRule;
 import uk.gov.ons.ssdc.common.validation.Rule;
 
 @Component
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 public class JunkDataHelper {
   private static final Random RANDOM = new Random();
 

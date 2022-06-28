@@ -1,0 +1,38 @@
+steps:
+  - name: maven:3.8.3-openjdk-17-slim
+    entrypoint: mvn
+    args: [ 'fmt:check','pmd:check', '--no-transfer-progress', '-B' ]
+    id: mvn-format
+  - id: docker-compose
+    name: 'docker/compose:1.29.0'
+    args: ['-f', '/workspace/src/test/resources/docker-compose-ci.yml', 'up', '-d']
+  - name: maven:3.8.3-openjdk-17-slim
+    entrypoint: mvn
+    args: [ 'verify','jacoco:report', '-DdockerCompose.skip=true', '-Dspring.profiles.active=test-ci', '--no-transfer-progress', '-B' ]
+  - name: gcr.io/cloud-builders/curl
+    entrypoint: bash
+    secretEnv: [ CODECOV_TOKEN_CP ]
+    args:
+      - '-eEuo'
+      - 'pipefail'
+      - '-c'
+      - |-
+        apt-get update
+        apt-get install -y gnupg
+        apt-get install -y git
+        gpg --no-default-keyring --keyring trustedkeys.gpg --import codecov_public_key.asc
+        curl -Os https://uploader.codecov.io/latest/linux/codecov
+        curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+        curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+      
+        # NOTE: the "|| exit 1"'s are required to stop travis continuing to run subsequent steps even if the integrity checks failed
+        gpgv codecov.SHA256SUM.sig codecov.SHA256SUM || exit 1
+        shasum -a 256 -c codecov.SHA256SUM || exit 1
+      
+        chmod +x codecov
+        ./codecov -t $$CODECOV_TOKEN_CP -C $COMMIT_SHA -B $BRANCH_NAME -r "ONSdigital/ssdc-rm-caseprocessor" -P $_PR_NUMBER
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/$PROJECT_NUMBER/secrets/codecov-token-case-processor/versions/1
+      env: CODECOV_TOKEN_CP

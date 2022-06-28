@@ -9,7 +9,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.ssdc.common.model.entity.Event;
 
 @Component
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 public class EventPoller {
   private final EventRepository eventRepository;
 
