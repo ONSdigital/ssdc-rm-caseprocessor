@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk-alpine
+FROM eclipse-temurin:17-jre-alpine
 
 ARG JAR_FILE=ssdc-rm-caseprocessor*.jar
 CMD ["/opt/java/openjdk/bin/java", "-jar", "/opt/ssdc-rm-caseprocessor.jar"]
