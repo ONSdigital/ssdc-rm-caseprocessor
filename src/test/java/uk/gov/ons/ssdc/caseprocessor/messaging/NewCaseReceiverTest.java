@@ -22,7 +22,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
@@ -62,11 +61,17 @@ public class NewCaseReceiverTest {
   @Mock private CollectionExerciseRepository collectionExerciseRepository;
   @Mock private RasRmCaseNotificationEnrichmentService rasRmNewBusinessCaseEnricher;
 
-  @InjectMocks NewCaseReceiver underTest;
-
   @Test
   public void testNewCaseReceiver() {
     // Given
+    NewCaseReceiver underTest =
+        new NewCaseReceiver(
+            caseRepository,
+            caseService,
+            collectionExerciseRepository,
+            eventLogger,
+            rasRmNewBusinessCaseEnricher,
+            caserefgeneratorkey);
     NewCase newCase = new NewCase();
     newCase.setCaseId(TEST_CASE_ID);
     newCase.setCollectionExerciseId(TEST_CASE_COLLECTION_EXERCISE_ID);
@@ -139,6 +144,14 @@ public class NewCaseReceiverTest {
   @Test
   public void testNewCaseReceiverCaseAlreadyExists() {
     // Given
+    NewCaseReceiver underTest =
+        new NewCaseReceiver(
+            caseRepository,
+            caseService,
+            collectionExerciseRepository,
+            eventLogger,
+            rasRmNewBusinessCaseEnricher,
+            caserefgeneratorkey);
     NewCase newCase = new NewCase();
     newCase.setCaseId(TEST_CASE_ID);
 
@@ -167,6 +180,14 @@ public class NewCaseReceiverTest {
 
   @Test
   public void testNewCaseReceiverCollectionExerciseNotFound() {
+    NewCaseReceiver underTest =
+        new NewCaseReceiver(
+            caseRepository,
+            caseService,
+            collectionExerciseRepository,
+            eventLogger,
+            rasRmNewBusinessCaseEnricher,
+            caserefgeneratorkey);
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
 
     // Given
@@ -198,6 +219,14 @@ public class NewCaseReceiverTest {
 
   @Test
   public void testNewCaseReceiverCaseFailsValidation() {
+    NewCaseReceiver underTest =
+        new NewCaseReceiver(
+            caseRepository,
+            caseService,
+            collectionExerciseRepository,
+            eventLogger,
+            rasRmNewBusinessCaseEnricher,
+            caserefgeneratorkey);
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
 
     // Given
@@ -262,6 +291,14 @@ public class NewCaseReceiverTest {
 
   @Test
   public void testNewCaseReceiverCaseFailsValidationBecauseOfUndefinedSensitiveData() {
+    NewCaseReceiver underTest =
+        new NewCaseReceiver(
+            caseRepository,
+            caseService,
+            collectionExerciseRepository,
+            eventLogger,
+            rasRmNewBusinessCaseEnricher,
+            caserefgeneratorkey);
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
 
     // Given
@@ -319,6 +356,14 @@ public class NewCaseReceiverTest {
 
   @Test
   public void testNewCaseReceiverCaseFailsValidationBecauseOfUndefinedSampleData() {
+    NewCaseReceiver underTest =
+        new NewCaseReceiver(
+            caseRepository,
+            caseService,
+            collectionExerciseRepository,
+            eventLogger,
+            rasRmNewBusinessCaseEnricher,
+            caserefgeneratorkey);
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
 
     // Given
@@ -378,6 +423,14 @@ public class NewCaseReceiverTest {
   @Test
   public void testNewCaseReceiverRasRmBusinessCase() {
     // Given
+    NewCaseReceiver underTest =
+        new NewCaseReceiver(
+            caseRepository,
+            caseService,
+            collectionExerciseRepository,
+            eventLogger,
+            rasRmNewBusinessCaseEnricher,
+            caserefgeneratorkey);
     NewCase newCase = new NewCase();
     newCase.setCaseId(TEST_CASE_ID);
     newCase.setCollectionExerciseId(TEST_CASE_COLLECTION_EXERCISE_ID);
