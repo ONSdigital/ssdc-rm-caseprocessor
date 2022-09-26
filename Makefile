@@ -24,3 +24,5 @@ test:
 docker-build:
 	docker build . -t europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/ssdc-rm-caseprocessor:latest
 
+rebuild-java-healthcheck:
+	$(MAKE) -C src/test/resources/java_healthcheck rebuild-java-healthcheck
