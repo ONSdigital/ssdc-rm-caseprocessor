@@ -79,8 +79,6 @@ logging:
     root: INFO
     com.google.cloud.spring.pubsub.integration.inbound.PubSubInboundChannelAdapter: ERROR
 
-caserefgeneratorkey: abc123
-
 scheduler:
   frequency: 1000 #milliseconds
   chunksize: 1000
