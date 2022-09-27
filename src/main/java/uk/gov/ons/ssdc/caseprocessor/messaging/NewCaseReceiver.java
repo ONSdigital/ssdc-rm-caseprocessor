@@ -29,27 +29,26 @@ import uk.gov.ons.ssdc.common.validation.ColumnValidator;
 
 @MessageEndpoint
 public class NewCaseReceiver {
-
   private final CaseRepository caseRepository;
   private final CaseService caseService;
   private final CollectionExerciseRepository collectionExerciseRepository;
   private final EventLogger eventLogger;
   private final RasRmCaseNotificationEnrichmentService rasRmNewBusinessCaseEnricher;
-  private final byte[] caserefgeneratorkey;
+
+  @Value("${caserefgeneratorkey}")
+  private byte[] caserefgeneratorkey;
 
   public NewCaseReceiver(
       CaseRepository caseRepository,
       CaseService caseService,
       CollectionExerciseRepository collectionExerciseRepository,
       EventLogger eventLogger,
-      RasRmCaseNotificationEnrichmentService rasRmNewBusinessCaseEnricher,
-      @Value("${caserefgeneratorkey}") byte[] caserefgeneratorkeybytes) {
+      RasRmCaseNotificationEnrichmentService rasRmNewBusinessCaseEnricher) {
     this.caseRepository = caseRepository;
     this.caseService = caseService;
     this.collectionExerciseRepository = collectionExerciseRepository;
     this.eventLogger = eventLogger;
     this.rasRmNewBusinessCaseEnricher = rasRmNewBusinessCaseEnricher;
-    this.caserefgeneratorkey = caserefgeneratorkeybytes.clone();
   }
 
   @Transactional
