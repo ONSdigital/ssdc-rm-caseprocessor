@@ -6,5 +6,5 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.ons.ssdc.common.model.entity.EmailTemplate;
 
 @Component
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 public interface EmailTemplateRepository extends JpaRepository<EmailTemplate, String> {}

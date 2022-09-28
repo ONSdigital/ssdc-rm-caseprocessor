@@ -30,7 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
 
 @Component
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 @EnableRetry
 public class PubsubHelper {
   @Qualifier("pubSubTemplateForIntegrationTests")

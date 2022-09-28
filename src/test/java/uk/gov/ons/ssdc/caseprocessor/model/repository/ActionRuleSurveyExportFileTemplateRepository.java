@@ -7,6 +7,6 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.ons.ssdc.common.model.entity.ActionRuleSurveyExportFileTemplate;
 
 @Component
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 public interface ActionRuleSurveyExportFileTemplateRepository
     extends JpaRepository<ActionRuleSurveyExportFileTemplate, UUID> {}

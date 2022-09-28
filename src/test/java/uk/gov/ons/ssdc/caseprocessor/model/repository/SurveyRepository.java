@@ -7,5 +7,5 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.ons.ssdc.common.model.entity.Survey;
 
 @Component
-@ActiveProfiles("test")
+@ActiveProfiles("${spring.profiles.active}")
 public interface SurveyRepository extends JpaRepository<Survey, UUID> {}
