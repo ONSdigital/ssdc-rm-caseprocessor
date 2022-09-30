@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 public interface UacQidLinkRepository extends JpaRepository<UacQidLink, UUID> {
-  Optional<UacQidLink> findByQid(String questionnaireId);
+  Optional<UacQidLink> findByQid(String qid);
 
   boolean existsByQid(String qid);
 }

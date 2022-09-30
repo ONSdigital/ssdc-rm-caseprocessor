@@ -29,7 +29,7 @@ import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 
 @ExtendWith(MockitoExtension.class)
 public class ReceiptReceiverTest {
-  private static final String QUESTIONNAIRE_ID = "12345";
+  private static final String QID = "12345";
 
   @Mock private UacService uacService;
   @Mock private EventLogger eventLogger;
@@ -39,7 +39,7 @@ public class ReceiptReceiverTest {
   @Test
   public void testUnlinkedUacQidReceiptWhereActive() {
     ReceiptDTO receiptDTO = new ReceiptDTO();
-    receiptDTO.setQid(QUESTIONNAIRE_ID);
+    receiptDTO.setQid(QID);
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setReceipt(receiptDTO);
@@ -83,7 +83,7 @@ public class ReceiptReceiverTest {
   @Test
   public void testUnlinkedUacQidReceiptWherePreviouslyReceipted() {
     ReceiptDTO receiptDTO = new ReceiptDTO();
-    receiptDTO.setQid(QUESTIONNAIRE_ID);
+    receiptDTO.setQid(QID);
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setReceipt(receiptDTO);
@@ -118,7 +118,7 @@ public class ReceiptReceiverTest {
   @Test
   public void testUnlinkedUacQidReceiptsUacQid() {
     ReceiptDTO receiptDTO = new ReceiptDTO();
-    receiptDTO.setQid(QUESTIONNAIRE_ID);
+    receiptDTO.setQid(QID);
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setReceipt(receiptDTO);
