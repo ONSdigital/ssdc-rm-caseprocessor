@@ -1,6 +1,5 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
-
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -11,8 +10,7 @@ import uk.gov.ons.ssdc.common.model.entity.ActionRule;
 public class CaseClassifier {
   private final JdbcTemplate jdbcTemplate;
 
-  public CaseClassifier(
-      JdbcTemplate jdbcTemplate) {
+  public CaseClassifier(JdbcTemplate jdbcTemplate) {
     this.jdbcTemplate = jdbcTemplate;
   }
 
