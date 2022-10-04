@@ -13,7 +13,6 @@ import uk.gov.ons.ssdc.caseprocessor.collectioninstrument.CollectionInstrumentHe
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
-import uk.gov.ons.ssdc.caseprocessor.rasrm.service.RasRmCaseIacService;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
 import uk.gov.ons.ssdc.caseprocessor.utils.HashHelper;
 import uk.gov.ons.ssdc.common.model.entity.*;
@@ -24,7 +23,6 @@ public class ExportFileProcessor {
   private final UacService uacService;
   private final EventLogger eventLogger;
   private final ExportFileRowRepository exportFileRowRepository;
-  private final RasRmCaseIacService rasRmCaseIacService;
   private final CollectionInstrumentHelper collectionInstrumentHelper;
 
   private final StringWriter stringWriter = new StringWriter();
@@ -41,13 +39,11 @@ public class ExportFileProcessor {
       UacService uacService,
       EventLogger eventLogger,
       ExportFileRowRepository exportFileRowRepository,
-      RasRmCaseIacService rasRmCaseIacService,
       CollectionInstrumentHelper collectionInstrumentHelper) {
     this.uacQidCache = uacQidCache;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.exportFileRowRepository = exportFileRowRepository;
-    this.rasRmCaseIacService = rasRmCaseIacService;
     this.collectionInstrumentHelper = collectionInstrumentHelper;
   }
 
@@ -126,9 +122,6 @@ public class ExportFileProcessor {
           }
 
           rowStrings[i] = uacQidDTO.getQid();
-          break;
-        case "__ras_rm_iac__":
-          rowStrings[i] = rasRmCaseIacService.getRasRmIac(caze);
           break;
         default:
           if (templateItem.startsWith(REQUEST_PERSONALISATION_PREFIX)) {

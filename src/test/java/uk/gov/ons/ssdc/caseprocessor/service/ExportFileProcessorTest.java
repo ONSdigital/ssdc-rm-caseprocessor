@@ -25,7 +25,6 @@ import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
-import uk.gov.ons.ssdc.caseprocessor.rasrm.service.RasRmCaseIacService;
 import uk.gov.ons.ssdc.common.model.entity.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +33,6 @@ class ExportFileProcessorTest {
   @Mock private UacService uacService;
   @Mock private EventLogger eventLogger;
   @Mock private ExportFileRowRepository exportFileRowRepository;
-  @Mock private RasRmCaseIacService rasRmCaseIacService;
   @Mock private CollectionInstrumentHelper collectionInstrumentHelper;
 
   @InjectMocks ExportFileProcessor underTest;
@@ -143,8 +141,6 @@ class ExportFileProcessorTest {
     caseToProcess.setActionRule(actionRule);
     caseToProcess.setCaze(caze);
     caseToProcess.setBatchId(UUID.fromString("6a127d58-c1cb-489c-a3f5-72014a0c32d6"));
-
-    when(rasRmCaseIacService.getRasRmIac(any(Case.class))).thenReturn("test IAC");
 
     // When
     underTest.processExportFileRow(

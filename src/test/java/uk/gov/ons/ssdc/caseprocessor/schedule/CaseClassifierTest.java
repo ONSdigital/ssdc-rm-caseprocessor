@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
-import uk.gov.ons.ssdc.caseprocessor.rasrm.service.RasRmSampleSummaryCollexLinkService;
 import uk.gov.ons.ssdc.common.model.entity.ActionRule;
 import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
@@ -46,43 +45,5 @@ class CaseClassifierTest {
     expectedSql.append(" AND foo IN ('bar')");
     verify(jdbcTemplate)
         .update(eq(expectedSql.toString()), any(UUID.class), eq(actionRule.getId()));
-  }
-
-  @Test
-  void testEnqueueCasesForActionRuleRasRmBusiness() {
-    // Given
-    JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
-    RasRmSampleSummaryCollexLinkService rasRmSampleSummaryCollexLinkService =
-        mock(RasRmSampleSummaryCollexLinkService.class);
-
-    CaseClassifier underTest =
-        new CaseClassifier(jdbcTemplate, rasRmSampleSummaryCollexLinkService);
-    String classifiers = "foo IN ('bar')";
-    Survey survey = new Survey();
-    survey.setSampleDefinitionUrl("business.json");
-    CollectionExercise collectionExercise = new CollectionExercise();
-    collectionExercise.setId(UUID.randomUUID());
-    collectionExercise.setSurvey(survey);
-    ActionRule actionRule = new ActionRule();
-    actionRule.setId(UUID.randomUUID());
-    actionRule.setCollectionExercise(collectionExercise);
-    actionRule.setClassifiers(classifiers);
-    actionRule.setType(ActionRuleType.EXPORT_FILE);
-
-    // When
-    underTest.enqueueCasesForActionRule(actionRule);
-
-    // Then
-    StringBuilder expectedSql = new StringBuilder();
-    expectedSql.append("INSERT INTO casev3.case_to_process (batch_id, batch_quantity,");
-    expectedSql.append(" action_rule_id, caze_id)");
-    expectedSql.append(" SELECT ?, COUNT(*) OVER (), ?, id");
-    expectedSql.append(" FROM casev3.cases WHERE collection_exercise_id=");
-    expectedSql.append("'" + collectionExercise.getId().toString() + "'");
-    expectedSql.append(" AND foo IN ('bar')");
-    verify(jdbcTemplate)
-        .update(eq(expectedSql.toString()), any(UUID.class), eq(actionRule.getId()));
-
-    verify(rasRmSampleSummaryCollexLinkService).linkSampleSummaryToCollex(collectionExercise);
   }
 }
