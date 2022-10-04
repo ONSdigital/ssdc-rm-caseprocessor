@@ -7,6 +7,5 @@ spring:
 
 queueconfig:
   shared-pubsub-project: shared-project
-  ras-rm-pubsub-project: REPLACEME
 
 caserefgeneratorkey: abc123
