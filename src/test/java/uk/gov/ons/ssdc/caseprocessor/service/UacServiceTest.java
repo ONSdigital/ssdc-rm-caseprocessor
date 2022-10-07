@@ -101,7 +101,7 @@ public class UacServiceTest {
   @Test
   void findByQidFails() {
     String qid = "12345";
-    String expectedErrorMessage = String.format("Questionnaire Id '%s' not found!", qid);
+    String expectedErrorMessage = String.format("qid '%s' not found!", qid);
 
     RuntimeException thrown = assertThrows(RuntimeException.class, () -> underTest.findByQid(qid));
 

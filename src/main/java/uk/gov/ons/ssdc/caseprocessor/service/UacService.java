@@ -70,12 +70,11 @@ public class UacService {
     return savedUacQidLink;
   }
 
-  public UacQidLink findByQid(String questionnaireId) {
-    Optional<UacQidLink> uacQidLinkOpt = uacQidLinkRepository.findByQid(questionnaireId);
+  public UacQidLink findByQid(String qid) {
+    Optional<UacQidLink> uacQidLinkOpt = uacQidLinkRepository.findByQid(qid);
 
     if (uacQidLinkOpt.isEmpty()) {
-      throw new RuntimeException(
-          String.format("Questionnaire Id '%s' not found!", questionnaireId));
+      throw new RuntimeException(String.format("qid '%s' not found!", qid));
     }
 
     return uacQidLinkOpt.get();
