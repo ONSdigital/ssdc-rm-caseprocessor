@@ -43,9 +43,6 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.uac-authentication-subscription}")
   private String uacAuthenticationSubscription;
 
-  @Value("${queueconfig.telephone-capture-subscription}")
-  private String telephoneCaptureSubscription;
-
   @Value("${queueconfig.deactivate-uac-subscription}")
   private String deactivateUacSubscription;
 
@@ -99,11 +96,6 @@ public class MessageConsumerConfig {
 
   @Bean
   public MessageChannel printFulfilmentInputChannel() {
-    return new DirectChannel();
-  }
-
-  @Bean
-  public MessageChannel telephoneCaptureInputChannel() {
     return new DirectChannel();
   }
 
@@ -186,12 +178,6 @@ public class MessageConsumerConfig {
     String subscription =
         toProjectSubscriptionName(printFulfilmentSubscription, sharedPubsubProject).toString();
     return makeAdapter(channel, subscription);
-  }
-
-  @Bean
-  PubSubInboundChannelAdapter telephoneCaptureInbound(
-      @Qualifier("telephoneCaptureInputChannel") MessageChannel channel) {
-    return makeAdapter(channel, telephoneCaptureSubscription);
   }
 
   @Bean

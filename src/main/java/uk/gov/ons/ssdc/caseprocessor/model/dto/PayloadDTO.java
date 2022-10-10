@@ -13,7 +13,6 @@ public class PayloadDTO {
   private UacUpdateDTO uacUpdate;
   private InvalidCase invalidCase;
   private PrintFulfilmentDTO printFulfilment;
-  private TelephoneCaptureDTO telephoneCapture;
   private DeactivateUacDTO deactivateUac;
   private UpdateSampleSensitive updateSampleSensitive;
   private UpdateSample updateSample;

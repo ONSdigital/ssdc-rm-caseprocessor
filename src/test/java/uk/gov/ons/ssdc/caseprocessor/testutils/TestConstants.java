@@ -13,8 +13,6 @@ public class TestConstants {
   public static final String OUTBOUND_EMAIL_REQUEST_SUBSCRIPTION =
       "rm-internal-email-request-enriched_notify-service";
   public static final String PRINT_FULFILMENT_TOPIC = "event_print-fulfilment";
-
-  public static final String TELEPHONE_CAPTURE_TOPIC = "rm-internal-telephone-capture";
   public static final String SMS_CONFIRMATION_TOPIC = "rm-internal-sms-confirmation";
   public static final String EMAIL_CONFIRMATION_TOPIC = "rm-internal-email-confirmation";
 

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.NewCase;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.ssdc.caseprocessor.model.dto.TelephoneCaptureDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.SmsRequest;
 
 public class RedactHelperTest {
   @Test
@@ -32,12 +32,12 @@ public class RedactHelperTest {
   public void testRedactWorksForString() {
     // GIVEN
 
-    TelephoneCaptureDTO telephoneCaptureDto = new TelephoneCaptureDTO();
+    SmsRequest smsRequest = new SmsRequest();
 
-    telephoneCaptureDto.setUac("SUPER SECRET VALUE");
+    smsRequest.setPhoneNumber("SUPER SECRET VALUE");
 
     PayloadDTO payloadDto = new PayloadDTO();
-    payloadDto.setTelephoneCapture(telephoneCaptureDto);
+    payloadDto.setSmsRequest(smsRequest);
 
     EventDTO eventDto = new EventDTO();
     eventDto.setPayload(payloadDto);
@@ -47,10 +47,10 @@ public class RedactHelperTest {
     EventDTO eventDeepCopy = (EventDTO) RedactHelper.redact(eventDto);
 
     // THEN
-    assertThat(eventDeepCopy.getPayload().getTelephoneCapture().getUac()).isEqualTo("REDACTED");
+    assertThat(eventDeepCopy.getPayload().getSmsRequest().getPhoneNumber()).isEqualTo("REDACTED");
 
     // Extra check to make sure the original object wasn't accidentally mutated
-    assertThat(eventDto.getPayload().getTelephoneCapture().getUac())
+    assertThat(eventDto.getPayload().getSmsRequest().getPhoneNumber())
         .isEqualTo("SUPER SECRET VALUE");
   }
 }

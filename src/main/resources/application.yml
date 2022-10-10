@@ -37,7 +37,6 @@ spring:
             max-outstanding-element-count: 100
 
 queueconfig:
-  telephone-capture-subscription: rm-internal-telephone-capture_case-processor
   sms-confirmation-subscription: rm-internal-sms-confirmation_case-processor
   email-confirmation-subscription: rm-internal-email-confirmation_case-processor
   new-case-subscription: event_new-case_rm-case-processor
