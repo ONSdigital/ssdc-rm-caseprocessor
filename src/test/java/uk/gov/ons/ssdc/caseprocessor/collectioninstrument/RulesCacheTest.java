@@ -26,9 +26,9 @@ class RulesCacheTest {
     CollectionExercise collex = new CollectionExercise();
     collex.setCollectionInstrumentSelectionRules(
         new CollectionInstrumentSelectionRule[] {
-          new CollectionInstrumentSelectionRule(3, "'foo' == 'bar'", "url3"),
-          new CollectionInstrumentSelectionRule(1, "'baz' == 'brr'", "url1"),
-          new CollectionInstrumentSelectionRule(2, "'fiz' == 'foz'", "url2")
+          new CollectionInstrumentSelectionRule(3, "'foo' == 'bar'", "url3", null),
+          new CollectionInstrumentSelectionRule(1, "'baz' == 'brr'", "url1", null),
+          new CollectionInstrumentSelectionRule(2, "'fiz' == 'foz'", "url2", null)
         });
 
     when(collectionExerciseRepository.findById(collexId)).thenReturn(Optional.of(collex));
