@@ -13,16 +13,19 @@ public class CaseToProcessProcessor {
   private final DeactivateUacProcessor deactivateUacProcessor;
   private final SmsProcessor smsProcessor;
   private final EmailProcessor emailProcessor;
+  private final EqFlushProcessor eqFlushProcessor;
 
   public CaseToProcessProcessor(
       ExportFileProcessor exportFileProcessor,
       DeactivateUacProcessor deactivateUacProcessor,
       SmsProcessor smsProcessor,
-      EmailProcessor emailProcessor) {
+      EmailProcessor emailProcessor,
+      EqFlushProcessor eqFlushProcessor) {
     this.exportFileProcessor = exportFileProcessor;
     this.deactivateUacProcessor = deactivateUacProcessor;
     this.smsProcessor = smsProcessor;
     this.emailProcessor = emailProcessor;
+    this.eqFlushProcessor = eqFlushProcessor;
   }
 
   public void process(CaseToProcess caseToProcess) {
@@ -51,6 +54,9 @@ public class CaseToProcessProcessor {
         break;
       case EMAIL:
         emailProcessor.process(caseToProcess.getCaze(), caseToProcess.getActionRule());
+        break;
+      case EQ_FLUSH:
+        eqFlushProcessor.process(caseToProcess.getCaze(), caseToProcess.getActionRule());
         break;
       default:
         throw new NotImplementedException("No implementation for other types of action rule yet");
