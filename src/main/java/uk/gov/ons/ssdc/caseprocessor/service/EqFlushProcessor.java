@@ -40,6 +40,7 @@ public class EqFlushProcessor {
       UacQidLink uacQidLink, UUID transactionId) {
     CloudTaskMessage cloudTaskMessage = new CloudTaskMessage();
     cloudTaskMessage.setCloudTaskType(EQ_FLUSH);
+    cloudTaskMessage.setCorrelationId(transactionId);
 
     EqFlushTaskPayload eqFlushTaskPayload = new EqFlushTaskPayload();
     eqFlushTaskPayload.setQid(uacQidLink.getQid());

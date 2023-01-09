@@ -57,6 +57,7 @@ class EqFlushProcessorTest {
 
     assertThat(messageArgumentCaptor.getValue().getCloudTaskType())
         .isEqualTo(CloudTaskType.EQ_FLUSH);
+    assertThat(messageArgumentCaptor.getValue().getCorrelationId()).isEqualTo(actionRule.getId());
 
     EqFlushTaskPayload cloudTaskPayload =
         (EqFlushTaskPayload) messageArgumentCaptor.getValue().getPayload();
