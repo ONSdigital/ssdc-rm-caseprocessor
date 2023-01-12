@@ -7,5 +7,5 @@ import lombok.Data;
 public class CloudTaskMessage {
   private CloudTaskType cloudTaskType;
   private UUID correlationId;
-  private CloudTaskPayload payload;
+  private Object payload;
 }

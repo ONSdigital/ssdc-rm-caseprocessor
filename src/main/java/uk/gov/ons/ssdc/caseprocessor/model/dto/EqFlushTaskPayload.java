@@ -4,7 +4,7 @@ import java.util.UUID;
 import lombok.Data;
 
 @Data
-public class EqFlushTaskPayload implements CloudTaskPayload {
+public class EqFlushTaskPayload {
   private String qid;
   private UUID transactionId;
 }
