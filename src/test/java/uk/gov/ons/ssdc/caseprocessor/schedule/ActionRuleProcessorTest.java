@@ -1,6 +1,5 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.time.OffsetDateTime;
@@ -33,7 +32,7 @@ class ActionRuleProcessorTest {
     actionRule.setHasTriggered(true);
     Assertions.assertThat(actualActionRule).isEqualTo(actionRule);
 
-    verify(caseClassifier).enqueueCasesForActionRule(eq(actionRule));
+    verify(caseClassifier).enqueueCasesForActionRule(actionRule);
   }
 
   private ActionRule setUpActionRule(ActionRuleType actionRuleType) {
