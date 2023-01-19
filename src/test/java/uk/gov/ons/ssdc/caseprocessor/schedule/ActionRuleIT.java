@@ -16,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -28,6 +30,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.SmsTemplateRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.UacQidLinkRepository;
+import uk.gov.ons.ssdc.caseprocessor.testutils.ActionRulePoller;
 import uk.gov.ons.ssdc.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JsonHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
@@ -49,6 +52,7 @@ import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
 @SpringBootTest
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
+@ExtendWith(OutputCaptureExtension.class)
 class ActionRuleIT {
   private static final String PACK_CODE = "test-pack-code";
   private static final String EXPORT_FILE_DESTINATION = "test-export-file-destination";
@@ -75,6 +79,7 @@ class ActionRuleIT {
   @Autowired private SmsTemplateRepository smsTemplateRepository;
   @Autowired private EmailTemplateRepository emailTemplateRepository;
   @Autowired private EventRepository eventRepository;
+  @Autowired private ActionRulePoller actionRulePoller;
 
   @BeforeEach
   public void setUp() {
@@ -92,7 +97,12 @@ class ActionRuleIT {
 
       // When
       setUpActionRule(
-          ActionRuleType.EXPORT_FILE, caze.getCollectionExercise(), exportFileTemplate, null, null);
+          ActionRuleType.EXPORT_FILE,
+          caze.getCollectionExercise(),
+          exportFileTemplate,
+          null,
+          null,
+          null);
       EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
       List<ExportFileRow> exportFileRows = exportFileRowRepository.findAll();
       ExportFileRow exportFileRow = exportFileRows.get(0);
@@ -120,7 +130,7 @@ class ActionRuleIT {
 
       // When
       setUpActionRule(
-          ActionRuleType.DEACTIVATE_UAC, caze.getCollectionExercise(), null, null, null);
+          ActionRuleType.DEACTIVATE_UAC, caze.getCollectionExercise(), null, null, null, null);
       EventDTO rme = outboundUacQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
@@ -144,7 +154,8 @@ class ActionRuleIT {
       SmsTemplate smsTemplate = setupSmsTemplate();
 
       // When
-      setUpActionRule(ActionRuleType.SMS, caze.getCollectionExercise(), null, smsTemplate, null);
+      setUpActionRule(
+          ActionRuleType.SMS, caze.getCollectionExercise(), null, smsTemplate, null, null);
       EventDTO rme = smsRequestQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
@@ -177,7 +188,7 @@ class ActionRuleIT {
 
       // When
       setUpActionRule(
-          ActionRuleType.EMAIL, caze.getCollectionExercise(), null, null, emailTemplate);
+          ActionRuleType.EMAIL, caze.getCollectionExercise(), null, null, emailTemplate, null);
       EventDTO rme = emailRequestQueue.getQueue().poll(20, TimeUnit.SECONDS);
 
       // Then
@@ -199,6 +210,32 @@ class ActionRuleIT {
     }
   }
 
+  @Test
+  void testBadSQLIsHandled(CapturedOutput output) throws Exception {
+    Case caze = junkDataHelper.setupJunkCase();
+    ExportFileTemplate exportFileTemplate = setUpExportFileTemplate();
+
+    // When
+    ActionRule actionRule =
+        setUpActionRule(
+            ActionRuleType.EXPORT_FILE,
+            caze.getCollectionExercise(),
+            exportFileTemplate,
+            null,
+            null,
+            "NoneExistantColumn = 'Throw A SQL Exception");
+
+    actionRulePoller.getTriggeredActionRule(actionRule.getId());
+
+    String expectedErrorMessage =
+        "ActionRule "
+            + actionRule.getId()
+            + " failed with a BadSqlGrammarException"
+            + ", it has been marked Trigggered to stop it running until it is fixed";
+
+    assertThat(output).contains(expectedErrorMessage);
+  }
+
   private ExportFileTemplate setUpExportFileTemplate() {
     ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
     exportFileTemplate.setTemplate(new String[] {"__caseref__", "foo", "__uac__"});
@@ -213,7 +250,8 @@ class ActionRuleIT {
       CollectionExercise collectionExercise,
       ExportFileTemplate exportFileTemplate,
       SmsTemplate smsTemplate,
-      EmailTemplate emailTemplate) {
+      EmailTemplate emailTemplate,
+      String classifiers) {
     ActionRule actionRule = new ActionRule();
     actionRule.setId(UUID.randomUUID());
     actionRule.setTriggerDateTime(OffsetDateTime.now());
@@ -223,6 +261,7 @@ class ActionRuleIT {
     actionRule.setExportFileTemplate(exportFileTemplate);
     actionRule.setCreatedBy(CREATED_BY_USER);
     actionRule.setUacMetadata(TEST_UAC_METADATA);
+    actionRule.setClassifiers(classifiers);
 
     if (smsTemplate != null) {
       actionRule.setSmsTemplate(smsTemplate);

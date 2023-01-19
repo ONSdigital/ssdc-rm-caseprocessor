@@ -1,18 +1,18 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.BadSqlGrammarException;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.common.model.entity.ActionRule;
 
@@ -56,5 +56,31 @@ public class ActionRuleTriggererTest {
 
     // Then
     verify(actionRuleProcessor, times(50)).processTriggeredActionRule(any(ActionRule.class));
+  }
+
+  @Test
+  public void badSqlGrammarExceptionHandled() throws UnknownHostException {
+    // Given
+    ActionRule actionRule = new ActionRule();
+    actionRule.setHasTriggered(false);
+
+    when(actionRuleRepository.findByTriggerDateTimeBeforeAndHasTriggeredIsFalse(
+            any(OffsetDateTime.class)))
+        .thenReturn(Collections.singletonList(actionRule));
+
+    SQLException sqlException = new SQLException("rubbish SQL", "Broken", -137);
+    BadSqlGrammarException badSqlGrammarException =
+        new BadSqlGrammarException("A task", "rubbish SQL", sqlException);
+
+    doThrow(badSqlGrammarException).when(actionRuleProcessor).processTriggeredActionRule(any());
+
+    // When
+    ActionRuleTriggerer underTest =
+        new ActionRuleTriggerer(actionRuleRepository, actionRuleProcessor);
+    underTest.triggerActionRule();
+
+    // Then
+    verify(actionRuleProcessor).processTriggeredActionRule(eq(actionRule));
+    assertThat(actionRule.isHasTriggered()).isTrue();
   }
 }
