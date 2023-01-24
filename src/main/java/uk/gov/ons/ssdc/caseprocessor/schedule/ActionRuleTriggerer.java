@@ -44,7 +44,7 @@ public class ActionRuleTriggerer {
             "ActionRule "
                 + triggeredActionRule.getId()
                 + " failed with a BadSqlGrammarException,"
-                + " it has been marked Trigggered to stop it running until it is fixed."
+                + " it has been marked Triggered to stop it running until it is fixed."
                 + " Exception Message: "
                 + badSqlGrammarException.getMessage();
         log.with("hostName", hostName).with("id", triggeredActionRule.getId()).error(errorMessage);
