@@ -53,7 +53,7 @@ public class ActionRuleTriggerer {
         actionRuleRepository.save(triggeredActionRule);
       } catch (Exception e) {
         log.with("id", triggeredActionRule.getId())
-            .error("Unexpected error while executing action rule - is classifier valid SQL?", e);
+            .error("Unexpected error while executing action rule", e);
       }
     }
   }
