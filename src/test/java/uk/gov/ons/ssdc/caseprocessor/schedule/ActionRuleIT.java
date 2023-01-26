@@ -231,7 +231,7 @@ class ActionRuleIT {
         "ActionRule "
             + actionRule.getId()
             + " failed with a BadSqlGrammarException"
-            + ", it has been marked Trigggered to stop it running until it is fixed";
+            + ", it has been marked Triggered to stop it running until it is fixed";
 
     assertThat(output).contains(expectedErrorMessage);
   }
