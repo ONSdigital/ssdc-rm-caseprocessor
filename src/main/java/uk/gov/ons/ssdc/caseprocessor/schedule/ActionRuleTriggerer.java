@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.OffsetDateTime;
 import java.util.List;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
@@ -38,9 +39,21 @@ public class ActionRuleTriggerer {
             .with("id", triggeredActionRule.getId())
             .info("Action rule triggered");
         actionRuleProcessor.processTriggeredActionRule(triggeredActionRule);
+      } catch (BadSqlGrammarException badSqlGrammarException) {
+        String errorMessage =
+            "ActionRule "
+                + triggeredActionRule.getId()
+                + " failed with a BadSqlGrammarException,"
+                + " it has been marked Triggered to stop it running until it is fixed."
+                + " Exception Message: "
+                + badSqlGrammarException.getMessage();
+        log.with("hostName", hostName).with("id", triggeredActionRule.getId()).error(errorMessage);
+
+        triggeredActionRule.setHasTriggered(true);
+        actionRuleRepository.save(triggeredActionRule);
       } catch (Exception e) {
         log.with("id", triggeredActionRule.getId())
-            .error("Unexpected error while executing action rule - is classifier valid SQL?", e);
+            .error("Unexpected error while executing action rule", e);
       }
     }
   }
