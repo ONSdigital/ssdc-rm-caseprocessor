@@ -153,7 +153,7 @@ class ExportFileProcessorTest {
         null,
         actionRule.getUacMetadata());
 
-    //    // Then
+    // Then
     ArgumentCaptor<ExportFileRow> exportFileRowArgumentCaptor =
         ArgumentCaptor.forClass(ExportFileRow.class);
     verify(exportFileRowRepository).save(exportFileRowArgumentCaptor.capture());
