@@ -131,10 +131,11 @@ public class ExportFileProcessor {
                     ? personalisation.get(
                         templateItem.substring(REQUEST_PERSONALISATION_PREFIX.length()))
                     : null;
-          } else if(templateItem.startsWith(SENSITIVE_FIELD_PREFIX)) {
-            rowStrings[i] = caze.getSampleSensitive().get(templateItem.substring(SENSITIVE_FIELD_PREFIX.length()));
-          }
-          else {
+          } else if (templateItem.startsWith(SENSITIVE_FIELD_PREFIX)) {
+            rowStrings[i] =
+                caze.getSampleSensitive()
+                    .get(templateItem.substring(SENSITIVE_FIELD_PREFIX.length()));
+          } else {
             rowStrings[i] = caze.getSample().get(templateItem);
           }
       }
