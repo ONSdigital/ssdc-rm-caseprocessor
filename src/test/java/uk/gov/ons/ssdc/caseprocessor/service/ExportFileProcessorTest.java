@@ -120,6 +120,62 @@ class ExportFileProcessorTest {
   }
 
   @Test
+  void testProcessExportFileRowWithSensitiveField() {
+    // Given
+    Case caze = new Case();
+    caze.setSampleSensitive(Map.of("foo", "bar"));
+    caze.setCaseRef(123L);
+
+    ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
+    exportFileTemplate.setTemplate(new String[] {"__sensitive__.foo"});
+    exportFileTemplate.setPackCode(PACK_CODE);
+    exportFileTemplate.setExportFileDestination(EXPORT_FILE_DESTINATION);
+
+    ActionRule actionRule = new ActionRule();
+    actionRule.setId(UUID.randomUUID());
+    actionRule.setType(ActionRuleType.EXPORT_FILE);
+    actionRule.setExportFileTemplate(exportFileTemplate);
+
+    CaseToProcess caseToProcess = new CaseToProcess();
+    caseToProcess.setActionRule(actionRule);
+    caseToProcess.setCaze(caze);
+    caseToProcess.setBatchId(UUID.fromString("6a127d58-c1cb-489c-a3f5-72014a0c32d6"));
+
+    // When
+    underTest.processExportFileRow(
+        exportFileTemplate.getTemplate(),
+        caze,
+        caseToProcess.getBatchId(),
+        caseToProcess.getBatchQuantity(),
+        exportFileTemplate.getPackCode(),
+        exportFileTemplate.getExportFileDestination(),
+        actionRule.getId(),
+        null,
+        actionRule.getUacMetadata());
+
+    // Then
+    ArgumentCaptor<ExportFileRow> exportFileRowArgumentCaptor =
+        ArgumentCaptor.forClass(ExportFileRow.class);
+    verify(exportFileRowRepository).save(exportFileRowArgumentCaptor.capture());
+    ExportFileRow actualExportFileRow = exportFileRowArgumentCaptor.getValue();
+    assertThat(actualExportFileRow.getPackCode()).isEqualTo(PACK_CODE);
+    assertThat(actualExportFileRow.getExportFileDestination()).isEqualTo(EXPORT_FILE_DESTINATION);
+    assertThat(actualExportFileRow.getRow()).isEqualTo("\"bar\"");
+
+    ArgumentCaptor<EventDTO> eventCaptor = ArgumentCaptor.forClass(EventDTO.class);
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(caze),
+            eq("Export file generated with pack code " + PACK_CODE),
+            eq(EventType.EXPORT_FILE),
+            eventCaptor.capture(),
+            any(OffsetDateTime.class));
+
+    EventHeaderDTO actualHeader = eventCaptor.getValue().getHeader();
+    Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(actionRule.getId());
+  }
+
+  @Test
   void testProcessFulfilment() {
     // Given
     ExportFileTemplate exportFileTemplate = new ExportFileTemplate();

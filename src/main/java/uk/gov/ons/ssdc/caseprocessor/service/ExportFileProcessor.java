@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.REQUEST_PERSONALISATION_PREFIX;
+import static uk.gov.ons.ssdc.caseprocessor.utils.Constants.SENSITIVE_FIELD_PREFIX;
 
 import com.opencsv.CSVWriter;
 import java.io.StringWriter;
@@ -130,6 +131,10 @@ public class ExportFileProcessor {
                     ? personalisation.get(
                         templateItem.substring(REQUEST_PERSONALISATION_PREFIX.length()))
                     : null;
+          } else if (templateItem.startsWith(SENSITIVE_FIELD_PREFIX)) {
+            rowStrings[i] =
+                caze.getSampleSensitive()
+                    .get(templateItem.substring(SENSITIVE_FIELD_PREFIX.length()));
           } else {
             rowStrings[i] = caze.getSample().get(templateItem);
           }
