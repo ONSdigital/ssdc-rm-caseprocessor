@@ -92,7 +92,7 @@ class ExportFileProcessorTest {
     ExportFileRow actualExportFileRow = exportFileRowArgumentCaptor.getValue();
     assertThat(actualExportFileRow.getPackCode()).isEqualTo(PACK_CODE);
     assertThat(actualExportFileRow.getExportFileDestination()).isEqualTo(EXPORT_FILE_DESTINATION);
-    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\"|\"" + UAC + "\"|\"bar\"");
+    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\",\"" + UAC + "\",\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService)
@@ -212,7 +212,7 @@ class ExportFileProcessorTest {
     ExportFileRow actualExportFileRow = exportFileRowArgumentCaptor.getValue();
     assertThat(actualExportFileRow.getPackCode()).isEqualTo(PACK_CODE);
     assertThat(actualExportFileRow.getExportFileDestination()).isEqualTo(EXPORT_FILE_DESTINATION);
-    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\"|\"" + UAC + "\"|\"bar\"");
+    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\",\"" + UAC + "\",\"bar\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService)
@@ -278,7 +278,7 @@ class ExportFileProcessorTest {
     ExportFileRow actualExportFileRow = exportFileRowArgumentCaptor.getValue();
     assertThat(actualExportFileRow.getPackCode()).isEqualTo(PACK_CODE);
     assertThat(actualExportFileRow.getExportFileDestination()).isEqualTo(EXPORT_FILE_DESTINATION);
-    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\"|\"" + UAC + "\"|\"bar\"|\"eggs\"");
+    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\",\"" + UAC + "\",\"bar\",\"eggs\"");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService)
@@ -343,7 +343,7 @@ class ExportFileProcessorTest {
     ExportFileRow actualExportFileRow = exportFileRowArgumentCaptor.getValue();
     assertThat(actualExportFileRow.getPackCode()).isEqualTo(PACK_CODE);
     assertThat(actualExportFileRow.getExportFileDestination()).isEqualTo(EXPORT_FILE_DESTINATION);
-    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\"|\"" + UAC + "\"|");
+    assertThat(actualExportFileRow.getRow()).isEqualTo("\"123\",\"" + UAC + "\",");
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService)
