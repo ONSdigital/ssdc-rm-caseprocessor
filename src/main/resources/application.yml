@@ -5,8 +5,8 @@ spring:
         size: 30
 
   datasource:
-    url: jdbc:postgresql://localhost:6432/postgres
-    username: postgres
+    url: jdbc:postgresql://localhost:6432/rm
+    username: appuser
     password: postgres
     driverClassName: org.postgresql.Driver
     hikari:
