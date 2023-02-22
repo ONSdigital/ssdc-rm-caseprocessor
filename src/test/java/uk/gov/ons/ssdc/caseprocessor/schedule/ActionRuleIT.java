@@ -112,7 +112,7 @@ class ActionRuleIT {
       assertThat(exportFileRow.getBatchQuantity()).isEqualTo(1);
       assertThat(exportFileRow.getPackCode()).isEqualTo(PACK_CODE);
       assertThat(exportFileRow.getExportFileDestination()).isEqualTo(EXPORT_FILE_DESTINATION);
-      assertThat(exportFileRow.getRow()).startsWith("\"" + caze.getCaseRef() + "\"|\"bar\"|\"");
+      assertThat(exportFileRow.getRow()).startsWith("\"" + caze.getCaseRef() + "\",\"bar\",\"");
 
       assertThat(rme).isNotNull();
       assertThat(rme.getHeader().getTopic()).isEqualTo(uacUpdateTopic);

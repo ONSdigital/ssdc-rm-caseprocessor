@@ -30,7 +30,7 @@ public class ExportFileProcessor {
   private final CSVWriter csvWriter =
       new CSVWriter(
           stringWriter,
-          '|',
+          ',',
           CSVWriter.DEFAULT_QUOTE_CHARACTER,
           CSVWriter.DEFAULT_ESCAPE_CHARACTER,
           "");
