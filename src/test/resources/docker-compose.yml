@@ -15,7 +15,9 @@ services:
     external_links:
       - postgres-case-it
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-case-it:5432/postgres?sslmode=disable
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-case-it:5432/rm?sslmode=disable
+      - SPRING_DATASOURCE_USERNAME=appuser
+      - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_PROFILES_ACTIVE=dev
     volumes:
       - ./java_healthcheck:/opt/healthcheck/
