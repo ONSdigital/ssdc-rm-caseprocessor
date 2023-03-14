@@ -6,6 +6,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventHeaderDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 
 public class EventHelper {
 
@@ -38,6 +39,11 @@ public class EventHelper {
   }
 
   public static EventDTO getDummyEvent(UUID correlationId, String originatingUser) {
+    return getDummyEvent(correlationId, originatingUser, null);
+  }
+
+  public static EventDTO getDummyEvent(
+      UUID correlationId, String originatingUser, PayloadDTO payloadDTO) {
     EventHeaderDTO eventHeader = new EventHeaderDTO();
 
     eventHeader.setChannel(EVENT_CHANNEL);
@@ -49,6 +55,7 @@ public class EventHelper {
 
     EventDTO event = new EventDTO();
     event.setHeader(eventHeader);
+    event.setPayload(payloadDTO);
 
     return event;
   }

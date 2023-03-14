@@ -23,4 +23,5 @@ public class PayloadDTO {
   private NewCase newCase;
   private SmsRequest smsRequest;
   private EmailRequest emailRequest;
+  private ExportFileDTO exportFile;
 }
