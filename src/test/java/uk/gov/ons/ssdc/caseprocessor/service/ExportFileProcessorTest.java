@@ -115,8 +115,9 @@ class ExportFileProcessorTest {
             eventCaptor.capture(),
             any(OffsetDateTime.class));
 
-    EventHeaderDTO actualHeader = eventCaptor.getValue().getHeader();
-    Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(actionRule.getId());
+    EventDTO actualEvent = eventCaptor.getValue();
+    Assertions.assertThat(actualEvent.getHeader().getCorrelationId()).isEqualTo(actionRule.getId());
+    Assertions.assertThat(actualEvent.getPayload().getExportFile().getPackCode()).isEqualTo(PACK_CODE);
   }
 
   @Test
@@ -171,8 +172,10 @@ class ExportFileProcessorTest {
             eventCaptor.capture(),
             any(OffsetDateTime.class));
 
-    EventHeaderDTO actualHeader = eventCaptor.getValue().getHeader();
-    Assertions.assertThat(actualHeader.getCorrelationId()).isEqualTo(actionRule.getId());
+    EventDTO actualEvent = eventCaptor.getValue();
+    Assertions.assertThat(actualEvent.getHeader().getCorrelationId()).isEqualTo(actionRule.getId());
+    Assertions.assertThat(actualEvent.getPayload().getExportFile().getPackCode()).isEqualTo(PACK_CODE);
+
   }
 
   @Test
