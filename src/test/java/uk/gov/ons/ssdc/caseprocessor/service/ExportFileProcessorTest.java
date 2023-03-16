@@ -117,7 +117,8 @@ class ExportFileProcessorTest {
 
     EventDTO actualEvent = eventCaptor.getValue();
     Assertions.assertThat(actualEvent.getHeader().getCorrelationId()).isEqualTo(actionRule.getId());
-    Assertions.assertThat(actualEvent.getPayload().getExportFile().getPackCode()).isEqualTo(PACK_CODE);
+    Assertions.assertThat(actualEvent.getPayload().getExportFile().getPackCode())
+        .isEqualTo(PACK_CODE);
   }
 
   @Test
@@ -174,8 +175,8 @@ class ExportFileProcessorTest {
 
     EventDTO actualEvent = eventCaptor.getValue();
     Assertions.assertThat(actualEvent.getHeader().getCorrelationId()).isEqualTo(actionRule.getId());
-    Assertions.assertThat(actualEvent.getPayload().getExportFile().getPackCode()).isEqualTo(PACK_CODE);
-
+    Assertions.assertThat(actualEvent.getPayload().getExportFile().getPackCode())
+        .isEqualTo(PACK_CODE);
   }
 
   @Test
