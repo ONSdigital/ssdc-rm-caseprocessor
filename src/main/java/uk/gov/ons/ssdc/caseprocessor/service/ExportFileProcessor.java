@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.cache.UacQidCache;
 import uk.gov.ons.ssdc.caseprocessor.collectioninstrument.CollectionInstrumentHelper;
 import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.ExportFileDTO;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ExportFileRowRepository;
 import uk.gov.ons.ssdc.caseprocessor.utils.EventHelper;
@@ -150,11 +152,15 @@ public class ExportFileProcessor {
 
     exportFileRowRepository.save(exportFileRow);
 
+    PayloadDTO exportFilePayload = new PayloadDTO();
+    ExportFileDTO exportFileDTO = new ExportFileDTO(packCode);
+    exportFilePayload.setExportFile(exportFileDTO);
+
     eventLogger.logCaseEvent(
         caze,
         String.format("Export file generated with pack code %s", packCode),
         EventType.EXPORT_FILE,
-        EventHelper.getDummyEvent(correlationId, originatingUser),
+        EventHelper.getDummyEvent(correlationId, originatingUser, exportFilePayload),
         OffsetDateTime.now());
   }
 
