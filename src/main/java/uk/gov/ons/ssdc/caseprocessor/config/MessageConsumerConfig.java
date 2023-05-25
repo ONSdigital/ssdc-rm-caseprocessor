@@ -40,9 +40,6 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.eq-launch-subscription}")
   private String eqLaunchSubscription;
 
-  @Value("${queueconfig.uac-authentication-subscription}")
-  private String uacAuthenticationSubscription;
-
   @Value("${queueconfig.deactivate-uac-subscription}")
   private String deactivateUacSubscription;
 
@@ -86,11 +83,6 @@ public class MessageConsumerConfig {
 
   @Bean
   public MessageChannel eqLaunchInputChannel() {
-    return new DirectChannel();
-  }
-
-  @Bean
-  public MessageChannel uacAuthenticationInputChannel() {
     return new DirectChannel();
   }
 
@@ -161,14 +153,6 @@ public class MessageConsumerConfig {
       @Qualifier("eqLaunchInputChannel") MessageChannel channel) {
     String subscription =
         toProjectSubscriptionName(eqLaunchSubscription, sharedPubsubProject).toString();
-    return makeAdapter(channel, subscription);
-  }
-
-  @Bean
-  PubSubInboundChannelAdapter uacAuthenticationInbound(
-      @Qualifier("uacAuthenticationInputChannel") MessageChannel channel) {
-    String subscription =
-        toProjectSubscriptionName(uacAuthenticationSubscription, sharedPubsubProject).toString();
     return makeAdapter(channel, subscription);
   }
 
