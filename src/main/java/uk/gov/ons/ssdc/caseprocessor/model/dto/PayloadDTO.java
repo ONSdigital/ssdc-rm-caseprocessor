@@ -17,7 +17,6 @@ public class PayloadDTO {
   private UpdateSampleSensitive updateSampleSensitive;
   private UpdateSample updateSample;
   private EqLaunchDTO eqLaunch;
-  private UacAuthenticationDTO uacAuthentication;
   private SmsConfirmation smsConfirmation;
   private EmailConfirmation emailConfirmation;
   private NewCase newCase;

@@ -30,9 +30,6 @@ curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/shared-project/subscriptions/e
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/shared-project/topics/event_eq-launch
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/shared-project/subscriptions/event_eq-launch_rm-case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/shared-project/topics/event_eq-launch"}'
 
-curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/shared-project/topics/event_uac-authentication
-curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/shared-project/subscriptions/event_uac-authentication_rm-case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/shared-project/topics/event_uac-authentication"}'
-
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/shared-project/topics/event_print-fulfilment
 curl -X PUT http://$PUBSUB_SETUP_HOST/v1/projects/shared-project/subscriptions/event_print-fulfilment_rm-case-processor -H 'Content-Type: application/json' -d '{"topic": "projects/shared-project/topics/event_print-fulfilment"}'
 
