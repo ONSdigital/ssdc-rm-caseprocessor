@@ -192,31 +192,35 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>com.dkanejs.maven.plugins</groupId>
-        <artifactId>docker-compose-maven-plugin</artifactId>
-        <version>4.0.0</version>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>0.43.4</version>
+        <configuration>
+          <image>
+            <name>ssdc-rm-dev-common-postgres:latest</name>
+            <exernal>
+              <type>compose</type>
+              <basedir>${project.basedir}/src/test/resources</basedir>
+              <composeFile>docker-compose.yml</composeFile>
+            </exernal>
+          </image>
+          <removeVolumes>true</removeVolumes>
+        </configuration>
         <executions>
           <execution>
-            <id>up</id>
-            <phase>pre-integration-test</phase>
-            <goals>
-              <goal>up</goal>
-            </goals>
-            <configuration>
-              <composeFile>${project.basedir}/src/test/resources/docker-compose.yml</composeFile>
-              <detachedMode>true</detachedMode>
-            </configuration>
+          <id>start</id>
+          <phase>pre-integration-test</phase>
+          <goals>
+            <goal>build</goal>
+            <goal>start</goal>
+          </goals>
           </execution>
           <execution>
-            <id>down</id>
-            <phase>post-integration-test</phase>
-            <goals>
-              <goal>down</goal>
-            </goals>
-            <configuration>
-              <composeFile>${project.basedir}/src/test/resources/docker-compose.yml</composeFile>
-              <removeVolumes>true</removeVolumes>
-            </configuration>
+          <id>stop</id>
+          <phase>post-integration-test</phase>
+          <goals>
+            <goal>stop</goal>
+          </goals>
           </execution>
         </executions>
       </plugin>
