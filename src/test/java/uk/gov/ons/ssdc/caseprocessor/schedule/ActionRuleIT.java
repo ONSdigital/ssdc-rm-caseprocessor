@@ -294,6 +294,7 @@ class ActionRuleIT {
     smsTemplate.setNotifyTemplateId(UUID.randomUUID());
     smsTemplate.setTemplate(new String[] {"FOO", "BAR"});
     smsTemplate.setDescription("Test description");
+    smsTemplate.setNotifyServiceRef("Dummy_service");
     return smsTemplateRepository.saveAndFlush(smsTemplate);
   }
 
@@ -303,6 +304,7 @@ class ActionRuleIT {
     emailTemplate.setNotifyTemplateId(UUID.randomUUID());
     emailTemplate.setTemplate(new String[] {"FOO", "BAR"});
     emailTemplate.setDescription("Test description");
+    emailTemplate.setNotifyServiceRef("Dummy_service");
     return emailTemplateRepository.saveAndFlush(emailTemplate);
   }
 }
