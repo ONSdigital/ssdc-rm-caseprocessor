@@ -1,21 +1,22 @@
 from google.cloud import pubsub_v1
 
-PROJECT_ID = ""
+class PubsubConfig:
+    PROJECT_ID = "ssdc-rm-danielbanks02"
 
-PUBLISHER = pubsub_v1.PublisherClient()
-TOPIC_ID = "event-new-case"
-TOPIC_PATH = PUBLISHER.topic_path(PROJECT_ID, TOPIC_ID)
+    PUBLISHER = pubsub_v1.PublisherClient()
+    TOPIC_ID = "event_new-case"
+    TOPIC_PATH = PUBLISHER.topic_path(PROJECT_ID, TOPIC_ID)
 
-SUBSCRIBER = pubsub_v1.SubscriberClient()
-SUBSCRIPTION_ID = "event_new-case_rm-case-processor"
-SUBSCRIPTION_PATH = SUBSCRIBER.subscription_path(PROJECT_ID, SUBSCRIPTION_ID)
+    SUBSCRIBER = pubsub_v1.SubscriberClient()
+    SUBSCRIPTION_ID = "event_new-case_rm-case-processor"
+    SUBSCRIPTION_PATH = SUBSCRIBER.subscription_path(PROJECT_ID, SUBSCRIPTION_ID)
 
 
 """
 class PubsubInstance:
 
     def __init__(self):
-        self.__project_id = ""
+        self.__project_id = "ssdc-rm-danielbanks02"
         
         # List of topic ids that the pubsub publishes to
         self.__topics = ["event-new-case"]

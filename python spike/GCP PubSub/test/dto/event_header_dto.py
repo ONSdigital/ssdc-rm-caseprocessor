@@ -9,7 +9,7 @@ class EventHeaderDTO:
     topic: str
     source: str
     channel: str
-    datetime: datetime
+    date_time: datetime
     message_id: uuid
     correlation_id: uuid
     originating_user: str

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Dict
 import uuid
 
 
@@ -6,5 +7,5 @@ import uuid
 class NewCase:
     case_id: uuid
     collection_exercise_id: uuid
-    sample: {}
-    sample_sensitive: {}
+    sample: Dict[str, str]
+    sample_sensitive: Dict[str, str]
