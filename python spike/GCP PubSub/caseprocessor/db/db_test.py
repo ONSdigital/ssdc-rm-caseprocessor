@@ -9,8 +9,9 @@ def test_database():
 
     session = create_session()
 
+    print("here")
     for row in CasesTable.select_all(session):
-        print(row.id)
+        print(row.secret_sequence_number)
 
 
     print("\n")

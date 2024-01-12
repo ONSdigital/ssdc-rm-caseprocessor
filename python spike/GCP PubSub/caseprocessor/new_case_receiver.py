@@ -9,6 +9,7 @@ from caseprocessor.validation.column_validator import ColumnValidator
 from caseprocessor.entity.case import Case
 from caseprocessor.case_ref_generator import get_case_ref
 
+# TODO: This should probs be change to static methods or just remove the class?
 class NewCaseReceiver:
     __case_ref_generator_key = bytes("abc123", "utf-8")
 
@@ -44,13 +45,15 @@ class NewCaseReceiver:
             sample = new_case_payload.sample
 
             new_case = Case(
-                case_id=new_case_payload.case_id,
-                collection_exercise=collex,
+                id=new_case_payload.case_id,
+                collection_exercise_id=collex.id,
                 sample=new_case_payload.sample,
                 sample_sensitive=new_case_payload.sample_sensitive
             )
 
-            new_case = cls.__save_new_case_and_stamp_case_ref(new_case)
+            #new_case.add_secret_sequence_number(session)
+
+            new_case = cls.__save_new_case_and_stamp_case_ref(new_case, session)
 
             # TODO: add logger and finish this off
 
@@ -66,28 +69,28 @@ class NewCaseReceiver:
                              for column_validator in column_validators
                              if ColumnValidator.is_sensitive(column_validator)}
 
-        if sensitive_columns.issubset(new_case_payload.sample_sensitive.keys()):
+        if not sensitive_columns.issubset(new_case_payload.sample_sensitive.keys()):
             raise Exception("Attempt to send sensitive data to RM which was not part of defined sample")
 
         return sensitive_columns
 
     @classmethod
     def __check_new_sample_within_sample_definition(cls, column_validators, new_case_payload):
-        sensitive_columns = {ColumnValidator.get_column_name(column_validator)
-                             for column_validator in column_validators
-                             if not ColumnValidator.is_sensitive(column_validator)}
+        non_sensitive_columns = {ColumnValidator.get_column_name(column_validator)
+                                 for column_validator in column_validators
+                                 if not ColumnValidator.is_sensitive(column_validator)}
 
-        if sensitive_columns.issubset(new_case_payload.sample_sensitive.keys()):
+        if not non_sensitive_columns.issubset(new_case_payload.sample.keys()):
             raise Exception("Attempt to send data to RM which was not part of defined sample")
 
-        return sensitive_columns
+        return non_sensitive_columns
 
     @classmethod
     def __validate_new_case(cls, column_validators, new_case_payload):
         validate_errors = []
 
         for column_validator in column_validators:
-            if column_validator.is_sensitive:
+            if column_validator.is_sensitive():
                 error = column_validator.validate_row(new_case_payload.sample_sensitive,
                                                       exclude_data_from_returned_error_msgs=True)
                 if error is not None:
@@ -104,5 +107,7 @@ class NewCaseReceiver:
     @classmethod
     def __save_new_case_and_stamp_case_ref(cls, caze, session):
         CasesTable.save_and_flush(session, caze)
-        caze.case_ref = get_case_ref(caze.secret_sequence_number(), cls.__case_ref_generator_key)
+        caze.case_ref = get_case_ref(3, cls.__case_ref_generator_key)
+
+        #caze.case_ref = get_case_ref(caze.secret_sequence_number(), cls.__case_ref_generator_key)
         return caze

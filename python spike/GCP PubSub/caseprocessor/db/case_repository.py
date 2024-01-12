@@ -1,6 +1,7 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session
-from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import Session, registry
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Column, Integer, String, BIGINT, Sequence
 from sqlalchemy import MetaData
 import uuid
 from typing import Optional
@@ -12,6 +13,12 @@ Base = declarative_base(metadata=metadata_obj)
 class CasesTable(Base):
     __tablename__ = "cases"
     id = Column(Integer, primary_key=True)
+    case_ref = Column(BIGINT)
+    collection_exercise_id = Column(Integer)
+    sample = Column(JSONB)
+    sample_sensitive = Column(JSONB)
+    secret_sequence_number = Column(Integer, autoincrement=True)  # Not 100% sure if this is what we want
+
 
     @classmethod
     def find_by_id_with_update_lock(cls, session: Session, case_id: uuid) -> Optional[str]:
@@ -24,8 +31,22 @@ class CasesTable(Base):
 
     @classmethod
     def save_and_flush(cls, session: Session, caze: Case):
+        #registry.map_imperatively(Case, CasesTable)
+        # TODO: make this more efficient?
+        caze = CasesTable(id=caze.id,
+                          case_ref=caze.case_ref,
+                          collection_exercise_id=caze.collection_exercise_id,
+                          sample=caze.sample,
+                          sample_sensitive=caze.sample_sensitive,
+                          )
         session.add(caze)
 
     @classmethod
     def select_all(cls, session: Session):
         return session.query(cls).all()
+
+    # This doesn't currently work
+    def add_secret_sequence_number(self, session: Session):
+        session.add(self)
+        print(self.secret_sequence_number)
+

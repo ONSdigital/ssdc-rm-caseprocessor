@@ -50,7 +50,7 @@ class ColumnValidator:
                         + validation_error
                     )
 
-        if not validation_errors:
+        if validation_errors:
             return ", ".join(validation_errors)
 
         return None

@@ -16,5 +16,6 @@ def convert_to_byte_array_and_strip_leading_zero(n):
     return bytes(f"{len(n_as_byte_array) - first_non_zero_index}", 'utf-8')
 
 
-def to_bytes(cls, i):
-    return struct.pack('>I', i)
+def to_bytes(i: int) -> bytes:
+    return int(i).to_bytes(4, byteorder="big")
+    #return struct.pack('>I', int(i))

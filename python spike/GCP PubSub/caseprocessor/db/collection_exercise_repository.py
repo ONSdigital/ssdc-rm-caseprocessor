@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from caseprocessor.entity.collection_exercise import CollectionExercise
 from caseprocessor.entity.survey import Survey
 from caseprocessor.validation.column_validator import ColumnValidator
+from caseprocessor.validation.rules import create_rule
 from dataclass_wizard import fromdict
 import uuid
 
@@ -32,13 +33,16 @@ class CollectionExerciseTable(Base):
                   .join(cls.survey)
                   .first())
 
-        # TODO fix this
-        # The issue is that it takes in a java class for the validation rules
-        # Those rules will have to be added, there is an 'abstract' (Python equivalent) class called rules
+        sample_validation_rules = []
 
-        # result = session.query(cls.id, cls.survey).filter_by(id=collection_exercise_id).first()
-        sample_validation_rules = [
-            fromdict(ColumnValidator, sample_validation_rule) for sample_validation_rule in result[2]]
+        for sample_validation_rule in result[2]:
+            rules = []
+            for rule in sample_validation_rule['rules']:
+                rules.append(create_rule(rule['className']))
+            column_validator = ColumnValidator(column_name=sample_validation_rule['columnName'],
+                                               sensitive=sample_validation_rule['sensitive'],
+                                               rules=rules)
+            sample_validation_rules.append(column_validator)
 
         survey = Survey(id=result[1], sample_validation_rules=sample_validation_rules)
         return CollectionExercise(id=result[0], survey=survey)

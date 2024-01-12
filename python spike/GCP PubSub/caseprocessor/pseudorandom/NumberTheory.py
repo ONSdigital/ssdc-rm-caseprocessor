@@ -501,7 +501,7 @@ class NumberTheory:
         if n > 0:
             bytes = to_bytes(n)
 
-            for i in range(len(bytes) - 1):
+            for i in range(len(bytes) - 1, -1, -1):
                 x = bytes[i]
 
                 if x != 0:
@@ -511,8 +511,8 @@ class NumberTheory:
                     low_zero += 8
         return low_zero
 
-    @classmethod
-    def count_trailing_zeros(cls, n):
+    @staticmethod
+    def count_trailing_zeros(n):
         for i in range(8):
             if ((n >> i) & 0x01) > 0:
                 return i

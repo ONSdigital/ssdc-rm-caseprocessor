@@ -12,9 +12,9 @@ from sqlalchemy import func
 
 @dataclass
 class Case:
-    case_id: uuid
-    case_ref: int
-    collection_exercise: CollectionExercise
+    id: uuid
+    collection_exercise_id: CollectionExercise
     sample: Dict[str, str]
     sample_sensitive: Dict[str, str]
+    case_ref: int = None
     secret_sequence_number: int = func.now()  # Not 100% sure if this is what we want

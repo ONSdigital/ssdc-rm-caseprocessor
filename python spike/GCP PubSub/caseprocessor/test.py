@@ -55,5 +55,3 @@ def generate_message():
 test_database()
 
 NewCaseReceiver.receive_new_case(generate_message().encode('utf-8'))
-
-print(get_case_ref())

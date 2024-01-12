@@ -41,7 +41,7 @@ class PseudorandomNumberGenerator:
 
         self.wip = digest(bytes_to_digest=baos.getvalue())
 
-    def get_pseudorandom(self, original_number, key):
+    def get_pseudorandom(self, original_number: int, key: bytes) -> int:
         if original_number > self.modulus:
             raise ValueError("Cannot encrypt a number bigger than the modulus "
                              "(otherwise this wouldn't be format preserving encryption")
@@ -52,10 +52,10 @@ class PseudorandomNumberGenerator:
 
         for i in range(self.LOWEST_SAFE_NUMBER_OF_ROUNDS):
             left = int(pseudo_random_number / self.second_factor)
-            riight = pseudo_random_number % self.second_factor
+            right = pseudo_random_number % self.second_factor
 
-            w = (left + self.__one_way_function(i - 1, riight)) % self.first_factor_bi
-            pseudo_random_number = self.first_factor * riight + w
+            w = int((left + self.__one_way_function(i, right)) % int(self.first_factor_bi))
+            pseudo_random_number = self.first_factor * right + w
 
         return pseudo_random_number
 
@@ -64,19 +64,19 @@ class PseudorandomNumberGenerator:
 
         baos = io.BytesIO()
 
-        try:
-            baos.write(self.wip)
-            baos.write(to_bytes(round_no))
+        #try:
+        baos.write(self.wip)
+        baos.write(to_bytes(round_no))
 
-            baos.write(to_bytes(len(r_bin)))
-            baos.write(r_bin)
+        baos.write(to_bytes(len(r_bin)))
+        baos.write(r_bin)
 
-            digest_bytes = digest(baos.getvalue())
-            return self.__turn_final_value_into_positive_big_int(digest_bytes)
+        digest_bytes = digest(baos.getvalue())
+        return self.__turn_final_value_into_positive_big_int(digest_bytes)
 
-        except Exception as e:
-            raise RuntimeError("Unable to write to internal byte array,"
-                               " this should never happen so indicates a defect in the code", e)
+        #except Exception as e:
+        #    raise RuntimeError("Unable to write to internal byte array,"
+        #                       " this should never happen so indicates a defect in the code", e)
 
     @staticmethod
     def __turn_final_value_into_positive_big_int(encrypted_value_bytes):
