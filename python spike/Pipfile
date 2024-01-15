@@ -4,8 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-google-cloud-pubsub = "*"
-dataclasses-wizzard = "*"
+celery = "*"
+celery-pubsub = "*"
 
 [requires]
 python_version = "3.11"

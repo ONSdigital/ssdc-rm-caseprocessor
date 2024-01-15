@@ -56,7 +56,6 @@ class PseudorandomNumberGenerator:
 
             w = int((left + self.__one_way_function(i, right)) % int(self.first_factor_bi))
             pseudo_random_number = self.first_factor * right + w
-
         return pseudo_random_number
 
     def __one_way_function(self, round_no, value_to_encrypt):
@@ -80,4 +79,4 @@ class PseudorandomNumberGenerator:
 
     @staticmethod
     def __turn_final_value_into_positive_big_int(encrypted_value_bytes):
-        return abs(int(encrypted_value_bytes))
+        return abs(int.from_bytes(encrypted_value_bytes, "big"))

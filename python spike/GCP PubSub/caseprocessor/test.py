@@ -6,7 +6,6 @@ from caseprocessor.db.db_utility import to_string
 from caseprocessor.db.db_test import test_database
 from caseprocessor.case_ref_generator import get_case_ref
 
-
 def generate_message():
     case_id = str(uuid.uuid4())
     message_id = str(uuid.uuid4())
@@ -52,6 +51,8 @@ def generate_message():
 
 
 # printing the schema and tables in the database
-test_database()
+# test_database()
 
-NewCaseReceiver.receive_new_case(generate_message().encode('utf-8'))
+# NewCaseReceiver.receive_new_case(generate_message().encode('utf-8'))
+
+print(get_case_ref(3, bytes("abc123", "utf-8")))

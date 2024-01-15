@@ -16,5 +16,5 @@ def get_case_ref(sequence_number: int, case_ref_generator_key: bytes):
     pseudo_random_number = PSEUDORANDOM_NUMBER_GENERATOR.get_pseudorandom(sequence_number,
                                                                           case_ref_generator_key)
 
-    case_ref_without_check_digit = pseudo_random_number + LOWEST_POSSIBLE_CASE_REF
+    case_ref_without_check_digit = int(pseudo_random_number + LOWEST_POSSIBLE_CASE_REF)
     return add_check_digit(case_ref_without_check_digit)
