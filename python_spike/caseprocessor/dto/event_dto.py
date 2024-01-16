@@ -1,10 +1,6 @@
 from dataclasses import dataclass
 from .event_header_dto import EventHeaderDTO
 from .payload_dto import PayloadDTO
-
-import uuid
-from datetime import datetime
-from typing import Dict
 from dataclasses_json import LetterCase, dataclass_json
 
 

@@ -5,7 +5,6 @@ from sqlalchemy import Column, Integer, String, BIGINT, DateTime, func, Boolean,
 from sqlalchemy import MetaData
 import uuid
 from typing import Optional
-from caseprocessor.entity.case import Case
 
 from datetime import datetime
 

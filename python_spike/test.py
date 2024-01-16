@@ -1,7 +1,7 @@
-from .config import PubsubConfig
+from caseprocessor.config import PubsubConfig
 import uuid
 import json
-from .new_case_receiver import NewCaseReceiver
+from caseprocessor.new_case_receiver import NewCaseReceiver
 from caseprocessor.db.db_utility import to_string
 from caseprocessor.db.db_test import test_database
 from caseprocessor.util.case_ref_generator import get_case_ref

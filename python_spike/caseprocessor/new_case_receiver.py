@@ -1,14 +1,12 @@
 import json
-from caseprocessor.config import PubsubConfig
-from caseprocessor.dto.event_dto import EventDTO
-from caseprocessor.db.case_repository import *
-from caseprocessor.db.collection_exercise_repository import CollectionExerciseTable
-from caseprocessor.db.db_utility import create_session
-from caseprocessor.validation.column_validator import ColumnValidator
-from caseprocessor.entity.case import Case
-from caseprocessor.util.case_ref_generator import get_case_ref
-from caseprocessor.db.case_repository import CasesTable, Base
-from caseprocessor.service.case_service import emit_case
+from .dto.event_dto import EventDTO
+from .db.case_repository import *
+from .db.collection_exercise_repository import CollectionExerciseTable
+from .db.db_utility import create_session
+from .validation.column_validator import ColumnValidator
+from .util.case_ref_generator import get_case_ref
+from .db.case_repository import CasesTable, Base
+from .service.case_service import emit_case
 from sqlalchemy import func
 
 
