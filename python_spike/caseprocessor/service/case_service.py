@@ -27,7 +27,7 @@ def emit_case(caze: Case, correlation_id: uuid, originating_user: str):
     event = __prepare_case_event(caze, event_header)
     event_json = event.to_json()
     print(f"\n event to json {event_json}")
-    future = PubsubConfig.PUBLISHER.publish(PubsubConfig.TOPIC_PATH, event_json.encode('utf-8'))
+    future = PubsubConfig.PUBLISHER.publish(PubsubConfig.CASE_UPDATE_PATH, event_json.encode('utf-8'))
     print("publishing")
     future.result()
 
