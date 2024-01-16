@@ -1,4 +1,4 @@
-from caseprocessor.config import PubsubConfig
+from config import PubsubConfig
 import uuid
 import json
 from caseprocessor.new_case_receiver import NewCaseReceiver

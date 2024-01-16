@@ -3,9 +3,8 @@ from caseprocessor.dto.event_header_dto import EventHeaderDTO
 from caseprocessor.dto.case_update_dto import CaseUpdateDTO
 from caseprocessor.dto.event_dto import EventDTO
 from caseprocessor.dto.payload_dto import PayloadDTO
-from caseprocessor.config import PubsubConfig
 from caseprocessor.util.redact_helper import redact
-from caseprocessor.config import PubsubConfig
+from config import PubsubConfig
 
 import uuid
 

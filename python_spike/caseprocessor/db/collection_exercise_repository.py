@@ -7,7 +7,6 @@ from caseprocessor.entity.collection_exercise import CollectionExercise
 from caseprocessor.entity.survey import Survey
 from caseprocessor.validation.column_validator import ColumnValidator
 from caseprocessor.validation.rules import create_rule
-from dataclass_wizard import fromdict
 import uuid
 
 from typing import Optional

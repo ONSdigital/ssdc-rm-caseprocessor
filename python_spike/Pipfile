@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 google-cloud-pubsub = "*"
-dataclass-json = "*"
+dataclasses-json = "*"
 SQLAlchemy = "*"
 psycopg2-binary = "*"
 luhn = "*"
