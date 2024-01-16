@@ -30,6 +30,12 @@ def to_string():
             for column in inspector.get_columns(table_name, schema=schema):
                 print("Column: %s" % column)
 
+    print("\n sequence:")
+
+    sequences = inspector.get_sequence_names()
+    for sequence in sequences:
+        print(sequence)
+
 
 '''
     DB_URL = URL.create(

@@ -1,16 +1,18 @@
-from config import PubsubConfig
+from .config import PubsubConfig
 import uuid
 import json
-from new_case_receiver import NewCaseReceiver
-from db.db_utility import to_string
-from db.db_test import test_database
-from case_ref_generator import get_case_ref
+from .new_case_receiver import NewCaseReceiver
+from caseprocessor.db.db_utility import to_string
+from caseprocessor.db.db_test import test_database
+from caseprocessor.util.case_ref_generator import get_case_ref
+from sqlalchemy import func
+from caseprocessor.db.case_repository import CasesTable, Base
 
 def generate_message():
     case_id = str(uuid.uuid4())
     message_id = str(uuid.uuid4())
     correlation_id = str(uuid.uuid4())
-    collex_id = "95649341-f970-4389-b81a-e8ea53d8a759"
+    collex_id = "068de8bd-ea80-4442-86a6-705c14eb5ee7"
     originating_user = "foo.bar@ons.gov.uk"
     return json.dumps(
         {
@@ -51,8 +53,7 @@ def generate_message():
 
 
 # printing the schema and tables in the database
-# test_database()
+#test_database()
 
 NewCaseReceiver.receive_new_case(generate_message().encode('utf-8'))
 
-print(get_case_ref(3, bytes("abc123", "utf-8")))

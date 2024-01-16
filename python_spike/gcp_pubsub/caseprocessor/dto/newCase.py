@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from typing import Dict
 import uuid
+from dataclasses_json import LetterCase, dataclass_json
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class NewCase:
     case_id: uuid

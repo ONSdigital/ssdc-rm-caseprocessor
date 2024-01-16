@@ -8,6 +8,7 @@ import uuid
 from .collection_exercise import CollectionExercise
 from typing import Dict
 from sqlalchemy import func
+from datetime import datetime
 
 
 @dataclass
@@ -16,5 +17,9 @@ class Case:
     collection_exercise_id: CollectionExercise
     sample: Dict[str, str]
     sample_sensitive: Dict[str, str]
+    created_at: datetime
+    last_updated_at: datetime
+    invalid: bool = False
     case_ref: int = None
-    secret_sequence_number: int = func.now()  # Not 100% sure if this is what we want
+    secret_sequence_number: int = None # Not 100% sure if this is what we want
+

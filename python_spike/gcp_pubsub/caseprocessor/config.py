@@ -1,5 +1,6 @@
 from google.cloud import pubsub_v1
 
+
 class PubsubConfig:
     PROJECT_ID = "ssdc-rm-danielbanks02"
 
@@ -10,6 +11,9 @@ class PubsubConfig:
     SUBSCRIBER = pubsub_v1.SubscriberClient()
     SUBSCRIPTION_ID = "event_new-case_rm-case-processor"
     SUBSCRIPTION_PATH = SUBSCRIBER.subscription_path(PROJECT_ID, SUBSCRIPTION_ID)
+
+    CASE_UPDATE_TOPIC = "event_case-update"
+    CASE_UPDATE_PATH = SUBSCRIBER.subscription_path(PROJECT_ID, CASE_UPDATE_TOPIC)
 
 
 """

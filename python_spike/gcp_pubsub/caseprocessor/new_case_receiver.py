@@ -1,12 +1,16 @@
 import json
-from dataclass_wizard import fromdict
-from dto.event_dto import EventDTO
-from db.case_repository import CasesTable
-from db.collection_exercise_repository import CollectionExerciseTable
-from db.db_utility import create_session
-from validation.column_validator import ColumnValidator
-from entity.case import Case
-from case_ref_generator import get_case_ref
+from caseprocessor.config import PubsubConfig
+from caseprocessor.dto.event_dto import EventDTO
+from caseprocessor.db.case_repository import *
+from caseprocessor.db.collection_exercise_repository import CollectionExerciseTable
+from caseprocessor.db.db_utility import create_session
+from caseprocessor.validation.column_validator import ColumnValidator
+from caseprocessor.entity.case import Case
+from caseprocessor.util.case_ref_generator import get_case_ref
+from caseprocessor.db.case_repository import CasesTable, Base
+from caseprocessor.service.case_service import emit_case
+from sqlalchemy import func
+
 
 # TODO: This should probs be change to static methods or just remove the class?
 class NewCaseReceiver:
@@ -15,24 +19,19 @@ class NewCaseReceiver:
     @classmethod
     def receive_new_case(cls, message: bytes):
         try:
-            parsed_json = json.loads(message)
-            event = fromdict(EventDTO, parsed_json)
-
+            event = EventDTO.from_json(message)
             new_case_payload = event.payload.new_case
-
-            print("----Json Deserialized----")
-            print(new_case_payload)
 
             session = create_session()
 
-            if CasesTable.exists_by_id(session, new_case_payload.case_id):
+            if exists_by_id(session, new_case_payload.case_id):
                 return
 
             collex = CollectionExerciseTable.find_by_id(session, new_case_payload.collection_exercise_id)
 
             if collex is None:
                 raise Exception("Collection exercise '"
-                                + new_case_payload.collection_exercise_id()
+                                + new_case_payload.collection_exercise_id
                                 + "' not found")
 
             column_validator = collex.survey.sample_validation_rules
@@ -41,22 +40,22 @@ class NewCaseReceiver:
             cls.__check_new_sample_within_sample_definition(column_validator, new_case_payload)
             cls.__validate_new_case(column_validator, new_case_payload)
 
-            sample = new_case_payload.sample
-
-            new_case = Case(
+            new_case = CasesTable(
                 id=new_case_payload.case_id,
                 collection_exercise_id=collex.id,
                 sample=new_case_payload.sample,
-                sample_sensitive=new_case_payload.sample_sensitive
+                sample_sensitive=new_case_payload.sample_sensitive,
+                created_at=func.current_timestamp()
             )
-
-            #new_case.add_secret_sequence_number(session)
 
             new_case = cls.__save_new_case_and_stamp_case_ref(new_case, session)
 
             # TODO: add logger and finish this off
+            print("it worked")
 
+            session.commit()
 
+            emit_case(new_case, event.header.correlation_id, event.header.originating_user)
 
         except TypeError as e:
             # TODO: throw error if json is wrong/can't cast to class
@@ -104,9 +103,8 @@ class NewCaseReceiver:
             raise Exception("NEW_CASE event: " + "\n.join(validate_errors)")
 
     @classmethod
-    def __save_new_case_and_stamp_case_ref(cls, caze, session):
-        CasesTable.save_and_flush(session, caze)
-        caze.case_ref = get_case_ref(3, cls.__case_ref_generator_key)
-
-        #caze.case_ref = get_case_ref(caze.secret_sequence_number(), cls.__case_ref_generator_key)
+    def __save_new_case_and_stamp_case_ref(cls, caze: CasesTable, session):
+        add_and_flush(session, caze)
+        caze.case_ref = get_case_ref(caze.secret_sequence_number, cls.__case_ref_generator_key)
+        update_case_ref(session, caze)
         return caze

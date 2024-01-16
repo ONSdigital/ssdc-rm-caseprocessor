@@ -1,11 +1,21 @@
 from dataclasses import dataclass
 from .event_header_dto import EventHeaderDTO
 from .payload_dto import PayloadDTO
+
 import uuid
 from datetime import datetime
 from typing import Dict
+from dataclasses_json import LetterCase, dataclass_json
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class EventDTO:
+    header: EventHeaderDTO
+    payload: PayloadDTO
+
+
+"""
 @dataclass
 class EventHeaderDTO:
     version: str
@@ -28,13 +38,6 @@ class NewCase:
 
 @dataclass
 class PayloadDTO:
-    new_case: NewCase
-
-
-
-
-@dataclass
-class EventDTO:
-    header: EventHeaderDTO
-    payload: PayloadDTO
-
+    new_case: NewCase = None
+    case_update_dto: CaseUpdateDTO = None
+"""
