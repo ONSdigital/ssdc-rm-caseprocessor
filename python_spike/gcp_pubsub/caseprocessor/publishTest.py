@@ -1,16 +1,14 @@
-from .config import PubsubConfig
-import uuid
+from pubsub import PubsubConfig
 import json
-from .new_case_receiver import NewCaseReceiver
-from caseprocessor.db.db_utility import to_string
-from caseprocessor.db.db_test import test_database
-from caseprocessor.case_ref_generator import get_case_ref
+import uuid
+from google.cloud import pubsub_v1
+
 
 def generate_message():
     case_id = str(uuid.uuid4())
     message_id = str(uuid.uuid4())
     correlation_id = str(uuid.uuid4())
-    collex_id = "95649341-f970-4389-b81a-e8ea53d8a759"
+    collex_id = str(uuid.uuid4())
     originating_user = "foo.bar@ons.gov.uk"
     return json.dumps(
         {
@@ -50,9 +48,6 @@ def generate_message():
     )
 
 
-# printing the schema and tables in the database
-# test_database()
-
-# NewCaseReceiver.receive_new_case(generate_message().encode('utf-8'))
-
-print(get_case_ref(3, bytes("abc123", "utf-8")))
+future = PubsubConfig.PUBLISHER.publish(PubsubConfig.TOPIC_PATH, generate_message().encode('utf-8'))
+print("publishing")
+future.result()

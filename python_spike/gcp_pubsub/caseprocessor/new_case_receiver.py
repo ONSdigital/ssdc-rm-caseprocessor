@@ -1,13 +1,12 @@
 import json
 from dataclass_wizard import fromdict
-from caseprocessor.config import PubsubConfig
-from caseprocessor.dto.event_dto import EventDTO
-from caseprocessor.db.case_repository import CasesTable
-from caseprocessor.db.collection_exercise_repository import CollectionExerciseTable
-from caseprocessor.db.db_utility import create_session
-from caseprocessor.validation.column_validator import ColumnValidator
-from caseprocessor.entity.case import Case
-from caseprocessor.case_ref_generator import get_case_ref
+from dto.event_dto import EventDTO
+from db.case_repository import CasesTable
+from db.collection_exercise_repository import CollectionExerciseTable
+from db.db_utility import create_session
+from validation.column_validator import ColumnValidator
+from entity.case import Case
+from case_ref_generator import get_case_ref
 
 # TODO: This should probs be change to static methods or just remove the class?
 class NewCaseReceiver:

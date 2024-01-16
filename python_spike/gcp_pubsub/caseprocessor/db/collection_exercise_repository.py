@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session, relationship, Mapped
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy import MetaData
 from sqlalchemy.dialects.postgresql import JSONB
-from caseprocessor.entity.collection_exercise import CollectionExercise
-from caseprocessor.entity.survey import Survey
-from caseprocessor.validation.column_validator import ColumnValidator
-from caseprocessor.validation.rules import create_rule
+from entity.collection_exercise import CollectionExercise
+from entity.survey import Survey
+from validation.column_validator import ColumnValidator
+from validation.rules import create_rule
 from dataclass_wizard import fromdict
 import uuid
 

@@ -1,8 +1,8 @@
 import json
 from dataclass_wizard import fromdict
-from caseprocessor.pubsub import PubsubConfig
-from caseprocessor.dto.event_dto import EventDTO
-from caseprocessor.new_case_receiver import NewCaseReceiver
+from pubsub import PubsubConfig
+from dto.event_dto import EventDTO
+from new_case_receiver import NewCaseReceiver
 
 timeout = 5.0
 
@@ -30,15 +30,16 @@ def callback(message) -> None:
     message.ack()
 
 
-streaming_pull_future = PubsubConfig.SUBSCRIBER.subscribe(PubsubConfig.SUBSCRIPTION_PATH, callback=callback)
-print(f"Listening for messages on {PubsubConfig.SUBSCRIPTION_PATH}")
+def subscribe():
+    streaming_pull_future = PubsubConfig.SUBSCRIBER.subscribe(PubsubConfig.SUBSCRIPTION_PATH, callback=callback)
+    print(f"Listening for messages on {PubsubConfig.SUBSCRIPTION_PATH}")
 
-with PubsubConfig.SUBSCRIBER:
-    try:
-        streaming_pull_future.result()
-    except TimeoutError:
-        print("closing")
-        streaming_pull_future.cancel()
-        streaming_pull_future.result()
-    except KeyboardInterrupt:
-        print("----Manually Stopped Subscriber----")
+    with PubsubConfig.SUBSCRIBER:
+        try:
+            streaming_pull_future.result()
+        except TimeoutError:
+            print("closing")
+            streaming_pull_future.cancel()
+            streaming_pull_future.result()
+        except KeyboardInterrupt:
+            print("----Manually Stopped Subscriber----")
