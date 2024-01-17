@@ -9,8 +9,6 @@ from caseprocessor.validation.column_validator import ColumnValidator
 from caseprocessor.validation.rules import create_rule
 import uuid
 
-from typing import Optional
-
 metadata_obj = MetaData(schema="casev3")
 Base = declarative_base(metadata=metadata_obj)
 

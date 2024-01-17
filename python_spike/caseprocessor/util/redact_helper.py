@@ -1,6 +1,6 @@
 import dataclasses
-from typing import Dict, get_origin
-from dataclasses import fields, dataclass
+from typing import Dict
+from dataclasses import fields
 
 REDACTION_FAILURE = "Failed to redact sensitive data"
 REDACTION_TEXT = "REDACTED"

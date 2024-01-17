@@ -7,7 +7,6 @@ from dataclasses import dataclass
 import uuid
 from .collection_exercise import CollectionExercise
 from typing import Dict
-from sqlalchemy import func
 from datetime import datetime
 
 

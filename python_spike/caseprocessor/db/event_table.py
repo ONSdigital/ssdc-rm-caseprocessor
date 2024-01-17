@@ -2,8 +2,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, DateTime, func, String, MetaData
 from sqlalchemy.orm import Session
 from sqlalchemy.dialects.postgresql import JSONB
-from dataclasses import dataclass
-from dataclasses_json import dataclass_json
 
 metadata_obj = MetaData(schema="casev3")
 Base = declarative_base(metadata=metadata_obj)

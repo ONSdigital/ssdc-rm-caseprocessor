@@ -1,13 +1,10 @@
 import uuid
 from ..db.event_table import *
-from ..db.case_repository import Case
 from ..dto.event_dto import EventDTO
-from ..dto.event_header_dto import EventHeaderDTO
 from ..entity.event_type import EventType
 from ..util.redact_helper import redact
 from datetime import datetime
 from sqlalchemy.orm import Session
-import json
 
 
 def log_case_event(

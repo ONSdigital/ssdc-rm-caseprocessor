@@ -3,7 +3,7 @@ This is just temporary for the spike - since common validation is out of scope
 
 This will get replaced if and when we change common validation to python
 """
-from typing import Optional, List
+from typing import List
 from .rule import Rule
 from dataclasses import dataclass
 

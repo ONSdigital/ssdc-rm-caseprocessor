@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, relationship, Mapped
+from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer
 from sqlalchemy import MetaData
 

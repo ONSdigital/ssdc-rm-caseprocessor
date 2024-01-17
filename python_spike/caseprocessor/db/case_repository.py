@@ -1,12 +1,11 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, registry
+from sqlalchemy.orm import Session
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy import Column, Integer, String, BIGINT, DateTime, func, Boolean, Sequence
+from sqlalchemy import Column, Integer, BIGINT, DateTime, func, Boolean, Sequence
 from sqlalchemy import MetaData
 import uuid
 from typing import Optional
 
-from datetime import datetime
 
 metadata_obj = MetaData(schema="casev3")
 Base = declarative_base(metadata=metadata_obj)

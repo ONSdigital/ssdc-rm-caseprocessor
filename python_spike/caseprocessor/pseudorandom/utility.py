@@ -1,6 +1,5 @@
 # Utility methods that swap between BigInteger, Java primitives and byte array representations of
 #  numbers.
-import struct
 
 
 def convert_to_byte_array_and_strip_leading_zero(n):
