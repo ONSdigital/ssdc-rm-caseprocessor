@@ -12,7 +12,7 @@ metadata_obj = MetaData(schema="casev3")
 Base = declarative_base(metadata=metadata_obj)
 
 
-class CasesTable(Base):
+class Case(Base):
     __tablename__ = "cases"
     id = Column(Integer, primary_key=True)
     case_ref = Column(BIGINT)
@@ -27,22 +27,22 @@ class CasesTable(Base):
 
 
 def find_by_id_with_update_lock(session: Session, case_id: uuid) -> Optional[str]:
-    result = session.query(CasesTable).filter_by(id=case_id).with_for_update(skip_locked=True).first()
+    result = session.query(Case).filter_by(id=case_id).with_for_update(skip_locked=True).first()
     return result.id if result else None
 
 
 def exists_by_id(session: Session, case_id: uuid):
-    return session.query(CasesTable).filter_by(id=case_id).scalar() is not None
+    return session.query(Case).filter_by(id=case_id).scalar() is not None
 
 
-def add_and_flush(session: Session, caze: CasesTable):
+def add_and_flush(session: Session, caze: Case):
     session.add(caze)
     session.flush([caze])
 
 
 def select_all(session: Session):
-    return session.query(CasesTable).all()
+    return session.query(Case).all()
 
 
-def update_case_ref(session: Session, caze: CasesTable):
-    session.query(CasesTable).filter_by(id=caze.id).update({CasesTable.case_ref: caze.case_ref})
+def update_case_ref(session: Session, caze: Case):
+    session.query(Case).filter_by(id=caze.id).update({Case.case_ref: caze.case_ref})

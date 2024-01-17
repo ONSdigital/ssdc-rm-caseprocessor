@@ -3,10 +3,6 @@ import uuid
 import json
 from caseprocessor.new_case_receiver import NewCaseReceiver
 from caseprocessor.db.db_utility import to_string
-from caseprocessor.db.db_test import test_database
-from caseprocessor.util.case_ref_generator import get_case_ref
-from sqlalchemy import func
-from caseprocessor.db.case_repository import CasesTable, Base
 
 def generate_message():
     case_id = str(uuid.uuid4())

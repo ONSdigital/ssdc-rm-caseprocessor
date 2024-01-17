@@ -5,14 +5,18 @@ from .db.collection_exercise_repository import CollectionExerciseTable
 from .db.db_utility import create_session
 from .validation.column_validator import ColumnValidator
 from .util.case_ref_generator import get_case_ref
-from .db.case_repository import CasesTable, Base
+from .db.case_repository import Case, Base
 from .service.case_service import emit_case
+from .logging.event_logging import log_case_event
+from .entity.event_type import EventType
 from sqlalchemy import func
 
 
 # TODO: This should probs be change to static methods or just remove the class?
 class NewCaseReceiver:
     __case_ref_generator_key = bytes("abc123", "utf-8")
+
+    NEW_CLASS_LOG_MSG = "New Case created"
 
     @classmethod
     def receive_new_case(cls, message: bytes):
@@ -38,7 +42,7 @@ class NewCaseReceiver:
             cls.__check_new_sample_within_sample_definition(column_validator, new_case_payload)
             cls.__validate_new_case(column_validator, new_case_payload)
 
-            new_case = CasesTable(
+            new_case = Case(
                 id=new_case_payload.case_id,
                 collection_exercise_id=collex.id,
                 sample=new_case_payload.sample,
@@ -48,12 +52,13 @@ class NewCaseReceiver:
 
             new_case = cls.__save_new_case_and_stamp_case_ref(new_case, session)
 
-            # TODO: add logger and finish this off
-            print("it worked")
+            emit_case(new_case, event.header.correlation_id, event.header.originating_user, collex)
+
+            log_case_event(session, cls.NEW_CLASS_LOG_MSG, EventType.NEW_CASE, event, new_case.created_at)
 
             session.commit()
 
-            emit_case(new_case, event.header.correlation_id, event.header.originating_user)
+            print("it worked")
 
         except TypeError as e:
             # TODO: throw error if json is wrong/can't cast to class
@@ -101,7 +106,7 @@ class NewCaseReceiver:
             raise Exception("NEW_CASE event: " + "\n.join(validate_errors)")
 
     @classmethod
-    def __save_new_case_and_stamp_case_ref(cls, caze: CasesTable, session):
+    def __save_new_case_and_stamp_case_ref(cls, caze: Case, session):
         add_and_flush(session, caze)
         caze.case_ref = get_case_ref(caze.secret_sequence_number, cls.__case_ref_generator_key)
         update_case_ref(session, caze)
