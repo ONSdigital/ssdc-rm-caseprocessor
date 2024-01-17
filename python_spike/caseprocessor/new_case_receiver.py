@@ -18,12 +18,7 @@ NEW_CLASS_LOG_MSG = "New Case created"
 
 
 def receive_new_case(message: bytes):
-    try:
-        event = EventDTO.from_json(message)
-    except TypeError as e:
-        print(f"something went wrong parsing the message:\n{e}")
-        return
-
+    event = EventDTO.from_json(message)
     new_case_payload = event.payload.new_case
 
     session = create_session()
