@@ -1,15 +1,14 @@
 import json
 from .dto.event_dto import EventDTO
-from .db.case_repository import *
-from .db.collection_exercise_repository import CollectionExerciseTable
+from .db.case_table_util import *
+from .db.collection_exercise_table_util import CollectionExerciseTable, find_collex_by_id
 from .db.db_utility import create_session
 from .validation.column_validator import ColumnValidator
 from .util.case_ref_generator import get_case_ref
-from .db.case_repository import Case, Base
+from .entity.case import Case
 from .service.case_service import emit_case
 from .logging.event_logging import log_case_event
 from .entity.event_type import EventType
-from .dto.newCase import NewCase
 from sqlalchemy import func
 
 __case_ref_generator_key = bytes("abc123", "utf-8")
@@ -26,7 +25,7 @@ def receive_new_case(message: bytes):
     if exists_by_id(session, new_case_payload.case_id):
         return
 
-    collex = CollectionExerciseTable.find_by_id(session, new_case_payload.collection_exercise_id)
+    collex = find_collex_by_id(session, new_case_payload.collection_exercise_id)
 
     if collex is None:
         raise Exception("Collection exercise '"

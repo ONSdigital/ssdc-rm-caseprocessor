@@ -1,5 +1,5 @@
 from .case_repository import *
-from .collection_exercise_repository import CollectionExerciseTable
+from .collection_exercise_table_util import CollectionExerciseTable
 from .db_utility import *
 
 

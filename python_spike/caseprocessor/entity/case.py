@@ -1,24 +1,22 @@
-"""
-This is just temporary for the spike - since common entity is out of scope
-
-This will get replaced if and when we change common entity to python
-"""
-from dataclasses import dataclass
-import uuid
-from .collection_exercise import CollectionExercise
-from typing import Dict
-from datetime import datetime
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Column, Integer, BIGINT, DateTime, func, Boolean, Sequence
+from sqlalchemy import MetaData
 
 
-@dataclass
-class Case:
-    id: uuid
-    collection_exercise_id: CollectionExercise
-    sample: Dict[str, str]
-    sample_sensitive: Dict[str, str]
-    created_at: datetime
-    last_updated_at: datetime
-    invalid: bool = False
-    case_ref: int = None
-    secret_sequence_number: int = None # Not 100% sure if this is what we want
+metadata_obj = MetaData(schema="casev3")
+Base = declarative_base(metadata=metadata_obj)
 
+
+class Case(Base):
+    __tablename__ = "cases"
+    id = Column(Integer, primary_key=True)
+    case_ref = Column(BIGINT)
+    collection_exercise_id = Column(Integer)
+    sample = Column(JSONB)
+    sample_sensitive = Column(JSONB)
+    secret_sequence_number = Column(Integer, Sequence('cases_secret_sequence_number_seq',
+                                                      metadata=Base.metadata))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    last_updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
+    invalid = Column(Boolean, default=False, nullable=False)
