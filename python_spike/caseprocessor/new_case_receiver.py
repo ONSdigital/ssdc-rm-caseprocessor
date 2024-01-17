@@ -9,6 +9,7 @@ from .db.case_repository import Case, Base
 from .service.case_service import emit_case
 from .logging.event_logging import log_case_event
 from .entity.event_type import EventType
+from .dto.newCase import NewCase
 from sqlalchemy import func
 
 __case_ref_generator_key = bytes("abc123", "utf-8")
@@ -19,47 +20,47 @@ NEW_CLASS_LOG_MSG = "New Case created"
 def receive_new_case(message: bytes):
     try:
         event = EventDTO.from_json(message)
-        new_case_payload = event.payload.new_case
-
-        session = create_session()
-
-        if exists_by_id(session, new_case_payload.case_id):
-            return
-
-        collex = CollectionExerciseTable.find_by_id(session, new_case_payload.collection_exercise_id)
-
-        if collex is None:
-            raise Exception("Collection exercise '"
-                            + new_case_payload.collection_exercise_id
-                            + "' not found")
-
-        column_validator = collex.survey.sample_validation_rules
-
-        __check_new_sensitive_within_sample_sensitive_definition(column_validator, new_case_payload)
-        __check_new_sample_within_sample_definition(column_validator, new_case_payload)
-        __validate_new_case(column_validator, new_case_payload)
-
-        new_case = Case(
-            id=new_case_payload.case_id,
-            collection_exercise_id=collex.id,
-            sample=new_case_payload.sample,
-            sample_sensitive=new_case_payload.sample_sensitive,
-            created_at=func.current_timestamp()
-        )
-
-        new_case = __save_new_case_and_stamp_case_ref(new_case, session)
-
-        emit_case(new_case, event.header.correlation_id, event.header.originating_user, collex)
-
-        log_case_event(session, NEW_CLASS_LOG_MSG, EventType.NEW_CASE, event, new_case.created_at)
-
-        session.commit()
-
-        print("it worked")
-
     except TypeError as e:
-        # TODO: throw error if json is wrong/can't cast to class
-        print(f"something went wrong:\n{e}")
+        print(f"something went wrong parsing the message:\n{e}")
+        return
+
+    new_case_payload = event.payload.new_case
+
+    session = create_session()
+
+    if exists_by_id(session, new_case_payload.case_id):
+        return
+
+    collex = CollectionExerciseTable.find_by_id(session, new_case_payload.collection_exercise_id)
+
+    if collex is None:
+        raise Exception("Collection exercise '"
+                        + new_case_payload.collection_exercise_id
+                        + "' not found")
+
+    column_validator = collex.survey.sample_validation_rules
+
+    __check_new_sensitive_within_sample_sensitive_definition(column_validator, new_case_payload)
+    __check_new_sample_within_sample_definition(column_validator, new_case_payload)
+    __validate_new_case(column_validator, new_case_payload)
+
+    new_case = Case(
+        id=new_case_payload.case_id,
+        collection_exercise_id=collex.id,
+        sample=new_case_payload.sample,
+        sample_sensitive=new_case_payload.sample_sensitive,
+        created_at=func.current_timestamp()
+    )
+
+    new_case = __save_new_case_and_stamp_case_ref(new_case, session)
+
+    emit_case(new_case, event.header.correlation_id, event.header.originating_user, collex)
+
+    log_case_event(session, NEW_CLASS_LOG_MSG, EventType.NEW_CASE, event, new_case.created_at)
+
+    session.commit()
+
+    print("it worked")
 
 
 def __check_new_sensitive_within_sample_sensitive_definition(column_validators, new_case_payload):
