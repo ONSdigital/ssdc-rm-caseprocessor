@@ -1,7 +1,7 @@
 from config import PubsubConfig
 import uuid
 import json
-from caseprocessor.new_case_receiver import NewCaseReceiver
+from caseprocessor.new_case_receiver import receive_new_case
 from caseprocessor.db.db_utility import to_string
 
 def generate_message():
@@ -51,5 +51,5 @@ def generate_message():
 # printing the schema and tables in the database
 #test_database()
 
-NewCaseReceiver.receive_new_case(generate_message().encode('utf-8'))
+receive_new_case(generate_message().encode('utf-8'))
 

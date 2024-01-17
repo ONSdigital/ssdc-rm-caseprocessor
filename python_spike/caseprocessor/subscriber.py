@@ -1,5 +1,5 @@
 from config import PubsubConfig
-from new_case_receiver import NewCaseReceiver
+from new_case_receiver import receive_new_case
 
 timeout = 5.0
 
@@ -7,7 +7,7 @@ timeout = 5.0
 def callback(message) -> None:
     print(f"Received {message.data}")
     # receive_new_case(message.data)
-    NewCaseReceiver.receive_new_case(message.data)
+    receive_new_case(message.data)
     message.ack()
 
 
