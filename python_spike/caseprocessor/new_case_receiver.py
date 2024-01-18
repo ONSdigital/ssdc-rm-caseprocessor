@@ -1,7 +1,6 @@
-import json
 from .dto.event_dto import EventDTO
 from .db.case_table_util import *
-from .db.collection_exercise_table_util import CollectionExerciseTable, find_collex_by_id
+from .db.collection_exercise_table_util import find_collex_by_id
 from .db.db_utility import create_session
 from .validation.column_validator import ColumnValidator
 from .util.case_ref_generator import get_case_ref
@@ -16,6 +15,11 @@ __case_ref_generator_key = bytes("abc123", "utf-8")
 NEW_CLASS_LOG_MSG = "New Case created"
 
 
+# Handles receiving a new case from a given pubsub message
+#
+# Since python doesn't have transactions like our java repo,
+# We have to manually create a session and pass that through all the database functions
+# Once we've done what we want to we can then commit the session
 def receive_new_case(message: bytes):
     event = EventDTO.from_json(message)
     new_case_payload = event.payload.new_case
@@ -34,9 +38,7 @@ def receive_new_case(message: bytes):
 
     column_validator = collex.survey.sample_validation_rules
 
-    __check_new_sensitive_within_sample_sensitive_definition(column_validator, new_case_payload)
-    __check_new_sample_within_sample_definition(column_validator, new_case_payload)
-    __validate_new_case(column_validator, new_case_payload)
+    __check_and_validate_new_case(column_validator, new_case_payload)
 
     new_case = Case(
         id=new_case_payload.case_id,
@@ -55,6 +57,12 @@ def receive_new_case(message: bytes):
     session.commit()
 
     print("it worked")
+
+
+def __check_and_validate_new_case(column_validator, new_case_payload):
+    __check_new_sensitive_within_sample_sensitive_definition(column_validator, new_case_payload)
+    __check_new_sample_within_sample_definition(column_validator, new_case_payload)
+    __validate_new_case(column_validator, new_case_payload)
 
 
 def __check_new_sensitive_within_sample_sensitive_definition(column_validators, new_case_payload):

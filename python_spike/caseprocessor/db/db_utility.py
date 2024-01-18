@@ -11,6 +11,14 @@ DB_NAME = 'rm'
 ENGINE = sqlalchemy.create_engine(
     f"postgresql+psycopg2://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
 # Bellow might be a better way of doing it but can't get it to work
+# DB_URL = URL.create(
+#     "postgresql + psycopg2",
+#     username=DB_USERNAME,
+#     password=DB_PASSWORD,
+#     host=DB_HOST,
+#     database=DB_NAME,
+# )
+# ENGINE = sqlalchemy.create_engine(DB_URL)
 
 CONN = ENGINE.connect()
 
@@ -19,6 +27,8 @@ def create_session() -> Session:
     return Session(ENGINE)
 
 
+# Used for testing
+# Returns the schema and tables of the database
 def to_string():
     inspector = inspect(ENGINE)
     schemas = inspector.get_schema_names()
@@ -36,14 +46,3 @@ def to_string():
     for sequence in sequences:
         print(sequence)
 
-
-'''
-    DB_URL = URL.create(
-        "postgresql + psycopg2",
-        username=DB_USERNAME,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        database=DB_NAME,
-    )
-    ENGINE = sqlalchemy.create_engine(DB_URL)
-    '''
