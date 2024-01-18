@@ -5,10 +5,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import inspect
 from config import DatabaseConfig
 
-# waiting 5 seconds before connecting
-# This is just temporary for the spike, without it sometimes it fails as the postgres database docker isn't ready
-time.sleep(5)
-
 ENGINE = sqlalchemy.create_engine(
     f"postgresql+psycopg2://{DatabaseConfig.DB_USERNAME}:{DatabaseConfig.DB_PASSWORD}@{DatabaseConfig.DB_HOST}:{DatabaseConfig.DB_PORT}/{DatabaseConfig.DB_NAME}")
 # Bellow might be a better way of doing it but can't get it to work
