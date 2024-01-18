@@ -19,8 +19,6 @@ RUN mkdir -v /app/venv && chown caseprocessor:caseprocessor /app/venv
 COPY --chown=caseprocessor:caseprocessor --from=build /app/.venv/ /app/venv/
 COPY --chown=caseprocessor:caseprocessor . /app/
 
-EXPOSE 9092
-
 USER caseprocessor
 
 ENTRYPOINT ["/app/venv/bin/python"]
