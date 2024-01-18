@@ -1,15 +1,10 @@
 import sqlalchemy
 from sqlalchemy.orm import Session
 from sqlalchemy import inspect
-
-DB_USERNAME = 'appuser'
-DB_PASSWORD = 'postgres'
-DB_HOST = 'localhost'
-DB_PORT = '6432'
-DB_NAME = 'rm'
+from config import PubsubConfig
 
 ENGINE = sqlalchemy.create_engine(
-    f"postgresql+psycopg2://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+    f"postgresql+psycopg2://{PubsubConfig.DB_USERNAME}:{PubsubConfig.DB_PASSWORD}@{PubsubConfig.DB_HOST}:{PubsubConfig.DB_PORT}/{PubsubConfig.DB_NAME}")
 # Bellow might be a better way of doing it but can't get it to work
 # DB_URL = URL.create(
 #     "postgresql + psycopg2",

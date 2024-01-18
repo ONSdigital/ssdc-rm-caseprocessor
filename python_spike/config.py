@@ -21,3 +21,9 @@ class PubsubConfig:
 
     CASE_UPDATE_TOPIC = "event_case-update"
     CASE_UPDATE_PATH = PUBLISHER.topic_path(PROJECT_ID, CASE_UPDATE_TOPIC)
+
+    DB_USERNAME = os.getenv('DB_USERNAME', 'appuser')
+    DB_PASSWORD = os.getenv('DB_PASSWORD', 'postgres')
+    DB_HOST = os.getenv('DB_HOST', 'localhost')
+    DB_PORT = os.getenv('DB_PORT', '6432')
+    DB_NAME = os.getenv('DB_NAME', 'rm')
