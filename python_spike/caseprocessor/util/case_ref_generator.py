@@ -12,7 +12,7 @@ HIGHEST_POSSIBLE_CASE_REF = 999999999
 PSEUDORANDOM_NUMBER_GENERATOR = PseudorandomNumberGenerator(HIGHEST_POSSIBLE_CASE_REF - LOWEST_POSSIBLE_CASE_REF)
 
 
-def get_case_ref(sequence_number: int, case_ref_generator_key: bytes):
+def get_case_ref(sequence_number: int, case_ref_generator_key: bytes) -> int:
     pseudo_random_number = PSEUDORANDOM_NUMBER_GENERATOR.get_pseudorandom(sequence_number,
                                                                           case_ref_generator_key)
 

@@ -9,31 +9,3 @@ from dataclasses_json import LetterCase, dataclass_json
 class EventDTO:
     header: EventHeaderDTO
     payload: PayloadDTO
-
-
-"""
-@dataclass
-class EventHeaderDTO:
-    version: str
-    topic: str
-    source: str
-    channel: str
-    date_time: datetime
-    message_id: uuid
-    correlation_id: uuid
-    originating_user: str
-
-
-@dataclass
-class NewCase:
-    case_id: uuid
-    collection_exercise_id: uuid
-    sample: Dict[str, str]
-    sample_sensitive: Dict[str, str]
-
-
-@dataclass
-class PayloadDTO:
-    new_case: NewCase = None
-    case_update_dto: CaseUpdateDTO = None
-"""

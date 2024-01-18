@@ -8,21 +8,11 @@ from .rule import Rule
 from dataclasses import dataclass
 
 
-# wasn't sure weather to make this a data class or not - decided to so it could be easier to deseiralise json
-
 @dataclass
 class ColumnValidator:
     column_name: str
     sensitive: str
     rules: List[Rule]
-
-    """
-    def __init__(self, column_name: str, sensitive: str, rules: List[Rule]):
-        # I set these as private like in the java repo
-        self.__column_name = column_name
-        self.__sensitive = sensitive
-        self.__rules = rules
-    """
 
     def validate_data(self, data_to_validate, exclude_data_from_returned_error_msgs):
         validation_errors = []

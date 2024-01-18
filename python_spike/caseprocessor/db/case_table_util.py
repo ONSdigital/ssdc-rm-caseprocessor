@@ -30,7 +30,7 @@ def find_by_id_with_update_lock(session: Session, case_id: uuid) -> Optional[str
     return result.id if result else None
 
 
-def exists_by_id(session: Session, case_id: uuid):
+def exists_by_id(session: Session, case_id: uuid) -> bool:
     return session.query(Case).filter_by(id=case_id).scalar() is not None
 
 
@@ -39,9 +39,10 @@ def add_and_flush(session: Session, caze: Case):
     session.flush([caze])
 
 
-def select_all(session: Session):
-    return session.query(Case).all()
-
-
 def update_case_ref(session: Session, caze: Case):
     session.query(Case).filter_by(id=caze.id).update({Case.case_ref: caze.case_ref})
+
+
+# Used for testing
+def select_all(session: Session):
+    return session.query(Case).all()

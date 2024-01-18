@@ -1,5 +1,7 @@
 """
-This is just temporary to test functionality
+This is just temporary for the spike - since common validation is out of scope
+
+This is just to test functionality
 """
 from .rule import Rule
 from typing import Optional

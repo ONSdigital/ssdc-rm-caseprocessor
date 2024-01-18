@@ -5,15 +5,6 @@ from dataclasses_json import LetterCase, dataclass_json, config
 from marshmallow import fields
 from typing import Optional
 
-def date_time_decoder(time):
-    if time is None:
-        return None
-    return datetime.fromisoformat(time)
-
-def datetime_encoder(time):
-    if time is None:
-        return None
-    return datetime.isoformat(time)
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
@@ -26,11 +17,10 @@ class EventHeaderDTO:
     date_time: Optional[datetime] = field(
         default=None,
         metadata=config(
-            encoder=datetime_encoder,
-            decoder=date_time_decoder,
+            encoder=lambda time: datetime.isoformat(time) if time else None,
+            decoder=lambda time: datetime.fromisoformat(time) if time else None,
             mm_field=fields.DateTime(format='iso')
         )
     )
     message_id: uuid = None
     version: str = None
-
