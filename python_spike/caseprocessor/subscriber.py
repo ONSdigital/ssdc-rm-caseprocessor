@@ -1,5 +1,5 @@
 from config import PubsubConfig
-from new_case_receiver import receive_new_case
+from .new_case_receiver import receive_new_case
 
 timeout = 5.0
 
