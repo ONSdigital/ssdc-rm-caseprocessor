@@ -1,3 +1,5 @@
+import logging
+
 from .dto.event_dto import EventDTO
 from .db.case_table_util import *
 from .db.collection_exercise_table_util import find_collex_by_id
@@ -21,6 +23,7 @@ NEW_CLASS_LOG_MSG = "New Case created"
 # We have to manually create a session and pass that through all the database functions
 # Once we've done what we want to we can then commit the session
 def receive_new_case(message: bytes):
+    logging.info("New case received")
     event = EventDTO.from_json(message)
     new_case_payload = event.payload.new_case
 
@@ -56,7 +59,7 @@ def receive_new_case(message: bytes):
 
     session.commit()
 
-    print("it worked")
+    logging.info("New case added")
 
 
 def __check_and_validate_new_case(column_validator, new_case_payload):

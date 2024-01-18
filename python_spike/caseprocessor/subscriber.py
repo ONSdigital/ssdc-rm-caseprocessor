@@ -1,3 +1,5 @@
+import logging
+
 from config import PubsubConfig
 from .new_case_receiver import receive_new_case
 
@@ -13,7 +15,7 @@ def callback(message) -> None:
 
 def subscribe():
     streaming_pull_future = PubsubConfig.SUBSCRIBER.subscribe(PubsubConfig.SUBSCRIPTION_PATH, callback=callback)
-    print(f"Listening for messages on {PubsubConfig.SUBSCRIPTION_PATH}")
+    logging.info(f"Listening for messages on {PubsubConfig.SUBSCRIPTION_PATH}")
 
     with PubsubConfig.SUBSCRIBER:
         try:
