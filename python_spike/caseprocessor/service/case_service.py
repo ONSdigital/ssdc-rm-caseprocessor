@@ -6,7 +6,7 @@ from caseprocessor.dto.event_dto import EventDTO
 from caseprocessor.dto.payload_dto import PayloadDTO
 from caseprocessor.util.redact_helper import redact
 from config import PubsubConfig
-from datetime import datetime
+from datetime import datetime, timezone
 
 import uuid
 
@@ -26,7 +26,7 @@ def emit_case(caze: Case, correlation_id: uuid, originating_user: str, collex: C
         source=EVENT_SOURCE,
         correlation_id=correlation_id,
         originating_user=originating_user,
-        date_time=datetime.now(),
+        date_time=datetime.now(timezone.utc),
         message_id=uuid.uuid4(),
         version=OUTBOUND_EVENT_SCHEMA_VERSION
     )
