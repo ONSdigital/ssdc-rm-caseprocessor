@@ -7,8 +7,6 @@ timeout = 5.0
 
 
 def callback(message) -> None:
-    print(f"Received {message.data}")
-    # receive_new_case(message.data)
     receive_new_case(message.data)
     message.ack()
 
