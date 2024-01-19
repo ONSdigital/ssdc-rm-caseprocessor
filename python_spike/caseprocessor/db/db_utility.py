@@ -5,8 +5,31 @@ from sqlalchemy.orm import Session
 from sqlalchemy import inspect
 from config import DatabaseConfig
 
+
+# Keeps trying to connect to the database until it can
+# I know this isn't very nice - I also don't like it but...
+# This is just temporary for the spike,
+# without it sometimes the container crashes as the postgres database isn't ready
+def wait_for_postgres_ready():
+    tries = 0
+    while tries < 10:
+        try:
+            ENGINE = sqlalchemy.create_engine(
+                f"postgresql+psycopg2://{DatabaseConfig.DB_USERNAME}:{DatabaseConfig.DB_PASSWORD}@{DatabaseConfig.DB_HOST}:{DatabaseConfig.DB_PORT}/{DatabaseConfig.DB_NAME}")
+            CONN = ENGINE.connect()
+            CONN.close()
+            return
+        except:
+            time.sleep(5)
+            tries += 1
+
+
+wait_for_postgres_ready()
+
+
 ENGINE = sqlalchemy.create_engine(
-    f"postgresql+psycopg2://{DatabaseConfig.DB_USERNAME}:{DatabaseConfig.DB_PASSWORD}@{DatabaseConfig.DB_HOST}:{DatabaseConfig.DB_PORT}/{DatabaseConfig.DB_NAME}")
+            f"postgresql+psycopg2://{DatabaseConfig.DB_USERNAME}:{DatabaseConfig.DB_PASSWORD}@{DatabaseConfig.DB_HOST}:{DatabaseConfig.DB_PORT}/{DatabaseConfig.DB_NAME}")
+CONN = ENGINE.connect()
 # Bellow might be a better way of doing it but can't get it to work
 # DB_URL = URL.create(
 #     "postgresql + psycopg2",
@@ -16,8 +39,6 @@ ENGINE = sqlalchemy.create_engine(
 #     database=DB_NAME,
 # )
 # ENGINE = sqlalchemy.create_engine(DB_URL)
-
-CONN = ENGINE.connect()
 
 
 def create_session() -> Session:
@@ -42,4 +63,3 @@ def to_string():
     sequences = inspector.get_sequence_names()
     for sequence in sequences:
         print(sequence)
-
