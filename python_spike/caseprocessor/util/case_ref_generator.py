@@ -1,7 +1,3 @@
-"""
-Just using random for now for simplicity
-"""
-
 from caseprocessor.pseudorandom.pseudo_random_number_generator import PseudorandomNumberGenerator
 from caseprocessor.pseudorandom.luhn_utility import add_check_digit
 

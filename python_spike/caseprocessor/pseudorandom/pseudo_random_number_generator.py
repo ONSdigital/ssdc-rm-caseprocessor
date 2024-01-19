@@ -63,19 +63,19 @@ class PseudorandomNumberGenerator:
 
         baos = io.BytesIO()
 
-        #try:
-        baos.write(self.wip)
-        baos.write(to_bytes(round_no))
+        try:
+            baos.write(self.wip)
+            baos.write(to_bytes(round_no))
 
-        baos.write(to_bytes(len(r_bin)))
-        baos.write(r_bin)
+            baos.write(to_bytes(len(r_bin)))
+            baos.write(r_bin)
 
-        digest_bytes = digest(baos.getvalue())
-        return self.__turn_final_value_into_positive_big_int(digest_bytes)
+            digest_bytes = digest(baos.getvalue())
+            return self.__turn_final_value_into_positive_big_int(digest_bytes)
 
-        #except Exception as e:
-        #    raise RuntimeError("Unable to write to internal byte array,"
-        #                       " this should never happen so indicates a defect in the code", e)
+        except Exception as e:
+            raise RuntimeError("Unable to write to internal byte array,"
+                               " this should never happen so indicates a defect in the code", e)
 
     @staticmethod
     def __turn_final_value_into_positive_big_int(encrypted_value_bytes):

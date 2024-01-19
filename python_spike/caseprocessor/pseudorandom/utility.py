@@ -17,4 +17,3 @@ def convert_to_byte_array_and_strip_leading_zero(n):
 
 def to_bytes(i: int) -> bytes:
     return int(i).to_bytes(4, byteorder="big")
-    #return struct.pack('>I', int(i))
