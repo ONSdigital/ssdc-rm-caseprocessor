@@ -1,10 +1,13 @@
 import logging
 import time
+from google.cloud import pubsub_v1
 
 from config import PubsubConfig
 from .new_case_receiver import receive_new_case
 
 timeout = 5.0
+
+subscriber = pubsub_v1.SubscriberClient()
 
 
 def callback(message) -> None:
@@ -13,12 +16,13 @@ def callback(message) -> None:
 
 
 def subscribe():
-    streaming_pull_future = PubsubConfig.SUBSCRIBER.subscribe(PubsubConfig.SUBSCRIPTION_PATH, callback=callback)
-    logging.info(f"Listening for messages on {PubsubConfig.SUBSCRIPTION_PATH}")
+    new_case_subscription = add_subscription_path(PubsubConfig.SUBSCRIPTION_ID)
+    streaming_pull_future = subscriber.subscribe(new_case_subscription, callback=callback)
 
     wait_till_pubsub_ready()
+    logging.info(f"Listening for messages on {new_case_subscription}")
 
-    with PubsubConfig.SUBSCRIBER:
+    with subscriber:
         try:
             streaming_pull_future.result()
         except TimeoutError:
@@ -29,6 +33,10 @@ def subscribe():
             print("----Manually Stopped Subscriber----")
 
 
+def add_subscription_path(subscription_id):
+    return subscriber.subscription_path(PubsubConfig.PROJECT_ID, subscription_id)
+
+
 # Keeps trying to check if there is a subscription
 # I know this isn't very nice - I also don't like it but...
 # This is just temporary for the spike,
@@ -37,7 +45,7 @@ def wait_till_pubsub_ready():
     tries = 0
     while tries < 10:
         try:
-            PubsubConfig.SUBSCRIBER.get_subcription(PubsubConfig.SUBSCRIPTION_PATH)
+            subscriber.get_subcription(PubsubConfig.SUBSCRIPTION_PATH)
             return
         except:
             tries += 1

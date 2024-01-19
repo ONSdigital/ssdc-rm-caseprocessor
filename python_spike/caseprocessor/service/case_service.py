@@ -5,6 +5,7 @@ from caseprocessor.entity.collection_exercise import CollectionExercise
 from caseprocessor.dto.event_dto import EventDTO
 from caseprocessor.dto.payload_dto import PayloadDTO
 from caseprocessor.util.redact_helper import redact
+from caseprocessor.publish_util import publish_to_pubsub
 from config import PubsubConfig
 from datetime import datetime, timezone
 
@@ -12,8 +13,6 @@ import uuid
 
 EVENT_SOURCE = "CASE_PROCESSOR"
 EVENT_CHANNEL = "RM"
-
-CASE_UPDATE_TOPIC = ""
 
 # In java repo this is in a constraints file, for now it's here
 OUTBOUND_EVENT_SCHEMA_VERSION = '0.5.0'
@@ -33,8 +32,7 @@ def emit_case(caze: Case, correlation_id: uuid, originating_user: str, collex: C
 
     event = __prepare_case_event(caze, event_header, collex)
     event_json = event.to_json()
-    future = PubsubConfig.PUBLISHER.publish(PubsubConfig.CASE_UPDATE_PATH, event_json.encode('utf-8'))
-    future.result()
+    publish_to_pubsub(PubsubConfig.CASE_UPDATE_TOPIC, event_json)
 
 
 def __prepare_case_event(caze, event_header, collex):
