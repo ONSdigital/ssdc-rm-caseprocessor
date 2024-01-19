@@ -5,7 +5,7 @@ from caseprocessor.entity.collection_exercise import CollectionExercise
 from caseprocessor.dto.event_dto import EventDTO
 from caseprocessor.dto.payload_dto import PayloadDTO
 from caseprocessor.util.redact_helper import redact
-from caseprocessor.publish_util import publish_to_pubsub
+from caseprocessor.util.publish_util import publish_to_pubsub
 from config import PubsubConfig
 from datetime import datetime, timezone
 

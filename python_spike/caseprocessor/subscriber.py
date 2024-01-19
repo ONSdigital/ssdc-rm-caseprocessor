@@ -3,7 +3,7 @@ import time
 from google.cloud import pubsub_v1
 
 from config import PubsubConfig
-from .new_case_receiver import receive_new_case
+from caseprocessor.messaging.new_case_receiver import receive_new_case
 
 timeout = 5.0
 

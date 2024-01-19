@@ -1,15 +1,15 @@
 import logging
 
-from .dto.event_dto import EventDTO
-from .db.case_table_util import *
-from .db.collection_exercise_table_util import find_collex_by_id
-from .db.db_utility import create_session
-from .validation.column_validator import ColumnValidator
-from .util.case_ref_generator import get_case_ref
-from .entity.case import Case
-from .service.case_service import emit_case
-from .logging.event_logging import log_case_event
-from .entity.event_type import EventType
+from caseprocessor.dto.event_dto import EventDTO
+from caseprocessor.db.case_table_util import *
+from caseprocessor.db.collection_exercise_table_util import find_collex_by_id
+from caseprocessor.db.db_utility import create_session
+from caseprocessor.validation.column_validator import ColumnValidator
+from caseprocessor.util.case_ref_generator import get_case_ref
+from caseprocessor.entity.case import Case
+from caseprocessor.service.case_service import emit_case
+from caseprocessor.logging.event_logging import log_case_event
+from caseprocessor.entity.event_type import EventType
 from sqlalchemy import func
 
 __case_ref_generator_key = bytes("abc123", "utf-8")

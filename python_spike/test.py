@@ -1,8 +1,8 @@
 from config import PubsubConfig
 import uuid
 import json
-from caseprocessor.new_case_receiver import receive_new_case
-from caseprocessor.db.db_utility import to_string
+from python_spike.caseprocessor.messaging.new_case_receiver import receive_new_case
+
 
 def generate_message():
     case_id = str(uuid.uuid4())
