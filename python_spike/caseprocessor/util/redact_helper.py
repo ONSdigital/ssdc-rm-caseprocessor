@@ -39,10 +39,15 @@ def redact_data(obj, attribute, attribute_type, thing_to_redact_name, thing_to_r
     if attribute != thing_to_redact_name:
         return
 
+    # This could probably be made more efficient and could be condensed - since at the moment it duplicates a dict
+    # by using dict comprehension or even assigning the key value straight away,
+    # But I've left it as this for the spike since it's more readable
     if thing_to_react_type == dict and (attribute_type == dict or attribute_type == Dict[str, str]):
         redacted_dict = {}
         for key, value in getattr(obj, thing_to_redact_name).items():
-            if value:
+            if not value:
+                redacted_dict[key] = ''
+            else:
                 redacted_dict[key] = REDACTION_TEXT
         setattr(obj, attribute, redacted_dict)
     elif thing_to_react_type == str and attribute_type == str:
