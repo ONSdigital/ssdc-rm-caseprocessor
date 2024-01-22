@@ -42,7 +42,9 @@ def redact_data(obj, attribute, attribute_type, thing_to_redact_name, thing_to_r
     if thing_to_react_type == dict and (attribute_type == dict or attribute_type == Dict[str, str]):
         redacted_dict = {}
         for key, value in getattr(obj, thing_to_redact_name).items():
-            if value:
+            if not value:
+                redacted_dict[key] = ''
+            else:
                 redacted_dict[key] = REDACTION_TEXT
         setattr(obj, attribute, redacted_dict)
     elif thing_to_react_type == str and attribute_type == str:
