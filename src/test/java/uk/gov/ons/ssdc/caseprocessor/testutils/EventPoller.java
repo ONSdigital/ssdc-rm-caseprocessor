@@ -18,9 +18,10 @@ public class EventPoller {
   }
 
   @Retryable(
-      value = {EventsNotFoundException.class},
+      retryFor = {EventsNotFoundException.class},
       maxAttempts = 10,
-      backoff = @Backoff(delay = 2000))
+      backoff = @Backoff(delay = 2000),
+      listeners = {"retryListener"})
   public List<Event> getEvents(int minExpectedEventCount) throws EventsNotFoundException {
     List<Event> events = eventRepository.findAll();
 
