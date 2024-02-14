@@ -6,6 +6,6 @@ spring:
         project-id: our-project
 
 queueconfig:
-  shared-pubsub-project: our-project
+  shared-pubsub-project: shared-project
 
 caserefgeneratorkey: abc123
