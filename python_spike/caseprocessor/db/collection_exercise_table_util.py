@@ -8,17 +8,20 @@ from caseprocessor.entity.survey import Survey
 from caseprocessor.validation.column_validator import ColumnValidator
 from caseprocessor.validation.rules import create_rule
 from caseprocessor.db.survey_table import SurveyTable
+from ..entity.common_entity_model import CollectionExercise as CollectionExerciseTable
+from ..entity.common_entity_model import Survey as SurveyTable
+
 import uuid
 
 metadata_obj = MetaData(schema="casev3")
 Base = declarative_base(metadata=metadata_obj)
 
 
-class CollectionExerciseTable(Base):
-    __tablename__ = "collection_exercise"
-    id = Column(Integer, primary_key=True)
-    survey_id = Column(Integer, ForeignKey("survey.id"))
-    survey = relationship("SurveyTable")
+# class CollectionExerciseTable(Base):
+#     __tablename__ = "collection_exercise"
+#     id = Column(Integer, primary_key=True)
+#     survey_id = Column(Integer, ForeignKey("survey.id"))
+#     survey = relationship("SurveyTable")
 
 
 def find_collex_by_id(session: Session, collection_exercise_id: uuid) -> CollectionExercise:
@@ -51,7 +54,7 @@ def select_all_collex(session: Session):
 
 
 # I can't seem to get this to work when it's in a different file
-class SurveyTable(Base):
-    __tablename__ = "survey"
-    id = Column(Integer, primary_key=True)
-    sample_validation_rules = Column(JSONB)
+# class SurveyTable(Base):
+#     __tablename__ = "survey"
+#     id = Column(Integer, primary_key=True)
+#     sample_validation_rules = Column(JSONB)

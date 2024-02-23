@@ -1,0 +1,17 @@
+
+CREATE TABLE casev3.cases (
+	id UUID NOT NULL, 
+	case_ref BIGINT, 
+	created_at TIMESTAMP WITH TIME ZONE, 
+	invalid BOOLEAN DEFAULT false NOT NULL, 
+	last_updated_at TIMESTAMP WITH TIME ZONE, 
+	refusal_received VARCHAR(255), 
+	sample JSONB, 
+	sample_sensitive JSONB, 
+	secret_sequence_number INTEGER DEFAULT nextval('casev3.cases_secret_sequence_number_seq'::regclass) NOT NULL, 
+	collection_exercise_id UUID NOT NULL, 
+	PRIMARY KEY (id), 
+	CHECK ((refusal_received)::text = ANY ((ARRAY['HARD_REFUSAL'::character varying, 'EXTRAORDINARY_REFUSAL'::character varying, 'SOFT_REFUSAL'::character varying, 'WITHDRAWAL_REFUSAL'::character varying])::text[])), 
+	FOREIGN KEY(collection_exercise_id) REFERENCES casev3.collection_exercise (id)
+)
+
