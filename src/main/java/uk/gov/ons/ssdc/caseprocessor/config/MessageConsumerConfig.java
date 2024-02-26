@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.handler.advice.RequestHandlerRetryAdvice;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.retry.RetryListener;
 import uk.gov.ons.ssdc.caseprocessor.messaging.ManagedMessageRecoverer;
 
 @Configuration
@@ -214,5 +215,12 @@ public class MessageConsumerConfig {
     RequestHandlerRetryAdvice requestHandlerRetryAdvice = new RequestHandlerRetryAdvice();
     requestHandlerRetryAdvice.setRecoveryCallback(managedMessageRecoverer);
     return requestHandlerRetryAdvice;
+  }
+
+  @Bean
+  public RetryListener retryListener() {
+    RetryListener retryListener = new DefaultListenerSupport();
+
+    return retryListener;
   }
 }

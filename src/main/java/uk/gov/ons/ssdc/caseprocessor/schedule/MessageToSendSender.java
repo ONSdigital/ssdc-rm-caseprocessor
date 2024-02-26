@@ -3,12 +3,12 @@ package uk.gov.ons.ssdc.caseprocessor.schedule;
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.concurrent.ListenableFuture;
 import uk.gov.ons.ssdc.common.model.entity.MessageToSend;
 
 @Component
@@ -28,7 +28,7 @@ public class MessageToSendSender {
             .setData(ByteString.copyFromUtf8(messageToSend.getMessageBody()))
             .build();
 
-    ListenableFuture<String> future =
+    CompletableFuture<String> future =
         pubSubTemplate.publish(messageToSend.getDestinationTopic(), pubsubMessage);
 
     try {
