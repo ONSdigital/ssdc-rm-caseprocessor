@@ -1,11 +1,11 @@
 package uk.gov.ons.ssdc.caseprocessor.messaging;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import com.google.cloud.spring.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import com.google.cloud.spring.pubsub.support.GcpPubSubHeaders;
 import com.google.protobuf.ByteString;
-import net.logstash.logback.encoder.org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandlingException;
@@ -87,9 +87,11 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
           exceptionManagerClient.reportException(
               messageHash, SERVICE_NAME, subscriptionName, cause, stackTraceRootCause);
     } catch (Exception exceptionManagerClientException) {
-      log.with("reason", exceptionManagerClientException.getMessage())
-          .warn(
-              "Could not report to Exception Manager. There will be excessive logging until resolved");
+      log.atWarn()
+          .setMessage(
+              "Could not report to Exception Manager. There will be excessive logging until resolved")
+          .addKeyValue("reason", exceptionManagerClientException.getMessage())
+          .log();
     }
     return reportResult;
   }
@@ -119,15 +121,17 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
       exceptionManagerClient.storeMessageBeforeSkipping(skippedMessage);
       result = true;
     } catch (Exception exceptionManagerClientException) {
-      log.with("message_hash", messageHash)
-          .warn(
-              "Unable to store a copy of the message. Will NOT be quarantining",
-              exceptionManagerClientException);
+
+      log.atWarn()
+          .setMessage("Unable to store a copy of the message. Will NOT be quarantining")
+          .setCause(exceptionManagerClientException)
+          .addKeyValue("message_hash", messageHash)
+          .log();
     }
 
     // If the quarantined message is persisted OK then we can ACK the message
     if (result) {
-      log.with("message_hash", messageHash).warn("Quarantined message");
+      log.atWarn().setMessage("Quarantined message").addKeyValue("message_hash", messageHash).log();
     }
 
     return result;
@@ -157,12 +161,19 @@ public class ManagedMessageRecoverer implements RecoveryCallback<Object> {
     }
 
     if (logStackTraces) {
-      log.with("message_hash", messageHash).error("Could not process message", cause);
+      log.atError()
+          .setMessage("Could not process message")
+          .setCause(cause)
+          .addKeyValue("message_hash", messageHash)
+          .log();
     } else {
-      log.with("message_hash", messageHash)
-          .with("cause", cause.getMessage())
-          .with("root_cause", stackTraceRootCause)
-          .error("Could not process message");
+
+      log.atError()
+          .setMessage("Could not process message")
+          .addKeyValue("message_hash", messageHash)
+          .addKeyValue("cause", cause.getMessage())
+          .addKeyValue("root_cause", stackTraceRootCause)
+          .log();
     }
   }
 

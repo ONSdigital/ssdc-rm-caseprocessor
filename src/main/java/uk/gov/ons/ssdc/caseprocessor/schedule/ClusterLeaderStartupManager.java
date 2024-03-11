@@ -1,11 +1,11 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -39,7 +39,9 @@ public class ClusterLeaderStartupManager {
     clusterLeader.setHostLastSeenAliveAt(OffsetDateTime.now());
     clusterLeaderRepository.saveAndFlush(clusterLeader);
 
-    log.with("hostName", hostName)
-        .debug("No leader existed in DB, so this host is attempting to become leader");
+    log.atDebug()
+        .setMessage("No leader existed in DB, so this host is attempting to become leader")
+        .addKeyValue("hostName", hostName)
+        .log();
   }
 }

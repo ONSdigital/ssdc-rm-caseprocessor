@@ -2,8 +2,8 @@ package uk.gov.ons.ssdc.caseprocessor.messaging;
 
 import static uk.gov.ons.ssdc.caseprocessor.utils.JsonHelper.convertJsonBytesToEvent;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -41,10 +41,13 @@ public class PrintFulfilmentReceiver {
     EventDTO event = convertJsonBytesToEvent(message.getPayload());
 
     if (fulfilmentToProcessRepository.existsByMessageId(event.getHeader().getMessageId())) {
-      log.with("correlationId", event.getHeader().getCorrelationId())
-          .with("messageId", event.getHeader().getMessageId())
-          .info(
-              "Received duplicate fulfilment message ID, ignoring and acking the duplicate message");
+      log.atInfo()
+          .setMessage(
+              "Received duplicate fulfilment message ID, ignoring and acking the duplicate message")
+          .addKeyValue("correlationId", event.getHeader().getCorrelationId())
+          .addKeyValue("messageId", event.getHeader().getMessageId())
+          .log();
+
       return;
     }
 

@@ -1,11 +1,11 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.OffsetDateTime;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +43,11 @@ public class FulfilmentScheduler {
         fulfilmentNextTriggerRepository.findByTriggerDateTimeBefore(OffsetDateTime.now());
 
     if (triggerOptional.isPresent()) {
-      log.with("hostName", hostName).info("Fulfilment processing triggered");
+      //      log.with("hostName", hostName).info("Fulfilment processing triggered");
+      log.atInfo()
+          .setMessage("Fulfilment processing triggered")
+          .addKeyValue("hostName", hostName)
+          .log();
 
       fulfilmentProcessor.addFulfilmentBatchIdAndQuantity();
 

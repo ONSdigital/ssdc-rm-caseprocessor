@@ -1,11 +1,11 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.OffsetDateTime;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,9 +35,11 @@ public class ActionRuleTriggerer {
 
     for (ActionRule triggeredActionRule : triggeredActionRules) {
       try {
-        log.with("hostName", hostName)
-            .with("id", triggeredActionRule.getId())
-            .info("Action rule triggered");
+        log.atInfo()
+            .setMessage("Action rule triggered")
+            .addKeyValue("hostName", hostName)
+            .addKeyValue("id", triggeredActionRule.getId())
+            .log();
         actionRuleProcessor.processTriggeredActionRule(triggeredActionRule);
       } catch (BadSqlGrammarException badSqlGrammarException) {
         String errorMessage =
@@ -47,13 +49,21 @@ public class ActionRuleTriggerer {
                 + " it has been marked Triggered to stop it running until it is fixed."
                 + " Exception Message: "
                 + badSqlGrammarException.getMessage();
-        log.with("hostName", hostName).with("id", triggeredActionRule.getId()).error(errorMessage);
+        log.atError()
+            .setMessage(errorMessage)
+            .addKeyValue("hostName", hostName)
+            .addKeyValue("id", triggeredActionRule.getId())
+            .log();
 
         triggeredActionRule.setHasTriggered(true);
         actionRuleRepository.save(triggeredActionRule);
       } catch (Exception e) {
-        log.with("id", triggeredActionRule.getId())
-            .error("Unexpected error while executing action rule", e);
+        log.atError()
+            .setMessage("Unexpected error while executing action rule")
+            .setCause(e)
+            .addKeyValue("hostName", hostName)
+            .addKeyValue("id", triggeredActionRule.getId())
+            .log();
       }
     }
   }
