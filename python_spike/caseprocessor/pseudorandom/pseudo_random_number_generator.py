@@ -1,82 +1,51 @@
-from .NumberTheory import NumberTheory
-from .utility import convert_to_byte_array_and_strip_leading_zero, to_bytes
-import io
-from .hash_utility import digest
+import logging
+
+from .NumberTheory import factor
+from .fpe_encryptor import FPEEncryptor
 
 
 class PseudorandomNumberGenerator:
-    wip: bytes
+    """
+     Format Preserving 'Encryption' using the scheme FE1 from the paper "Format-Preserving Encryption"
+     by Bellare, Rogaway, et al (http://eprint.iacr.org/2009/251).
+     """
+
     LOWEST_SAFE_NUMBER_OF_ROUNDS = 3
-    MAX_N_BYTES = 16
 
     def __init__(self, modulus):
         self.modulus = modulus
-        self.factors = NumberTheory.factor(modulus)
+        self.factors = factor(modulus)
         self.first_factor = self.factors[0]
-        self.first_factor_bi = int(self.first_factor)
         self.second_factor = self.factors[1]
 
-    def fpe_encryptor(self, key, modulus):
-        encode_modules = convert_to_byte_array_and_strip_leading_zero(modulus)
-
-        if len(encode_modules) > self.MAX_N_BYTES:
-            raise Exception("Size of encoded n is too large for FPE encryption (was "
-                            + encode_modules
-                            + " bytes, max permitted "
-                            + str(self.MAX_N_BYTES)
-                            + ")"
-                            )
-
-        baos = io.BytesIO()
-
-        try:
-            baos.write(to_bytes(len(encode_modules)))
-            baos.write(encode_modules)
-
-            baos.write(to_bytes(len(key)))
-            baos.write(key)
-
-        except Exception as e:
-            raise RuntimeError("Unable to write to byte array output stream!", e)
-
-        self.wip = digest(bytes_to_digest=baos.getvalue())
-
     def get_pseudorandom(self, original_number: int, key: bytes) -> int:
+        """
+        Generic Z_n FPE 'encryption' using the FE1 scheme.
+
+        :param original_number: The number to 'encrypt'. Must not be null.
+        :param key: Secret key to 'salt' the hashing with.
+        :return: the encrypted version of <code>originalNumber</code>.
+        :raises ValueError: if any of the parameters are invalid.
+        """
         if original_number > self.modulus:
             raise ValueError("Cannot encrypt a number bigger than the modulus "
                              "(otherwise this wouldn't be format preserving encryption")
 
-        self.fpe_encryptor(key, self.modulus)
+        encryptor = FPEEncryptor(key, self.modulus)
 
         pseudo_random_number = original_number
 
+        # Apply the same algorithm repeatedly on x for the number of rounds given by getNumberOfRounds.
+        # Each round increases the security.
+        # Note that the attribute and method names used align to the paper on FE1, not Python conventions on readability
         for i in range(self.LOWEST_SAFE_NUMBER_OF_ROUNDS):
+            # Split the value of x in to left and right values (think splitting the binary in to two halves),
+            # around the second (smaller) factor
             left = int(pseudo_random_number / self.second_factor)
-            right = pseudo_random_number % self.second_factor
+            right = int(pseudo_random_number % self.second_factor)
 
-            w = int((left + self.__one_way_function(i, right)) % int(self.first_factor_bi))
+            print(f"Left = {left}   Right = {right}")
+
+            w = int((left + encryptor.one_way_function(i, right)) % self.first_factor)
             pseudo_random_number = self.first_factor * right + w
         return pseudo_random_number
-
-    def __one_way_function(self, round_no, value_to_encrypt):
-        r_bin = convert_to_byte_array_and_strip_leading_zero(value_to_encrypt)
-
-        baos = io.BytesIO()
-
-        try:
-            baos.write(self.wip)
-            baos.write(to_bytes(round_no))
-
-            baos.write(to_bytes(len(r_bin)))
-            baos.write(r_bin)
-
-            digest_bytes = digest(baos.getvalue())
-            return self.__turn_final_value_into_positive_big_int(digest_bytes)
-
-        except Exception as e:
-            raise RuntimeError("Unable to write to internal byte array,"
-                               " this should never happen so indicates a defect in the code", e)
-
-    @staticmethod
-    def __turn_final_value_into_positive_big_int(encrypted_value_bytes):
-        return abs(int.from_bytes(encrypted_value_bytes, "big"))

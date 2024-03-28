@@ -11,6 +11,4 @@ def generate_hash(string_to_hash: str = None, bytes_to_hash: bytes = None) -> st
 
 
 def digest(bytes_to_digest: bytes) -> bytes:
-    hash_obj = hashlib.sha256()
-    hash_obj.update(bytes_to_digest)
-    return hash_obj.digest()
+    return hashlib.sha256(bytes_to_digest).digest()
