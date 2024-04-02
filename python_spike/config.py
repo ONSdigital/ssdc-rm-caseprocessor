@@ -23,3 +23,9 @@ class DatabaseConfig:
     DB_HOST = os.getenv('DB_HOST', 'localhost')
     DB_PORT = os.getenv('DB_PORT', '6432')
     DB_NAME = os.getenv('DB_NAME', 'rm')
+
+
+class CaseRegGeneratorConfig:
+    # This gives a caseRef 9 long, plus 1 checkbit at the end = 10
+    LOWEST_POSSIBLE_CASE_REF = 100000000
+    HIGHEST_POSSIBLE_CASE_REF = 999999999
