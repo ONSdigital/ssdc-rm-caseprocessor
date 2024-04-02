@@ -1,4 +1,4 @@
-from .NumberTheory import factor
+from .number_theory import factor
 from .fpe_encryptor import FPEEncryptor
 from config import CaseRegGeneratorConfig
 
