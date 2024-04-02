@@ -1,7 +1,6 @@
 import io
 from .utility import convert_to_bytes_and_strip_leading_zero, to_bytes, convert_final_value_into_positive_int
 from .hash_utility import digest
-import logging
 
 
 # A simple round function based on SHA-256
@@ -27,7 +26,7 @@ class FPEEncryptor:
         encode_modules = convert_to_bytes_and_strip_leading_zero(modulus)
 
         if len(encode_modules) > self.MAX_N_BYTES:
-            raise Exception("Size of encoded n is too large for FPE encryption (was "
+            raise ValueError("Size of encoded n is too large for FPE encryption (was "
                             + encode_modules
                             + " bytes, max permitted "
                             + str(self.MAX_N_BYTES)
@@ -42,7 +41,6 @@ class FPEEncryptor:
             bio.write(key)
         except Exception as e:
             raise RuntimeError("Unable to write to byte IO!", e)
-        print(f"wip: {convert_final_value_into_positive_int(digest(bio.getvalue()))}")
         self.wip = digest(bio.getvalue())
 
     def one_way_function(self, round_no: int, value_to_encrypt: int) -> int:
@@ -72,7 +70,6 @@ class FPEEncryptor:
          :return: a new int value that has reversibly encrypted r.
         """
         r_bin = convert_to_bytes_and_strip_leading_zero(value_to_encrypt)
-        print(f"r_bin = {convert_final_value_into_positive_int(r_bin)}")
         bio = io.BytesIO()
 
         try:
@@ -81,10 +78,7 @@ class FPEEncryptor:
 
             bio.write(to_bytes(len(r_bin)))
             bio.write(r_bin)
-            print(f"bio: {convert_final_value_into_positive_int(bio.getvalue())}")
-            print(bio.getvalue())
             digest_bytes = digest(bio.getvalue())
-            print(f"final value: {convert_final_value_into_positive_int(digest_bytes)}")
             return convert_final_value_into_positive_int(digest_bytes)
         except Exception as e:
             raise RuntimeError("Unable to write to internal byte array,"
