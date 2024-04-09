@@ -38,13 +38,13 @@ def factor(number):
     b = b << int(n_low_zero - (n_low_zero / 2))
     n = n >> int(n_low_zero)
 
-    for i in range(len(PRIMES)):
-        while n % PRIMES[i] == 0:
-            a = a * (PRIMES[i])
+    for prime in PRIMES:
+        while n % prime == 0:
+            a = a * prime
 
             if a > b:
                 a, b = b, a
-            n = n / (PRIMES[i])
+            n = n / prime
 
     if a > b:
         a, b = b, a
