@@ -59,4 +59,4 @@ def factor(number):
             "Could not factor passed number for use in FPE.  "
             "This is usually caused by passing a prime number for a modulus.")
 
-    return [a, b]
+    return a, b

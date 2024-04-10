@@ -10,9 +10,7 @@ from config import CaseRegGeneratorConfig
 LOWEST_SAFE_NUMBER_OF_ROUNDS = 3
 
 modulus = CaseRegGeneratorConfig.HIGHEST_POSSIBLE_CASE_REF - CaseRegGeneratorConfig.LOWEST_POSSIBLE_CASE_REF
-factors = factor(modulus)
-first_factor = factors[0]
-second_factor = factors[1]
+first_factor, second_factor = factor(modulus)
 
 
 def get_pseudorandom(original_number: int, key: bytes) -> int:
