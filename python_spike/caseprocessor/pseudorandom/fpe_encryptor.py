@@ -39,7 +39,7 @@ class FPEEncryptor:
             bio.write(encode_modules)
             bio.write(to_bytes(len(key)))
             bio.write(key)
-        except Exception as e:
+        except OSError as e:
             raise RuntimeError("Unable to write to byte IO!", e)
         self.wip = digest(bio.getvalue())
 
@@ -80,6 +80,6 @@ class FPEEncryptor:
             bio.write(r_bin)
             digest_bytes = digest(bio.getvalue())
             return convert_final_value_into_positive_int(digest_bytes)
-        except Exception as e:
+        except OSError as e:
             raise RuntimeError("Unable to write to internal byte array,"
                                " this should never happen so indicates a defect in the code", e)
