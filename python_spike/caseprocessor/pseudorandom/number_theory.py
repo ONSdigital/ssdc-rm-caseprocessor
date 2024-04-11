@@ -1,4 +1,4 @@
-from .primes import PRIMES
+from caseprocessor.pseudorandom.primes import PRIMES
 
 
 def count_low_zero_bits(n: int) -> int:

@@ -1,5 +1,5 @@
-from .number_theory import factor
-from .fpe_encryptor import FPEEncryptor
+from caseprocessor.pseudorandom.number_theory import factor
+from caseprocessor.pseudorandom.fpe_encryptor import FPEEncryptor
 from config import CaseRegGeneratorConfig
 
 """

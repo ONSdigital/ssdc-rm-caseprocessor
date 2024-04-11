@@ -1,6 +1,6 @@
 import io
-from .utility import convert_to_bytes_and_strip_leading_zero, to_bytes, convert_final_value_into_positive_int
-from .hash_utility import digest
+from caseprocessor.pseudorandom.utility import convert_to_bytes_and_strip_leading_zero, to_bytes, convert_final_value_into_positive_int
+from caseprocessor.pseudorandom.hash_utility import digest
 
 
 # A simple round function based on SHA-256
