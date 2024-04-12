@@ -23,4 +23,4 @@ def to_bytes(i: int) -> bytes:
 
 
 def convert_final_value_into_positive_int(encrypted_value_bytes: bytes) -> int:
-    return abs(int.from_bytes(encrypted_value_bytes, "big"))
+    return abs(int.from_bytes(encrypted_value_bytes, "big", signed=True))
