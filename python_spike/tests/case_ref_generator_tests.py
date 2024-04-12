@@ -2,15 +2,8 @@ import unittest
 from caseprocessor.util.case_ref_generator import get_case_ref
 class CaseGeneratorTest(unittest.TestCase):
 
-    # Taken from Java Test
-
-    @unittest.skip
+    # Values taken from Java Test
     def test_case_ref_generator_single(self):
-        """
-        For now the python encryption produces a slightly different value than Java - it's being looked into
-        See: https://github.com/ONSdigital/ssdc-rm-documentation/blob/SDCSRM-373-Improve-Python-implenentaion-of-case-ref/spikes/python-migration-spikes/Improving-Python-Implementation-case-ref-gen-notes.md?plain=1#L20
-
-        """
         case_ref_generator_key = b'\x10\x20\x10\x20\x10\x20\x10\x20'
         expected_case_ref = 2459403677
         python_result = get_case_ref(99, case_ref_generator_key)
