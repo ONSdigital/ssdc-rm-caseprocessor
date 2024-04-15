@@ -12,7 +12,6 @@ class CaseGeneratorTest(unittest.TestCase):
     @unittest.skip("Takes a while to complete")
     def test_case_ref_generator(self):
         """
-        TODO: discuss if it's worth trying to make this more efficient -> concurrency?
         This may take a couple of minutes, on the java one it's disabled by default
         """
         case_ref_generator_key = b'\x10\x20\x10\x20\x10\x20\x10\x20'
