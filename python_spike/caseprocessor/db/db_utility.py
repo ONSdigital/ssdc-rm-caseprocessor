@@ -1,7 +1,7 @@
 import time
 
 import sqlalchemy
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import Session, scoped_session, sessionmaker
 from sqlalchemy import inspect
 from config import DatabaseConfig
 
