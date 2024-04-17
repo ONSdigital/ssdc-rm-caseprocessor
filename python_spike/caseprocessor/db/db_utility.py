@@ -41,7 +41,10 @@ CONN = ENGINE.connect()
 # ENGINE = sqlalchemy.create_engine(DB_URL)
 
 
-# Allows us to create thread-local sessions
+def create_session() -> Session:
+    return Session(ENGINE)
+
+# Allows us to create thread-local sessions, will eventually replace the above function
 session_factory = sessionmaker(bind=ENGINE)
 Session = scoped_session(session_factory)
 
