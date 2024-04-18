@@ -2,7 +2,7 @@ from functools import wraps
 from typing import Callable
 import logging
 from db.db_utility import Session
-
+from sqlalchemy.exc import SQLAlchemyError
 
 '''
 Example callback function signature:
@@ -15,6 +15,7 @@ def callback(message: pubsub_v1.subscriber.message.Message, session: Session) ->
 '''
  
 def pubsub_transaction(sql_transaction: Callable) -> Callable:
+    
     @wraps(sql_transaction)
     def with_pubsub_error_handling(*args, **kwargs):
         pubsub_message = args[0]
@@ -30,7 +31,6 @@ def pubsub_transaction(sql_transaction: Callable) -> Callable:
             logging.info(f"Message nacked: {pubsub_message.data}\n")
 
     return with_pubsub_error_handling
-
 
 def sqlalchemy_transaction(callback: Callable) -> Callable:
 
@@ -49,3 +49,36 @@ def sqlalchemy_transaction(callback: Callable) -> Callable:
             raise Exception("SQL transaction error")
 
     return with_transaction_handling
+
+
+'''
+Example callback function signature:
+
+@transaction
+def callback(message: pubsub_v1.subscriber.message.Message, session: Session) -> None:
+    ... 
+
+'''
+
+def transaction(callback: Callable) -> Callable:
+
+    @wraps(callback)
+    def with_transaction_handling(*args, **kwargs):
+        local_session = Session()
+        pubsub_message = args[0]
+
+        try:
+            callback(*args, **kwargs, session=local_session)
+            local_session.commit()
+            Session.remove()
+            logging.info("Session commited OK")
+            pubsub_message.ack()
+            logging.info("Message acked OK")
+            
+        except Exception as e:
+            Session.remove()
+            pubsub_message.nack()
+            logging.error(f"Transaction error: {e}")
+
+    return with_transaction_handling
+
