@@ -1,7 +1,7 @@
 import time
 
 import sqlalchemy
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, scoped_session, sessionmaker
 from sqlalchemy import inspect
 from config import DatabaseConfig
 
@@ -43,6 +43,10 @@ CONN = ENGINE.connect()
 
 def create_session() -> Session:
     return Session(ENGINE)
+
+# Allows us to create thread-local sessions, will eventually replace the above function
+session_factory = sessionmaker(bind=ENGINE)
+Session = scoped_session(session_factory)
 
 
 # Used for testing
