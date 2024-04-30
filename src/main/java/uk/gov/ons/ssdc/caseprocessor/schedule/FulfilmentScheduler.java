@@ -43,7 +43,6 @@ public class FulfilmentScheduler {
         fulfilmentNextTriggerRepository.findByTriggerDateTimeBefore(OffsetDateTime.now());
 
     if (triggerOptional.isPresent()) {
-      //      log.with("hostName", hostName).info("Fulfilment processing triggered");
       log.atInfo()
           .setMessage("Fulfilment processing triggered")
           .addKeyValue("hostName", hostName)
