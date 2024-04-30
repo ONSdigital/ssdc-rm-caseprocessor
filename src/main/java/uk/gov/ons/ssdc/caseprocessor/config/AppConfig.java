@@ -1,6 +1,5 @@
 package uk.gov.ons.ssdc.caseprocessor.config;
 
-import com.godaddy.logging.LoggingConfigs;
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.cloud.spring.pubsub.support.PublisherFactory;
 import com.google.cloud.spring.pubsub.support.SubscriberFactory;
@@ -47,9 +46,6 @@ public class AppConfig {
 
   @PostConstruct
   public void init() {
-    if ("STRUCTURED".equals(loggingProfile)) {
-      LoggingConfigs.setCurrent(LoggingConfigs.getCurrent().useJson());
-    }
 
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
   }

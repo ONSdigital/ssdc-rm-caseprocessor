@@ -194,9 +194,7 @@ class PrintFulfilmentReceiverTest {
     assertThat(logsList.size()).isEqualTo(1);
     String expecetedLogMessage =
         String.format(
-            "Received duplicate fulfilment message ID, ignoring and acking the duplicate message; correlationId=\"%s\"; messageId=\"%s\"",
-            managementEvent.getHeader().getCorrelationId(),
-            managementEvent.getHeader().getMessageId());
+            "Received duplicate fulfilment message ID, ignoring and acking the duplicate message");
     assertThat(logsList.get(0).getMessage()).isEqualTo(expecetedLogMessage);
   }
 

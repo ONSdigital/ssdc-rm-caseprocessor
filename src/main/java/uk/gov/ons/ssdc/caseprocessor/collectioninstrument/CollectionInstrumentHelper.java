@@ -1,7 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.collectioninstrument;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
@@ -32,12 +32,14 @@ public class CollectionInstrumentHelper {
         try {
           expressionResult = cachedRule.getSpelExpression().getValue(context, Boolean.class);
         } catch (Exception spelExpressionEvaluationException) {
-          log.with("case_id", caze.getId())
-              .with("uac_metadata", uacMetadata)
-              .with("expression", cachedRule.getSpelExpression().getExpressionString())
-              .error(
-                  "Collection instrument selection rule causing error",
-                  spelExpressionEvaluationException);
+
+          log.atError()
+              .setMessage("Collection instrument selection rule causing error")
+              .setCause(spelExpressionEvaluationException)
+              .addKeyValue("case_id", caze.getId())
+              .addKeyValue("uac_metadata", uacMetadata)
+              .addKeyValue("expression", cachedRule.getSpelExpression().getExpressionString())
+              .log();
 
           throw new RuntimeException(
               "Collection instrument selection rule causing error",
@@ -55,9 +57,11 @@ public class CollectionInstrumentHelper {
     // dodgy rules from ever being configured... it's here as a final line of defence, but we
     // absolutely can not rely on it because it will wreak havoc on operational support.
     if (selectedCollectionInstrumentUrl == null) {
-      log.with("collection_exercise_id", caze.getCollectionExercise().getId())
-          .error(
-              "Collection instrument rules are set up incorrectly: there MUST be a default rule");
+      log.atError()
+          .setMessage(
+              "Collection instrument rules are set up incorrectly: there MUST be a default rule")
+          .addKeyValue("collection_exercise_id", caze.getCollectionExercise().getId())
+          .log();
 
       throw new RuntimeException(
           "Collection instrument rules are set up incorrectly: there MUST be a default rule");

@@ -133,9 +133,19 @@
       <version>1.8.0</version>
     </dependency>
     <dependency>
-      <groupId>com.godaddy</groupId>
-      <artifactId>logging</artifactId>
-      <version>1.2.5</version>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.5.3</version>
+    </dependency>
+    <dependency>
+      <groupId>net.logstash.logback</groupId>
+      <artifactId>logstash-logback-encoder</artifactId>
+      <version>7.4</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>1.5.3</version>
     </dependency>
     <dependency>
       <groupId>com.opencsv</groupId>
