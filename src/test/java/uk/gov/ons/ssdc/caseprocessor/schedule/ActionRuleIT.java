@@ -262,6 +262,7 @@ class ActionRuleIT {
     actionRule.setCreatedBy(CREATED_BY_USER);
     actionRule.setUacMetadata(TEST_UAC_METADATA);
     actionRule.setClassifiers(classifiers);
+    actionRule.setSelectedCaseCount(0);
 
     if (smsTemplate != null) {
       actionRule.setSmsTemplate(smsTemplate);

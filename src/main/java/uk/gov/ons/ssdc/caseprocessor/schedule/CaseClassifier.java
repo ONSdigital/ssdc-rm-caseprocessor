@@ -14,10 +14,10 @@ public class CaseClassifier {
     this.jdbcTemplate = jdbcTemplate;
   }
 
-  public void enqueueCasesForActionRule(ActionRule actionRule) {
+  public int enqueueCasesForActionRule(ActionRule actionRule) {
     UUID batchId = UUID.randomUUID();
 
-    jdbcTemplate.update(
+    return jdbcTemplate.update(
         "INSERT INTO casev3.case_to_process (batch_id, batch_quantity, action_rule_id, "
             + "caze_id) SELECT ?, COUNT(*) OVER (), ?, id FROM "
             + "casev3.cases "
