@@ -23,11 +23,10 @@ public class UacQidServiceClient {
   @Value("${uacservice.connection.port}")
   private String port;
 
-  public List<UacQidDTO> getUacQids( int numberToCreate) {
+  public List<UacQidDTO> getUacQids(int numberToCreate) {
     RestTemplate restTemplate = new RestTemplate();
 
-    UriComponents uriComponents =
-        createUriComponents(numberToCreate, "multiple_qids");
+    UriComponents uriComponents = createUriComponents(numberToCreate, "multiple_qids");
     ResponseEntity<UacQidDTO[]> responseEntity =
         restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, null, UacQidDTO[].class);
 
