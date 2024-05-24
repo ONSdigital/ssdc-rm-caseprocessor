@@ -67,6 +67,8 @@ public class UacQidCache {
   }
 
   private void topUpCache() {
+    // We use synchronised on an empty object instead of the isToppingUpCache bool because it's
+    // bad practice to use it on a boolean literal.
     synchronized (lock) {
       if (!isToppingUpCache && uacQidLinkCache.size() < cacheMin) {
         isToppingUpCache = true;
