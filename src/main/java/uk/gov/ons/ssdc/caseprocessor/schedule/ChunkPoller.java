@@ -6,15 +6,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class ChunkPoller {
   private final ChunkProcessor chunkProcessor;
+  private final ActionRuleProcessor actionRuleProcessor;
 
-  public ChunkPoller(ChunkProcessor chunkProcessor) {
+  public ChunkPoller(ChunkProcessor chunkProcessor, ActionRuleProcessor actionRuleProcessor) {
     this.chunkProcessor = chunkProcessor;
+    this.actionRuleProcessor = actionRuleProcessor;
   }
 
   @Scheduled(fixedDelayString = "${scheduler.frequency}")
   public void processQueuedCases() {
     do {
       chunkProcessor.processChunk();
+      actionRuleProcessor.updateCompletedProcessingActionRules();
     } while (chunkProcessor.isThereWorkToDo()); // Don't go to sleep while there's work to do!
   }
 

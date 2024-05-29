@@ -5,6 +5,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.common.model.entity.ActionRule;
+import uk.gov.ons.ssdc.common.model.entity.ActionRuleStatus;
+
+import java.util.List;
 
 @Component
 public class ActionRuleProcessor {
@@ -12,7 +15,8 @@ public class ActionRuleProcessor {
   private final ActionRuleRepository actionRuleRepository;
 
   public ActionRuleProcessor(
-      CaseClassifier caseClassifier, ActionRuleRepository actionRuleRepository) {
+      CaseClassifier caseClassifier,
+      ActionRuleRepository actionRuleRepository) {
     this.caseClassifier = caseClassifier;
     this.actionRuleRepository = actionRuleRepository;
   }
@@ -24,5 +28,16 @@ public class ActionRuleProcessor {
     triggeredActionRule.setHasTriggered(true);
     triggeredActionRule.setSelectedCaseCount(casesSelected);
     actionRuleRepository.save(triggeredActionRule);
+  }
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void updateCompletedProcessingActionRules() {
+    List<ActionRule> completedProcessingActionRules =
+        actionRuleRepository.findCompletedProcessing();
+
+    for (ActionRule actionRule : completedProcessingActionRules) {
+      actionRule.setActionRuleStatus(ActionRuleStatus.COMPLETED);
+      actionRuleRepository.save(actionRule);
+    }
   }
 }
