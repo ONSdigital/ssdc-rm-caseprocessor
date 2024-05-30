@@ -1,9 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.cache;
 
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -30,27 +27,24 @@ public class UacQidCache {
 
   private static final Executor executor = Executors.newFixedThreadPool(8);
 
-  private Map<Integer, BlockingQueue<UacQidDTO>> uacQidLinkQueueMap = new ConcurrentHashMap<>();
-  private Set<Integer> isToppingUpQueue = ConcurrentHashMap.newKeySet();
+  private BlockingQueue<UacQidDTO> uacQidLinkCache = new LinkedBlockingDeque<>();
+  private boolean isToppingUpCache = false;
+  private final Object lock = new Object();
 
   public UacQidCache(UacQidServiceClient uacQidServiceClient) {
     this.uacQidServiceClient = uacQidServiceClient;
   }
 
-  public UacQidDTO getUacQidPair(int questionnaireType) {
-    uacQidLinkQueueMap.computeIfAbsent(questionnaireType, key -> new LinkedBlockingDeque<>());
-
+  public UacQidDTO getUacQidPair() {
     try {
-      topUpQueue(questionnaireType);
-      UacQidDTO uacQidDTO =
-          uacQidLinkQueueMap.get(questionnaireType).poll(uacQidGetTimout, TimeUnit.SECONDS);
+      topUpCache();
+      UacQidDTO uacQidDTO = uacQidLinkCache.poll(uacQidGetTimout, TimeUnit.SECONDS);
 
       if (uacQidDTO == null) {
         // The cache topper upper is executed in a separate thread, which can fail if uacqid api
         // down
         // So check we get a non null result otherwise throw a RunTimeException to re-enqueue msg
-        throw new RuntimeException(
-            "Timeout getting UacQidDTO for questionnaireType :" + questionnaireType);
+        throw new RuntimeException("Timeout getting UacQidDTO");
       }
 
       // Put the UAC-QID back into the cache if the transaction rolls back
@@ -60,7 +54,7 @@ public class UacQidCache {
               @Override
               public void afterCompletion(int status) {
                 if (status == STATUS_ROLLED_BACK) {
-                  uacQidLinkQueueMap.get(questionnaireType).add(uacQidDTO);
+                  uacQidLinkCache.add(uacQidDTO);
                 }
               }
             });
@@ -72,25 +66,23 @@ public class UacQidCache {
     }
   }
 
-  private void topUpQueue(int questionnaireType) {
-    synchronized (isToppingUpQueue) {
-      if (!isToppingUpQueue.contains(questionnaireType)
-          && uacQidLinkQueueMap.get(questionnaireType).size() < cacheMin) {
-        isToppingUpQueue.add(questionnaireType);
+  private void topUpCache() {
+    // We use synchronised on an empty object instead of the isToppingUpCache bool because it's
+    // bad practice to use it on a boolean literal.
+    synchronized (lock) {
+      if (!isToppingUpCache && uacQidLinkCache.size() < cacheMin) {
+        isToppingUpCache = true;
       } else {
         return;
       }
+      executor.execute(
+          () -> {
+            try {
+              uacQidLinkCache.addAll(uacQidServiceClient.getUacQids(cacheFetch));
+            } finally {
+              isToppingUpCache = false;
+            }
+          });
     }
-
-    executor.execute(
-        () -> {
-          try {
-            uacQidLinkQueueMap
-                .get(questionnaireType)
-                .addAll(uacQidServiceClient.getUacQids(questionnaireType, cacheFetch));
-          } finally {
-            isToppingUpQueue.remove(questionnaireType);
-          }
-        });
   }
 }

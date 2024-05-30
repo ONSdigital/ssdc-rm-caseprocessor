@@ -69,7 +69,7 @@ class ExportFileProcessorTest {
     uacQidDTO.setUac(UAC);
     uacQidDTO.setQid(QID);
 
-    when(uacQidCache.getUacQidPair(anyInt())).thenReturn(uacQidDTO);
+    when(uacQidCache.getUacQidPair()).thenReturn(uacQidDTO);
     when(collectionInstrumentHelper.getCollectionInstrumentUrl(caze, TEST_UAC_METADATA))
         .thenReturn("testCollectionInstrumentUrl");
 
@@ -204,7 +204,7 @@ class ExportFileProcessorTest {
     uacQidDTO.setUac(UAC);
     uacQidDTO.setQid(QID);
 
-    when(uacQidCache.getUacQidPair(anyInt())).thenReturn(uacQidDTO);
+    when(uacQidCache.getUacQidPair()).thenReturn(uacQidDTO);
 
     // When
     underTest.process(fulfilmentToProcess);
@@ -270,7 +270,7 @@ class ExportFileProcessorTest {
     uacQidDTO.setUac(UAC);
     uacQidDTO.setQid(QID);
 
-    when(uacQidCache.getUacQidPair(anyInt())).thenReturn(uacQidDTO);
+    when(uacQidCache.getUacQidPair()).thenReturn(uacQidDTO);
 
     // When
     underTest.process(fulfilmentToProcess);
@@ -335,7 +335,7 @@ class ExportFileProcessorTest {
     uacQidDTO.setUac(UAC);
     uacQidDTO.setQid(QID);
 
-    when(uacQidCache.getUacQidPair(anyInt())).thenReturn(uacQidDTO);
+    when(uacQidCache.getUacQidPair()).thenReturn(uacQidDTO);
 
     // When
     underTest.process(fulfilmentToProcess);
