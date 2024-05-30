@@ -1,5 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.model.repository;
 
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,7 @@ public interface CaseToProcessRepository extends JpaRepository<CaseToProcess, UU
       value = "SELECT * FROM casev3.case_to_process LIMIT :limit FOR UPDATE SKIP LOCKED",
       nativeQuery = true)
   Stream<CaseToProcess> findChunkToProcess(@Param("limit") int limit);
+
+  @Query(value = "SELECT action_rule_id FROM casev3.case_to_process", nativeQuery = true)
+  Set<String> getActionRuleIds();
 }

@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
+import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseToProcessRepository;
 
 public class ChunkPollerTest {
 
@@ -11,7 +12,8 @@ public class ChunkPollerTest {
   public void testProcessQueuedCases() {
     // Given
     ChunkProcessor chunkProcessor = mock(ChunkProcessor.class);
-    ChunkPoller underTest = new ChunkPoller(chunkProcessor);
+    CaseToProcessRepository caseToProcessRepository = mock(CaseToProcessRepository.class);
+    ChunkPoller underTest = new ChunkPoller(chunkProcessor, caseToProcessRepository);
 
     // When
     underTest.processQueuedCases();
