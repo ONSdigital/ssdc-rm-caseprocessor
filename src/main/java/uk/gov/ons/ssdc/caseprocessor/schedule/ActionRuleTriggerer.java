@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.common.model.entity.ActionRule;
+import uk.gov.ons.ssdc.common.model.entity.ActionRuleStatus;
 
 @Component
 public class ActionRuleTriggerer {
@@ -35,12 +36,25 @@ public class ActionRuleTriggerer {
 
     for (ActionRule triggeredActionRule : triggeredActionRules) {
       try {
+        actionRuleProcessor.updateActionRuleStatus(
+            triggeredActionRule, ActionRuleStatus.SELECTING_CASES);
+
+        log.atInfo()
+            .setMessage("Action rule selecting cases")
+            .addKeyValue("hostName", hostName)
+            .addKeyValue("id", triggeredActionRule.getId())
+            .log();
+
+        actionRuleProcessor.processTriggeredActionRule(triggeredActionRule);
+
         log.atInfo()
             .setMessage("Action rule triggered")
             .addKeyValue("hostName", hostName)
             .addKeyValue("id", triggeredActionRule.getId())
             .log();
-        actionRuleProcessor.processTriggeredActionRule(triggeredActionRule);
+
+        actionRuleProcessor.updateActionRuleStatus(
+            triggeredActionRule, ActionRuleStatus.PROCESSING_CASES);
       } catch (BadSqlGrammarException badSqlGrammarException) {
         String errorMessage =
             "ActionRule "
@@ -55,6 +69,7 @@ public class ActionRuleTriggerer {
             .addKeyValue("id", triggeredActionRule.getId())
             .log();
 
+        triggeredActionRule.setActionRuleStatus(ActionRuleStatus.ERRORED);
         triggeredActionRule.setHasTriggered(true);
         actionRuleRepository.save(triggeredActionRule);
       } catch (Exception e) {
