@@ -13,7 +13,7 @@ public interface ActionRuleRepository extends JpaRepository<ActionRule, UUID> {
 
   @Query(
       value =
-          "SELECT * FROM casev3.action_rule ar"
+          "SELECT * FROM casev3.action_rule ar "
               + "WHERE action_rule_status = 'PROCESSING_CASES' "
               + "AND (SELECT COUNT(*) FROM casev3.case_to_process WHERE action_rule_id = ar.id) = 0",
       nativeQuery = true)
