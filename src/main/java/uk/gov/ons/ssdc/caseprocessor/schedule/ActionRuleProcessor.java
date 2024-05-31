@@ -19,13 +19,6 @@ public class ActionRuleProcessor {
     this.actionRuleRepository = actionRuleRepository;
   }
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public ActionRule updateActionRuleStatus(
-      ActionRule actionRule, ActionRuleStatus actionRuleStatus) {
-    actionRule.setActionRuleStatus(actionRuleStatus);
-    return actionRuleRepository.save(actionRule);
-  }
-
   @Transactional(
       propagation = Propagation.REQUIRES_NEW) // Start a new transaction for every action rule
   public void processTriggeredActionRule(ActionRule triggeredActionRule) {
@@ -33,6 +26,14 @@ public class ActionRuleProcessor {
     triggeredActionRule.setHasTriggered(true);
     triggeredActionRule.setSelectedCaseCount(casesSelected);
     actionRuleRepository.save(triggeredActionRule);
+  }
+
+  @Transactional(
+      propagation = Propagation.REQUIRES_NEW) // We need status updates to be committed immediately
+  public ActionRule updateActionRuleStatus(
+      ActionRule actionRule, ActionRuleStatus actionRuleStatus) {
+    actionRule.setActionRuleStatus(actionRuleStatus);
+    return actionRuleRepository.save(actionRule);
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
