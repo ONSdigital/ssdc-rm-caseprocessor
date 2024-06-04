@@ -1,10 +1,12 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
+import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.common.model.entity.ActionRule;
+import uk.gov.ons.ssdc.common.model.entity.ActionRuleStatus;
 
 @Component
 public class ActionRuleProcessor {
@@ -24,5 +26,24 @@ public class ActionRuleProcessor {
     triggeredActionRule.setHasTriggered(true);
     triggeredActionRule.setSelectedCaseCount(casesSelected);
     actionRuleRepository.save(triggeredActionRule);
+  }
+
+  @Transactional(
+      propagation = Propagation.REQUIRES_NEW) // We need status updates to be committed immediately
+  public ActionRule updateActionRuleStatus(
+      ActionRule actionRule, ActionRuleStatus actionRuleStatus) {
+    actionRule.setActionRuleStatus(actionRuleStatus);
+    return actionRuleRepository.save(actionRule);
+  }
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void updateCompletedProcessingActionRules() {
+    List<ActionRule> completedProcessingActionRules =
+        actionRuleRepository.findCompletedProcessing();
+
+    for (ActionRule actionRule : completedProcessingActionRules) {
+      actionRule.setActionRuleStatus(ActionRuleStatus.COMPLETED);
+      actionRuleRepository.save(actionRule);
+    }
   }
 }

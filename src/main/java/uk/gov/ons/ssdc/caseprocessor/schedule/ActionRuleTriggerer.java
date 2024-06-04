@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.common.model.entity.ActionRule;
+import uk.gov.ons.ssdc.common.model.entity.ActionRuleStatus;
 
 @Component
 public class ActionRuleTriggerer {
@@ -34,13 +35,27 @@ public class ActionRuleTriggerer {
             OffsetDateTime.now());
 
     for (ActionRule triggeredActionRule : triggeredActionRules) {
+
       try {
+        log.atInfo()
+            .setMessage("Action rule selecting cases")
+            .addKeyValue("hostName", hostName)
+            .addKeyValue("id", triggeredActionRule.getId())
+            .log();
+
+        actionRuleProcessor.updateActionRuleStatus(
+            triggeredActionRule, ActionRuleStatus.SELECTING_CASES);
+
+        actionRuleProcessor.processTriggeredActionRule(triggeredActionRule);
+
+        actionRuleProcessor.updateActionRuleStatus(
+            triggeredActionRule, ActionRuleStatus.PROCESSING_CASES);
         log.atInfo()
             .setMessage("Action rule triggered")
             .addKeyValue("hostName", hostName)
             .addKeyValue("id", triggeredActionRule.getId())
             .log();
-        actionRuleProcessor.processTriggeredActionRule(triggeredActionRule);
+
       } catch (BadSqlGrammarException badSqlGrammarException) {
         String errorMessage =
             "ActionRule "
@@ -55,8 +70,14 @@ public class ActionRuleTriggerer {
             .addKeyValue("id", triggeredActionRule.getId())
             .log();
 
+        // Doing this update here means it's part of the overall method transaction, but this
+        // transaction wraps the entire loop including every action being triggered and won't be
+        // commited until any other actions also triggering are finished
+        // TODO re-write this method so that each action is handled in its own transaction
+        triggeredActionRule.setActionRuleStatus(ActionRuleStatus.ERRORED);
         triggeredActionRule.setHasTriggered(true);
         actionRuleRepository.save(triggeredActionRule);
+
       } catch (Exception e) {
         log.atError()
             .setMessage("Unexpected error while executing action rule")
