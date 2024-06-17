@@ -36,14 +36,12 @@ public class ActionRuleProcessor {
     return actionRuleRepository.save(actionRule);
   }
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void updateCompletedProcessingActionRules() {
     List<ActionRule> completedProcessingActionRules =
         actionRuleRepository.findCompletedProcessing();
 
     for (ActionRule actionRule : completedProcessingActionRules) {
-      actionRule.setActionRuleStatus(ActionRuleStatus.COMPLETED);
-      actionRuleRepository.save(actionRule);
+      updateActionRuleStatus(actionRule, ActionRuleStatus.COMPLETED);
     }
   }
 }
