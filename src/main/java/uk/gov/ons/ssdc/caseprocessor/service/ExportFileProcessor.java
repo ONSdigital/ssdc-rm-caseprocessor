@@ -178,7 +178,7 @@ public class ExportFileProcessor {
     String collectionInstrumentUrl =
         collectionInstrumentHelper.getCollectionInstrumentUrl(caze, metadata);
 
-    UacQidDTO uacQidDTO = uacQidCache.getUacQidPair(1);
+    UacQidDTO uacQidDTO = uacQidCache.getUacQidPair();
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setQid(uacQidDTO.getQid());
