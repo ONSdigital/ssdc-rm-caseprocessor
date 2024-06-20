@@ -28,64 +28,68 @@ public class ActionRuleTriggerer {
     this.actionRuleProcessor = actionRuleProcessor;
   }
 
-  @Transactional
-  public void triggerActionRule() {
-    List<ActionRule> triggeredActionRules =
-        actionRuleRepository.findByTriggerDateTimeBeforeAndHasTriggeredIsFalse(
-            OffsetDateTime.now());
+  
+  public void triggerAllActionRules(){
+    List<ActionRule> triggeredActionRules = 
+      actionRuleRepository.findByTriggerDateTimeBeforeAndHasTriggeredIsFalse(OffsetDateTime.now());
 
     for (ActionRule triggeredActionRule : triggeredActionRules) {
-
-      try {
-        log.atInfo()
-            .setMessage("Action rule selecting cases")
-            .addKeyValue("hostName", hostName)
-            .addKeyValue("id", triggeredActionRule.getId())
-            .log();
-
-        actionRuleProcessor.updateActionRuleStatus(
-            triggeredActionRule, ActionRuleStatus.SELECTING_CASES);
-
-        actionRuleProcessor.processTriggeredActionRule(triggeredActionRule);
-
-        actionRuleProcessor.updateActionRuleStatus(
-            triggeredActionRule, ActionRuleStatus.PROCESSING_CASES);
-        log.atInfo()
-            .setMessage("Action rule triggered")
-            .addKeyValue("hostName", hostName)
-            .addKeyValue("id", triggeredActionRule.getId())
-            .log();
-
-      } catch (BadSqlGrammarException badSqlGrammarException) {
-        String errorMessage =
-            "ActionRule "
-                + triggeredActionRule.getId()
-                + " failed with a BadSqlGrammarException,"
-                + " it has been marked Triggered to stop it running until it is fixed."
-                + " Exception Message: "
-                + badSqlGrammarException.getMessage();
-        log.atError()
-            .setMessage(errorMessage)
-            .addKeyValue("hostName", hostName)
-            .addKeyValue("id", triggeredActionRule.getId())
-            .log();
-
-        // Doing this update here means it's part of the overall method transaction, but this
-        // transaction wraps the entire loop including every action being triggered and won't be
-        // commited until any other actions also triggering are finished
-        // TODO re-write this method so that each action is handled in its own transaction
-        triggeredActionRule.setActionRuleStatus(ActionRuleStatus.ERRORED);
-        triggeredActionRule.setHasTriggered(true);
-        actionRuleRepository.save(triggeredActionRule);
-
-      } catch (Exception e) {
-        log.atError()
-            .setMessage("Unexpected error while executing action rule")
-            .setCause(e)
-            .addKeyValue("hostName", hostName)
-            .addKeyValue("id", triggeredActionRule.getId())
-            .log();
-      }
+      triggerActionRule(triggeredActionRule);
     }
   }
+
+  // TODO: look into transactional private methods in Spring
+  // by the looks of it it's not that trivial and currently won't work
+
+  @Transactional
+  private void triggerActionRule(ActionRule triggeredActionRule) {
+
+    try {
+      log.atInfo()
+          .setMessage("Action rule selecting cases")
+          .addKeyValue("hostName", hostName)
+          .addKeyValue("id", triggeredActionRule.getId())
+          .log();
+
+      actionRuleProcessor.updateActionRuleStatus(
+          triggeredActionRule, ActionRuleStatus.SELECTING_CASES);
+
+      actionRuleProcessor.processTriggeredActionRule(triggeredActionRule);
+
+      actionRuleProcessor.updateActionRuleStatus(
+          triggeredActionRule, ActionRuleStatus.PROCESSING_CASES);
+      log.atInfo()
+          .setMessage("Action rule triggered")
+          .addKeyValue("hostName", hostName)
+          .addKeyValue("id", triggeredActionRule.getId())
+          .log();
+
+    } catch (BadSqlGrammarException badSqlGrammarException) {
+      String errorMessage =
+          "ActionRule "
+              + triggeredActionRule.getId()
+              + " failed with a BadSqlGrammarException,"
+              + " it has been marked Triggered to stop it running until it is fixed."
+              + " Exception Message: "
+              + badSqlGrammarException.getMessage();
+      log.atError()
+          .setMessage(errorMessage)
+          .addKeyValue("hostName", hostName)
+          .addKeyValue("id", triggeredActionRule.getId())
+          .log();
+
+      triggeredActionRule.setActionRuleStatus(ActionRuleStatus.ERRORED);
+      triggeredActionRule.setHasTriggered(true);
+      actionRuleRepository.save(triggeredActionRule);
+
+    } catch (Exception e) {
+      log.atError()
+          .setMessage("Unexpected error while executing action rule")
+          .setCause(e)
+          .addKeyValue("hostName", hostName)
+          .addKeyValue("id", triggeredActionRule.getId())
+          .log();
+    }
+  }
+    
 }

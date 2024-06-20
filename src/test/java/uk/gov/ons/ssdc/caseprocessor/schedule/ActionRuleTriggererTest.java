@@ -31,7 +31,7 @@ public class ActionRuleTriggererTest {
     // When
     ActionRuleTriggerer underTest =
         new ActionRuleTriggerer(actionRuleRepository, actionRuleProcessor);
-    underTest.triggerActionRule();
+    underTest.triggerAllActionRules();
 
     // Then
     verify(actionRuleProcessor).processTriggeredActionRule(eq(actionRule));
@@ -52,7 +52,7 @@ public class ActionRuleTriggererTest {
     // When
     ActionRuleTriggerer underTest =
         new ActionRuleTriggerer(actionRuleRepository, actionRuleProcessor);
-    underTest.triggerActionRule();
+    underTest.triggerAllActionRules();
 
     // Then
     verify(actionRuleProcessor, times(50)).processTriggeredActionRule(any(ActionRule.class));
@@ -77,7 +77,7 @@ public class ActionRuleTriggererTest {
     // When
     ActionRuleTriggerer underTest =
         new ActionRuleTriggerer(actionRuleRepository, actionRuleProcessor);
-    underTest.triggerActionRule();
+    underTest.triggerAllActionRules();
 
     // Then
     verify(actionRuleProcessor).processTriggeredActionRule(eq(actionRule));
