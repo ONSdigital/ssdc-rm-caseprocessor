@@ -18,7 +18,7 @@ class ActionRuleProcessorTest {
   private final CaseClassifier caseClassifier = mock(CaseClassifier.class);
 
   @Test
-  void testProcessedTriggeredActionRule() {
+  void testProcessTriggeredActionRule() {
     // Given
     ActionRule actionRule = setUpActionRule(ActionRuleType.EXPORT_FILE);
     int mockSelectedCases = 1729;
