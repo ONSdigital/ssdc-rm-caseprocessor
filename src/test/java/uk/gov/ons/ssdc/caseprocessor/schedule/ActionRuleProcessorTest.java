@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.common.model.entity.ActionRule;
+import uk.gov.ons.ssdc.common.model.entity.ActionRuleStatus;
 import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
 
@@ -17,23 +18,26 @@ class ActionRuleProcessorTest {
   private final CaseClassifier caseClassifier = mock(CaseClassifier.class);
 
   @Test
-  void testExecuteClassifiers() {
+  void testProcessedTriggeredActionRule() {
     // Given
     ActionRule actionRule = setUpActionRule(ActionRuleType.EXPORT_FILE);
+    int mockSelectedCases = 1729;
+    when(caseClassifier.enqueueCasesForActionRule(actionRule)).thenReturn(mockSelectedCases);
 
-    // when
+    // When
     ActionRuleProcessor underTest = new ActionRuleProcessor(caseClassifier, actionRuleRepository);
     underTest.processTriggeredActionRule(actionRule);
 
-    // then
+    // Then
     ArgumentCaptor<ActionRule> actionRuleCaptor = ArgumentCaptor.forClass(ActionRule.class);
     verify(actionRuleRepository, times(1)).save(actionRuleCaptor.capture());
-    ActionRule actualActionRule = actionRuleCaptor.getAllValues().get(0);
-    // TODO redo this test, it doesn't work as is
-    actionRule.setHasTriggered(true);
-    Assertions.assertThat(actualActionRule).isEqualTo(actionRule);
-
     verify(caseClassifier).enqueueCasesForActionRule(actionRule);
+
+    ActionRule savedActionRule = actionRuleCaptor.getAllValues().get(0);
+    Assertions.assertThat(savedActionRule.isHasTriggered()).isTrue();
+    Assertions.assertThat(savedActionRule.getActionRuleStatus())
+        .isEqualTo(ActionRuleStatus.PROCESSING_CASES);
+    Assertions.assertThat(savedActionRule.getSelectedCaseCount()).isEqualTo(mockSelectedCases);
   }
 
   private ActionRule setUpActionRule(ActionRuleType actionRuleType) {
@@ -42,6 +46,7 @@ class ActionRuleProcessorTest {
     actionRule.setId(actionRuleId);
     actionRule.setTriggerDateTime(OffsetDateTime.now());
     actionRule.setHasTriggered(false);
+    actionRule.setActionRuleStatus(ActionRuleStatus.SELECTING_CASES);
 
     actionRule.setType(actionRuleType);
 
