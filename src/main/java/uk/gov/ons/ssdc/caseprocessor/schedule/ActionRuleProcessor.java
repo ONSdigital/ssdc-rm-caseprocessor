@@ -22,9 +22,12 @@ public class ActionRuleProcessor {
   @Transactional(
       propagation = Propagation.REQUIRES_NEW) // Start a new transaction for every action rule
   public void processTriggeredActionRule(ActionRule triggeredActionRule) {
+    // NOTE: This function will block for the entire duration as the database filters the targeted
+    // cases and creates cases to process rows
     int casesSelected = caseClassifier.enqueueCasesForActionRule(triggeredActionRule);
     triggeredActionRule.setHasTriggered(true);
     triggeredActionRule.setSelectedCaseCount(casesSelected);
+    triggeredActionRule.setActionRuleStatus(ActionRuleStatus.PROCESSING_CASES);
     actionRuleRepository.save(triggeredActionRule);
   }
 

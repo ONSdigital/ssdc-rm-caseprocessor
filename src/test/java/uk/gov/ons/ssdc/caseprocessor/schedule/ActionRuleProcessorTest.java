@@ -29,6 +29,7 @@ class ActionRuleProcessorTest {
     ArgumentCaptor<ActionRule> actionRuleCaptor = ArgumentCaptor.forClass(ActionRule.class);
     verify(actionRuleRepository, times(1)).save(actionRuleCaptor.capture());
     ActionRule actualActionRule = actionRuleCaptor.getAllValues().get(0);
+    // TODO redo this test, it doesn't work as is
     actionRule.setHasTriggered(true);
     Assertions.assertThat(actualActionRule).isEqualTo(actionRule);
 
