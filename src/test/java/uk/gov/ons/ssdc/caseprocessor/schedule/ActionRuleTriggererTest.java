@@ -36,7 +36,8 @@ class ActionRuleTriggererTest {
 
     // Then
     verify(actionRuleProcessor).processTriggeredActionRule(actionRule);
-    verify(actionRuleProcessor).updateActionRuleStatus(actionRule, ActionRuleStatus.SELECTING_CASES);
+    verify(actionRuleProcessor)
+        .updateActionRuleStatus(actionRule, ActionRuleStatus.SELECTING_CASES);
   }
 
   @Test
@@ -57,7 +58,8 @@ class ActionRuleTriggererTest {
     underTest.triggerAllActionRules();
 
     // Then
-    verify(actionRuleProcessor, times(50)).updateActionRuleStatus(any(ActionRule.class), eq(ActionRuleStatus.SELECTING_CASES));
+    verify(actionRuleProcessor, times(50))
+        .updateActionRuleStatus(any(ActionRule.class), eq(ActionRuleStatus.SELECTING_CASES));
     verify(actionRuleProcessor, times(50)).processTriggeredActionRule(any(ActionRule.class));
   }
 
