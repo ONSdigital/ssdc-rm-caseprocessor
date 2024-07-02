@@ -15,13 +15,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.BadSqlGrammarException;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.ActionRuleRepository;
 import uk.gov.ons.ssdc.common.model.entity.ActionRule;
+import uk.gov.ons.ssdc.common.model.entity.ActionRuleStatus;
 
-public class ActionRuleTriggererTest {
+class ActionRuleTriggererTest {
   private final ActionRuleRepository actionRuleRepository = mock(ActionRuleRepository.class);
   private final ActionRuleProcessor actionRuleProcessor = mock(ActionRuleProcessor.class);
 
   @Test
-  public void testTriggerActionRule() throws UnknownHostException {
+  void testTriggerActionRule() throws UnknownHostException {
     // Given
     ActionRule actionRule = new ActionRule();
     when(actionRuleRepository.findByTriggerDateTimeBeforeAndHasTriggeredIsFalse(
@@ -31,14 +32,16 @@ public class ActionRuleTriggererTest {
     // When
     ActionRuleTriggerer underTest =
         new ActionRuleTriggerer(actionRuleRepository, actionRuleProcessor);
-    underTest.triggerActionRule();
+    underTest.triggerAllActionRules();
 
     // Then
-    verify(actionRuleProcessor).processTriggeredActionRule(eq(actionRule));
+    verify(actionRuleProcessor).processTriggeredActionRule(actionRule);
+    verify(actionRuleProcessor)
+        .updateActionRuleStatus(actionRule, ActionRuleStatus.SELECTING_CASES);
   }
 
   @Test
-  public void testTriggerMultipleActionRule() throws UnknownHostException {
+  void testTriggerMultipleActionRule() throws UnknownHostException {
     // Given
     List<ActionRule> actionRules = new ArrayList<>(50);
     for (int i = 0; i < 50; i++) {
@@ -52,14 +55,16 @@ public class ActionRuleTriggererTest {
     // When
     ActionRuleTriggerer underTest =
         new ActionRuleTriggerer(actionRuleRepository, actionRuleProcessor);
-    underTest.triggerActionRule();
+    underTest.triggerAllActionRules();
 
     // Then
+    verify(actionRuleProcessor, times(50))
+        .updateActionRuleStatus(any(ActionRule.class), eq(ActionRuleStatus.SELECTING_CASES));
     verify(actionRuleProcessor, times(50)).processTriggeredActionRule(any(ActionRule.class));
   }
 
   @Test
-  public void badSqlGrammarExceptionHandled() throws UnknownHostException {
+  void badSqlGrammarExceptionHandled() throws UnknownHostException {
     // Given
     ActionRule actionRule = new ActionRule();
     actionRule.setHasTriggered(false);
@@ -77,10 +82,10 @@ public class ActionRuleTriggererTest {
     // When
     ActionRuleTriggerer underTest =
         new ActionRuleTriggerer(actionRuleRepository, actionRuleProcessor);
-    underTest.triggerActionRule();
+    underTest.triggerAllActionRules();
 
     // Then
-    verify(actionRuleProcessor).processTriggeredActionRule(eq(actionRule));
+    verify(actionRuleProcessor).processTriggeredActionRule(actionRule);
     assertThat(actionRule.isHasTriggered()).isTrue();
   }
 }

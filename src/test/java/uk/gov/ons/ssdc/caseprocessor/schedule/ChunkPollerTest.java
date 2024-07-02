@@ -5,13 +5,14 @@ import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
 
-public class ChunkPollerTest {
+class ChunkPollerTest {
 
   @Test
-  public void testProcessQueuedCases() {
+  void testProcessQueuedCases() {
     // Given
     ChunkProcessor chunkProcessor = mock(ChunkProcessor.class);
-    ChunkPoller underTest = new ChunkPoller(chunkProcessor);
+    ActionRuleProcessor actionRuleProcessor = mock(ActionRuleProcessor.class);
+    ChunkPoller underTest = new ChunkPoller(chunkProcessor, actionRuleProcessor);
 
     // When
     underTest.processQueuedCases();
