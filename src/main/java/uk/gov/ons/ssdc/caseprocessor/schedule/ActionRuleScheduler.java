@@ -24,7 +24,7 @@ public class ActionRuleScheduler {
     }
 
     try {
-      actionRuleTriggerer.triggerActionRule();
+      actionRuleTriggerer.triggerAllActionRules();
     } catch (Exception e) {
       log.error("Unexpected exception while processing action rule", e);
       throw e;
