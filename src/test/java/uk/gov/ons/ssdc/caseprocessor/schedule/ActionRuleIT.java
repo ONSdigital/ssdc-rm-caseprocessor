@@ -37,6 +37,7 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.common.model.entity.ActionRule;
+import uk.gov.ons.ssdc.common.model.entity.ActionRuleStatus;
 import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
@@ -262,7 +263,8 @@ class ActionRuleIT {
     actionRule.setCreatedBy(CREATED_BY_USER);
     actionRule.setUacMetadata(TEST_UAC_METADATA);
     actionRule.setClassifiers(classifiers);
-    actionRule.setSelectedCaseCount(0);
+    actionRule.setSelectedCaseCount(null);
+    actionRule.setActionRuleStatus(ActionRuleStatus.SCHEDULED);
 
     if (smsTemplate != null) {
       actionRule.setSmsTemplate(smsTemplate);
