@@ -25,8 +25,8 @@ public class CaseService {
   @Value("${queueconfig.case-update-topic}")
   private String caseUpdateTopic;
 
-  @Value("${queueconfig.shared-pubsub-project}")
-  private String sharedPubsubProject;
+  @Value("${spring.cloud.gcp.pubsub.project-id}")
+  private String pubsubProject;
 
   public CaseService(CaseRepository caseRepository, MessageSender messageSender) {
     this.caseRepository = caseRepository;
@@ -48,7 +48,7 @@ public class CaseService {
 
     EventDTO event = prepareCaseEvent(caze, eventHeader);
 
-    String topic = toProjectTopicName(caseUpdateTopic, sharedPubsubProject).toString();
+    String topic = toProjectTopicName(caseUpdateTopic, pubsubProject).toString();
     messageSender.sendMessage(topic, event);
   }
 

@@ -82,7 +82,7 @@ class PrintFulfilmentReceiverIT {
     printFulfilmentEvent.getPayload().getPrintFulfilment().setUacMetadata(uacMetadata);
 
     // When
-    pubsubHelper.sendMessageToSharedProject(PRINT_FULFILMENT_TOPIC, printFulfilmentEvent);
+    pubsubHelper.sendMessageToPubsubProject(PRINT_FULFILMENT_TOPIC, printFulfilmentEvent);
 
     // Then
     List<FulfilmentToProcess> fulfilmentsToProcess = getFulfilmentsToProcess();
@@ -132,8 +132,8 @@ class PrintFulfilmentReceiverIT {
     printFulfilmentEvent.getPayload().getPrintFulfilment().setUacMetadata(uacMetadata);
 
     // When
-    pubsubHelper.sendMessageToSharedProject(PRINT_FULFILMENT_TOPIC, printFulfilmentEvent);
-    pubsubHelper.sendMessageToSharedProject(PRINT_FULFILMENT_TOPIC, printFulfilmentEvent);
+    pubsubHelper.sendMessageToPubsubProject(PRINT_FULFILMENT_TOPIC, printFulfilmentEvent);
+    pubsubHelper.sendMessageToPubsubProject(PRINT_FULFILMENT_TOPIC, printFulfilmentEvent);
 
     // Then
     List<FulfilmentToProcess> fulfilmentsToProcess = getFulfilmentsToProcess();

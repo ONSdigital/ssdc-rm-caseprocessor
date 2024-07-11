@@ -59,7 +59,7 @@ Make sure you have the following environment variables set if you want to run in
 
 ```
 SPRING_CLOUD_GCP_PUBSUB_EMULATOR_HOST=localhost:8538
-QUEUECONFIG_SHARED-PUBSUB-PROJECT=shared-project
+QUEUECONFIG_PUBSUB-PROJECT=our-project
 ```
 
 ## Debugging With GCP PubSub Project
@@ -69,7 +69,7 @@ if you want to run in the debugger in your IDE:
 
 ```
 SPRING_CLOUD_GCP_PUBSUB_PROJECT-ID=<GCP Project>
-QUEUECONFIG_SHARED-PUBSUB-PROJECT=<GCP Project>
+QUEUECONFIG_PUBSUB-PROJECT=<GCP Project>
 ```
 
 ### Enriched SMS Fulfilment

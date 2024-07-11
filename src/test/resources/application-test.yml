@@ -17,6 +17,3 @@ uacservice:
   uacqid-get-timeout: 1   #seconds
 
 caserefgeneratorkey: rPr3qsjlU42hsDX5npfuCzlyF4UYfDTO
-
-queueconfig:
-  shared-pubsub-project: shared-project

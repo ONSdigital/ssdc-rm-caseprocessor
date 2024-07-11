@@ -50,7 +50,7 @@ public class EqLaunchReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
+    pubsubHelper.purgePubsubProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
@@ -59,7 +59,7 @@ public class EqLaunchReceiverIT {
     // GIVEN
 
     try (QueueSpy<EventDTO> outboundUacQueueSpy =
-        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.pubsubProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       Case caze = junkDataHelper.setupJunkCase();
 
       UacQidLink uacQidLink = new UacQidLink();
@@ -87,7 +87,7 @@ public class EqLaunchReceiverIT {
       eqLaunchedEvent.setPayload(payloadDTO);
 
       // WHEN
-      pubsubHelper.sendMessageToSharedProject(INBOUND_TOPIC, eqLaunchedEvent);
+      pubsubHelper.sendMessageToPubsubProject(INBOUND_TOPIC, eqLaunchedEvent);
 
       // THEN
       EventDTO uacUpdatedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();

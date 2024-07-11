@@ -42,7 +42,7 @@ public class UacServiceTest {
   @Test
   void saveAndEmitUacUpdatedEvent() {
     ReflectionTestUtils.setField(underTest, "uacUpdateTopic", "Test topic");
-    ReflectionTestUtils.setField(underTest, "sharedPubsubProject", "Test project");
+    ReflectionTestUtils.setField(underTest, "pubsubProject", "Test project");
 
     Survey survey = new Survey();
     survey.setId(UUID.randomUUID());
@@ -119,7 +119,7 @@ public class UacServiceTest {
   void createLinkAndEmitNewUacQid() {
     // Given
     ReflectionTestUtils.setField(underTest, "uacUpdateTopic", "Test topic");
-    ReflectionTestUtils.setField(underTest, "sharedPubsubProject", "Test project");
+    ReflectionTestUtils.setField(underTest, "pubsubProject", "Test project");
 
     String qid = "TEST_QID";
     String uac = "TEST_UAC";
