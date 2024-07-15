@@ -84,14 +84,14 @@ class ActionRuleIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
+    pubsubHelper.purgePubsubProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   void testExportFileRule() throws Exception {
     try (QueueSpy<EventDTO> outboundUacQueue =
-        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.pubsubProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       Case caze = junkDataHelper.setupJunkCase();
       ExportFileTemplate exportFileTemplate = setUpExportFileTemplate();
@@ -124,7 +124,7 @@ class ActionRuleIT {
   @Test
   void testDeactivateUacRule() throws Exception {
     try (QueueSpy<EventDTO> outboundUacQueue =
-        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.pubsubProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       Case caze = junkDataHelper.setupJunkCase();
       UacQidLink uacQidLink = setupUacQidLink(caze);

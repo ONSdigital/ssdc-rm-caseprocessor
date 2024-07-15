@@ -63,7 +63,7 @@ public class UpdateSampleSensitiveReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
+    pubsubHelper.purgePubsubProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
@@ -73,7 +73,7 @@ public class UpdateSampleSensitiveReceiverIT {
     // GIVEN
     //
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
-        pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.pubsubProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
 
       Case caze = new Case();
       caze.setId(TEST_CASE_ID);
@@ -85,7 +85,7 @@ public class UpdateSampleSensitiveReceiverIT {
       EventDTO event = prepareEvent("SensitiveJunk", "9999999");
 
       //  When
-      pubsubHelper.sendMessageToSharedProject(UPDATE_SAMPLE_SENSITIVE_TOPIC, event);
+      pubsubHelper.sendMessageToPubsubProject(UPDATE_SAMPLE_SENSITIVE_TOPIC, event);
 
       List<Event> databaseEvents = eventPoller.getEvents(1);
 
@@ -150,7 +150,7 @@ public class UpdateSampleSensitiveReceiverIT {
         .parallel()
         .forEach(
             event -> {
-              pubsubHelper.sendMessageToSharedProject(UPDATE_SAMPLE_SENSITIVE_TOPIC, event);
+              pubsubHelper.sendMessageToPubsubProject(UPDATE_SAMPLE_SENSITIVE_TOPIC, event);
             });
 
     eventPoller.getEvents(4);

@@ -20,8 +20,8 @@ public class MessageConsumerConfig {
   private final ManagedMessageRecoverer managedMessageRecoverer;
   private final PubSubTemplate pubSubTemplate;
 
-  @Value("${queueconfig.shared-pubsub-project}")
-  private String sharedPubsubProject;
+  @Value("${spring.cloud.gcp.pubsub.project-id}")
+  private String pubsubProject;
 
   @Value("${queueconfig.new-case-subscription}")
   private String newCaseSubscription;
@@ -120,24 +120,21 @@ public class MessageConsumerConfig {
   @Bean
   public PubSubInboundChannelAdapter newCaseInbound(
       @Qualifier("newCaseInputChannel") MessageChannel channel) {
-    String subscription =
-        toProjectSubscriptionName(newCaseSubscription, sharedPubsubProject).toString();
+    String subscription = toProjectSubscriptionName(newCaseSubscription, pubsubProject).toString();
     return makeAdapter(channel, subscription);
   }
 
   @Bean
   public PubSubInboundChannelAdapter receiptInbound(
       @Qualifier("receiptInputChannel") MessageChannel channel) {
-    String subscription =
-        toProjectSubscriptionName(receiptSubscription, sharedPubsubProject).toString();
+    String subscription = toProjectSubscriptionName(receiptSubscription, pubsubProject).toString();
     return makeAdapter(channel, subscription);
   }
 
   @Bean
   public PubSubInboundChannelAdapter refusalInbound(
       @Qualifier("refusalInputChannel") MessageChannel channel) {
-    String subscription =
-        toProjectSubscriptionName(refusalSubscription, sharedPubsubProject).toString();
+    String subscription = toProjectSubscriptionName(refusalSubscription, pubsubProject).toString();
     return makeAdapter(channel, subscription);
   }
 
@@ -145,15 +142,14 @@ public class MessageConsumerConfig {
   PubSubInboundChannelAdapter invalidCaseInbound(
       @Qualifier("invalidCaseInputChannel") MessageChannel channel) {
     String subscription =
-        toProjectSubscriptionName(invalidCaseSubscription, sharedPubsubProject).toString();
+        toProjectSubscriptionName(invalidCaseSubscription, pubsubProject).toString();
     return makeAdapter(channel, subscription);
   }
 
   @Bean
   PubSubInboundChannelAdapter eqLaunchedInbound(
       @Qualifier("eqLaunchInputChannel") MessageChannel channel) {
-    String subscription =
-        toProjectSubscriptionName(eqLaunchSubscription, sharedPubsubProject).toString();
+    String subscription = toProjectSubscriptionName(eqLaunchSubscription, pubsubProject).toString();
     return makeAdapter(channel, subscription);
   }
 
@@ -161,7 +157,7 @@ public class MessageConsumerConfig {
   PubSubInboundChannelAdapter fulfilmentInbound(
       @Qualifier("printFulfilmentInputChannel") MessageChannel channel) {
     String subscription =
-        toProjectSubscriptionName(printFulfilmentSubscription, sharedPubsubProject).toString();
+        toProjectSubscriptionName(printFulfilmentSubscription, pubsubProject).toString();
     return makeAdapter(channel, subscription);
   }
 
@@ -169,7 +165,7 @@ public class MessageConsumerConfig {
   PubSubInboundChannelAdapter deactivateUacInbound(
       @Qualifier("deactivateUacInputChannel") MessageChannel channel) {
     String subscription =
-        toProjectSubscriptionName(deactivateUacSubscription, sharedPubsubProject).toString();
+        toProjectSubscriptionName(deactivateUacSubscription, pubsubProject).toString();
     return makeAdapter(channel, subscription);
   }
 
@@ -177,7 +173,7 @@ public class MessageConsumerConfig {
   PubSubInboundChannelAdapter updateSampleInbound(
       @Qualifier("updateSampleInputChannel") MessageChannel channel) {
     String subscription =
-        toProjectSubscriptionName(updateSampleSubscription, sharedPubsubProject).toString();
+        toProjectSubscriptionName(updateSampleSubscription, pubsubProject).toString();
     return makeAdapter(channel, subscription);
   }
 
@@ -185,8 +181,7 @@ public class MessageConsumerConfig {
   PubSubInboundChannelAdapter updateSampleSensitiveInbound(
       @Qualifier("updateSampleSensitiveInputChannel") MessageChannel channel) {
     String subscription =
-        toProjectSubscriptionName(updateSampleSensitiveSubscription, sharedPubsubProject)
-            .toString();
+        toProjectSubscriptionName(updateSampleSensitiveSubscription, pubsubProject).toString();
     return makeAdapter(channel, subscription);
   }
 

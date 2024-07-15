@@ -39,7 +39,7 @@ public class CaseServiceTest {
   @Test
   public void saveCaseAndEmitCaseUpdatedEvent() {
     ReflectionTestUtils.setField(underTest, "caseUpdateTopic", "Test topic");
-    ReflectionTestUtils.setField(underTest, "sharedPubsubProject", "Test project");
+    ReflectionTestUtils.setField(underTest, "pubsubProject", "Test project");
 
     Survey survey = new Survey();
     survey.setId(UUID.randomUUID());
@@ -89,7 +89,7 @@ public class CaseServiceTest {
   @Test
   public void emitCaseUpdatedEvent() {
     ReflectionTestUtils.setField(underTest, "caseUpdateTopic", "Test topic");
-    ReflectionTestUtils.setField(underTest, "sharedPubsubProject", "Test project");
+    ReflectionTestUtils.setField(underTest, "pubsubProject", "Test project");
 
     Survey survey = new Survey();
     survey.setId(UUID.randomUUID());

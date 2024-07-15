@@ -52,14 +52,14 @@ public class ReceiptReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
+    pubsubHelper.purgePubsubProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testReceipt() throws Exception {
     try (QueueSpy<EventDTO> outboundUacQueueSpy =
-        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.pubsubProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // GIVEN
 
       Case caze = junkDataHelper.setupJunkCase();
@@ -89,7 +89,7 @@ public class ReceiptReceiverIT {
       junkDataHelper.junkify(eventHeader);
       event.setHeader(eventHeader);
 
-      pubsubHelper.sendMessageToSharedProject(INBOUND_RECEIPT_TOPIC, event);
+      pubsubHelper.sendMessageToPubsubProject(INBOUND_RECEIPT_TOPIC, event);
 
       //  THEN
       EventDTO uacUpdatedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();

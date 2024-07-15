@@ -46,14 +46,14 @@ public class RefusalReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
+    pubsubHelper.purgePubsubProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testRefusal() throws Exception {
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
-        pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.pubsubProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
       // GIVEN
 
       Case caze = junkDataHelper.setupJunkCase();
@@ -72,7 +72,7 @@ public class RefusalReceiverIT {
       junkDataHelper.junkify(eventHeader);
       event.setHeader(eventHeader);
 
-      pubsubHelper.sendMessageToSharedProject(INBOUND_REFUSAL_TOPIC, event);
+      pubsubHelper.sendMessageToPubsubProject(INBOUND_REFUSAL_TOPIC, event);
 
       //  THEN
       EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
@@ -91,7 +91,7 @@ public class RefusalReceiverIT {
   @Test
   public void testRefusalWithErasure() throws Exception {
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
-        pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.pubsubProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
       // GIVEN
 
       Case caze = junkDataHelper.setupJunkCase();
@@ -112,7 +112,7 @@ public class RefusalReceiverIT {
       event.setHeader(eventHeader);
 
       // WHEN
-      pubsubHelper.sendMessageToSharedProject(INBOUND_REFUSAL_TOPIC, event);
+      pubsubHelper.sendMessageToPubsubProject(INBOUND_REFUSAL_TOPIC, event);
 
       // THEN
       EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();

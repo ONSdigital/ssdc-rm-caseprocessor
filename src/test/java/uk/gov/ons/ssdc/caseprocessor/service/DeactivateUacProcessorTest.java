@@ -30,7 +30,7 @@ public class DeactivateUacProcessorTest {
   public void testProcessDeactivateUacRow() {
     // Given
     ReflectionTestUtils.setField(underTest, "deactivateUacTopic", "testTopic");
-    ReflectionTestUtils.setField(underTest, "sharedPubsubProject", "Test project");
+    ReflectionTestUtils.setField(underTest, "pubsubProject", "Test project");
 
     Case caze = new Case();
 
