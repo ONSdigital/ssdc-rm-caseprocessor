@@ -54,6 +54,7 @@ queueconfig:
   uac-update-topic: event_uac-update
   deactivate-uac-topic: event_deactivate-uac
   cloud-task-queue-topic: cloud_task_queue
+  rh-remove-personal-data-topic: remove_personal_data_topic
   publishtimeout: 30  # In seconds
 
 healthcheck:

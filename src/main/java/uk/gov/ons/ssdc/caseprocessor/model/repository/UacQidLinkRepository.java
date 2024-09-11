@@ -9,4 +9,6 @@ public interface UacQidLinkRepository extends JpaRepository<UacQidLink, UUID> {
   Optional<UacQidLink> findByQid(String qid);
 
   boolean existsByQid(String qid);
+
+  void deleteByCazeId(UUID cazeId);
 }

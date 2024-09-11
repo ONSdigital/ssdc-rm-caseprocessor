@@ -13,4 +13,6 @@ public interface CaseToProcessRepository extends JpaRepository<CaseToProcess, UU
       value = "SELECT * FROM casev3.case_to_process LIMIT :limit FOR UPDATE SKIP LOCKED",
       nativeQuery = true)
   Stream<CaseToProcess> findChunkToProcess(@Param("limit") int limit);
+
+  void deleteByCazeId(UUID cazeId);
 }
