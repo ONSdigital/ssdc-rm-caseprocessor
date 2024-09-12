@@ -42,7 +42,6 @@ public class RemovePersonalDataProcessor {
     this.caseToProcessRepository = caseToProcessRepository;
   }
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void process(Case caze, ActionRule actionRule) {
     UUID caseId = caze.getId();
 
