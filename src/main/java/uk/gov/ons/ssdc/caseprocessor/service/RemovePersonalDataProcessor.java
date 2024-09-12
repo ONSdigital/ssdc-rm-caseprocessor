@@ -1,12 +1,10 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
 import java.util.UUID;
-
-import com.google.api.client.util.Value;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.ssdc.caseprocessor.logging.EventLogger;
 import uk.gov.ons.ssdc.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.EventDTO;
@@ -44,13 +42,11 @@ public class RemovePersonalDataProcessor {
     this.caseToProcessRepository = caseToProcessRepository;
   }
 
-  @Transactional(
-      propagation = Propagation.REQUIRES_NEW)
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void process(Case caze, ActionRule actionRule) {
     UUID caseId = caze.getId();
 
     deletePersonalDataFromDB(caseId);
-
 
     CaseUpdateDTO caseUpdateDTO = new CaseUpdateDTO();
     caseUpdateDTO.setCaseId(caze.getId());
@@ -66,7 +62,6 @@ public class RemovePersonalDataProcessor {
     payload.setCaseUpdate(caseUpdateDTO);
 
     messageSender.sendMessage(removePersonalDataTopic, event);
-
   }
 
   private void deletePersonalDataFromDB(UUID caseId) {
