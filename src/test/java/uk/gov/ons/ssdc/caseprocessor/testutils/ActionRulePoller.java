@@ -18,9 +18,10 @@ public class ActionRulePoller {
   }
 
   @Retryable(
-      value = {ActionRuleNotTriggeredFoundException.class},
+      retryFor = {ActionRuleNotTriggeredFoundException.class},
       maxAttempts = 10,
-      backoff = @Backoff(delay = 2000))
+      backoff = @Backoff(delay = 2000),
+      listeners = {"retryListener"})
   public ActionRule getTriggeredActionRule(UUID actionRuleId) throws Exception {
 
     ActionRule actionRule =

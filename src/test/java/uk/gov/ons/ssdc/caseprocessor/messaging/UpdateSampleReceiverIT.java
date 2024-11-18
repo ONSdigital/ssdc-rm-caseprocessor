@@ -58,7 +58,7 @@ public class UpdateSampleReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, UPDATE_SAMPLE_TOPIC);
+    pubsubHelper.purgePubsubProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, UPDATE_SAMPLE_TOPIC);
     deleteDataHelper.deleteAllData();
   }
 
@@ -84,7 +84,7 @@ public class UpdateSampleReceiverIT {
     EventDTO event = prepareEvent("testSampleField");
 
     //  When
-    pubsubHelper.sendMessageToSharedProject(UPDATE_SAMPLE_TOPIC, event);
+    pubsubHelper.sendMessageToPubsubProject(UPDATE_SAMPLE_TOPIC, event);
 
     List<Event> databaseEvents = eventPoller.getEvents(1);
 
@@ -141,7 +141,7 @@ public class UpdateSampleReceiverIT {
         .parallel()
         .forEach(
             event -> {
-              pubsubHelper.sendMessageToSharedProject(UPDATE_SAMPLE_TOPIC, event);
+              pubsubHelper.sendMessageToPubsubProject(UPDATE_SAMPLE_TOPIC, event);
             });
 
     eventPoller.getEvents(4);

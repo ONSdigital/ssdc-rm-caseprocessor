@@ -55,7 +55,7 @@ class EmailFulfilmentReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
+    pubsubHelper.purgePubsubProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
@@ -63,7 +63,7 @@ class EmailFulfilmentReceiverIT {
   void testEmailFulfilment() throws Exception {
     // Given
     // Get a new UAC QID pair
-    List<UacQidDTO> uacQidDTOList = uacQidServiceClient.getUacQids(1, 1);
+    List<UacQidDTO> uacQidDTOList = uacQidServiceClient.getUacQids(1);
     UacQidDTO emailUacQid = uacQidDTOList.get(0);
 
     // Create the case
@@ -91,7 +91,7 @@ class EmailFulfilmentReceiverIT {
     event.setPayload(payloadDTO);
 
     try (QueueSpy<EventDTO> outboundUacQueueSpy =
-        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.pubsubProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       pubsubHelper.sendMessage(EMAIL_CONFIRMATION_TOPIC, event);
       EventDTO emittedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
 

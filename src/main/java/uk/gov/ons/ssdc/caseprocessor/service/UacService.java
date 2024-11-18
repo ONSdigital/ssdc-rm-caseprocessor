@@ -27,8 +27,8 @@ public class UacService {
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
 
-  @Value("${queueconfig.shared-pubsub-project}")
-  private String sharedPubsubProject;
+  @Value("${spring.cloud.gcp.pubsub.project-id}")
+  private String pubsubProject;
 
   public UacService(
       UacQidLinkRepository uacQidLinkRepository,
@@ -64,7 +64,7 @@ public class UacService {
     event.setHeader(eventHeader);
     event.setPayload(payloadDTO);
 
-    String topic = toProjectTopicName(uacUpdateTopic, sharedPubsubProject).toString();
+    String topic = toProjectTopicName(uacUpdateTopic, pubsubProject).toString();
     messageSender.sendMessage(topic, event);
 
     return savedUacQidLink;

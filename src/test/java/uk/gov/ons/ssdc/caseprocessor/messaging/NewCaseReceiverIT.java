@@ -54,14 +54,14 @@ public class NewCaseReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
+    pubsubHelper.purgePubsubProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testNewCaseLoaded() throws InterruptedException {
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
-        pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.pubsubProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
 
       // GIVEN
       EventDTO event = new EventDTO();
@@ -88,7 +88,7 @@ public class NewCaseReceiverIT {
       payloadDTO.setNewCase(newCase);
       event.setPayload(payloadDTO);
 
-      pubsubHelper.sendMessageToSharedProject(NEW_CASE_TOPIC, event);
+      pubsubHelper.sendMessageToPubsubProject(NEW_CASE_TOPIC, event);
 
       //  THEN
       EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();

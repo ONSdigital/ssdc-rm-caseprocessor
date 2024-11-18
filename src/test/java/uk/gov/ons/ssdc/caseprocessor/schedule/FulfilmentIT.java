@@ -61,14 +61,14 @@ class FulfilmentIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
+    pubsubHelper.purgePubsubProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   void testFulfilmentTrigger() throws Exception {
     try (QueueSpy<EventDTO> outboundUacQueue =
-        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.pubsubProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       ExportFileTemplate exportFileTemplate = new ExportFileTemplate();
       exportFileTemplate.setPackCode(PACK_CODE);
@@ -103,7 +103,7 @@ class FulfilmentIT {
       junkDataHelper.junkify(eventHeader);
       event.setHeader(eventHeader);
 
-      pubsubHelper.sendMessageToSharedProject(FULFILMENT_TOPIC, event);
+      pubsubHelper.sendMessageToPubsubProject(FULFILMENT_TOPIC, event);
 
       Thread.sleep(3000);
 

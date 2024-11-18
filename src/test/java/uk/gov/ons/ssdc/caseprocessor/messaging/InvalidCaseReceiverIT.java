@@ -45,14 +45,14 @@ public class InvalidCaseReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
+    pubsubHelper.purgePubsubProjectMessages(OUTBOUND_CASE_SUBSCRIPTION, caseUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   public void testInvalidCase() throws Exception {
     try (QueueSpy<EventDTO> outboundCaseQueueSpy =
-        pubsubHelper.sharedProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.pubsubProjectListen(OUTBOUND_CASE_SUBSCRIPTION, EventDTO.class)) {
       // GIVEN
 
       Case caze = junkDataHelper.setupJunkCase();
@@ -72,7 +72,7 @@ public class InvalidCaseReceiverIT {
       event.setHeader(eventHeader);
 
       //  When
-      pubsubHelper.sendMessageToSharedProject(INBOUND_INVALID_CASE_TOPIC, event);
+      pubsubHelper.sendMessageToPubsubProject(INBOUND_INVALID_CASE_TOPIC, event);
 
       //  Then
       EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();

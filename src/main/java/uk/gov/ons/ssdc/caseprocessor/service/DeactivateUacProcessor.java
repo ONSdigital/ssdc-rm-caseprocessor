@@ -22,15 +22,15 @@ public class DeactivateUacProcessor {
   @Value("${queueconfig.deactivate-uac-topic}")
   private String deactivateUacTopic;
 
-  @Value("${queueconfig.shared-pubsub-project}")
-  private String sharedPubsubProject;
+  @Value("${spring.cloud.gcp.pubsub.project-id}")
+  private String pubsubProject;
 
   public DeactivateUacProcessor(MessageSender messageSender) {
     this.messageSender = messageSender;
   }
 
   public void process(Case caze, UUID correlationId) {
-    String topic = toProjectTopicName(deactivateUacTopic, sharedPubsubProject).toString();
+    String topic = toProjectTopicName(deactivateUacTopic, pubsubProject).toString();
     List<UacQidLink> uacQidLinks = caze.getUacQidLinks();
 
     for (UacQidLink uacQidLink : uacQidLinks) {

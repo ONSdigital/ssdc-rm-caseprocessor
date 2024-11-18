@@ -82,7 +82,7 @@ class PrintFulfilmentReceiverIT {
     printFulfilmentEvent.getPayload().getPrintFulfilment().setUacMetadata(uacMetadata);
 
     // When
-    pubsubHelper.sendMessageToSharedProject(PRINT_FULFILMENT_TOPIC, printFulfilmentEvent);
+    pubsubHelper.sendMessageToPubsubProject(PRINT_FULFILMENT_TOPIC, printFulfilmentEvent);
 
     // Then
     List<FulfilmentToProcess> fulfilmentsToProcess = getFulfilmentsToProcess();
@@ -132,8 +132,8 @@ class PrintFulfilmentReceiverIT {
     printFulfilmentEvent.getPayload().getPrintFulfilment().setUacMetadata(uacMetadata);
 
     // When
-    pubsubHelper.sendMessageToSharedProject(PRINT_FULFILMENT_TOPIC, printFulfilmentEvent);
-    pubsubHelper.sendMessageToSharedProject(PRINT_FULFILMENT_TOPIC, printFulfilmentEvent);
+    pubsubHelper.sendMessageToPubsubProject(PRINT_FULFILMENT_TOPIC, printFulfilmentEvent);
+    pubsubHelper.sendMessageToPubsubProject(PRINT_FULFILMENT_TOPIC, printFulfilmentEvent);
 
     // Then
     List<FulfilmentToProcess> fulfilmentsToProcess = getFulfilmentsToProcess();
@@ -154,9 +154,7 @@ class PrintFulfilmentReceiverIT {
     assertThat(logsList.size()).isEqualTo(1);
     String expecetedLogMessage =
         String.format(
-            "Received duplicate fulfilment message ID, ignoring and acking the duplicate message; correlationId=\"%s\"; messageId=\"%s\"",
-            printFulfilmentEvent.getHeader().getCorrelationId(),
-            printFulfilmentEvent.getHeader().getMessageId());
+            "Received duplicate fulfilment message ID, ignoring and acking the duplicate message");
     assertThat(logsList.get(0).getMessage()).isEqualTo(expecetedLogMessage);
   }
 

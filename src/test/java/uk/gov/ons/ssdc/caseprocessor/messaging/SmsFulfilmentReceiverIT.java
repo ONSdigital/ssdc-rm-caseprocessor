@@ -55,7 +55,7 @@ class SmsFulfilmentReceiverIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
+    pubsubHelper.purgePubsubProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
@@ -63,7 +63,7 @@ class SmsFulfilmentReceiverIT {
   void testSmsFulfilment() throws Exception {
     // Given
     // Get a new UAC QID pair
-    List<UacQidDTO> uacQidDTOList = uacQidServiceClient.getUacQids(1, 1);
+    List<UacQidDTO> uacQidDTOList = uacQidServiceClient.getUacQids(1);
     UacQidDTO smsUacQid = uacQidDTOList.get(0);
 
     // Create the case
@@ -91,7 +91,7 @@ class SmsFulfilmentReceiverIT {
     event.setPayload(payloadDTO);
 
     try (QueueSpy<EventDTO> outboundUacQueueSpy =
-        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.pubsubProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       pubsubHelper.sendMessage(SMS_CONFIRMATION_TOPIC, event);
       EventDTO emittedEvent = outboundUacQueueSpy.checkExpectedMessageReceived();
 

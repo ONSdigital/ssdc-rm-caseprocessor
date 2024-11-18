@@ -37,6 +37,7 @@ import uk.gov.ons.ssdc.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.ssdc.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.ssdc.common.model.entity.ActionRule;
+import uk.gov.ons.ssdc.common.model.entity.ActionRuleStatus;
 import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.common.model.entity.Case;
 import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
@@ -83,14 +84,14 @@ class ActionRuleIT {
 
   @BeforeEach
   public void setUp() {
-    pubsubHelper.purgeSharedProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
+    pubsubHelper.purgePubsubProjectMessages(OUTBOUND_UAC_SUBSCRIPTION, uacUpdateTopic);
     deleteDataHelper.deleteAllData();
   }
 
   @Test
   void testExportFileRule() throws Exception {
     try (QueueSpy<EventDTO> outboundUacQueue =
-        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.pubsubProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       Case caze = junkDataHelper.setupJunkCase();
       ExportFileTemplate exportFileTemplate = setUpExportFileTemplate();
@@ -123,7 +124,7 @@ class ActionRuleIT {
   @Test
   void testDeactivateUacRule() throws Exception {
     try (QueueSpy<EventDTO> outboundUacQueue =
-        pubsubHelper.sharedProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
+        pubsubHelper.pubsubProjectListen(OUTBOUND_UAC_SUBSCRIPTION, EventDTO.class)) {
       // Given
       Case caze = junkDataHelper.setupJunkCase();
       UacQidLink uacQidLink = setupUacQidLink(caze);
@@ -262,6 +263,8 @@ class ActionRuleIT {
     actionRule.setCreatedBy(CREATED_BY_USER);
     actionRule.setUacMetadata(TEST_UAC_METADATA);
     actionRule.setClassifiers(classifiers);
+    actionRule.setSelectedCaseCount(null);
+    actionRule.setActionRuleStatus(ActionRuleStatus.SCHEDULED);
 
     if (smsTemplate != null) {
       actionRule.setSmsTemplate(smsTemplate);
@@ -294,6 +297,7 @@ class ActionRuleIT {
     smsTemplate.setNotifyTemplateId(UUID.randomUUID());
     smsTemplate.setTemplate(new String[] {"FOO", "BAR"});
     smsTemplate.setDescription("Test description");
+    smsTemplate.setNotifyServiceRef("Dummy_service");
     return smsTemplateRepository.saveAndFlush(smsTemplate);
   }
 
@@ -303,6 +307,7 @@ class ActionRuleIT {
     emailTemplate.setNotifyTemplateId(UUID.randomUUID());
     emailTemplate.setTemplate(new String[] {"FOO", "BAR"});
     emailTemplate.setDescription("Test description");
+    emailTemplate.setNotifyServiceRef("Dummy_service");
     return emailTemplateRepository.saveAndFlush(emailTemplate);
   }
 }

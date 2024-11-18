@@ -9,7 +9,7 @@ contact letter, to reminder letter, to the end of the collection exercise.
 
 The case processor has the following data model schema structure:
 
-```
+```text
   Survey
     └─ Collection Exercise
      ├─ Action Rule
@@ -30,13 +30,13 @@ QIDs and any attribute of the sample.
 
 To run all the tests and build the image
 
-```  
+```shell
    mvn clean install
 ```
 
 Just build the image
 
-```
+```shell
     mvn -DskipTests -DskipITs -DdockerCompose.skip
 ```
 
@@ -57,9 +57,9 @@ built changes.
 
 Make sure you have the following environment variables set if you want to run in the debugger in your IDE:
 
-```
+```shell
 SPRING_CLOUD_GCP_PUBSUB_EMULATOR_HOST=localhost:8538
-QUEUECONFIG_SHARED-PUBSUB-PROJECT=shared-project
+QUEUECONFIG_PUBSUB-PROJECT=our-project
 ```
 
 ## Debugging With GCP PubSub Project
@@ -67,9 +67,9 @@ QUEUECONFIG_SHARED-PUBSUB-PROJECT=shared-project
 If you want to use real GCP PubSub topics and subscriptions, make sure you have the following environment variables set
 if you want to run in the debugger in your IDE:
 
-```
+```shell
 SPRING_CLOUD_GCP_PUBSUB_PROJECT-ID=<GCP Project>
-QUEUECONFIG_SHARED-PUBSUB-PROJECT=<GCP Project>
+QUEUECONFIG_PUBSUB-PROJECT=<GCP Project>
 ```
 
 ### Enriched SMS Fulfilment

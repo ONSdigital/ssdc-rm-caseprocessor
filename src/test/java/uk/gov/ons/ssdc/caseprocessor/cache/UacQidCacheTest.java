@@ -38,9 +38,9 @@ public class UacQidCacheTest {
     uacQidDTO1.setQid("54321");
     listUacDtos.add(uacQidDTO2);
 
-    when(uacQidServiceClient.getUacQids(1, 2)).thenReturn(listUacDtos);
+    when(uacQidServiceClient.getUacQids(2)).thenReturn(listUacDtos);
 
-    UacQidDTO actualUacDto = underTest.getUacQidPair(1);
+    UacQidDTO actualUacDto = underTest.getUacQidPair();
     assertThat(actualUacDto.getQid()).isEqualTo(uacQidDTO1.getQid());
   }
 
@@ -52,12 +52,10 @@ public class UacQidCacheTest {
 
     List<UacQidDTO> listUacDtos = new ArrayList<>();
 
-    when(uacQidServiceClient.getUacQids(1, 2)).thenReturn(listUacDtos);
+    when(uacQidServiceClient.getUacQids(2)).thenReturn(listUacDtos);
 
-    RuntimeException thrown =
-        assertThrows(RuntimeException.class, () -> underTest.getUacQidPair(1));
+    RuntimeException thrown = assertThrows(RuntimeException.class, () -> underTest.getUacQidPair());
 
-    Assertions.assertThat(thrown.getMessage())
-        .isEqualTo("Timeout getting UacQidDTO for questionnaireType :1");
+    Assertions.assertThat(thrown.getMessage()).isEqualTo("Timeout getting UacQidDTO");
   }
 }

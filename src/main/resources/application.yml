@@ -17,7 +17,7 @@ spring:
       mode: always
 
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate
     properties:
@@ -55,7 +55,6 @@ queueconfig:
   deactivate-uac-topic: event_deactivate-uac
   cloud-task-queue-topic: cloud_task_queue
   publishtimeout: 30  # In seconds
-  shared-pubsub-project: REPLACEME
 
 healthcheck:
   frequency: 15000 #milliseconds

@@ -5,7 +5,4 @@ spring:
         emulator-host: localhost:8538
         project-id: our-project
 
-queueconfig:
-  shared-pubsub-project: shared-project
-
 caserefgeneratorkey: abc123

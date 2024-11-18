@@ -1,10 +1,10 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
-import javax.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
@@ -28,7 +28,11 @@ public class FulfilmentProcessor {
     packCodes.forEach(
         packCode -> {
           UUID batchId = UUID.randomUUID();
-          log.with("batch_id", batchId).with("pack_code", packCode).info("Fulfilments triggered");
+          log.atInfo()
+              .setMessage("Fulfilments triggered")
+              .addKeyValue("batch_id", batchId)
+              .addKeyValue("pack_code", packCode)
+              .log();
 
           jdbcTemplate.update(
               "UPDATE casev3.fulfilment_to_process "

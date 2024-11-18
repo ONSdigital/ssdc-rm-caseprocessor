@@ -1,12 +1,12 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
@@ -51,15 +51,18 @@ public class ClusterLeaderManager {
         clusterLeaderRepository.getClusterLeaderAndLockById(LEADER_ID);
 
     if (!lockedClusterLeaderOpt.isPresent()) {
-      log.with("hostName", hostName)
-          .debug("Could not get leader row, presumably because of lock contention");
+      log.atDebug()
+          .setMessage("Could not get leader row, presumably because of lock contention")
+          .addKeyValue("hostName", hostName)
+          .log();
       return false;
     }
 
     ClusterLeader clusterLeader = lockedClusterLeaderOpt.get();
 
     if (clusterLeader.getHostName().equals(hostName)) {
-      log.with("hostName", hostName).debug("This host is leader");
+      log.atDebug().setMessage("This host is leader").addKeyValue("hostName", hostName).log();
+
       return true;
     } else if (clusterLeader
         .getHostLastSeenAliveAt()
@@ -69,13 +72,17 @@ public class ClusterLeaderManager {
       clusterLeader.setHostLastSeenAliveAt(OffsetDateTime.now());
       clusterLeaderRepository.saveAndFlush(clusterLeader);
 
-      log.with("oldHostName", oldHostName)
-          .with("hostName", hostName)
-          .debug("Leader has transferred from dead host to this host");
+      log.atDebug()
+          .setMessage("Leader has transferred from dead host to this host")
+          .addKeyValue("hostName", hostName)
+          .addKeyValue("oldHostName", oldHostName)
+          .log();
+
       return true;
     }
 
-    log.with("hostName", hostName).debug("This host is not the leader");
+    log.atDebug().setMessage("This host is not the leader").addKeyValue("hostName", hostName).log();
+
     return false;
   }
 
@@ -94,7 +101,10 @@ public class ClusterLeaderManager {
       clusterLeader.setHostLastSeenAliveAt(OffsetDateTime.now());
       clusterLeaderRepository.saveAndFlush(clusterLeader);
 
-      log.with("hostName", hostName).debug("Leader keepalive updated. This host is leader");
+      log.atDebug()
+          .setMessage("Leader keepalive updated. This host is leader")
+          .addKeyValue("hostName", hostName)
+          .log();
     }
   }
 }

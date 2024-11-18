@@ -11,6 +11,7 @@ import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -24,7 +25,6 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.ssdc.caseprocessor.utils.ObjectMapperFactory;
@@ -39,14 +39,14 @@ public class PubsubHelper {
 
   @Autowired private GcpPubSubProperties gcpPubSubProperties;
 
-  @Value("${queueconfig.shared-pubsub-project}")
-  private String sharedPubsubProject;
+  @Value("${spring.cloud.gcp.pubsub.project-id}")
+  private String pubsubProject;
 
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
 
-  public <T> QueueSpy sharedProjectListen(String subscription, Class<T> contentClass) {
+  public <T> QueueSpy pubsubProjectListen(String subscription, Class<T> contentClass) {
     String fullyQualifiedSubscription =
-        toProjectSubscriptionName(subscription, sharedPubsubProject).toString();
+        toProjectSubscriptionName(subscription, pubsubProject).toString();
     return listen(fullyQualifiedSubscription, contentClass);
   }
 
@@ -73,17 +73,18 @@ public class PubsubHelper {
     return new QueueSpy(queue, subscriber);
   }
 
-  public void sendMessageToSharedProject(String topicName, Object message) {
-    String fullyQualifiedTopic = toProjectTopicName(topicName, sharedPubsubProject).toString();
+  public void sendMessageToPubsubProject(String topicName, Object message) {
+    String fullyQualifiedTopic = toProjectTopicName(topicName, pubsubProject).toString();
     sendMessage(fullyQualifiedTopic, message);
   }
 
   @Retryable(
-      value = {java.io.IOException.class},
+      retryFor = {java.io.IOException.class},
       maxAttempts = 10,
-      backoff = @Backoff(delay = 5000))
+      backoff = @Backoff(delay = 5000),
+      listeners = {"retryListener"})
   public void sendMessage(String topicName, Object message) {
-    ListenableFuture<String> future = pubSubTemplate.publish(topicName, message);
+    CompletableFuture<String> future = pubSubTemplate.publish(topicName, message);
 
     try {
       future.get(30, TimeUnit.SECONDS);
@@ -96,8 +97,8 @@ public class PubsubHelper {
     purgeMessages(subscription, topic, OUR_PUBSUB_PROJECT);
   }
 
-  public void purgeSharedProjectMessages(String subscription, String topic) {
-    purgeMessages(subscription, topic, sharedPubsubProject);
+  public void purgePubsubProjectMessages(String subscription, String topic) {
+    purgeMessages(subscription, topic, pubsubProject);
   }
 
   private void purgeMessages(String subscription, String topic, String project) {
