@@ -1,5 +1,5 @@
 from sqlalchemy.schema import CreateTable
-from caseprocessor.entity.common_entity_model import Case
+from caseprocessor.entity_models.common_entity_model import Case
 from sqlalchemy.dialects import postgresql
 
 with open("caseprocessor/db/ddl/ddl.txt", "w") as file:
