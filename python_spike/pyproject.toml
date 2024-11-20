@@ -3,8 +3,8 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "python_spike"
+name = "caseprocessor"
 version = "0.0.1"
 
 [tool.setuptools]
-include= ["caseprocessor*"]
+packages = { find = {} }
