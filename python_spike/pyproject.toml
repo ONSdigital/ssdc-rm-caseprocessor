@@ -7,6 +7,7 @@ name = "caseprocessor"
 version = "0.9.7"
 description = "Caseprocessor"
 urls = { "Homepage" = "https://github.com/ONSdigital/ssdc-rm-caseprocessor" }
+dependencies = ["sqlacodegen", "psycopg2-binary", "SQLAlchemy", "dataclasses-json", "google-cloud-pubsub", "luhn"]
 
 [tool.setuptools]
-packages = { find = {} }
+packages = ['caseprocessor', 'caseprocessor.dto', 'caseprocessor.util', 'caseprocessor.entity', 'caseprocessor.pseudorandom', 'caseprocessor.db', 'caseprocessor.service', 'caseprocessor.messaging', 'caseprocessor.logging', 'caseprocessor.validation']
