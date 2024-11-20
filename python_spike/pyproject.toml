@@ -6,5 +6,5 @@ build-backend = "setuptools.build_meta"
 name = "caseprocessor"
 version = "0.0.1"
 
-[tool.setuptools]
-packages = ['caseprocessor', 'caseprocessor.dto', 'caseprocessor.util', 'caseprocessor.entity', 'caseprocessor.pseudorandom', 'caseprocessor.db', 'caseprocessor.service', 'caseprocessor.messaging', 'caseprocessor.logging', 'caseprocessor.validation']
+[tool.setuptools.packages.find]
+include= ["caseprocessor*"]
