@@ -1,4 +1,3 @@
-import setuptools
+from setuptools import setup
 
-setuptools.setup(name="caseprocessor",
-    packages=setuptools.find_packages())
+setup()
