@@ -1,7 +1,7 @@
 import uuid
 from ..db.event_table import *
 from ..dto.event_dto import EventDTO
-from ..entity_models.event_type import EventType
+from ..entity.event_type import EventType
 from ..util.redact_helper import redact
 from datetime import datetime
 from sqlalchemy.orm import Session
