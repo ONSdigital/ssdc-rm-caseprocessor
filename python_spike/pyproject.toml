@@ -7,5 +7,5 @@ name = "caseprocessor"
 version = "0.0.1"
 
 [tool.setuptools]
-packages= ["caseprocessor"]
-py-modules = ["__init__"]
+packages= ["caseprocessor*"]
+py-modules = []
