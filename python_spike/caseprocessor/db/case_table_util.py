@@ -5,8 +5,8 @@ from sqlalchemy import Column, Integer, BIGINT, DateTime, func, Boolean, Sequenc
 from sqlalchemy import MetaData
 import uuid
 from typing import Optional
-#from ..entity_models.case import Case
-from ..entity_models.common_entity_model import Case
+#from ..entity.case import Case
+from ..entity.common_entity_model import Case
 
 # metadata_obj = MetaData(schema="casev3")
 # Base = declarative_base(metadata=metadata_obj)
