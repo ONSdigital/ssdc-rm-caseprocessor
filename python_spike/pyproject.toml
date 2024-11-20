@@ -7,4 +7,4 @@ name = "python_spike"
 version = "0.0.1"
 
 [tool.setuptools]
-packages= ["caseprocessor*"]
+include= ["caseprocessor*"]
