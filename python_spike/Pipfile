@@ -9,6 +9,7 @@ dataclasses-json = "*"
 SQLAlchemy = "*"
 psycopg2-binary = "*"
 luhn = "*"
+sqlacodegen = "==3.0.0rc5"
 
 [requires]
 python_version = "3.11"
