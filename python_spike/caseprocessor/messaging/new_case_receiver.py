@@ -6,10 +6,10 @@ from caseprocessor.db.collection_exercise_table_util import find_collex_by_id
 from caseprocessor.db.db_utility import create_session
 from caseprocessor.validation.column_validator import ColumnValidator
 from caseprocessor.util.case_ref_generator import get_case_ref
-from caseprocessor.entity.casev3_schema import Case
+from entity.casev3_schema import Case
 from caseprocessor.service.case_service import emit_case
 from caseprocessor.logging.event_logging import log_case_event
-from caseprocessor.entity.event_type import EventType
+from entity.event_type import EventType
 from sqlalchemy import func
 
 __case_ref_generator_key = bytes("abc123", "utf-8")

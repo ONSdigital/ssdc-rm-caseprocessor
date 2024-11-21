@@ -6,7 +6,7 @@ from sqlalchemy import MetaData
 import uuid
 from typing import Optional
 #from ..entity.case import Case
-from ..entity.common_entity_model import Case
+from entity.casev3_schema import Case
 
 # metadata_obj = MetaData(schema="casev3")
 # Base = declarative_base(metadata=metadata_obj)

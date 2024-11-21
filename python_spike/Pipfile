@@ -10,6 +10,8 @@ SQLAlchemy = "*"
 psycopg2-binary = "*"
 luhn = "*"
 sqlacodegen = "==3.0.0rc5"
+ssdc-rm-python-common-entity-model = {editable = true, ref = "SDCSRM-419-using-common-model-pyproject", git = "git+https://github.com/ONSdigital/ssdc-rm-ddl", subdirectory = "ssdc-rm-python-common-entity-model"}
+
 
 [requires]
 python_version = "3.11"

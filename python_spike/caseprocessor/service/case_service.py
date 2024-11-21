@@ -1,12 +1,11 @@
-from caseprocessor.entity.case import Case
 from caseprocessor.dto.event_header_dto import EventHeaderDTO
 from caseprocessor.dto.case_update_dto import CaseUpdateDTO
-from caseprocessor.entity.collection_exercise import CollectionExercise
 from caseprocessor.dto.event_dto import EventDTO
 from caseprocessor.dto.payload_dto import PayloadDTO
 from caseprocessor.util.redact_helper import redact
 from caseprocessor.util.publish_util import publish_to_pubsub
 from config import PubsubConfig
+from entity.casev3_schema import CollectionExercise, Case
 from datetime import datetime, timezone
 
 import uuid

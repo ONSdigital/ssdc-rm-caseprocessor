@@ -1,7 +1,10 @@
 import uuid
+
+from entity.event_type import EventType
+
 from ..db.event_table import *
 from ..dto.event_dto import EventDTO
-from ..entity.event_type import EventType
+
 from ..util.redact_helper import redact
 from datetime import datetime
 from sqlalchemy.orm import Session
@@ -29,6 +32,7 @@ def log_case_event(
         created_by=event_header.originating_user,
         correlation_id=event_header.correlation_id,
         payload=payload.to_dict(),
-        caze_id=payload.new_case.case_id
+        caze_id=payload.new_case.case_id,
+        processed_at=datetime.now()
     )
     add_event(session, logged_event)

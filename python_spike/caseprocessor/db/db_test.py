@@ -1,4 +1,4 @@
-from .case_repository import *
+from .case_table_util import select_all
 from .collection_exercise_table_util import CollectionExerciseTable
 from .db_utility import *
 

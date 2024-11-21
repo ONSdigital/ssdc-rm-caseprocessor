@@ -3,13 +3,13 @@ from sqlalchemy.orm import Session, relationship, Mapped
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy import MetaData
 from sqlalchemy.dialects.postgresql import JSONB
-from caseprocessor.entity.collection_exercise import CollectionExercise
-from caseprocessor.entity.survey import Survey
+from entity.casev3_schema import CollectionExercise
+from entity.casev3_schema import Survey
 from caseprocessor.validation.column_validator import ColumnValidator
 from caseprocessor.validation.rules import create_rule
 from caseprocessor.db.survey_table import SurveyTable
-from ..entity.common_entity_model import CollectionExercise as CollectionExerciseTable
-from ..entity.common_entity_model import Survey as SurveyTable
+from entity.casev3_schema import CollectionExercise as CollectionExerciseTable
+from entity.casev3_schema import Survey as SurveyTable
 
 import uuid
 
