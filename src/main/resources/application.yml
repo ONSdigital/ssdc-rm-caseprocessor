@@ -90,3 +90,6 @@ uacservice:
   uacqid-fetch-count: 1000
   uacqid-get-timeout: 60   #seconds
 
+feature:
+  new-notify-service: false
+

@@ -1,6 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.service;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
 import uk.gov.ons.ssdc.common.model.entity.CaseToProcess;
@@ -14,6 +15,9 @@ public class CaseToProcessProcessor {
   private final SmsProcessor smsProcessor;
   private final EmailProcessor emailProcessor;
   private final EqFlushProcessor eqFlushProcessor;
+
+  @Value("${feature.new-notify-service}")
+  private boolean newNotifyService;
 
   public CaseToProcessProcessor(
       ExportFileProcessor exportFileProcessor,
@@ -53,7 +57,11 @@ public class CaseToProcessProcessor {
         smsProcessor.process(caseToProcess.getCaze(), caseToProcess.getActionRule());
         break;
       case EMAIL:
-        emailProcessor.process(caseToProcess.getCaze(), caseToProcess.getActionRule());
+        if (newNotifyService) {
+          emailProcessor.newProcess(caseToProcess.getCaze(), caseToProcess.getActionRule());
+        } else {
+          emailProcessor.process(caseToProcess.getCaze(), caseToProcess.getActionRule());
+        }
         break;
       case EQ_FLUSH:
         eqFlushProcessor.process(caseToProcess.getCaze(), caseToProcess.getActionRule());

@@ -9,4 +9,6 @@ public class Constants {
 
   public static final String REQUEST_PERSONALISATION_PREFIX = "__request__.";
   public static final String SENSITIVE_FIELD_PREFIX = "__sensitive__.";
+  public static final String TEMPLATE_UAC_KEY = "__uac__";
+  public static final String TEMPLATE_QID_KEY = "__qid__";
 }

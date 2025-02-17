@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidCreatedPayloadDTO;
 import uk.gov.ons.ssdc.caseprocessor.model.dto.UacQidDTO;
 
 @Component
@@ -33,6 +34,16 @@ public class UacQidServiceClient {
     return Arrays.asList(responseEntity.getBody());
   }
 
+  public UacQidCreatedPayloadDTO generateUacQid() {
+
+    RestTemplate restTemplate = new RestTemplate();
+    UriComponents uriComponents = createUriComponentsForSingleUacQid();
+    ResponseEntity<UacQidCreatedPayloadDTO> responseEntity =
+        restTemplate.exchange(
+            uriComponents.toUri(), HttpMethod.GET, null, UacQidCreatedPayloadDTO.class);
+    return responseEntity.getBody();
+  }
+
   private UriComponents createUriComponents(int numberToCreate, String path) {
     return UriComponentsBuilder.newInstance()
         .scheme(scheme)
@@ -42,5 +53,9 @@ public class UacQidServiceClient {
         .queryParam("numberToCreate", numberToCreate)
         .build()
         .encode();
+  }
+
+  private UriComponents createUriComponentsForSingleUacQid() {
+    return UriComponentsBuilder.newInstance().scheme(scheme).host(host).port(port).build().encode();
   }
 }
