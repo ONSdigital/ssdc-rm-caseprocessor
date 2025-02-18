@@ -86,14 +86,13 @@ public class EmailProcessor {
     validateEmailAddress(email);
 
     // Get template
-    Optional<EmailTemplate> optionalEmailTemplate = emailTemplateRepository.findById(packCode);
-
-    if (optionalEmailTemplate.isEmpty()) {
-      // This may look weird but if this fails, we don't want it continuously retrying to process
-      // the case_to_process message
-      return;
-    }
-    EmailTemplate emailTemplate = optionalEmailTemplate.get();
+    EmailTemplate emailTemplate =
+            emailTemplateRepository
+                    .findById(packCode)
+                    .orElseThrow(
+                            () ->
+                                    new RuntimeException(
+                                            "Email template not found: " + packCode));
 
     if (!caseRepository.existsById(caseId)) {
       throw new RuntimeException("Case not found with ID: " + caseId);
