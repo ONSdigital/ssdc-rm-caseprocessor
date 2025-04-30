@@ -29,7 +29,7 @@ public class ActionRuleProcessor {
     // NOTE: This function will block for the entire duration as the database filters the targeted
     // cases and creates cases to process rows
     LocalDateTime startTime = LocalDateTime.now();
-    log.atTrace()
+    log.atInfo()
         .setMessage("Action rule selecting cases")
         .addKeyValue("id", triggeredActionRule.getId())
         .log();
@@ -39,7 +39,7 @@ public class ActionRuleProcessor {
     triggeredActionRule.setActionRuleStatus(ActionRuleStatus.PROCESSING_CASES);
     actionRuleRepository.save(triggeredActionRule);
     LocalDateTime endTime = LocalDateTime.now();
-    log.atTrace()
+    log.atInfo()
         .setMessage("Action rule selected cases")
         .addKeyValue("id", triggeredActionRule.getId())
         .addKeyValue("cases_selected", casesSelected)
