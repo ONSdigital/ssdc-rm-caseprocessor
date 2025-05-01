@@ -43,7 +43,7 @@ public class ActionRuleProcessor {
         .setMessage("Action rule selected cases")
         .addKeyValue("id", triggeredActionRule.getId())
         .addKeyValue("cases_selected", casesSelected)
-        .addKeyValue("duration", endTime.minusNanos(startTime.getNano()).toString())
+        .addKeyValue("duration", java.time.Duration.between(startTime, endTime).toString())
         .log();
   }
 
