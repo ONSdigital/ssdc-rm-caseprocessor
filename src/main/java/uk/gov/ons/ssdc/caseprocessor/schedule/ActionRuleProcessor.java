@@ -1,5 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.slf4j.Logger;
@@ -39,11 +40,12 @@ public class ActionRuleProcessor {
     triggeredActionRule.setActionRuleStatus(ActionRuleStatus.PROCESSING_CASES);
     actionRuleRepository.save(triggeredActionRule);
     LocalDateTime endTime = LocalDateTime.now();
+    Duration duration = Duration.between(startTime, endTime);
     log.atInfo()
         .setMessage("Action rule selected cases")
         .addKeyValue("id", triggeredActionRule.getId())
         .addKeyValue("cases_selected", casesSelected)
-        .addKeyValue("duration", java.time.Duration.between(startTime, endTime).toString())
+        .addKeyValue("duration", duration.getSeconds())
         .log();
   }
 
