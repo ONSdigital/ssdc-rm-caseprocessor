@@ -1,6 +1,10 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +14,7 @@ import uk.gov.ons.ssdc.common.model.entity.ActionRuleStatus;
 
 @Component
 public class ActionRuleProcessor {
+  private static final Logger log = LoggerFactory.getLogger(ActionRuleProcessor.class);
   private final CaseClassifier caseClassifier;
   private final ActionRuleRepository actionRuleRepository;
 
@@ -24,11 +29,24 @@ public class ActionRuleProcessor {
   public void processTriggeredActionRule(ActionRule triggeredActionRule) {
     // NOTE: This function will block for the entire duration as the database filters the targeted
     // cases and creates cases to process rows
+    LocalDateTime startTime = LocalDateTime.now();
+    log.atInfo()
+        .setMessage("Action rule selecting cases")
+        .addKeyValue("id", triggeredActionRule.getId())
+        .log();
     int casesSelected = caseClassifier.enqueueCasesForActionRule(triggeredActionRule);
     triggeredActionRule.setHasTriggered(true);
     triggeredActionRule.setSelectedCaseCount(casesSelected);
     triggeredActionRule.setActionRuleStatus(ActionRuleStatus.PROCESSING_CASES);
     actionRuleRepository.save(triggeredActionRule);
+    LocalDateTime endTime = LocalDateTime.now();
+    Duration duration = Duration.between(startTime, endTime);
+    log.atInfo()
+        .setMessage("Action rule selected cases")
+        .addKeyValue("id", triggeredActionRule.getId())
+        .addKeyValue("cases_selected", casesSelected)
+        .addKeyValue("duration", duration.getSeconds())
+        .log();
   }
 
   @Transactional(
