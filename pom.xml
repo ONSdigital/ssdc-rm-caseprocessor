@@ -220,7 +220,7 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>docker</executable>
+              <executable>podman</executable>
               <commandlineArgs>compose -f src/test/resources/docker-compose.yml up -d</commandlineArgs>
             </configuration>
           </execution>
@@ -231,7 +231,7 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>docker</executable>
+              <executable>podman</executable>
               <commandlineArgs>compose -f src/test/resources/docker-compose.yml down -v</commandlineArgs>
             </configuration>
           </execution>
