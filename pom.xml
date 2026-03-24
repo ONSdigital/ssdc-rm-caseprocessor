@@ -14,6 +14,8 @@
   </properties>
 
   <profiles>
+    <!-- Podman profile activated when env CONTAINER_CLI is set to "podman" -->
+    <!-- This is so podman will be used to run docker commands -->
     <profile>
       <id>podman</id>
       <activation>
