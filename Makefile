@@ -21,7 +21,7 @@ check:
 	mvn fmt:check pmd:check
 
 test:
-	mvn clean verify jacoco:report
+	CONTAINER_CLI=$(DOCKER) mvn clean verify jacoco:report
 
 docker-build:
 	$(DOCKER) build . --platform linux/amd64 -t europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/ssdc-rm-caseprocessor:latest
