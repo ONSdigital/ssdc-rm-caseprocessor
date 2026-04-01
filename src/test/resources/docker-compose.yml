@@ -12,8 +12,6 @@ services:
     image: europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/ssdc-rm-uac-qid-service:latest
     ports:
       - "18164:8164"
-    external_links:
-      - postgres-case-it
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-case-it:5432/rm?sslmode=disable
       - SPRING_DATASOURCE_USERNAME=appuser
