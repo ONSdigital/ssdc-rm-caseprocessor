@@ -41,22 +41,6 @@ public class RemovePersonalDataProcessor {
 
   public void process(List<UUID> caseIds) {
     deletePersonalDataFromDB(caseIds);
-
-    //        CaseUpdateDTO caseUpdateDTO = new CaseUpdateDTO();
-    //        caseUpdateDTO.setCaseId(caze.getId());
-    //
-    //        EventHeaderDTO eventHeader =
-    //                EventHelper.createEventDTO(
-    //                        removePersonalDataTopic, actionRule.getId(),
-    // actionRule.getCreatedBy());
-    //
-    //        EventDTO event = new EventDTO();
-    //        PayloadDTO payload = new PayloadDTO();
-    //        event.setHeader(eventHeader);
-    //        event.setPayload(payload);
-    //        payload.setCaseUpdate(caseUpdateDTO);
-    //
-    //        messageSender.sendMessage(removePersonalDataTopic, event);
   }
 
   private void deletePersonalDataFromDB(List<UUID> caseIds) {
@@ -101,46 +85,5 @@ public class RemovePersonalDataProcessor {
                     WHERE id IN (:ids)
             """,
         params);
-
-    //    String caseIdsStream =
-    //        caseIds.stream().map(UUID::toString).reduce((a, b) -> a + "," + b).orElse("");
-    //
-    //    jdbcTemplate.update(
-    //        """
-    //                DELETE FROM casev3.event
-    //                WHERE caze_id IN (%s)
-    //                    OR uac_qid_link_id IN (
-    //                        SELECT id FROM casev3.uac_qid_link
-    //                        WHERE caze_id IN (%s)
-    //                    )
-    //        """
-    //            .formatted(caseIdsStream, caseIdsStream),
-    //        Stream.concat(caseIds.stream(), caseIds.stream()).toArray());
-    //
-    //    jdbcTemplate.update(
-    //        """
-    //          DELETE FROM casev3.uac_qid_link
-    //          WHERE caze_id IN (%s)
-    //        """
-    //            .formatted(caseIdsStream));
-    //
-    //    jdbcTemplate.update(
-    //        """
-    //                DELETE FROM casev3.case_to_process
-    //                WHERE caze_id IN (%s)
-    //            """
-    //            .formatted(caseIdsStream));
-    //
-    //    jdbcTemplate.update(
-    //        """
-    //                DELETE FROM casev3.cases
-    //                WHERE id IN (%s)
-    //            """
-    //            .formatted(caseIdsStream));
-
-    //    eventRepository.deleteByCaze_IdIn(caseIds);
-    //    uacQidLinkRepository.deleteByCaze_IdIn(caseIds);
-    //    caseToProcessRepository.deleteByCaze_IdIn(caseIds);
-    //    caseRepository.deleteByIdIn(caseIds);
   }
 }
