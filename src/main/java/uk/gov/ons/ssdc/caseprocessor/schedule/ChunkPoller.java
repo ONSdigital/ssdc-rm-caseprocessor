@@ -17,6 +17,7 @@ public class ChunkPoller {
   public void processQueuedCases() {
     do {
       chunkProcessor.processChunk();
+      chunkProcessor.deleteChunk();
       actionRuleProcessor.updateCompletedProcessingActionRules();
     } while (chunkProcessor.isThereWorkToDo()); // Don't go to sleep while there's work to do!
   }

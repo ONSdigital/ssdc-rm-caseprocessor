@@ -1,5 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.model.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,4 +10,6 @@ public interface UacQidLinkRepository extends JpaRepository<UacQidLink, UUID> {
   Optional<UacQidLink> findByQid(String qid);
 
   boolean existsByQid(String qid);
+
+  void deleteByCaze_IdIn(List<UUID> cazeIds);
 }

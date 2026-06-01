@@ -1,5 +1,7 @@
 package uk.gov.ons.ssdc.caseprocessor.schedule;
 
+import static uk.gov.ons.ssdc.common.model.entity.ActionRuleType.REMOVE_PERSONAL_DATA;
+
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,18 @@ public class CaseClassifier {
 
   public int enqueueCasesForActionRule(ActionRule actionRule) {
     UUID batchId = UUID.randomUUID();
+
+    if (actionRule.getType().equals(REMOVE_PERSONAL_DATA)) {
+      return jdbcTemplate.update(
+          "INSERT INTO casev3.case_to_process (batch_id, batch_quantity, action_rule_id, "
+              + "caze_id, to_be_deleted) SELECT ?, COUNT(*) OVER (), ?, id, ? FROM "
+              + "casev3.cases "
+              + buildWhereClause(
+                  actionRule.getCollectionExercise().getId(), actionRule.getClassifiers()),
+          batchId,
+          actionRule.getId(),
+          true);
+    }
 
     return jdbcTemplate.update(
         "INSERT INTO casev3.case_to_process (batch_id, batch_quantity, action_rule_id, "

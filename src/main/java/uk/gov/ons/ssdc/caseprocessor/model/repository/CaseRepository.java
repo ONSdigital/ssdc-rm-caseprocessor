@@ -1,5 +1,6 @@
 package uk.gov.ons.ssdc.caseprocessor.model.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,6 @@ public interface CaseRepository extends JpaRepository<Case, UUID> {
       value = "SELECT * FROM casev3.cases WHERE id = :id FOR UPDATE SKIP LOCKED",
       nativeQuery = true)
   Optional<Case> findByIdWithUpdateLock(@Param("id") UUID id);
+
+  void deleteByIdIn(List<UUID> ids);
 }

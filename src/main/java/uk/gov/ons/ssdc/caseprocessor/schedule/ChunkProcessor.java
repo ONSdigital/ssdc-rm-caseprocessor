@@ -2,6 +2,7 @@ package uk.gov.ons.ssdc.caseprocessor.schedule;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import uk.gov.ons.ssdc.caseprocessor.model.repository.CaseToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.model.repository.FulfilmentToProcessRepository;
 import uk.gov.ons.ssdc.caseprocessor.service.CaseToProcessProcessor;
 import uk.gov.ons.ssdc.caseprocessor.service.ExportFileProcessor;
+import uk.gov.ons.ssdc.caseprocessor.service.RemovePersonalDataProcessor;
 import uk.gov.ons.ssdc.common.model.entity.CaseToProcess;
 import uk.gov.ons.ssdc.common.model.entity.FulfilmentToProcess;
 
@@ -20,6 +22,7 @@ public class ChunkProcessor {
   private final CaseToProcessProcessor caseToProcessProcessor;
   private final FulfilmentToProcessRepository fulfilmentToProcessRepository;
   private final ExportFileProcessor exportFileProcessor;
+  private final RemovePersonalDataProcessor removePersonalDataProcessor;
 
   @Value("${scheduler.chunksize}")
   private int chunkSize;
@@ -28,11 +31,13 @@ public class ChunkProcessor {
       CaseToProcessRepository caseToProcessRepository,
       CaseToProcessProcessor caseToProcessProcessor,
       FulfilmentToProcessRepository fulfilmentToProcessRepository,
-      ExportFileProcessor exportFileProcessor) {
+      ExportFileProcessor exportFileProcessor,
+      RemovePersonalDataProcessor removePersonalDataProcessor) {
     this.caseToProcessRepository = caseToProcessRepository;
     this.caseToProcessProcessor = caseToProcessProcessor;
     this.fulfilmentToProcessRepository = fulfilmentToProcessRepository;
     this.exportFileProcessor = exportFileProcessor;
+    this.removePersonalDataProcessor = removePersonalDataProcessor;
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW) // Start a new transaction for every chunk
@@ -48,6 +53,22 @@ public class ChunkProcessor {
 
       caseToProcessRepository.deleteAllInBatch(caseToProcessToDelete);
     }
+  }
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW) // Start a new transaction for every chunk
+  public void deleteChunk() {
+    List<CaseToProcess> cases = caseToProcessRepository.findChunkToDelete(chunkSize);
+    List<CaseToProcess> caseToProcessToDelete = new LinkedList<>();
+    List<UUID> caseIds = new LinkedList<>();
+
+    cases.forEach(
+        caseToProcess -> {
+          caseIds.add(caseToProcess.getCaze().getId());
+          caseToProcessToDelete.add(caseToProcess);
+        });
+
+    removePersonalDataProcessor.process(caseIds);
+    caseToProcessRepository.deleteAllInBatch(caseToProcessToDelete);
   }
 
   @Transactional
